@@ -4,7 +4,7 @@ A minimalistic sensor with graph lovelace card for [Home Assistant](https://gith
 The card works with entities from within the **sensor** domain and displays the sensors current state as well as a line graph of the sensor state during the past 24 hours (accuracy may vary).
 
 | Example dark | Example light |
-|:----:|:----:|:----:|
+|:----:|:----:|
 | <img src="https://user-images.githubusercontent.com/457678/46361353-abbfaa80-c66d-11e8-9599-70c4d0a155ae.png" alt="Preview 1" > | <img src="https://user-images.githubusercontent.com/457678/46361355-ac584100-c66d-11e8-8bdd-34b1bfbcaa16.png" alt="Preview 2" > |
 
 ## Install
