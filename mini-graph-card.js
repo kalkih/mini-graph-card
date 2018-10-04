@@ -48,6 +48,7 @@ class MiniGraphCard extends LitElement {
 
     config.icon = config.icon || false;
     config.more_info = (config.more_info !== false ? true : false);
+    config.hours_to_show = config.hours_to_show || 24;
     config.accuracy = Number(config.accuracy) || 10;
     config.height = Number(config.height) || 150;
     config.line_color = config.line_color || 'var(--accent-color)';
@@ -57,8 +58,13 @@ class MiniGraphCard extends LitElement {
   }
 
   async getHistory() {
-    let url = 'history/period';
+    let beginDate = new Date();
+    beginDate.setHours(beginDate.getHours() - this.config.hours_to_show);
+    let beginTimestamp = beginDate.toISOString();
+    let endTimestamp = (new Date()).toISOString();
+    let url = 'history/period/' + beginTimestamp;
     url += '?filter_entity_id=' + this.config.entity;
+    url += '&end_time=' + endTimestamp;
     this._hass.callApi('GET', url).then( data => {
       data = data[0];
       let newData = [data[data.length -1]];
