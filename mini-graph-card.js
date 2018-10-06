@@ -22,29 +22,18 @@ class MiniGraphCard extends LitElement {
     }
   }
 
-  connectedCallback() {
-    this.entity = this._hass.states[this.config.entity];
-    this.conf.unit = this.config.unit || this._getAttribute('unit_of_measurement');
-    this.conf.icon = this.config.icon || this._getIcon();
-  }
-
   static get properties() {
     return {
       _hass: Object,
       config: Object,
       entity: Object,
-      line: String,
-      conf: {
-        unit: String,
-        icon: String
-      }
+      line: String
     };
   }
 
   setConfig(config) {
-    if (!config.entity || config.entity.split('.')[0] !== 'sensor') {
+    if (!config.entity || config.entity.split('.')[0] !== 'sensor')
       throw new Error('Specify an entity from within the sensor domain.');
-    }
 
     config.icon = config.icon || false;
     config.more_info = (config.more_info !== false ? true : false);
@@ -57,55 +46,45 @@ class MiniGraphCard extends LitElement {
     this.config = config;
   }
 
-  async getHistory() {
-    let beginDate = new Date();
-    beginDate.setHours(beginDate.getHours() - this.config.hours_to_show);
-    let beginTimestamp = beginDate.toISOString();
-    let endTimestamp = (new Date()).toISOString();
-    let url = 'history/period/' + beginTimestamp;
-    url += '?filter_entity_id=' + this.config.entity;
-    url += '&end_time=' + endTimestamp;
-    this._hass.callApi('GET', url).then( data => {
-      data = data[0];
-      let newData = [data[data.length -1]];
-      newData.unshift();
-      let pos = data.length -1;
-      let increment = Math.ceil(data.length / this.config.accuracy);
-      increment = (increment <= 0) ? 1 : increment;
-      for (let i = this.config.accuracy; i >= 0 + 2; i--) {
-        pos -= increment;
-        newData.unshift(pos >= 0 ? data[pos] : data[0]);
-      }
-      this.line = Graph(newData, 500, this.config.height);
-    });
+  async getHistory({config} = this) {
+    const endTime = new Date();
+    const startTime = new Date();
+    startTime.setHours(endTime.getHours() - config.hours_to_show);
+    const stateHistory = await this.fetchRecent(config.entity, startTime, endTime);
+    const history = stateHistory[0];
+    const values = [history[history.length - 1]];
+
+    let pos = history.length - 1;
+    let increment = Math.ceil(history.length / config.accuracy);
+    increment = (increment <= 0) ? 1 : increment;
+    for (let i = config.accuracy; i >= 2; i--) {
+      pos -= increment;
+      values.unshift(pos >= 0 ? history[pos] : history[0]);
+    }
+    this.line = Graph(values, 500, config.height, config.line_width);
   }
 
   shouldUpdate(changedProps) {
-    const change = (
+    return (
       changedProps.has('entity') ||
-      changedProps.has('line') ||
-      changedProps.has('conf')
+      changedProps.has('line')
     );
-    if (change) return true;
   }
 
   render({config, entity} = this) {
-    const active = (entity.state !== 'off' && entity.state !== 'unavailable');
-    const name = config.name || this._getAttribute('friendly_name');
-
     return html`
       ${this._style()}
-      <ha-card ?group=${config.group} @click='${(e) => this._handleMore()}'
+      <ha-card ?group=${config.group} @click='${(e) => this.handleMore()}'
         ?more-info=${config.more_info}>
         <div class='flex'>
-          <div class='icon'><ha-icon icon='${this.conf.icon}'></ha-icon></div>
+          <div class='icon'><ha-icon icon=${this.computeIcon(entity)}></ha-icon></div>
           <div class='header'>
-            <span class='name'>${name}</span>
+            <span class='name'>${this.computeName(entity)}</span>
           </div>
         </div>
         <div class='flex info'>
           <span id='value'>${entity.state}</span>
-          <span id='measurement'>${this.conf.unit}</span>
+          <span id='measurement'>${this.computeUom(entity)}</span>
         </div>
         <div class='graph'>
           <div>
@@ -118,12 +97,12 @@ class MiniGraphCard extends LitElement {
       </ha-card>`;
   }
 
-  _handleMore({config} = this) {
+  handleMore({config} = this) {
     if(config.more_info)
-      this._fire('hass-more-info', { entityId: config.entity });
+      this.fire('hass-more-info', { entityId: config.entity });
   }
 
-  _fire(type, detail, options) {
+  fire(type, detail, options) {
     options = options || {};
     detail = (detail === null || detail === undefined) ? {} : detail;
     const e = new Event(type, {
@@ -136,12 +115,30 @@ class MiniGraphCard extends LitElement {
     return e;
   }
 
-  _getAttribute(attr, {entity} = this) {
-    return entity.attributes[attr] || '';
+  computeName() {
+    return this.config.name || this.getAttribute('friendly_name');
   }
 
-  _getIcon({entity} = this) {
-    return entity.attributes.icon || this._icons[entity.attributes.device_class];
+  computeIcon(entity) {
+    return this.config.icon ||
+      entity.attributes.icon ||
+      this._icons[entity.attributes.device_class];
+  }
+
+  computeUom(entity) {
+    return this.config.unit || entity.attributes.unit_of_measurement || '';
+  }
+
+  async fetchRecent(entityId, startTime, endTime) {
+    let url = 'history/period';
+    if (startTime)
+      url += '/' + startTime.toISOString();
+
+    url += '?filter_entity_id=' + entityId;
+    if (endTime)
+        url += '&end_time=' + endTime.toISOString();
+
+    return await this._hass.callApi('GET', url);
   }
 
   _style() {
