@@ -1,5 +1,8 @@
 import { LitElement, html } from 'https://unpkg.com/@polymer/lit-element@^0.6.1/lit-element.js?module';
+import { VERSION } from './mini-graph-lib.js';
 import Graph from './mini-graph-lib.js';
+
+const FONT_SIZE = 14;
 
 class MiniGraphCard extends LitElement {
   constructor() {
@@ -35,13 +38,18 @@ class MiniGraphCard extends LitElement {
     if (!config.entity || config.entity.split('.')[0] !== 'sensor')
       throw new Error('Specify an entity from within the sensor domain.');
 
+    if (VERSION !== 2) {
+      throw new Error('You need the latest version of mini-graph-lib.js. \n Get the latest version here: https://github.com/kalkih/mini-graph-card/blob/master/mini-graph-lib.js');
+    }
+
     config.icon = config.icon || false;
     config.more_info = (config.more_info !== false ? true : false);
     config.hours_to_show = config.hours_to_show || 24;
     config.accuracy = Number(config.accuracy) || 10;
-    config.height = Number(config.height) || 150;
+    config.height = Number(config.height) || 100;
     config.line_color = config.line_color || 'var(--accent-color)';
     config.line_width = Number(config.line_width) || 5;
+    config.font_scale = (config.font_size / 100) * FONT_SIZE || FONT_SIZE;
 
     this.config = config;
   }
@@ -75,9 +83,11 @@ class MiniGraphCard extends LitElement {
     return html`
       ${this._style()}
       <ha-card ?group=${config.group} @click='${(e) => this.handleMore()}'
-        ?more-info=${config.more_info}>
+        ?more-info=${config.more_info} style='font-size: ${config.font_scale}px;'>
         <div class='flex'>
-          <div class='icon'><ha-icon icon=${this.computeIcon(entity)}></ha-icon></div>
+          <div class='icon'>
+            <ha-icon icon=${this.computeIcon(entity)}></ha-icon>
+          </div>
           <div class='header'>
             <span class='name'>${this.computeName(entity)}</span>
           </div>
@@ -116,7 +126,7 @@ class MiniGraphCard extends LitElement {
   }
 
   computeName() {
-    return this.config.name || this.getAttribute('friendly_name');
+    return this.config.name || this.entity.attributes.friendly_name;
   }
 
   computeIcon(entity) {
@@ -149,11 +159,11 @@ class MiniGraphCard extends LitElement {
           flex-direction: column;
         }
         ha-card {
-          position: relative;
-          padding: 16px;
           display: flex;
           flex-direction: column;
           flex: 1;
+          padding: 16px;
+          position: relative;
         }
         ha-card[group] {
           background: none;
@@ -166,6 +176,7 @@ class MiniGraphCard extends LitElement {
         .flex {
           display: flex;
           display: -webkit-flex;
+          min-width: 0;
         }
         .justify {
           justify-content: space-between;
@@ -177,22 +188,23 @@ class MiniGraphCard extends LitElement {
           align-items: center;
           position: relative;
           opacity: .8;
-          overflow: hidden;
         }
+
         .name {
-          display: inline-block;
-          flex: 1 0 60px;
-          font-size: 1.2rem;
-          font-weight: bold;
-          max-height: 40px;
+          display: block;
           display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
+          font-size: 1.2rem;
+          font-weight: 500;
+          max-height: 1.4rem;
+          opacity: .75;
           overflow: hidden;
-          opacity: .8;
+          text-overflow: ellipsis;
+          -webkit-line-clamp: 1;
+          -webkit-box-orient: vertical;
           word-wrap: break-word;
           word-break: break-all;
         }
+
         .icon {
           display: inline-block;
           position: relative;
@@ -203,32 +215,33 @@ class MiniGraphCard extends LitElement {
           color: var(--paper-item-icon-color, #44739e);
         }
         .info {
-          margin: 20px 0 20px 8px;
+          margin: 1em 8px;
           flex-wrap: wrap;
-        }
-        .info[small] {
-          font-size: 1.2rem;
+          font-weight: 300;
         }
         #value {
-          font-size: 2.4rem;
-          line-height: 2.4rem;
-          margin-bottom: .2rem;
+          font-size: 2.4em;
+          line-height: 1em;
           display: inline-block;
           margin-right: 4px;
         }
         #measurement {
           display: inline-block;
-          font-size: 1.4rem;
-          line-height: 2rem;
+          font-size: 1.4em;
+
+          font-weight: 400;
+          line-height: 1.2em;
+          margin-top: .1em;
+          vertical-align: bottom;
           align-self: flex-end;
           opacity: .6;
         }
         .graph {
-          position: relative;
           align-self: flex-end;
           margin: auto;
-          width: 100%;
           margin-bottom: 0px;
+          position: relative;
+          width: 100%;
         }
         .graph > div {
           align-self: flex-end;

@@ -1,3 +1,5 @@
+export const VERSION = 2;
+
 export default function getGraph(graphData, width, height, line_width) {
   const values = getValueArray(graphData);
   const coords = calcCoordinates(values, width, height, line_width);
