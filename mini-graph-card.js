@@ -16,6 +16,10 @@ class MiniGraphCard extends LitElement {
     };
   }
 
+  createRenderRoot() {
+    return this;
+  }
+
   set hass(hass) {
     this._hass = hass;
     const entity = hass.states[this.config.entity];
@@ -42,6 +46,7 @@ class MiniGraphCard extends LitElement {
       throw new Error('You need the latest version of mini-graph-lib.js. \n Get the latest version here: https://github.com/kalkih/mini-graph-card/blob/master/mini-graph-lib.js');
     }
 
+    this.style = 'display: flex;';
     config.icon = config.icon || false;
     config.more_info = (config.more_info !== false ? true : false);
     config.hours_to_show = config.hours_to_show || 24;
