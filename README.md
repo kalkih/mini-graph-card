@@ -16,7 +16,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
 ```yaml
 resources:
-  - url: /local/mini-graph-card.js?v=0.0.3
+  - url: /local/mini-graph-card.js?v=0.0.4
     type: module
 ```
 
@@ -32,7 +32,7 @@ git clone https://github.com/kalkih/mini-graph-card.git
 
 ```yaml
 resources:
-  - url: /local/mini-graph-card/mini-graph-card.js?v=0.0.3
+  - url: /local/mini-graph-card/mini-graph-card.js?v=0.0.4
     type: module
 ```
 
@@ -55,7 +55,7 @@ custom_updater:
 
 ```yaml
 resources:
-  - url: /local/mini-graph-card.js?v=0.0.3
+  - url: /local/mini-graph-card.js?v=0.0.4
     type: module
 ```
 
@@ -63,7 +63,7 @@ If you went the `git clone` route, just run `git pull` from inside your `config/
 
 ```yaml
 resources:
-  - url: /local/mini-graph-card/mini-graph-card.js?v=0.0.3
+  - url: /local/mini-graph-card/mini-graph-card.js?v=0.0.4
     type: module
 ```
 
@@ -79,12 +79,17 @@ resources:
 | name | string | optional | v0.0.1 | Set a custom `friendly_name` which is displayed beside the icon.
 | unit | string | optional | v0.0.1 | Set a custom unit of measurement.
 | accuracy | number | 10 | v0.0.1 | Specify how many data points should be used to render the graph, higher number equals higher detailed graph. Results can vary depending on how often your sensor updates. *(Recommended to keep between 5 & 25).*
-| hours_to_show | number | 24 | v0.0.3 | Specify how many hours to show.
+| hours_to_show | number | 24 | v0.0.2 | Specify how many hours to show.
 | height | number | 150 | v0.0.1 | Set a custom height of the line graph.
 | font_size | number | 100 | v0.0.3 | Adjust the font size of the state value, as percentage of the original size.
 | line_color | string | 'var(accent-color)' | v0.0.1 | Set a custom color for the line in the graph.
 | line_width | number | 5 | v0.0.1 | Set a custom width of the line.
 | more_info | boolean | true | v0.0.1 | Set to `false` to disable the "more info" dialog when clicking on the card.
+| line_value_above | number | optional | v0.0.4 | Set a threshold where if current state is above this value, the line color will change to what's specified in `line_value_below`.
+| line_color_above | string | optional | v0.0.4 | Set the line color for `line_value_above`
+| line_value_below | number | optional | v0.0.4 | See `line_value_above`.
+| line_color_below | string | optional | v0.0.4 | See `line_color_above`.
+
 
 ### Example usage
 

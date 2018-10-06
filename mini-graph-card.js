@@ -53,6 +53,10 @@ class MiniGraphCard extends LitElement {
     config.accuracy = Number(config.accuracy) || 10;
     config.height = Number(config.height) || 100;
     config.line_color = config.line_color || 'var(--accent-color)';
+    config.line_value_above = config.line_value_above || false;
+    config.line_value_below = config.line_value_below || false;
+    config.line_color_above = config.line_color_above || config.line_color;
+    config.line_color_below = config.line_color_below || config.line_color;
     config.line_width = Number(config.line_width) || 5;
     config.font_scale = (config.font_size / 100) * FONT_SIZE || FONT_SIZE;
 
@@ -65,16 +69,18 @@ class MiniGraphCard extends LitElement {
     startTime.setHours(endTime.getHours() - config.hours_to_show);
     const stateHistory = await this.fetchRecent(config.entity, startTime, endTime);
     const history = stateHistory[0];
-    const values = [history[history.length - 1]];
+    const valArray = [history[history.length - 1]];
 
     let pos = history.length - 1;
-    let increment = Math.ceil(history.length / config.accuracy);
+    const accuracy = (this.config.accuracy) <= pos ? this.config.accuracy : pos;
+    let increment = Math.ceil(history.length / accuracy);
+    if (accuracy === pos) increment = 1;
     increment = (increment <= 0) ? 1 : increment;
-    for (let i = config.accuracy; i >= 2; i--) {
+    for (let i = accuracy; i >= 1; i--) {
       pos -= increment;
-      values.unshift(pos >= 0 ? history[pos] : history[0]);
+      valArray.unshift(pos >= 0 ? history[pos] : history[0]);
     }
-    this.line = Graph(values, 500, config.height, config.line_width);
+    this.line = Graph(valArray, 500, this.config.height, config.line_width);
   }
 
   shouldUpdate(changedProps) {
@@ -105,7 +111,7 @@ class MiniGraphCard extends LitElement {
           <div>
             ${this.line ? html`
             <svg width='100%' height='100%' viewBox='0 0 500 ${this.config.height}'>
-              <path d=${this.line} fill='none' stroke=${config.line_color} stroke-width=${config.line_width} />
+              <path d=${this.line} fill='none' stroke=${this.computeColor()} stroke-width=${config.line_width} />
             </svg>` : '' }
           </div>
         </div>
@@ -130,6 +136,15 @@ class MiniGraphCard extends LitElement {
     return e;
   }
 
+  computeColor() {
+    const state = Number(this.entity.state) || 0;
+    const above = this.config.line_value_above;
+    const below = this.config.line_value_below;
+    if (above && state > above) return this.config.line_color_above
+    if (below && state < below) return this.config.line_color_below
+    return this.config.line_color;
+  }
+
   computeName() {
     return this.config.name || this.entity.attributes.friendly_name;
   }
@@ -146,12 +161,9 @@ class MiniGraphCard extends LitElement {
 
   async fetchRecent(entityId, startTime, endTime) {
     let url = 'history/period';
-    if (startTime)
-      url += '/' + startTime.toISOString();
-
+    if (startTime) url += '/' + startTime.toISOString();
     url += '?filter_entity_id=' + entityId;
-    if (endTime)
-        url += '&end_time=' + endTime.toISOString();
+    if (endTime) url += '&end_time=' + endTime.toISOString();
 
     return await this._hass.callApi('GET', url);
   }
