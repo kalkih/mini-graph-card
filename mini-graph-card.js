@@ -1,5 +1,4 @@
 import { LitElement, html } from 'https://unpkg.com/@polymer/lit-element@^0.6.1/lit-element.js?module';
-import { VERSION } from './mini-graph-lib.js';
 import Graph from './mini-graph-lib.js';
 
 const FONT_SIZE = 14;
@@ -41,10 +40,6 @@ class MiniGraphCard extends LitElement {
   setConfig(config) {
     if (!config.entity || config.entity.split('.')[0] !== 'sensor')
       throw new Error('Specify an entity from within the sensor domain.');
-
-    if (VERSION !== 2) {
-      throw new Error('You need the latest version of mini-graph-lib.js. \n Get the latest version here: https://github.com/kalkih/mini-graph-card/blob/master/mini-graph-lib.js');
-    }
 
     this.style = 'display: flex;';
     config.icon = config.icon || false;
