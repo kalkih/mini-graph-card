@@ -1,4 +1,4 @@
-import { LitElement, html } from 'https://unpkg.com/@polymer/lit-element@^0.6.1/lit-element.js?module';
+import { LitElement, html, svg } from 'https://unpkg.com/@polymer/lit-element@^0.6.2/lit-element.js?module';
 import Graph from './mini-graph-lib.js';
 
 const FONT_SIZE = 14;
@@ -42,20 +42,22 @@ class MiniGraphCard extends LitElement {
       throw new Error('Specify an entity from within the sensor domain.');
 
     this.style = 'display: flex;';
-    config.icon = config.icon || false;
-    config.more_info = (config.more_info !== false ? true : false);
-    config.hours_to_show = config.hours_to_show || 24;
-    config.accuracy = Number(config.accuracy) || 10;
-    config.height = Number(config.height) || 100;
-    config.line_color = config.line_color || 'var(--accent-color)';
-    config.line_value_above = config.line_value_above || false;
-    config.line_value_below = config.line_value_below || false;
-    config.line_color_above = config.line_color_above || config.line_color;
-    config.line_color_below = config.line_color_below || config.line_color;
-    config.line_width = Number(config.line_width) || 5;
-    config.font_scale = (config.font_size / 100) * FONT_SIZE || FONT_SIZE;
+    const conf = Object.assign({
+      icon: false,
+      more_info: true,
+      hours_to_show: 24,
+      accuracy: 10,
+      height: 100,
+      line_color: 'var(--accent-color)',
+      line_width: 5,
+      font_size: FONT_SIZE
+    }, config);
+    conf.font_size = (config.font_size / 100) * FONT_SIZE;
+    conf.accuracy = Number(conf.accuracy);
+    conf.height = Number(conf.height);
+    conf.line_width = Number(conf.line_width);
 
-    this.config = config;
+    this.config = conf;
   }
 
   async getHistory({config} = this) {
@@ -89,7 +91,7 @@ class MiniGraphCard extends LitElement {
     return html`
       ${this._style()}
       <ha-card ?group=${config.group} @click='${(e) => this.handleMore()}'
-        ?more-info=${config.more_info} style='font-size: ${config.font_scale}px;'>
+        ?more-info=${config.more_info} style='font-size: ${config.font_size}px;'>
         <div class='flex'>
           <div class='icon'>
             <ha-icon icon=${this.computeIcon(entity)}></ha-icon>
@@ -104,9 +106,10 @@ class MiniGraphCard extends LitElement {
         </div>
         <div class='graph'>
           <div>
-            ${this.line ? html`
-            <svg width='100%' height='100%' viewBox='0 0 500 ${this.config.height}'>
-              <path d=${this.line} fill='none' stroke=${this.computeColor()} stroke-width=${config.line_width} />
+            ${this.line ? svg`
+            <svg width='100%' viewBox='0 0 500 ${this.config.height}'>
+              <path d=${this.line} fill='none' stroke=${this.computeColor()}
+                stroke-width=${config.line_width} stroke-linecap='round' stroke-linejoin='round' />
             </svg>` : '' }
           </div>
         </div>
@@ -240,7 +243,6 @@ class MiniGraphCard extends LitElement {
         #measurement {
           display: inline-block;
           font-size: 1.4em;
-
           font-weight: 400;
           line-height: 1.2em;
           margin-top: .1em;

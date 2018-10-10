@@ -1,3 +1,10 @@
+## v0.0.5
+- Fixed issue where unknown/unavailable history would make the graph not render #6
+- Fixed issue where graph line would rendering outside svg boundary and get clipped
+- Made graph line ends rounded
+- Adjusted line Y-scale
+- Updated to lit-element 0.6.2
+
 ## v0.0.4
 - Added options to have the line change color if the state is above/below specified values
 - Fixed graph when setting accuracy option to a higher value than the available data points in history

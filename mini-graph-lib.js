@@ -4,17 +4,16 @@ export default function getGraph(graphData, width, height, line_width) {
   return getPath(coords);
 }
 
-function getValueArray(graphData) {
-  return graphData.map((item) => {
-    return Number(item.state);
-  })
+function getValueArray(items) {
+  return items.map(item => Number(item.state) || 0);
 }
 
 function calcCoordinates(values, width, height, line_width) {
   const margin = line_width;
   width -= margin * 2;
-  const min = Math.floor(Math.min.apply(null, values) * 0.95);
-  const max = Math.ceil(Math.max.apply(null, values) * 1.05);
+  height -= margin * 2;
+  const min = Math.floor(Math.min.apply(null, values) * 0.995);
+  const max = Math.ceil(Math.max.apply(null, values) * 1.005);
 
   const yRatio = (max - min) / height;
   const xRatio = width / (values.length - 1);
