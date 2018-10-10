@@ -1,4 +1,5 @@
 ## v0.0.5
+- Added `hide_icon` option #5
 - Fixed issue where unknown/unavailable history would make the graph not render #6
 - Fixed issue where graph line would rendering outside svg boundary and get clipped
 - Made graph line ends rounded

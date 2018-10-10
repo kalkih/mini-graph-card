@@ -50,7 +50,8 @@ class MiniGraphCard extends LitElement {
       height: 100,
       line_color: 'var(--accent-color)',
       line_width: 5,
-      font_size: FONT_SIZE
+      font_size: FONT_SIZE,
+      hide_icon: false
     }, config);
     conf.font_size = (config.font_size / 100) * FONT_SIZE;
     conf.accuracy = Number(conf.accuracy);
@@ -92,7 +93,7 @@ class MiniGraphCard extends LitElement {
       ${this._style()}
       <ha-card ?group=${config.group} @click='${(e) => this.handleMore()}'
         ?more-info=${config.more_info} style='font-size: ${config.font_size}px;'>
-        <div class='flex'>
+        <div class='flex title' ?hide=${config.hide_icon}>
           <div class='icon'>
             <ha-icon icon=${this.computeIcon(entity)}></ha-icon>
           </div>
@@ -180,11 +181,6 @@ class MiniGraphCard extends LitElement {
           padding: 16px;
           position: relative;
         }
-        ha-card[group] {
-          background: none;
-          box-shadow: none;
-          padding: 0;
-        }
         ha-card[more-info] {
           cursor: pointer;
         }
@@ -204,7 +200,6 @@ class MiniGraphCard extends LitElement {
           position: relative;
           opacity: .8;
         }
-
         .name {
           display: block;
           display: -webkit-box;
@@ -219,7 +214,6 @@ class MiniGraphCard extends LitElement {
           word-wrap: break-word;
           word-break: break-all;
         }
-
         .icon {
           display: inline-block;
           position: relative;
@@ -233,6 +227,12 @@ class MiniGraphCard extends LitElement {
           margin: 1em 8px;
           flex-wrap: wrap;
           font-weight: 300;
+        }
+        .title[hide] .icon {
+          display: none;
+        }
+        .title[hide] .header {
+          margin-left: 8px;
         }
         #value {
           font-size: 2.4em;
