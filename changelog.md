@@ -1,3 +1,7 @@
+## v0.0.6
+- Fixed issue where `<path>` error would appear in some scenarios
+- Refactored code handling building of the graph
+
 ## v0.0.5
 - Added `hide_icon` option #5
 - Fixed issue where unknown/unavailable history would make the graph not render #6

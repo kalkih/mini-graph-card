@@ -19,34 +19,30 @@ function calcCoordinates(values, width, height, line_width) {
   const xRatio = width / (values.length - 1);
 
   return values.map((value, i) => {
-    let y = height - ((value - min) / yRatio);
-    let x = (xRatio * i) + margin;
+    const x = (xRatio * i) + margin;
+    const y = height - ((value - min) / yRatio);
     return [x,y];
   })
 }
 
 function getPath(points) {
-  const SPACE = ' ';
-  let first, second, next, Z;
+  let next, Z;
   let X = 0;
   let Y = 1;
   let path = '';
   let point = points[0];
 
-  path += 'M' + point[X] + ',' + point[Y];
-  first = point;
+  path += `M ${point[X]},${point[Y]}`;
 
   for (let i = 0; i < points.length; i++) {
     next = points[i];
     Z = midPoint(point[X], point[Y], next[X], next[Y]);
-    path += SPACE + Z[X] + ',' + Z[Y];
-    path += 'Q' + Math.floor(next[X]) + ',' + next[Y];
+    path += ` ${Z[X]},${Z[Y]}`;
+    path += ` Q${next[X]},${next[Y]}`;
     point = next;
   }
 
-  second = points[1];
-  Z = midPoint(first[X], first[Y], second[X], second[Y]);
-  path += SPACE + Math.floor(next[X])  + '.' + points[points.length -1];
+  path += ` ${next[X]},${next[Y]}`;
   return path;
 }
 
