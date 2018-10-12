@@ -95,7 +95,7 @@ class MiniGraphCard extends LitElement {
         ?more-info=${config.more_info} style='font-size: ${config.font_size}px;'>
         <div class='flex title' ?hide=${config.hide_icon}>
           <div class='icon'>
-            <ha-icon icon=${this.computeIcon(entity)}></ha-icon>
+            <ha-icon .icon=${this.computeIcon(entity)}></ha-icon>
           </div>
           <div class='header'>
             <span class='name'>${this.computeName(entity)}</span>
