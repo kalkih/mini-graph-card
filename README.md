@@ -16,7 +16,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
 ```yaml
 resources:
-  - url: /local/mini-graph-card.js?v=0.0.5
+  - url: /local/mini-graph-card.js?v=0.0.6
     type: module
 ```
 
@@ -32,7 +32,7 @@ git clone https://github.com/kalkih/mini-graph-card.git
 
 ```yaml
 resources:
-  - url: /local/mini-graph-card/mini-graph-card.js?v=0.0.5
+  - url: /local/mini-graph-card/mini-graph-card.js?v=0.0.6
     type: module
 ```
 
@@ -55,7 +55,7 @@ custom_updater:
 
 ```yaml
 resources:
-  - url: /local/mini-graph-card.js?v=0.0.5
+  - url: /local/mini-graph-card.js?v=0.0.6
     type: module
 ```
 
@@ -63,7 +63,7 @@ If you went the `git clone` route, just run `git pull` from inside your `config/
 
 ```yaml
 resources:
-  - url: /local/mini-graph-card/mini-graph-card.js?v=0.0.5
+  - url: /local/mini-graph-card/mini-graph-card.js?v=0.0.6
     type: module
 ```
 

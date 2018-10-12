@@ -1,6 +1,7 @@
 ## v0.0.6
+- Improved handling of unknown/unavailable history entries #8
 - Fixed issue where `<path>` error would appear in some scenarios
-- Refactored code handling building of the graph
+- Refactored code responsible for building the line graph #9
 
 ## v0.0.5
 - Added `hide_icon` option #5
