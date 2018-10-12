@@ -5,14 +5,14 @@ export default function getGraph(graphData, width, height, line_width) {
 }
 
 function getValueArray(items) {
-  return items.map(item => Number(item.state) || 0);
+  return items.map(item => Number(item.state))
+    .filter(val => !Number.isNaN(val));
 }
 
-function calcCoordinates(invalues, width, height, line_width) {
+function calcCoordinates(values, width, height, line_width) {
   const margin = line_width;
   width -= margin * 2;
   height -= margin * 2;
-  let values = invalues.filter(Boolean)
   const min = Math.floor(Math.min.apply(null, values) * 0.995);
   const max = Math.ceil(Math.max.apply(null, values) * 1.005);
 
