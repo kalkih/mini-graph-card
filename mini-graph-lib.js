@@ -5,7 +5,8 @@ export default function getGraph(graphData, width, height, line_width) {
 }
 
 function getValueArray(items) {
-  return items.map(item => Number(item.state) || 0);
+  return items.map(item => Number(item.state))
+    .filter(val => !Number.isNaN(val));
 }
 
 function calcCoordinates(values, width, height, line_width) {
