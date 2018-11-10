@@ -3,9 +3,7 @@ A minimalistic sensor with graph lovelace card for [Home Assistant](https://gith
 
 The card works with entities from within the **sensor** domain and displays the sensors current state as well as a line graph of the sensor state during the past 24 hours (accuracy may vary).
 
-| Example dark | Example light |
-|:----:|:----:|
-| <img src="https://user-images.githubusercontent.com/457678/46361353-abbfaa80-c66d-11e8-9599-70c4d0a155ae.png" alt="Preview 1" > | <img src="https://user-images.githubusercontent.com/457678/46361355-ac584100-c66d-11e8-8bdd-34b1bfbcaa16.png" alt="Preview 2" > |
+![Preview](https://user-images.githubusercontent.com/457678/48304689-d975fa00-e51d-11e8-9cd6-620a17e3d244.png)
 
 ## Install
 
@@ -16,7 +14,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
 ```yaml
 resources:
-  - url: /local/mini-graph-card.js?v=0.0.6
+  - url: /local/mini-graph-card.js?v=0.0.7
     type: module
 ```
 
@@ -32,7 +30,7 @@ git clone https://github.com/kalkih/mini-graph-card.git
 
 ```yaml
 resources:
-  - url: /local/mini-graph-card/mini-graph-card.js?v=0.0.6
+  - url: /local/mini-graph-card/mini-graph-card.js?v=0.0.7
     type: module
 ```
 
@@ -55,7 +53,7 @@ custom_updater:
 
 ```yaml
 resources:
-  - url: /local/mini-graph-card.js?v=0.0.6
+  - url: /local/mini-graph-card.js?v=0.0.7
     type: module
 ```
 
@@ -63,7 +61,7 @@ If you went the `git clone` route, just run `git pull` from inside your `config/
 
 ```yaml
 resources:
-  - url: /local/mini-graph-card/mini-graph-card.js?v=0.0.6
+  - url: /local/mini-graph-card/mini-graph-card.js?v=0.0.7
     type: module
 ```
 
@@ -74,22 +72,22 @@ resources:
 | Name | Type | Default | Since | Description |
 |------|:----:|:-------:|:-----:|-------------|
 | type | string | **required** | v0.0.1 | `custom:mini-graph-card`.
-| entity | string | **required** | v0.0.1 | An entity_id from an entity within the `sensor` domain.
-| icon | string | optional | v0.0.1 | set a custom icon from any of the available mdi icons.
-| name | string | optional | v0.0.1 | Set a custom `friendly_name` which is displayed beside the icon.
+| entity | string | **required** | v0.0.1 | Entity id of the sensor.
+| icon | string | optional | v0.0.1 | Set a custom icon from any of the available mdi icons.
+| name | string | optional | v0.0.1 | Set a custom name which is displayed beside the icon.
 | unit | string | optional | v0.0.1 | Set a custom unit of measurement.
-| accuracy | number | 10 | v0.0.1 | Specify how many data points should be used to render the graph, higher number equals higher detailed graph. Results can vary depending on how often your sensor updates. *(Recommended to keep between 5 & 25).*
-| hours_to_show | number | 24 | v0.0.2 | Specify how many hours to show.
+| accuracy | number | 10 | v0.0.1 | Specify how many data points should be used to render the graph, higher number equals in a more detailed graph. Results may vary depending on how often the sensor updates. *(Recommended to keep between 5 & 50).*
 | height | number | 150 | v0.0.1 | Set a custom height of the line graph.
-| hide_icon | boolean | optional | v0.0.5 | Set to `true` to hide icon.
-| font_size | number | 100 | v0.0.3 | Adjust the font size of the state value, as percentage of the original size.
+| line_width | number | 5 | v0.0.1 | Set the thickness of the line.
 | line_color | string | 'var(accent-color)' | v0.0.1 | Set a custom color for the line in the graph.
-| line_width | number | 5 | v0.0.1 | Set a custom width of the line.
-| more_info | boolean | true | v0.0.1 | Set to `false` to disable the "more info" dialog when clicking on the card.
-| line_value_above | number | optional | v0.0.4 | Set a threshold where if current state is above this value, the line color will change to what's specified in `line_value_above`.
+| more_info | boolean | true | v0.0.1 | Set to `false` to disable the "more info" dialog when pressing the card.
+| hours_to_show | number | 24 | v0.0.2 | Specify how many hours to show.
+| font_size | number | 100 | v0.0.3 | Adjust the font size of the state value, as percentage of the original size.
+| line_value_above | number | optional | v0.0.4 | Set a threshold, if current state is above this value, the line color will change to color specified in `line_value_above`.
 | line_color_above | string | optional | v0.0.4 | Set the line color for `line_value_above`
-| line_value_below | number | optional | v0.0.4 | See `line_value_above`.
-| line_color_below | string | optional | v0.0.4 | See `line_color_above`.
+| line_value_below | number | optional | v0.0.4 | Set a threshold, if current state is below this value, the line color will change to color specified in `line_value_below`.
+| line_color_below | string | optional | v0.0.4 | Set the line color for `line_value_below`.
+| hide_icon | boolean | optional | v0.0.5 | Set to `true` to hide icon.
 
 
 ### Example usage
