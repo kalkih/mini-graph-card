@@ -41,7 +41,7 @@ class MiniGraphCard extends LitElement {
     if (!config.entity || config.entity.split('.')[0] !== 'sensor')
       throw new Error('Specify an entity from within the sensor domain.');
 
-    this.style = 'display: flex;';
+    this.style = 'display: flex; flex-direction: column;';
     const conf = Object.assign({
       icon: false,
       more_info: true,
@@ -53,7 +53,7 @@ class MiniGraphCard extends LitElement {
       font_size: FONT_SIZE,
       hide_icon: false
     }, config);
-    conf.font_size = (config.font_size / 100) * FONT_SIZE;
+    conf.font_size = (config.font_size  / 100) * FONT_SIZE || FONT_SIZE;
     conf.accuracy = Number(conf.accuracy);
     conf.height = Number(conf.height);
     conf.line_width = Number(conf.line_width);
@@ -98,12 +98,12 @@ class MiniGraphCard extends LitElement {
             <ha-icon .icon=${this.computeIcon(entity)}></ha-icon>
           </div>
           <div class='header'>
-            <span class='name'>${this.computeName(entity)}</span>
+            <span class='name ellipsis'>${this.computeName(entity)}</span>
           </div>
         </div>
         <div class='flex info'>
-          <span id='value'>${entity.state}</span>
-          <span id='measurement'>${this.computeUom(entity)}</span>
+          <span id='value' class='ellipsis'>${entity.state}</span>
+          <span id='measurement' class='ellipsis'>${this.computeUom(entity)}</span>
         </div>
         <div class='graph'>
           <div>
@@ -174,6 +174,7 @@ class MiniGraphCard extends LitElement {
         :host {
           display: flex;
           flex-direction: column;
+          flex: 1;
         }
         ha-card {
           display: flex;
@@ -202,18 +203,10 @@ class MiniGraphCard extends LitElement {
           opacity: .8;
         }
         .name {
-          display: block;
-          display: -webkit-box;
           font-size: 1.2rem;
           font-weight: 500;
           max-height: 1.4rem;
           opacity: .75;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          -webkit-line-clamp: 1;
-          -webkit-box-orient: vertical;
-          word-wrap: break-word;
-          word-break: break-all;
         }
         .icon {
           display: inline-block;
@@ -240,6 +233,7 @@ class MiniGraphCard extends LitElement {
           line-height: 1em;
           display: inline-block;
           margin-right: 4px;
+          max-size: 100%;
         }
         #measurement {
           display: inline-block;
@@ -261,6 +255,11 @@ class MiniGraphCard extends LitElement {
         .graph > div {
           align-self: flex-end;
           margin: auto 8px;
+        }
+        .ellipsis {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
       </style>`;
   }
