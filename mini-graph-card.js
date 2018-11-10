@@ -2,17 +2,17 @@ import { LitElement, html, svg } from 'https://unpkg.com/@polymer/lit-element@^0
 import Graph from './mini-graph-lib.js';
 
 const FONT_SIZE = 14;
+const ICON = {
+  humidity: 'hass:water-percent',
+  illuminance: 'hass:brightness-5',
+  temperature: 'hass:thermometer',
+  battery: 'hass:battery'
+};
 
 class MiniGraphCard extends LitElement {
   constructor() {
     super();
     this.conf = {};
-    this._icons = {
-      humidity: 'hass:water-percent',
-      illuminance: 'hass:brightness-5',
-      temperature: 'hass:thermometer',
-      battery: 'hass:battery'
-    };
   }
 
   createRenderRoot() {
@@ -151,7 +151,8 @@ class MiniGraphCard extends LitElement {
   computeIcon(entity) {
     return this.config.icon ||
       entity.attributes.icon ||
-      this._icons[entity.attributes.device_class];
+      ICON[entity.attributes.device_class] ||
+      ICON.temperature;
   }
 
   computeUom(entity) {
