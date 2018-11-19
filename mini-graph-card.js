@@ -265,7 +265,7 @@ class MiniGraphCard extends LitElement {
   }
 
   getCardSize() {
-    return 1;
+    return 3;
   }
 }
 
