@@ -1,7 +1,7 @@
 # Lovelace Mini Graph Card
 A minimalistic sensor with graph lovelace card for [Home Assistant](https://github.com/home-assistant/home-assistant).
 
-The card works with entities from within the **sensor** domain and displays the sensors current state as well as a line graph of the sensor state during the past 24 hours (accuracy may vary).
+The card works with entities from within the **sensor** domain and displays the sensors current state as well as a line graph of the sensors state history.
 
 ![Preview](https://user-images.githubusercontent.com/457678/48304689-d975fa00-e51d-11e8-9cd6-620a17e3d244.png)
 
@@ -15,8 +15,8 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.0.7
-      type: module
+    - url: /local/mini-graph-card-bundle.js?v=0.0.8
+      type: js
   ```
 
 ### CLI install
@@ -26,15 +26,15 @@ The card works with entities from within the **sensor** domain and displays the 
 - Grab `mini-graph-card-bundle.js`
 
   ```
-  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.0.7/mini-graph-card-bundle.js
+  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.0.8/mini-graph-card-bundle.js
   ```
 
 - Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`.
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.0.7
-      type: module
+    - url: /local/mini-graph-card-bundle.js?v=0.0.8
+      type: js
   ```
 
 ### *(Optional)* Add to custom updater
@@ -50,7 +50,7 @@ The card works with entities from within the **sensor** domain and displays the 
   ```
 
 ## Updating
- **Important:** If you are updating from a version prior to v0.5, make sure you change `- type: js` to `- type: module` in your reference to the card in your `ui-lovelace.ysml`.
+**If you have a version older than v0.0.8 installed, please delete the current files and follow the installation instructions again.**
 
 1. Find your `mini-graph-card-bundle.js` file in `config/www` or wherever you ended up storing it.
 
@@ -60,12 +60,11 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.0.7
-      type: module
+    - url: /local/mini-graph-card-bundle.js?v=0.0.8
+      type: js
   ```
 
 *You may need to empty the browsers cache if you have problems loading the updated card.*
-
 
 ## Using the card
 
@@ -83,13 +82,15 @@ The card works with entities from within the **sensor** domain and displays the 
 | line_width | number | 5 | v0.0.1 | Set the thickness of the line.
 | line_color | string | 'var(accent-color)' | v0.0.1 | Set a custom color for the line in the graph.
 | more_info | boolean | true | v0.0.1 | Set to `false` to disable the "more info" dialog when pressing the card.
-| hours_to_show | number | 24 | v0.0.2 | Specify how many hours to show.
+| hours_to_show | integer | 24 | v0.0.2 | Specify how many hours the line graph should render.
 | font_size | number | 100 | v0.0.3 | Adjust the font size of the state value, as percentage of the original size.
 | line_value_above | number | optional | v0.0.4 | Set a threshold, if current state is above this value, the line color will change to color specified in `line_value_above`.
 | line_color_above | string | optional | v0.0.4 | Set the line color for `line_value_above`
 | line_value_below | number | optional | v0.0.4 | Set a threshold, if current state is below this value, the line color will change to color specified in `line_value_below`.
 | line_color_below | string | optional | v0.0.4 | Set the line color for `line_value_below`.
 | hide_icon | boolean | optional | v0.0.5 | Set to `true` to hide icon.
+| detail | integer | 1 | v0.0.8 | '1' or '2', 1 equals ONE data point per hour, 2 equals SIX data points per hour.
+| labels | boolean | false | v0.0.8 | Set to `true` to display min/max labels.
 
 
 ### Example usage
@@ -129,7 +130,6 @@ The card works with entities from within the **sensor** domain and displays the 
     - type: "custom:mini-graph-card"
       entity: sensor.sensor_pressure
       name: Pressure
-      accuracy: 8
       line_width: 8
 ```
 
@@ -146,7 +146,7 @@ $ git clone https://github.com/kalkih/mini-graph-card.git
 ```yaml
 resources:
   - url: /local/mini-graph-card/mini-graph-card.js
-    type: module
+    type: js
 ```
 
 ### Generate the bundle

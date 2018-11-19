@@ -1,8 +1,16 @@
+## v0.0.8
+- Major rework of the graph calculation, now taking moving average and timestamps into account
+- Added bundle version
+- Added `detail` option, to specify the detail level of the graph
+- Added `labels` option to display min/max labels
+- Removed `accuracy` option in favor for `detail`
+- Changed the reported size of the card
+
 ## v0.0.7
 - Improved responsive design
 - Fixed overflow issue when stacking several cards in horizontal-stack #11
 - Fixed default font-size when not specified in config
-  
+
 ## v0.0.6
 - Improved handling of unknown/unavailable history entries #8
 - Fixed issue where `<path>` error would appear in some scenarios
