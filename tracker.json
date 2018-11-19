@@ -5,5 +5,12 @@
       "remote_location": "https://raw.githubusercontent.com/kalkih/mini-graph-card/master/mini-graph-card.js",
       "visit_repo": "https://github.com/kalkih/mini-graph-card",
       "changelog": "https://github.com/kalkih/mini-graph-card/releases/latest"
+    },
+    "mini-graph-card-bundle": {
+      "updated_at": "2018-11-10",
+      "version": "0.0.7",
+      "remote_location": "https://github.com/kalkih/mini-graph-card/releases/download/v0.0.8/mini-graph-card-bundle.js",
+      "visit_repo": "https://github.com/kalkih/mini-graph-card",
+      "changelog": "https://github.com/kalkih/mini-graph-card/releases/latest"
     }
 }

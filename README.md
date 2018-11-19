@@ -9,61 +9,63 @@ The card works with entities from within the **sensor** domain and displays the 
 
 ### Simple install
 
-- Copy `mini-graph-card.js` and `mini-graph-lib.js` into your `config/www` folder.
-- Add a reference to the `mini-graph-card.js` inside your `ui-lovelace.yaml`.
+1. Download and copy `mini-graph-card-bundle.js` from the [latest release](https://github.com/kalkih/mini-graph-card/releases/latest) into your `config/www` directory.
 
-```yaml
-resources:
-  - url: /local/mini-graph-card.js?v=0.0.7
-    type: module
-```
+- Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`.
 
-### Install using git
+  ```yaml
+  resources:
+    - url: /local/mini-graph-card-bundle.js?v=0.0.7
+      type: module
+  ```
 
-- Clone this repository into your `config/www` folder using git.
+### CLI install
 
-```bash
-git clone https://github.com/kalkih/mini-graph-card.git
-```
+1. Move into your `config/www` directory
 
-- Add a reference to the card in your `ui-lovelace.yaml`.
+- Grab `mini-graph-card-bundle.js`
 
-```yaml
-resources:
-  - url: /local/mini-graph-card/mini-graph-card.js?v=0.0.7
-    type: module
-```
+  ```
+  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.0.7/mini-graph-card-bundle.js
+  ```
+
+- Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`.
+
+  ```yaml
+  resources:
+    - url: /local/mini-graph-card-bundle.js?v=0.0.7
+      type: module
+  ```
 
 ### *(Optional)* Add to custom updater
 
-- Make sure you got the [custom_updater](https://github.com/custom-components/custom_updater) component installed.
-- Add a reference under `card_urls` in your `custom_updater` configuration in `configuration.yaml`.
+1. Make sure you've the [custom_updater](https://github.com/custom-components/custom_updater) component installed and working.
 
-```yaml
-custom_updater:
-  card_urls:
-    - https://raw.githubusercontent.com/kalkih/mini-graph-card/master/tracker.json
-```
+- Add a new reference under `card_urls` in your `custom_updater` configuration in `configuration.yaml`.
+
+  ```yaml
+  custom_updater:
+    card_urls:
+      - https://raw.githubusercontent.com/kalkih/mini-graph-card/master/tracker.json
+  ```
 
 ## Updating
+ **Important:** If you are updating from a version prior to v0.5, make sure you change `- type: js` to `- type: module` in your reference to the card in your `ui-lovelace.ysml`.
 
-- Find your `mini-graph-card.js` & `mini-graph-lib.js` files in `config/www` or wherever you ended up storing them.
-- Replace the files with the latest versions of [mini-graph-card.js](mini-graph-card.js). [mini-graph-lib.js](mini-graph-lib.js).
+1. Find your `mini-graph-card-bundle.js` file in `config/www` or wherever you ended up storing it.
+
+- Replace the local file with the latest one attached in the [latest release](https://github.com/kalkih/mini-graph-card/releases/latest).
+
 - Add the new version number to the end of the cards reference url in your `ui-lovelace.yaml` like below.
 
-```yaml
-resources:
-  - url: /local/mini-graph-card.js?v=0.0.7
-    type: module
-```
+  ```yaml
+  resources:
+    - url: /local/mini-graph-card-bundle.js?v=0.0.7
+      type: module
+  ```
 
-If you went the `git clone` route, just run `git pull` from inside your `config/www/mini-graph-card/` directory, to get the latest version of the code. Then add the new version number to the end of the card reference url in your `ui-lovelace.yaml` like below.
+*You may need to empty the browsers cache if you have problems loading the updated card.*
 
-```yaml
-resources:
-  - url: /local/mini-graph-card/mini-graph-card.js?v=0.0.7
-    type: module
-```
 
 ## Using the card
 
@@ -76,7 +78,7 @@ resources:
 | icon | string | optional | v0.0.1 | Set a custom icon from any of the available mdi icons.
 | name | string | optional | v0.0.1 | Set a custom name which is displayed beside the icon.
 | unit | string | optional | v0.0.1 | Set a custom unit of measurement.
-| accuracy | number | 10 | v0.0.1 | Specify how many data points should be used to render the graph, higher number equals in a more detailed graph. Results may vary depending on how often the sensor updates. *(Recommended to keep between 5 & 50).*
+| detail | number | 1 | v0.0.8 | `1´ equals one data point per hour, `2` equals one data point per ten minutes (6 an hour).
 | height | number | 150 | v0.0.1 | Set a custom height of the line graph.
 | line_width | number | 5 | v0.0.1 | Set the thickness of the line.
 | line_color | string | 'var(accent-color)' | v0.0.1 | Set a custom color for the line in the graph.
@@ -130,6 +132,41 @@ resources:
       accuracy: 8
       line_width: 8
 ```
+
+## Develop
+
+**Clone this repository into your `config/www` folder using git.**
+
+```
+$ git clone https://github.com/kalkih/mini-graph-card.git
+```
+
+**Add a reference to the card in your `ui-lovelace.yaml`.**
+
+```yaml
+resources:
+  - url: /local/mini-graph-card/mini-graph-card.js
+    type: module
+```
+
+### Generate the bundle
+
+*Requires `nodejs` & `npm`*
+
+**Move into the `mini-graph-card` repo & install dependencies.**
+
+```
+$ npm install
+```
+
+**Edit the source file `mini-graph-card.js`, build by running**
+```
+$ npm run build
+```
+
+The `mini-graph-card-bundle.js` will be rebuilt and ready.
+
+
 
 ## Getting errors?
 Make sure you have `javascript_version: latest` in your `configuration.yaml` under `frontend:`.
