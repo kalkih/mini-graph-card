@@ -48,6 +48,7 @@ class MiniGraphCard extends LitElement {
       hours_to_show: 24,
       detail: 1,
       height: 100,
+      labels: false,
       line_color: 'var(--accent-color)',
       line_width: 5,
       font_size: FONT_SIZE,
@@ -89,9 +90,14 @@ class MiniGraphCard extends LitElement {
   }
 
   render({config, entity} = this) {
+    const path = svg`
+      <svg width='100%' viewBox='0 0 500 ${this.config.height}'>
+        <path d=${this.line} fill='none' stroke=${this.computeColor()}
+          stroke-width=${config.line_width} stroke-linecap='round' stroke-linejoin='round' />
+      </svg>`;
     return html`
       ${this._style()}
-      <ha-card ?group=${config.group} @click='${(e) => this.handleMore()}'
+      <ha-card ?group=${config.group} ?labels=${config.labels} @click='${(e) => this.handleMore()}'
         ?more-info=${config.more_info} style='font-size: ${config.font_size}px;'>
         <div class='flex title' ?hide=${config.hide_icon}>
           <div class='icon'>
@@ -106,15 +112,20 @@ class MiniGraphCard extends LitElement {
           <span id='measurement' class='ellipsis'>${this.computeUom(entity)}</span>
         </div>
         <div class='graph'>
-          <div>
-            ${this.line ? svg`
-            <svg width='100%' viewBox='0 0 500 ${this.config.height}'>
-              <path d=${this.line} fill='none' stroke=${this.computeColor()}
-                stroke-width=${config.line_width} stroke-linecap='round' stroke-linejoin='round' />
-            </svg>` : '' }
+          ${config.labels ? this.renderLabels() : ''}
+          <div class='svg'>
+            ${this.line ? path : ''}
           </div>
         </div>
       </ha-card>`;
+  }
+
+  renderLabels() {
+    return html`
+      <div class='label'>
+        <span class='label--max'>${this.Graph.max}</span>
+        <span class='label--min'>${this.Graph.min}</span>
+      </div>`;
   }
 
   handleMore({config} = this) {
@@ -251,15 +262,44 @@ class MiniGraphCard extends LitElement {
           margin-bottom: 0px;
           position: relative;
           width: 100%;
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
         }
-        .graph > div {
+        .graph > .svg {
           align-self: flex-end;
           margin: auto 8px;
+          flex: 1;
+        }
+        svg {
+          overflow: visible;
+        }
+        .label {
+          font-size: .8em;
+          display: flex;
+          flex-direction: column;
+          opacity: .5;
+          font-weight: 400;
+          justify-content: space-between;
+          margin-left: 8px;
+        }
+        .label--max {
+          align-self: flex-end;
+        }
+        .label--min {
+          align-self: flex-end;
+        }
+        .label--min:after,
+        .label--max:after {
+          content: ' -'
         }
         .ellipsis {
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
+        }
+        ha-card[labels] .graph > .svg {
+          margin-left: 16px;
         }
       </style>`;
   }
