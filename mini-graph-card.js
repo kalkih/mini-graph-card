@@ -12,7 +12,6 @@ const ICON = {
 class MiniGraphCard extends LitElement {
   constructor() {
     super();
-    this.conf = {};
   }
 
   createRenderRoot() {
@@ -33,7 +32,8 @@ class MiniGraphCard extends LitElement {
       _hass: Object,
       config: Object,
       entity: Object,
-      line: String
+      line: String,
+      Graph: String
     };
   }
 
@@ -46,7 +46,7 @@ class MiniGraphCard extends LitElement {
       icon: false,
       more_info: true,
       hours_to_show: 24,
-      accuracy: 10,
+      detail: 1,
       height: 100,
       line_color: 'var(--accent-color)',
       line_width: 5,
@@ -54,9 +54,13 @@ class MiniGraphCard extends LitElement {
       hide_icon: false
     }, config);
     conf.font_size = (config.font_size  / 100) * FONT_SIZE || FONT_SIZE;
-    conf.accuracy = Number(conf.accuracy);
+    conf.hours_to_show = Math.floor(Number(conf.hours_to_show)) || 24;
     conf.height = Number(conf.height);
     conf.line_width = Number(conf.line_width);
+    conf.detail = (conf.detail === 1 || conf.detail === 2) ? conf.detail : 1;
+
+    if (!this.Graph)
+      this.Graph = new Graph(500, conf.height, conf.line_width);
 
     this.config = conf;
   }
@@ -66,19 +70,15 @@ class MiniGraphCard extends LitElement {
     const startTime = new Date();
     startTime.setHours(endTime.getHours() - config.hours_to_show);
     const stateHistory = await this.fetchRecent(config.entity, startTime, endTime);
-    const history = stateHistory[0];
-    const valArray = [history[history.length - 1]];
 
-    let pos = history.length - 1;
-    const accuracy = (this.config.accuracy) <= pos ? this.config.accuracy : pos;
-    let increment = Math.ceil(history.length / accuracy);
-    if (accuracy === pos) increment = 1;
-    increment = (increment <= 0) ? 1 : increment;
-    for (let i = accuracy; i >= 1; i--) {
-      pos -= increment;
-      valArray.unshift(pos >= 0 ? history[pos] : history[0]);
-    }
-    this.line = Graph(valArray, 500, this.config.height, config.line_width);
+    if (stateHistory[0].length < 1) return;
+
+    const coords = this.Graph.coordinates(
+      stateHistory[0],
+      config.hours_to_show,
+      config.detail
+    );
+    this.line = this.Graph.getPath(coords);
   }
 
   shouldUpdate(changedProps) {
