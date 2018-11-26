@@ -77,7 +77,6 @@ The card works with entities from within the **sensor** domain and displays the 
 | icon | string | optional | v0.0.1 | Set a custom icon from any of the available mdi icons.
 | name | string | optional | v0.0.1 | Set a custom name which is displayed beside the icon.
 | unit | string | optional | v0.0.1 | Set a custom unit of measurement.
-| detail | number | 1 | v0.0.8 | `1´ equals one data point per hour, `2` equals one data point per ten minutes (6 an hour).
 | height | number | 150 | v0.0.1 | Set a custom height of the line graph.
 | line_width | number | 5 | v0.0.1 | Set the thickness of the line.
 | line_color | string | 'var(accent-color)' | v0.0.1 | Set a custom color for the line in the graph.
