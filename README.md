@@ -88,7 +88,7 @@ The card works with entities from within the **sensor** domain and displays the 
 | line_value_below | number | optional | v0.0.4 | Set a threshold, if current state is below this value, the line color will change to color specified in `line_value_below`.
 | line_color_below | string | optional | v0.0.4 | Set the line color for `line_value_below`.
 | hide_icon | boolean | optional | v0.0.5 | Set to `true` to hide icon.
-| detail | integer | 1 | v0.0.8 | '1' or '2', 1 equals ONE data point per hour, 2 equals SIX data points per hour.
+| detail | integer | 1 | v0.0.8 | `1` or `2`, 1 equals ONE data point per hour, 2 equals SIX data points per hour.
 | labels | boolean | false | v0.0.8 | Set to `true` to display min/max labels.
 
 
