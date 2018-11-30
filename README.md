@@ -9,13 +9,13 @@ The card works with entities from within the **sensor** domain and displays the 
 
 ### Simple install
 
-1. Download and copy `mini-graph-card-bundle.js` from the [latest release](https://github.com/kalkih/mini-graph-card/releases/latest) into your `config/www` directory.
+1. Download and copy `mini-graph-card.js` from the [latest release](https://github.com/kalkih/mini-graph-card/releases/latest) into your `config/www` directory.
 
-- Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`.
+- Add a reference to `mini-graph-card.js` inside your `ui-lovelace.yaml`.
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.0.8
+    - url: /local/mini-graph-card.js?v=0.0.8
       type: js
   ```
 
@@ -23,17 +23,17 @@ The card works with entities from within the **sensor** domain and displays the 
 
 1. Move into your `config/www` directory
 
-- Grab `mini-graph-card-bundle.js`
+- Grab `mini-graph-card.js`
 
   ```
-  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.0.8/mini-graph-card-bundle.js
+  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.0.8/mini-graph-card.js
   ```
 
-- Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`.
+- Add a reference to `mini-graph-card.js` inside your `ui-lovelace.yaml`.
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.0.8
+    - url: /local/mini-graph-card.js?v=0.0.8
       type: js
   ```
 
@@ -52,7 +52,7 @@ The card works with entities from within the **sensor** domain and displays the 
 ## Updating
 **If you have a version older than v0.0.8 installed, please delete the current files and follow the installation instructions again.**
 
-1. Find your `mini-graph-card-bundle.js` file in `config/www` or wherever you ended up storing it.
+1. Find your `mini-graph-card.js` file in `config/www` or wherever you ended up storing it.
 
 - Replace the local file with the latest one attached in the [latest release](https://github.com/kalkih/mini-graph-card/releases/latest).
 
@@ -60,7 +60,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.0.8
+    - url: /local/mini-graph-card.js?v=0.0.8
       type: js
   ```
 
