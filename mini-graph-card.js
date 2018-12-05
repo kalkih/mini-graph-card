@@ -159,8 +159,8 @@ class MiniGraphCard extends LitElement {
     const state = Number(this.entity.state) || 0;
     const above = this.config.line_value_above;
     const below = this.config.line_value_below;
-    if (above && state > above) return this.config.line_color_above
-    if (below && state < below) return this.config.line_color_below
+    if (above !== null && state > above) return this.config.line_color_above
+    if (below !== null && state < below) return this.config.line_color_below
     return this.config.line_color;
   }
 
