@@ -29,11 +29,11 @@ class MiniGraphCard extends LitElement {
 
   static get properties() {
     return {
-      _hass: Object,
-      config: Object,
-      entity: Object,
-      line: String,
-      Graph: String
+      _hass: {},
+      config: {},
+      entity: {},
+      Graph: {},
+      line: String
     };
   }
 
@@ -42,19 +42,21 @@ class MiniGraphCard extends LitElement {
       throw new Error('Specify an entity from within the sensor domain.');
 
     this.style = 'display: flex; flex-direction: column;';
-    const conf = Object.assign({
-      icon: false,
-      more_info: true,
-      hours_to_show: 24,
+    const conf = {
+      decimals: null,
       detail: 1,
+      font_size: FONT_SIZE,
       height: 100,
+      hours_to_show: 24,
+      icon: false,
+      hide_icon: false,
       labels: false,
       line_color: 'var(--accent-color)',
       line_width: 5,
-      font_size: FONT_SIZE,
-      hide_icon: false
-    }, config);
-    conf.font_size = (config.font_size  / 100) * FONT_SIZE || FONT_SIZE;
+      more_info: true,
+      ...config
+    };
+    conf.font_size = (config.font_size / 100) * FONT_SIZE || FONT_SIZE;
     conf.hours_to_show = Math.floor(Number(conf.hours_to_show)) || 24;
     conf.height = Number(conf.height);
     conf.line_width = Number(conf.line_width);
@@ -90,16 +92,15 @@ class MiniGraphCard extends LitElement {
   }
 
   render({config, entity} = this) {
-    const path = svg`
-      <svg width='100%' viewBox='0 0 500 ${this.config.height}'>
-        <path d=${this.line} fill='none' stroke=${this.computeColor()}
-          stroke-width=${config.line_width} stroke-linecap='round' stroke-linejoin='round' />
-      </svg>`;
     return html`
       ${this._style()}
-      <ha-card ?group=${config.group} ?labels=${config.labels} @click='${(e) => this.handleMore()}'
-        ?more-info=${config.more_info} style='font-size: ${config.font_size}px;'>
-        <div class='flex title' ?hide=${config.hide_icon}>
+      <ha-card
+        ?group=${config.group}
+        ?labels=${config.labels}
+        ?more-info=${config.more_info}
+        style='font-size: ${config.font_size}px;'
+        @click='${(e) => this.handleMore()}'>
+        <div class='title flex' ?hide=${config.hide_icon}>
           <div class='icon'>
             <ha-icon .icon=${this.computeIcon(entity)}></ha-icon>
           </div>
@@ -107,17 +108,25 @@ class MiniGraphCard extends LitElement {
             <span class='name ellipsis'>${this.computeName(entity)}</span>
           </div>
         </div>
-        <div class='flex info'>
-          <span id='value' class='ellipsis'>${entity.state}</span>
+        <div class='info flex'>
+          <span id='value' class='ellipsis'>${this.computeState()}</span>
           <span id='measurement' class='ellipsis'>${this.computeUom(entity)}</span>
         </div>
         <div class='graph'>
           ${config.labels ? this.renderLabels() : ''}
           <div class='svg'>
-            ${this.line ? path : ''}
+            ${this.line ? this.renderGraph() : ''}
           </div>
         </div>
       </ha-card>`;
+  }
+
+  renderGraph() {
+    return svg`
+      <svg width='100%' viewBox='0 0 500 ${this.config.height}'>
+        <path d=${this.line} fill='none' stroke=${this.computeColor()}
+          stroke-width=${this.config.line_width} stroke-linecap='round' stroke-linejoin='round' />
+      </svg>`;
   }
 
   renderLabels() {
@@ -160,21 +169,30 @@ class MiniGraphCard extends LitElement {
   }
 
   computeIcon(entity) {
-    return this.config.icon ||
-      entity.attributes.icon ||
-      ICON[entity.attributes.device_class] ||
-      ICON.temperature;
+    return this.config.icon
+      || this.entity.attributes.icon
+      || ICON[this.entity.attributes.device_class]
+      || ICON.temperature;
   }
 
-  computeUom(entity) {
-    return this.config.unit || entity.attributes.unit_of_measurement || '';
+  computeUom() {
+    return this.config.unit || this.entity.attributes.unit_of_measurement || '';
+  }
+
+  computeState() {
+    const dec = this.config.decimals;
+    if (dec === null || isNaN(dec) || Number.isNaN(this.entity.state))
+      return this.entity.state;
+
+    const x = Math.pow(10, dec);
+    return (Math.round(this.entity.state * x) / x).toFixed(dec);
   }
 
   async fetchRecent(entityId, startTime, endTime) {
     let url = 'history/period';
-    if (startTime) url += '/' + startTime.toISOString();
-    url += '?filter_entity_id=' + entityId;
-    if (endTime) url += '&end_time=' + endTime.toISOString();
+    if (startTime) url += `/${startTime.toISOString()}`;
+    url += `?filter_entity_id=${entityId}`;
+    if (endTime) url += `&end_time=${endTime.toISOString()}`;
 
     return await this._hass.callApi('GET', url);
   }
