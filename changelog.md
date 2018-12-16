@@ -1,3 +1,7 @@
+## v0.0.9
+- Added `decimals` option to display specified amount of decimals for the current state #18
+- Fixed issue where `line_value_above` and `line_value_below` would not work when set to `0` #13
+
 ## v0.0.8
 - Major rework of the graph calculation, now taking moving average and timestamps into account
 - Added bundle version

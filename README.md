@@ -15,8 +15,8 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.0.8
-      type: js
+    - url: /local/mini-graph-card-bundle.js?v=0.0.9
+      type: module
   ```
 
 ### CLI install
@@ -26,15 +26,15 @@ The card works with entities from within the **sensor** domain and displays the 
 - Grab `mini-graph-card-bundle.js`
 
   ```
-  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.0.8/mini-graph-card-bundle.js
+  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.0.9/mini-graph-card-bundle.js
   ```
 
 - Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`.
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.0.8
-      type: js
+    - url: /local/mini-graph-card-bundle.js?v=0.0.9
+      type: module
   ```
 
 ### *(Optional)* Add to custom updater
@@ -60,8 +60,8 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.0.8
-      type: js
+    - url: /local/mini-graph-card-bundle.js?v=0.0.9
+      type: module
   ```
 
 *You may need to empty the browsers cache if you have problems loading the updated card.*
@@ -87,10 +87,10 @@ The card works with entities from within the **sensor** domain and displays the 
 | line_color_above | string | optional | v0.0.4 | Set the line color for `line_value_above`
 | line_value_below | number | optional | v0.0.4 | Set a threshold, if current state is below this value, the line color will change to color specified in `line_value_below`.
 | line_color_below | string | optional | v0.0.4 | Set the line color for `line_value_below`.
-| hide_icon | boolean | optional | v0.0.5 | Set to `true` to hide icon.
+| hide_icon | boolean | optional | v0.0.5 | Set to `true` to hide the icon.
 | detail | integer | 1 | v0.0.8 | `1` or `2`, 1 equals ONE data point per hour, 2 equals SIX data points per hour.
 | labels | boolean | false | v0.0.8 | Set to `true` to display min/max labels.
-
+| decimals | integer | optional | v0.0.9 | Specify the exact number of decimals to show for the current state.
 
 ### Example usage
 
@@ -145,7 +145,7 @@ $ git clone https://github.com/kalkih/mini-graph-card.git
 ```yaml
 resources:
   - url: /local/mini-graph-card/mini-graph-card.js
-    type: js
+    type: module
 ```
 
 ### Generate the bundle
@@ -173,6 +173,8 @@ Make sure you have `javascript_version: latest` in your `configuration.yaml` und
 Make sure you have the latest versions of `mini-graph-card.js` & `mini-graph-lib.js`.
 
 If you have issues after updating the card, try clearing your browser cache.
+
+If you have issues displaying the card in older browsers, try changing `type: module` to `type: js` at the card reference in `ui-lovelace.yaml`.
 
 ## License
 This project is under the MIT license.
