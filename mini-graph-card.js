@@ -23,7 +23,8 @@ class MiniGraphCard extends LitElement {
     const entity = hass.states[this.config.entity];
     if (entity && this.entity !== entity) {
       this.entity = entity;
-      this.getHistory();
+      if (!this.hide_graph)
+        this.getHistory();
     }
   }
 
@@ -95,43 +96,73 @@ class MiniGraphCard extends LitElement {
     return html`
       ${this._style()}
       <ha-card
-        ?group=${config.group}
-        ?labels=${config.labels}
+        class='flex'
         ?more-info=${config.more_info}
         style='font-size: ${config.font_size}px;'
         @click='${(e) => this.handleMore()}'>
-        <div class='title flex' ?hide=${config.hide_icon}>
-          <div class='icon'>
-            <ha-icon .icon=${this.computeIcon(entity)}></ha-icon>
-          </div>
-          <div class='header'>
-            <span class='name ellipsis'>${this.computeName(entity)}</span>
-          </div>
-        </div>
-        <div class='info flex'>
-          <span id='value' class='ellipsis'>${this.computeState()}</span>
-          <span id='measurement' class='ellipsis'>${this.computeUom(entity)}</span>
-        </div>
-        <div class='graph'>
-          ${config.labels ? this.renderLabels() : ''}
-          <div class='svg'>
-            ${this.line ? this.renderGraph() : ''}
-          </div>
-        </div>
+        ${this.renderHeader()}
+        ${this.renderState()}
+        ${this.renderGraph()}
       </ha-card>`;
   }
 
+  renderHeader() {
+    return (!this.config.hide_icon || !this.config.hide_name) ? html`
+      <div class='header flex'>
+        ${this.renderIcon()}
+        ${this.renderName()}
+      </div>` : '';
+  }
+
+  renderIcon() {
+    return !this.config.hide_icon ? html`
+      <div class='icon'>
+        <ha-icon .icon=${this.computeIcon()}></ha-icon>
+      </div>` : '';
+  }
+
+  renderName() {
+    return !this.config.hide_name ? html`
+      <div class='name flex'>
+        <span class='ellipsis'>${this.computeName()}</span>
+      </div>` : '';
+  }
+
+  renderState() {
+    return !this.config.hide_state ? html`
+      <div class='info flex'>
+        <span class='state ellipsis'>${this.computeState()}</span>
+        <span class='uom ellipsis'>${this.computeUom()}</span>
+      </div> `: '';
+  }
+
   renderGraph() {
+    return !this.config.hide_graph ? html`
+      <div class='graph'>
+        ${this.config.labels ? this.renderLabels() : ''}
+        <div class='line'>
+          ${this.line ? this.renderLine() : ''}
+        </div>
+      </div>` : '';
+  }
+
+  renderLine() {
     return svg`
       <svg width='100%' viewBox='0 0 500 ${this.config.height}'>
-        <path d=${this.line} fill='none' stroke=${this.computeColor()}
-          stroke-width=${this.config.line_width} stroke-linecap='round' stroke-linejoin='round' />
+        <path
+          d=${this.line}
+          fill='none'
+          stroke=${this.computeColor()}
+          stroke-width=${this.config.line_width}
+          stroke-linecap='round'
+          stroke-linejoin='round'
+        />
       </svg>`;
   }
 
   renderLabels() {
     return html`
-      <div class='label'>
+      <div class='label flex'>
         <span class='label--max'>${this.Graph.max}</span>
         <span class='label--min'>${this.Graph.min}</span>
       </div>`;
@@ -168,7 +199,7 @@ class MiniGraphCard extends LitElement {
     return this.config.name || this.entity.attributes.friendly_name;
   }
 
-  computeIcon(entity) {
+  computeIcon() {
     return this.config.icon
       || this.entity.attributes.icon
       || ICON[this.entity.attributes.device_class]
@@ -202,11 +233,10 @@ class MiniGraphCard extends LitElement {
       <style>
         :host {
           display: flex;
-          flex-direction: column;
           flex: 1;
+          flex-direction: column;
         }
         ha-card {
-          display: flex;
           flex-direction: column;
           flex: 1;
           padding: 16px;
@@ -215,109 +245,89 @@ class MiniGraphCard extends LitElement {
         ha-card[more-info] {
           cursor: pointer;
         }
+        ha-card > div {
+          padding: 20px 0 0 8px;
+        }
+        ha-card > div:first-child {
+          padding-top: 0;
+        }
         .flex {
           display: flex;
           display: -webkit-flex;
           min-width: 0;
         }
-        .justify {
-          justify-content: space-between;
-          -webkit-justify-content: space-between;
-        }
-        .header {
-          display: flex;
-          min-width: 0;
+        .name {
           align-items: center;
-          position: relative;
+          min-width: 0;
           opacity: .8;
         }
-        .name {
+        .name > span {
           font-size: 1.2rem;
           font-weight: 500;
           max-height: 1.4rem;
           opacity: .75;
         }
         .icon {
-          display: inline-block;
-          position: relative;
-          flex: 0 0 40px;
-          width: 40px;
-          line-height: 40px;
-          text-align: center;
           color: var(--paper-item-icon-color, #44739e);
+          display: inline-block;
+          flex: 0 0 24px;
+          margin-right: 8px;
+          text-align: center;
+          width: 24px;
         }
         .info {
-          margin: 1em 8px;
           flex-wrap: wrap;
           font-weight: 300;
         }
-        .title[hide] .icon {
-          display: none;
-        }
-        .title[hide] .header {
-          margin-left: 8px;
-        }
-        #value {
+        .state {
+          display: inline-block;
           font-size: 2.4em;
           line-height: 1em;
-          display: inline-block;
           margin-right: 4px;
           max-size: 100%;
         }
-        #measurement {
+        .uom {
+          align-self: flex-end;
           display: inline-block;
           font-size: 1.4em;
           font-weight: 400;
           line-height: 1.2em;
           margin-top: .1em;
-          vertical-align: bottom;
-          align-self: flex-end;
           opacity: .6;
+          vertical-align: bottom;
         }
         .graph {
           align-self: flex-end;
-          margin: auto;
-          margin-bottom: 0px;
-          position: relative;
-          width: 100%;
+          box-sizing: border-box;
           display: flex;
-          flex-direction: row;
-          justify-content: space-between;
+          margin-top: auto;
+          width: 100%;
         }
-        .graph > .svg {
-          align-self: flex-end;
-          margin: auto 8px;
+        .graph > .line {
           flex: 1;
         }
         svg {
           overflow: visible;
         }
         .label {
-          font-size: .8em;
-          display: flex;
           flex-direction: column;
-          opacity: .5;
+          font-size: .8em;
           font-weight: 400;
           justify-content: space-between;
-          margin-left: 8px;
+          margin-right: 8px;
+          opacity: .75;
         }
-        .label--max {
+        .label > span {
           align-self: flex-end;
         }
-        .label--min {
-          align-self: flex-end;
-        }
-        .label--min:after,
-        .label--max:after {
-          content: ' -'
+        .label > span:after {
+          content: ' -';
+          opacity: .75;
         }
         .ellipsis {
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
-        }
-        ha-card[labels] .graph > .svg {
-          margin-left: 16px;
         }
       </style>`;
   }
