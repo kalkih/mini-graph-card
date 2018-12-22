@@ -39,12 +39,12 @@ export default class Graph {
     const coords = []
     let xRatio = this.width / (hours - (detail === 1 ? 1 : 0));
     xRatio = isFinite(xRatio) ? xRatio : this.width;
-    const yRatio = (this.max - this.min) / this.height;
+    const yRatio = ((this.max - this.min) / this.height) || 1;
 
     const getCoords = (item, i, offset = 0, depth = 1) => {
       if (depth > 1)
         return item.forEach((item, index) => getCoords(item, i, index, depth - 1));
-      let average = item.reduce((sum, entry) => {
+      const average = item.reduce((sum, entry) => {
         return (sum + parseFloat(entry.state));
       }, 0) / item.length;
       const x = xRatio * (i + (offset / 6)) + this.margin;
