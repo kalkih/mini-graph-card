@@ -50,7 +50,7 @@ class MiniGraphCard extends LitElement {
       height: 100,
       hours_to_show: 24,
       icon: false,
-      hide_icon: false,
+      hide: [],
       labels: false,
       line_color: 'var(--accent-color)',
       line_width: 5,
@@ -107,7 +107,8 @@ class MiniGraphCard extends LitElement {
   }
 
   renderHeader() {
-    return (!this.config.hide_icon || !this.config.hide_name) ? html`
+    const items = ['icon', 'name'];
+    return !(items.every(el => this.config.hide.includes(el))) ? html`
       <div class='header flex'>
         ${this.renderIcon()}
         ${this.renderName()}
@@ -115,21 +116,21 @@ class MiniGraphCard extends LitElement {
   }
 
   renderIcon() {
-    return !this.config.hide_icon ? html`
+    return !(this.config.hide.includes('icon')) ? html`
       <div class='icon'>
         <ha-icon .icon=${this.computeIcon()}></ha-icon>
       </div>` : '';
   }
 
   renderName() {
-    return !this.config.hide_name ? html`
+    return !(this.config.hide.includes('name')) ? html`
       <div class='name flex'>
         <span class='ellipsis'>${this.computeName()}</span>
       </div>` : '';
   }
 
   renderState() {
-    return !this.config.hide_state ? html`
+    return !(this.config.hide.includes('state')) ? html`
       <div class='info flex'>
         <span class='state ellipsis'>${this.computeState()}</span>
         <span class='uom ellipsis'>${this.computeUom()}</span>
@@ -137,7 +138,7 @@ class MiniGraphCard extends LitElement {
   }
 
   renderGraph() {
-    return !this.config.hide_graph ? html`
+    return !(this.config.hide.includes('graph'))  ? html`
       <div class='graph'>
         ${this.config.labels ? this.renderLabels() : ''}
         <div class='line'>
