@@ -9,6 +9,8 @@ const ICON = {
   battery: 'hass:battery'
 };
 
+const UPDATE_PROPS = ['entity', 'line'];
+
 class MiniGraphCard extends LitElement {
   constructor() {
     super();
@@ -24,7 +26,7 @@ class MiniGraphCard extends LitElement {
     if (entity && this.entity !== entity) {
       this.entity = entity;
       if (!this.hide_graph)
-        this.getHistory();
+        this.updateGraph();
     }
   }
 
@@ -44,14 +46,11 @@ class MiniGraphCard extends LitElement {
 
     this.style = 'display: flex; flex-direction: column;';
     const conf = {
-      decimals: null,
       detail: 1,
       font_size: FONT_SIZE,
       height: 100,
-      hours_to_show: 24,
-      icon: false,
       hide: [],
-      labels: false,
+      hours_to_show: 24,
       line_color: 'var(--accent-color)',
       line_width: 5,
       more_info: true,
@@ -59,8 +58,6 @@ class MiniGraphCard extends LitElement {
     };
     conf.font_size = (config.font_size / 100) * FONT_SIZE || FONT_SIZE;
     conf.hours_to_show = Math.floor(Number(conf.hours_to_show)) || 24;
-    conf.height = Number(conf.height);
-    conf.line_width = Number(conf.line_width);
     conf.detail = (conf.detail === 1 || conf.detail === 2) ? conf.detail : 1;
 
     if (!this.Graph)
@@ -69,7 +66,7 @@ class MiniGraphCard extends LitElement {
     this.config = conf;
   }
 
-  async getHistory({config} = this) {
+  async updateGraph({config} = this) {
     const endTime = new Date();
     const startTime = new Date();
     startTime.setHours(endTime.getHours() - config.hours_to_show);
@@ -86,10 +83,7 @@ class MiniGraphCard extends LitElement {
   }
 
   shouldUpdate(changedProps) {
-    return (
-      changedProps.has('entity') ||
-      changedProps.has('line')
-    );
+    return UPDATE_PROPS.some(prop => changedProps.has(prop));
   }
 
   render({config, entity} = this) {
@@ -302,6 +296,7 @@ class MiniGraphCard extends LitElement {
           box-sizing: border-box;
           display: flex;
           margin-top: auto;
+          padding-right: 8px;
           width: 100%;
         }
         .graph > .line {
