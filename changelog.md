@@ -1,3 +1,9 @@
+## v0.1.0
+- Added `hide` option to hide specific UI elements.
+- Removed `hide_icon`, use new `hide` option (**Breaking change**)
+- Fixed issue causing errors if all available history entries had the exact same state
+- Updated dependencies
+
 ## v0.0.9
 - Added `decimals` option to display specified amount of decimals for the current state #18
 - Fixed issue where `line_value_above` and `line_value_below` would not work when set to `0` #13

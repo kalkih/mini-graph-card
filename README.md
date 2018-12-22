@@ -15,7 +15,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.0.9
+    - url: /local/mini-graph-card-bundle.js?v=0.1.0
       type: module
   ```
 
@@ -26,14 +26,14 @@ The card works with entities from within the **sensor** domain and displays the 
 - Grab `mini-graph-card-bundle.js`
 
   ```
-  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.0.9/mini-graph-card-bundle.js
+  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.1.0/mini-graph-card-bundle.js
   ```
 
 - Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`.
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.0.9
+    - url: /local/mini-graph-card-bundle.js?v=0.1.0
       type: module
   ```
 
@@ -60,7 +60,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.0.9
+    - url: /local/mini-graph-card-bundle.js?v=0.1.0
       type: module
   ```
 
@@ -87,16 +87,16 @@ The card works with entities from within the **sensor** domain and displays the 
 | line_color_above | string | optional | v0.0.4 | Set the line color for `line_value_above`
 | line_value_below | number | optional | v0.0.4 | Set a threshold, if current state is below this value, the line color will change to color specified in `line_value_below`.
 | line_color_below | string | optional | v0.0.4 | Set the line color for `line_value_below`.
-| hide_icon | boolean | optional | v0.0.5 | Set to `true` to hide the icon.
 | detail | integer | 1 | v0.0.8 | `1` or `2`, 1 equals ONE data point per hour, 2 equals SIX data points per hour.
 | labels | boolean | false | v0.0.8 | Set to `true` to display min/max labels.
 | decimals | integer | optional | v0.0.9 | Specify the exact number of decimals to show for the current state.
+| hide | list | optional | v0.1.0 | List containing UI elements to hide, available items are (`icon`, `name`, `state`, `graph`)
 
 ### Example usage
 
 #### Single card
 ```yaml
-- type: "custom:mini-graph-card"
+- type: custom:mini-graph-card
   entity: sensor.sensor_illumination
   height: 100
   line_width: 4
@@ -106,9 +106,19 @@ The card works with entities from within the **sensor** domain and displays the 
 
 #### Show data from the last week
 ```yaml
-- type: "custom:mini-graph-card"
+- type: custom:mini-graph-card
   entity: sensor.sensor_illumination
   hours_to_show: 168
+```
+
+#### Hide everything except the graph
+```yaml
+- type: custom:mini-graph-card
+  entity: sensor.sensor_illumination
+  hide:
+    - icon
+    - name
+    - state
 ```
 
 #### Stacking horizontally
@@ -116,17 +126,17 @@ The card works with entities from within the **sensor** domain and displays the 
 ```yaml
 - type: horizontal-stack
   cards:
-    - type: "custom:mini-graph-card"
+    - type: custom:mini-graph-card
       entity: sensor.sensor_temperature
       name: Temperature
       line_color: '#3498db'
       line_width: 8
-    - type: "custom:mini-graph-card"
+    - type: custom:mini-graph-card
       entity: sensor.sensor_humidity
       name: Humidity
       line_color: '#e74c3c'
       line_width: 8
-    - type: "custom:mini-graph-card"
+    - type: custom:mini-graph-card
       entity: sensor.sensor_pressure
       name: Pressure
       line_width: 8
