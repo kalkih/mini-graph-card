@@ -11,7 +11,7 @@ export default {
   plugins: [
     replace({
       include: 'mini-graph-card.js',
-      'https://unpkg.com/@polymer/lit-element@^0.6.2/lit-element.js?module': '@polymer/lit-element'
+      'https://unpkg.com/@polymer/lit-element@^0.6.3/lit-element.js?module': '@polymer/lit-element'
     }),
     resolve(),
     terser()
