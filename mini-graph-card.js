@@ -52,6 +52,8 @@ class MiniGraphCard extends LitElement {
       hide: [],
       hours_to_show: 24,
       line_color: 'var(--accent-color)',
+      line_color_above: [],
+      line_color_below: [],
       line_width: 5,
       more_info: true,
       ...config
@@ -59,6 +61,8 @@ class MiniGraphCard extends LitElement {
     conf.font_size = (config.font_size / 100) * FONT_SIZE || FONT_SIZE;
     conf.hours_to_show = Math.floor(Number(conf.hours_to_show)) || 24;
     conf.detail = (conf.detail === 1 || conf.detail === 2) ? conf.detail : 1;
+    conf.line_color_above.reverse();
+    conf.line_color_below.reverse();
 
     if (!this.Graph)
       this.Graph = new Graph(500, conf.height, conf.line_width);
@@ -183,10 +187,10 @@ class MiniGraphCard extends LitElement {
 
   computeColor() {
     const state = Number(this.entity.state) || 0;
-    const above = this.config.line_value_above;
-    const below = this.config.line_value_below;
-    if (above !== null && state > above) return this.config.line_color_above
-    if (below !== null && state < below) return this.config.line_color_below
+    for (const item of this.config.line_color_above)
+      if (state > item.value) return item.color;
+    for (const item of this.config.line_color_below)
+      if (state < item.value) return item.color;
     return this.config.line_color;
   }
 
