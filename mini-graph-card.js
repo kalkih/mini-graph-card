@@ -25,7 +25,7 @@ class MiniGraphCard extends LitElement {
     const entity = hass.states[this.config.entity];
     if (entity && this.entity !== entity) {
       this.entity = entity;
-      if (!this.hide_graph)
+      if (!this.config.hide.includes('graph'))
         this.updateGraph();
     }
   }
