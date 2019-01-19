@@ -15,6 +15,7 @@
   },
   "scripts": {
     "build": "rollup -c && babel mini-graph-card-bundle.js --out-file mini-graph-card-bundle.js",
+    "watch": "rollup -c --watch",
     "rollup": "rollup -c"
   }
 }
