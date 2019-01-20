@@ -14,10 +14,7 @@ const UPDATE_PROPS = ['entity', 'line'];
 class MiniGraphCard extends LitElement {
   constructor() {
     super();
-  }
-
-  createRenderRoot() {
-    return this;
+    this.line = ' ';
   }
 
   set hass(hass) {
