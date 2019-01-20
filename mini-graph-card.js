@@ -9,12 +9,13 @@ const ICON = {
   battery: 'hass:battery'
 };
 
-const UPDATE_PROPS = ['entity', 'line'];
+const UPDATE_PROPS = ['entity', 'line', 'length'];
 
 class MiniGraphCard extends LitElement {
   constructor() {
     super();
     this.line = ' ';
+    this.length = 0;
   }
 
   set hass(hass) {
@@ -33,7 +34,8 @@ class MiniGraphCard extends LitElement {
       config: {},
       entity: {},
       Graph: {},
-      line: String
+      line: String,
+      length: Number
     };
   }
 
@@ -87,6 +89,15 @@ class MiniGraphCard extends LitElement {
     return UPDATE_PROPS.some(prop => changedProps.has(prop));
   }
 
+  updated(changedProperties) {
+    if (this.config.animate && changedProperties.has('line')) {
+      if (changedProperties.get('line') === ' ') {
+        const path = this.shadowRoot.querySelector('svg path');
+        this.length = path.getTotalLength();
+      }
+    }
+  }
+
   render({config, entity} = this) {
     return html`
       ${this._style()}
@@ -133,7 +144,7 @@ class MiniGraphCard extends LitElement {
   }
 
   renderGraph() {
-    return !(this.config.hide.includes('graph'))  ? html`
+    return !(this.config.hide.includes('graph')) ? html`
       <div class='graph'>
         ${this.config.labels ? this.renderLabels() : ''}
         <div class='line'>
@@ -146,6 +157,10 @@ class MiniGraphCard extends LitElement {
     return svg`
       <svg width='100%' viewBox='0 0 500 ${this.config.height}'>
         <path
+          ?anim=${this.config.animate}
+          ?init=${this.length !== 0}
+          stroke-dasharray=${this.length}
+          stroke-dashoffset=${this.length}
           d=${this.line}
           fill='none'
           stroke=${this.computeColor()}
@@ -307,6 +322,12 @@ class MiniGraphCard extends LitElement {
         svg {
           overflow: visible;
         }
+        path[anim] {
+          opacity: 0;
+        }
+        path[anim][init] {
+          animation: dash 1s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+        }
         .label {
           flex-direction: column;
           font-size: .8em;
@@ -326,6 +347,15 @@ class MiniGraphCard extends LitElement {
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
+        }
+        @keyframes dash {
+          25% {
+            opacity: 1;
+          }
+          100% {
+            opacity: 1;
+            stroke-dashoffset: 0;
+          }
         }
       </style>`;
   }
