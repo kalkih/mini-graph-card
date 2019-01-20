@@ -160,10 +160,11 @@ class MiniGraphCard extends LitElement {
   }
 
   renderLabels() {
+    const dec = this.config.decimals;
     return html`
       <div class='label flex'>
-        <span class='label--max'>${this.Graph.max}</span>
-        <span class='label--min'>${this.Graph.min}</span>
+        <span class='label--max'>${this.Graph.max.toFixed(dec)}</span>
+        <span class='label--min'>${this.Graph.min.toFixed(dec)}</span>
       </div>`;
   }
 

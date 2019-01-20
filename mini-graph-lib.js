@@ -3,8 +3,8 @@ export default class Graph {
     this.width = width - margin * 2;
     this.height = height - margin * 4;
     this.margin = margin;
-    this.min = null;
-    this.max = null;
+    this.min = 0;
+    this.max = 0;
   }
 
   coordinates(history, hours, detail = 1) {
@@ -72,7 +72,7 @@ export default class Graph {
       path += ` ${Z[X]},${Z[Y]}`;
       path += ` Q${next[X]},${next[Y]}`;
       last = next;
-    })
+    });
 
     path += ` ${next[X]},${next[Y]}`;
     return path;
