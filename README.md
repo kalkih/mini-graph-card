@@ -15,7 +15,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.1.0
+    - url: /local/mini-graph-card-bundle.js?v=0.1.1
       type: module
   ```
 
@@ -26,14 +26,14 @@ The card works with entities from within the **sensor** domain and displays the 
 - Grab `mini-graph-card-bundle.js`
 
   ```
-  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.1.0/mini-graph-card-bundle.js
+  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.1.1/mini-graph-card-bundle.js
   ```
 
 - Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`.
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.1.0
+    - url: /local/mini-graph-card-bundle.js?v=0.1.1
       type: module
   ```
 
@@ -60,7 +60,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.1.0
+    - url: /local/mini-graph-card-bundle.js?v=0.1.1
       type: module
   ```
 
@@ -91,6 +91,7 @@ The card works with entities from within the **sensor** domain and displays the 
 | labels | boolean | false | v0.0.8 | Set to `true` to display min/max labels.
 | decimals | integer | optional | v0.0.9 | Specify the exact number of decimals to show for the current state.
 | hide | list | optional | v0.1.0 | List containing UI elements to hide, available items are (`icon`, `name`, `state`, `graph`)
+| group | boolean | false | v0.1.1 | Disable paddings and box-shadow.
 
 ### Example usage
 

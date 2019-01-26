@@ -1,3 +1,6 @@
+## v0.1.1
+- Added `group` option to disable paddings and box-shadow.
+
 ## v0.1.0
 - Added `hide` option to hide specific UI elements.
 - Removed `hide_icon`, use new `hide` option (**Breaking change**)

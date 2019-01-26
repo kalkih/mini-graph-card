@@ -91,6 +91,7 @@ class MiniGraphCard extends LitElement {
       ${this._style()}
       <ha-card
         class='flex'
+        ?bg=${config.background} ?group=${config.group}
         ?more-info=${config.more_info}
         style='font-size: ${config.font_size}px;'
         @click='${(e) => this.handleMore()}'>
@@ -237,6 +238,9 @@ class MiniGraphCard extends LitElement {
           padding: 16px;
           position: relative;
         }
+        ha-card[group] {
+          box-shadow: none;
+        }
         ha-card[more-info] {
           cursor: pointer;
         }
@@ -254,13 +258,13 @@ class MiniGraphCard extends LitElement {
         .name {
           align-items: center;
           min-width: 0;
-          opacity: .8;
+          opacity: 0.8;
         }
         .name > span {
           font-size: 1.2rem;
           font-weight: 500;
           max-height: 1.4rem;
-          opacity: .75;
+          opacity: 0.75;
         }
         .icon {
           color: var(--paper-item-icon-color, #44739e);
@@ -287,8 +291,8 @@ class MiniGraphCard extends LitElement {
           font-size: 1.4em;
           font-weight: 400;
           line-height: 1.2em;
-          margin-top: .1em;
-          opacity: .6;
+          margin-top: 0.1em;
+          opacity: 0.6;
           vertical-align: bottom;
         }
         .graph {
@@ -307,18 +311,18 @@ class MiniGraphCard extends LitElement {
         }
         .label {
           flex-direction: column;
-          font-size: .8em;
+          font-size: 0.8em;
           font-weight: 400;
           justify-content: space-between;
           margin-right: 8px;
-          opacity: .75;
+          opacity: 0.75;
         }
         .label > span {
           align-self: flex-end;
         }
         .label > span:after {
-          content: ' -';
-          opacity: .75;
+          content: " -";
+          opacity: 0.75;
         }
         .ellipsis {
           overflow: hidden;
