@@ -151,7 +151,7 @@ class MiniGraphCard extends LitElement {
       ${this._style()}
       <ha-card
         class='flex'
-        ?bg=${config.background} ?group=${config.group}
+        ?group=${config.group}
         ?more-info=${config.more_info}
         style='font-size: ${config.font_size}px;'
         @click='${(e) => this.handleMore()}'>
@@ -327,6 +327,7 @@ class MiniGraphCard extends LitElement {
         }
         ha-card[group] {
           box-shadow: none;
+          padding: 0;
         }
         ha-card[more-info] {
           cursor: pointer;
