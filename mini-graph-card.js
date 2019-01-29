@@ -12,6 +12,17 @@ const DEFAULT_COLORS = ['var(--accent-color)', '#3498db', '#e74c3c', '#9b59b6', 
 
 const UPDATE_PROPS = ['entity', '_line', 'length', 'shadow'];
 
+const DEFAULT_SHOW = {
+  name: true,
+  icon: true,
+  state: true,
+  graph: true,
+  labels: false,
+  extrema: false,
+  legend: true,
+  fill: true,
+};
+
 const getMin = (arr, val) => {
   return arr.reduce((min, p) => p[val] < min[val] ? p : min, arr[0]);
 }
@@ -28,7 +39,7 @@ class MiniGraphCard extends LitElement {
     this.abs = [];
     this.length = [];
     this.entity = [];
-    this.shadow = [];
+    this.fill = [];
   }
 
   set hass(hass) {
@@ -41,7 +52,7 @@ class MiniGraphCard extends LitElement {
         update = true;
       }
     });
-    if (update && !this.config.hide.includes('graph')) {
+    if (update) {
       this.entity = [...this.entity];
       this.updateGraph();
     }
@@ -83,7 +94,8 @@ class MiniGraphCard extends LitElement {
       line_color_below: [],
       line_width: 5,
       more_info: true,
-      ...config
+      show: {...DEFAULT_SHOW},
+      ...config,
     };
 
     if (typeof config.entity === 'string')
@@ -98,7 +110,7 @@ class MiniGraphCard extends LitElement {
     conf.line_color_below.reverse();
 
     this.line = conf.entity.map(x => ' ');
-    const margin = conf.shadow ? 0 : conf.line_width;
+    const margin = conf.show.shadow ? 0 : conf.line_width;
     if (!this.Graph) {
       this.Graph = [];
       conf.entity.forEach((entity, index) => {
@@ -128,8 +140,8 @@ class MiniGraphCard extends LitElement {
         config.hours_to_show,
         config.detail
       );
-      if (this.config.shadow) {
-        this.shadow[index] = this.Graph[index].getShadow(this.line[index]);
+      if (config.show.fill) {
+        this.fill[index] = this.Graph[index].getShadow(this.line[index]);
       }
     });
     this.line = [...this.line];
@@ -178,7 +190,7 @@ class MiniGraphCard extends LitElement {
       <ha-card
         class='flex'
         ?group=${config.group}
-        ?shadow=${this.config.shadow}
+        ?fill=${this.config.show.fill}
         ?more-info=${config.more_info}
         style='font-size: ${config.font_size}px;'
         @click='${(e) => this.handleMore()}'>
@@ -190,33 +202,33 @@ class MiniGraphCard extends LitElement {
   }
 
   renderHeader() {
-    const items = ['icon', 'name'];
-    return !(items.every(el => this.config.hide.includes(el))) ? html`
-      <div class='header flex' loc=${this.config.header_location}>
+    const {show, icon_location, header_location} = this.config;
+    return show.name || (show.icon && icon_location !== 'state') ? html`
+      <div class='header flex' loc=${header_location}>
         ${this.renderName()}
-        ${this.config.icon_location !== 'state' ? this.renderIcon() : ''}
+        ${icon_location !== 'state' ? this.renderIcon() : ''}
       </div>` : '';
   }
 
   renderIcon() {
-    return !(this.config.hide.includes('icon')) ? html`
+    return this.config.show.icon ? html`
       <div class='icon' loc=${this.config.icon_location}>
         <ha-icon .icon=${this.computeIcon(this.entity[0])}></ha-icon>
       </div>` : '';
   }
 
   renderName() {
-    return !(this.config.hide.includes('name')) ? html`
+    return this.config.show.name ? html`
       <div class='name flex'>
-        <span class='ellipsis'>${this.config.name || this.computeName(this.entity[0])}</span>
+        <span class='ellipsis'>${this.config.name || this.computeName(0)}</span>
       </div>` : '';
   }
 
   renderState() {
-    return !(this.config.hide.includes('state')) ? html`
+    return this.config.show.state ? html`
       <div class='state flex' loc=${this.config.state_location}>
         <div class='flex'>
-          <span class='state__value ellipsis'>${this.computeState(this.entity[0])}</span>
+          <span class='state__value ellipsis'>${this.computeState(this.entity[0].state)}</span>
           <span class='state__uom ellipsis'>${this.computeUom(this.entity[0])}</span>
         </div>
         ${this.config.icon_location === 'state' ? this.renderIcon() : ''}
@@ -224,7 +236,7 @@ class MiniGraphCard extends LitElement {
   }
 
   renderGraph() {
-    return !(this.config.hide.includes('graph')) ? html`
+    return this.config.show.graph ? html`
       <div class='graph'>
         <div class='graph__container'>
           ${this.config.labels ? this.renderLabels() : ''}
@@ -237,36 +249,35 @@ class MiniGraphCard extends LitElement {
   }
 
   renderLegend() {
-    if (this.config.entity.length < 1) return;
-    return !(this.config.hide.includes('legend')) ? html`
+    if (this.config.entity.length <= 1 || !this.config.show.legend) return;
+    return html`
       <div class='graph__legend'>
       ${this.entity.map((entity, i) => html`
         <div>
           <svg width='10' height='10'>
             <rect width='10' height='10' fill=${this.computeColor(entity, i)} />
           </svg>
-          <span>${this.computeName(entity)}</span>
+          <span>${this.computeName(i)}</span>
         </div>
       `)}
-      </div>
-    ` : '';
+      </div>`;
   }
 
   renderLine() {
     return svg`
       <svg width='100%' height=${'100%'} viewBox='0 0 500 ${this.config.height}'>
-        ${this.shadow.map((shadow, i) => svg`
+        ${this.fill.map((fill, i) => svg`
           <path
-            class='line--shadow'
+            class='line--fill'
             .id=${i}
-            .set=${shadow !== ' '}
+            .set=${fill !== ' '}
             ?anim=${this.config.animate}
             ?init=${this.length[i]}
             style="animation-delay: ${i * 0.5 + 's'}"
             fill=${this.computeColor(this.entity[i], i)}
             stroke=${this.computeColor(this.entity[i], i)}
             stroke-width=${this.config.line_width}
-            d=${this.shadow[i]}
+            d=${this.fill[i]}
           />`
         )}
         ${this.line.map((line, i) => svg`
@@ -288,17 +299,15 @@ class MiniGraphCard extends LitElement {
   }
 
   renderLabels() {
-    const dec = this.config.decimals;
     return html`
       <div class='graph__labels flex'>
-        <span class='label--max'>${this.bound[1].toFixed(dec)}</span>
-        <span class='label--min'>${this.bound[0].toFixed(dec)}</span>
+        <span class='label--max'>${this.computeState(this.bound[1])}</span>
+        <span class='label--min'>${this.computeState(this.bound[0])}</span>
       </div>`;
   }
 
   renderInfo() {
-    if (this.config.hide.includes('stats')) return;
-    const dec = this.config.decimals;
+    if (!this.config.show.extrema) return;
     return html`
       <div class='info flex'>
         ${this.abs.map(entry => html`
@@ -306,7 +315,7 @@ class MiniGraphCard extends LitElement {
             <span class='info__item__type'>${entry.type}</span>
             <div>
               <span class='info__item__value'>
-                ${Number(entry.state).toFixed(dec)}
+                ${this.computeState(entry.state)}
                 ${this.computeUom(entry)}
               </span>
             </div>
@@ -343,8 +352,8 @@ class MiniGraphCard extends LitElement {
     return this.config.line_color[i] || this.config.line_color[0];
   }
 
-  computeName(entity) {
-    return entity.attributes.friendly_name;
+  computeName(index) {
+    return this.entity[index].attributes.friendly_name;
   }
 
   computeIcon(entity) {
@@ -358,13 +367,13 @@ class MiniGraphCard extends LitElement {
     return this.config.unit || entity.attributes.unit_of_measurement || '';
   }
 
-  computeState(entity) {
+  computeState(state) {
     const dec = this.config.decimals;
-    if (dec === null || isNaN(dec) || Number.isNaN(entity.state))
-      return entity.state;
+    if (dec === null || isNaN(dec) || Number.isNaN(state))
+      return state;
 
     const x = Math.pow(10, dec);
-    return (Math.round(entity.state * x) / x).toFixed(dec);
+    return (Math.round(state * x) / x).toFixed(dec);
   }
 
   async fetchRecent(entityId, startTime, endTime) {
@@ -389,20 +398,23 @@ class MiniGraphCard extends LitElement {
           padding: 16px 0;
           position: relative;
         }
-        ha-card[shadow] {
+        ha-card[fill] {
           padding-bottom: 0;
         }
-        ha-card[shadow] .graph {
+        ha-card[fill] .graph {
           padding: 0 0 0 0;
           order: 10;
         }
-        ha-card[shadow] path {
+        ha-card[fill] path {
           stroke-linecap: initial;
           stroke-linejoin: initial;
         }
-        ha-card[shadow] .graph__legend {
+        ha-card[fill] .graph__legend {
           order: -1;
           padding: 0 16px 8px 16px;
+        }
+        ha-card[fill] .info {
+          padding-bottom: 16px;
         }
         ha-card[group] {
           box-shadow: none;
@@ -423,10 +435,6 @@ class MiniGraphCard extends LitElement {
         }
         ha-card > div:last-child {
           padding-bottom: 0;
-        }
-        .header:empty {
-          display: none !important;
-          background: red;
         }
         .flex {
           display: flex;
@@ -525,7 +533,7 @@ class MiniGraphCard extends LitElement {
         path[anim][init] {
           animation: dash 1s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
         }
-        .line--shadow[anim][init] {
+        .line--fill[anim][init] {
           animation: reveal .5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
         }
         .labels {
