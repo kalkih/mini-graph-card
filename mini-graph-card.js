@@ -84,11 +84,11 @@ class MiniGraphCard extends LitElement {
   setConfig(config) {
     this.style = 'display: flex; flex-direction: column;';
     const conf = {
-      detail: 1,
       font_size: FONT_SIZE,
       height: 100,
       hide: [],
       hours_to_show: 24,
+      points_per_hour: 1,
       line_color: [...DEFAULT_COLORS],
       line_color_above: [],
       line_color_below: [],
@@ -111,16 +111,21 @@ class MiniGraphCard extends LitElement {
 
     conf.font_size = (config.font_size / 100) * FONT_SIZE || FONT_SIZE;
     conf.hours_to_show = Math.floor(Number(conf.hours_to_show)) || 24;
-    conf.detail = (conf.detail === 1 || conf.detail === 2) ? conf.detail : 1;
     conf.line_color_above.reverse();
     conf.line_color_below.reverse();
 
     this.line = conf.entities.map(x => ' ');
-    const margin = conf.show.shadow ? 0 : conf.line_width;
+    const margin = conf.show.fill ? 0 : conf.line_width;
     if (!this.Graph) {
       this.Graph = [];
       conf.entities.forEach((entity, index) => {
-        this.Graph[index] = new Graph(500, conf.height, margin);
+        this.Graph[index] = new Graph(
+          500,
+          conf.height,
+          margin,
+          conf.hours_to_show,
+          conf.points_per_hour
+        );
       });
     }
 
@@ -142,10 +147,7 @@ class MiniGraphCard extends LitElement {
     this.entity.map((entity, index) => {
       this.Graph[index].min = this.bound[0];
       this.Graph[index].max = this.bound[1];
-      this.line[index] = this.Graph[index].getPath(
-        config.hours_to_show,
-        config.detail
-      );
+      this.line[index] = this.Graph[index].getPath();
       if (config.show.fill) {
         this.fill[index] = this.Graph[index].getShadow(this.line[index]);
       }
@@ -168,11 +170,7 @@ class MiniGraphCard extends LitElement {
       };
     }
 
-    this.Graph[index].update(
-      stateHistory[0],
-      this.config.hours_to_show,
-      this.config.detail
-    );
+    this.Graph[index].update(stateHistory[0]);
   }
 
   shouldUpdate(changedProps) {

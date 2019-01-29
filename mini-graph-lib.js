@@ -1,5 +1,5 @@
 export default class Graph {
-  constructor(width, height, margin, points = 1) {
+  constructor(width, height, margin, hours = 24, points = 1) {
     this.coords = [];
     this.width = width - margin * 2;
     this.height = height - margin * 4;
@@ -7,6 +7,7 @@ export default class Graph {
     this._max = 0;
     this._min = 0;
     this.points = points;
+    this.hours = hours
   }
 
   get max() {
@@ -22,13 +23,13 @@ export default class Graph {
     this._min = min;
   }
 
-  update(history, hours, detail) {
+  update(history) {
     history = history.filter(item => !Number.isNaN(Number(item.state)));
 
     const now = new Date().getTime();
     const reduce = (res, item) => {
       const age = now - new Date(item.last_changed).getTime();
-      const interval = (age / (1000 * 3600) * this.points) - hours * this.points;
+      const interval = (age / (1000 * 3600) * this.points) - this.hours * this.points;
       const key = Math.abs(Math.floor(interval));
       if (!res[key]) res[key] = [];
       res[key].push(item);
@@ -36,15 +37,15 @@ export default class Graph {
     }
     history = history.reduce((res, item) => reduce(res, item), []);
 
-    this.coords = this._calcPoints(history, hours);
+    this.coords = this._calcPoints(history);
 
     this.min = Math.min(...this.coords.map(item => Number(item[2])));
     this.max = Math.max(...this.coords.map(item => Number(item[2])));
   }
 
-  _calcPoints(history, hours) {
+  _calcPoints(history) {
     const coords = []
-    let xRatio = this.width / (hours * this.points);
+    let xRatio = this.width / (this.hours * this.points);
     xRatio = isFinite(xRatio) ? xRatio : this.width;
 
     const getCoords = (item, i) => {
