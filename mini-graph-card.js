@@ -45,10 +45,10 @@ class MiniGraphCard extends LitElement {
   set hass(hass) {
     this._hass = hass;
     let update = false;
-    this.config.entity.forEach((name, index) => {
-      const entity = hass.states[name];
-      if (entity && this.entity[index] !== entity) {
-        this.entity[index] = entity;
+    this.config.entities.forEach((entity, index) => {
+      const entityState = hass.states[entity.entity];
+      if (entityState && this.entity[index] !== entityState) {
+        this.entity[index] = entityState;
         update = true;
       }
     });
@@ -95,11 +95,17 @@ class MiniGraphCard extends LitElement {
       line_width: 5,
       more_info: true,
       show: {...DEFAULT_SHOW},
+      entities: config.entity,
       ...config,
     };
 
-    if (typeof config.entity === 'string')
-      conf.entity = [config.entity];
+    if (typeof conf.entities === 'string')
+      conf.entities = [{entity: conf.entities}];
+    conf.entities.forEach((entity, i) => {
+      if (typeof entity === 'string')
+        conf.entities[i] = { entity: entity };
+    });
+
     if (typeof config.line_color === 'string')
       conf.line_color = [config.line_color, ...DEFAULT_COLORS];
 
@@ -109,11 +115,11 @@ class MiniGraphCard extends LitElement {
     conf.line_color_above.reverse();
     conf.line_color_below.reverse();
 
-    this.line = conf.entity.map(x => ' ');
+    this.line = conf.entities.map(x => ' ');
     const margin = conf.show.shadow ? 0 : conf.line_width;
     if (!this.Graph) {
       this.Graph = [];
-      conf.entity.forEach((entity, index) => {
+      conf.entities.forEach((entity, index) => {
         this.Graph[index] = new Graph(500, conf.height, margin);
       });
     }
@@ -249,7 +255,7 @@ class MiniGraphCard extends LitElement {
   }
 
   renderLegend() {
-    if (this.config.entity.length <= 1 || !this.config.show.legend) return;
+    if (this.config.entities.length <= 1 || !this.config.show.legend) return;
     return html`
       <div class='graph__legend'>
       ${this.entity.map((entity, i) => html`
@@ -327,7 +333,7 @@ class MiniGraphCard extends LitElement {
 
   handleMore({config} = this) {
     if(config.more_info)
-      this.fire('hass-more-info', { entityId: config.entity[0] });
+      this.fire('hass-more-info', { entityId: config.entities[0].entity });
   }
 
   fire(type, detail, options) {
@@ -353,7 +359,8 @@ class MiniGraphCard extends LitElement {
   }
 
   computeName(index) {
-    return this.entity[index].attributes.friendly_name;
+    return this.config.entities[index].name
+      || this.entity[index].attributes.friendly_name;
   }
 
   computeIcon(entity) {
