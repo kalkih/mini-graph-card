@@ -12,13 +12,22 @@ const DEFAULT_COLORS = ['var(--accent-color)', '#3498db', '#e74c3c', '#9b59b6', 
 
 const UPDATE_PROPS = ['entity', '_line', 'length'];
 
+const getMin = (arr, val) => {
+  return arr.reduce((min, p) => p[val] < min[val] ? p : min, arr[0]);
+}
+const getMax = (arr, val) => {
+  return arr.reduce((max, p) => p[val] > max[val] ? p : max, arr[0]);
+}
+
+const getTime = (date) => date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+
 class MiniGraphCard extends LitElement {
   constructor() {
     super();
+    this.bound = [0,0];
+    this.abs = [];
     this.length = [];
     this.entity = [];
-    this.max = 0;
-    this.min = 0;
   }
 
   set hass(hass) {
@@ -54,8 +63,8 @@ class MiniGraphCard extends LitElement {
       Graph: [],
       _line: [],
       length: Number,
-      min: Number,
-      max: Number
+      bound: [],
+      abs: [],
     };
   }
 
@@ -106,12 +115,12 @@ class MiniGraphCard extends LitElement {
       this.updateLine(entity, index, startTime, endTime));
     await Promise.all(updates);
 
-    this.max = Math.max.apply(Math, this.Graph.map(ele => ele.max )) || this.max;
-    this.min = Math.min.apply(Math, this.Graph.map(ele => ele.min )) || this.min;
+    this.bound[0] = Math.min(...this.Graph.map(ele => ele.min)) || this.bound[0];
+    this.bound[1] = Math.max(...this.Graph.map(ele => ele.max)) || this.bound[1];
 
     this.entity.map((entity, index) => {
-      this.Graph[index].max = this.max;
-      this.Graph[index].min = this.min;
+      this.Graph[index].min = this.bound[0];
+      this.Graph[index].max = this.bound[1];
       this.line[index] = this.Graph[index].getPath(
         config.hours_to_show,
         config.detail
@@ -123,6 +132,17 @@ class MiniGraphCard extends LitElement {
   async updateLine(entity, index, startTime, endTime) {
     const stateHistory = await this.fetchRecent(entity.entity_id, startTime, endTime);
     if (stateHistory[0].length < 1) return;
+
+    if (entity === this.entity[0]) {
+      this.abs[0] = {
+        type: 'min',
+        ...getMin(stateHistory[0], 'state')
+      };
+      this.abs[1] = {
+        type: 'max',
+        ...getMax(stateHistory[0], 'state')
+      };
+    }
 
     this.Graph[index].update(
       stateHistory[0],
@@ -158,6 +178,7 @@ class MiniGraphCard extends LitElement {
         ${this.renderHeader()}
         ${this.renderState()}
         ${this.renderGraph()}
+        ${this.renderInfo()}
       </ha-card>`;
   }
 
@@ -249,6 +270,23 @@ class MiniGraphCard extends LitElement {
       <div class='label flex'>
         <span class='label--max'>${this.max.toFixed(dec)}</span>
         <span class='label--min'>${this.min.toFixed(dec)}</span>
+  renderInfo() {
+    if (this.config.hide.includes('stats')) return;
+    const dec = this.config.decimals;
+    return html`
+      <div class='info flex'>
+        ${this.abs.map(entry => html`
+          <div class='info__item'>
+            <span class='info__item__type'>${entry.type}</span>
+            <div>
+              <span class='info__item__value'>
+                ${Number(entry.state).toFixed(dec)}
+                ${this.computeUom(entry)}
+              </span>
+            </div>
+            <span class='info__item__time'>${getTime(new Date(entry.last_changed))}</span>
+          </div>`
+        )}
       </div>`;
   }
 
@@ -431,6 +469,26 @@ class MiniGraphCard extends LitElement {
           display: flex;
           flex-direction: row;
           justify-content: space-evenly;
+        .info {
+          justify-content: space-between;
+          align-items: middle;
+        }
+        .info__item {
+          display: flex;
+          flex-flow: column;
+          align-items: flex-end
+        }
+        .info__item:first-child {
+          align-items: flex-start;
+        }
+        .info__item__type {
+          text-transform: capitalize;
+          font-weight: 500;
+          opacity: .9;
+        }
+        .info__item__time,
+        .info__item__value {
+          opacity: .75;
         }
         .ellipsis {
           overflow: hidden;
