@@ -87,11 +87,18 @@ export default class Graph {
       next = point;
       Z = this._midPoint(last[X], last[Y], next[X], next[Y]);
       path += ` ${Z[X]},${Z[Y]}`;
-      path += ` Q${next[X]},${next[Y]}`;
+      path += ` Q ${next[X]},${next[Y]}`;
       last = next;
     });
 
     path += ` ${next[X]},${next[Y]}`;
+    return path;
+  }
+
+  getShadow(path) {
+    const height = this.height + this.margin * 4;
+    path += ` L ${this.width + this.margin}, ${height}`;
+    path += ` L 0, ${height} z`;
     return path;
   }
 

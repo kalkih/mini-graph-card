@@ -10,7 +10,7 @@ const ICON = {
 };
 const DEFAULT_COLORS = ['var(--accent-color)', '#3498db', '#e74c3c', '#9b59b6', '#f1c40f', '#2ecc71'];
 
-const UPDATE_PROPS = ['entity', '_line', 'length'];
+const UPDATE_PROPS = ['entity', '_line', 'length', 'shadow'];
 
 const getMin = (arr, val) => {
   return arr.reduce((min, p) => p[val] < min[val] ? p : min, arr[0]);
@@ -28,6 +28,7 @@ class MiniGraphCard extends LitElement {
     this.abs = [];
     this.length = [];
     this.entity = [];
+    this.shadow = [];
   }
 
   set hass(hass) {
@@ -62,6 +63,7 @@ class MiniGraphCard extends LitElement {
       entity: [],
       Graph: [],
       _line: [],
+      shadow: [],
       length: Number,
       bound: [],
       abs: [],
@@ -96,10 +98,11 @@ class MiniGraphCard extends LitElement {
     conf.line_color_below.reverse();
 
     this.line = conf.entity.map(x => ' ');
+    const margin = conf.shadow ? 0 : conf.line_width;
     if (!this.Graph) {
       this.Graph = [];
       conf.entity.forEach((entity, index) => {
-        this.Graph[index] = new Graph(500, conf.height, conf.line_width);
+        this.Graph[index] = new Graph(500, conf.height, margin);
       });
     }
 
@@ -125,6 +128,9 @@ class MiniGraphCard extends LitElement {
         config.hours_to_show,
         config.detail
       );
+      if (this.config.shadow) {
+        this.shadow[index] = this.Graph[index].getShadow(this.line[index]);
+      }
     });
     this.line = [...this.line];
   }
@@ -172,6 +178,7 @@ class MiniGraphCard extends LitElement {
       <ha-card
         class='flex'
         ?group=${config.group}
+        ?shadow=${this.config.shadow}
         ?more-info=${config.more_info}
         style='font-size: ${config.font_size}px;'
         @click='${(e) => this.handleMore()}'>
@@ -185,15 +192,15 @@ class MiniGraphCard extends LitElement {
   renderHeader() {
     const items = ['icon', 'name'];
     return !(items.every(el => this.config.hide.includes(el))) ? html`
-      <div class='header flex'>
-        ${this.renderIcon()}
+      <div class='header flex' loc=${this.config.header_location}>
         ${this.renderName()}
+        ${this.config.icon_location !== 'state' ? this.renderIcon() : ''}
       </div>` : '';
   }
 
   renderIcon() {
     return !(this.config.hide.includes('icon')) ? html`
-      <div class='icon'>
+      <div class='icon' loc=${this.config.icon_location}>
         <ha-icon .icon=${this.computeIcon(this.entity[0])}></ha-icon>
       </div>` : '';
   }
@@ -207,28 +214,32 @@ class MiniGraphCard extends LitElement {
 
   renderState() {
     return !(this.config.hide.includes('state')) ? html`
-      <div class='info flex'>
-        <span class='state ellipsis'>${this.computeState(this.entity[0])}</span>
-        <span class='uom ellipsis'>${this.computeUom(this.entity[0])}</span>
+      <div class='state flex' loc=${this.config.state_location}>
+        <div class='flex'>
+          <span class='state__value ellipsis'>${this.computeState(this.entity[0])}</span>
+          <span class='state__uom ellipsis'>${this.computeUom(this.entity[0])}</span>
+        </div>
+        ${this.config.icon_location === 'state' ? this.renderIcon() : ''}
       </div> `: '';
   }
 
   renderGraph() {
     return !(this.config.hide.includes('graph')) ? html`
       <div class='graph'>
-        <div class='upper'>
+        <div class='graph__container'>
           ${this.config.labels ? this.renderLabels() : ''}
-          <div class='line'>
+          <div class='graph__container__svg'>
             ${this.line ? this.renderLine() : ''}
           </div>
         </div>
-        ${this.config.entity.length > 1 ? this.renderLegend() : ''}
+        ${this.renderLegend()}
       </div>` : '';
   }
 
   renderLegend() {
+    if (this.config.entity.length < 1) return;
     return !(this.config.hide.includes('legend')) ? html`
-      <div class='legend'>
+      <div class='graph__legend'>
       ${this.entity.map((entity, i) => html`
         <div>
           <svg width='10' height='10'>
@@ -244,6 +255,20 @@ class MiniGraphCard extends LitElement {
   renderLine() {
     return svg`
       <svg width='100%' height=${'100%'} viewBox='0 0 500 ${this.config.height}'>
+        ${this.shadow.map((shadow, i) => svg`
+          <path
+            class='line--shadow'
+            .id=${i}
+            .set=${shadow !== ' '}
+            ?anim=${this.config.animate}
+            ?init=${this.length[i]}
+            style="animation-delay: ${i * 0.5 + 's'}"
+            fill=${this.computeColor(this.entity[i], i)}
+            stroke=${this.computeColor(this.entity[i], i)}
+            stroke-width=${this.config.line_width}
+            d=${this.shadow[i]}
+          />`
+        )}
         ${this.line.map((line, i) => svg`
           <path
             .id=${i}
@@ -257,8 +282,6 @@ class MiniGraphCard extends LitElement {
             fill='none'
             stroke=${this.computeColor(this.entity[i], i)}
             stroke-width=${this.config.line_width}
-            stroke-linecap='round'
-            stroke-linejoin='round'
           />`
         )}
       </svg>`;
@@ -267,9 +290,12 @@ class MiniGraphCard extends LitElement {
   renderLabels() {
     const dec = this.config.decimals;
     return html`
-      <div class='label flex'>
-        <span class='label--max'>${this.max.toFixed(dec)}</span>
-        <span class='label--min'>${this.min.toFixed(dec)}</span>
+      <div class='graph__labels flex'>
+        <span class='label--max'>${this.bound[1].toFixed(dec)}</span>
+        <span class='label--min'>${this.bound[0].toFixed(dec)}</span>
+      </div>`;
+  }
+
   renderInfo() {
     if (this.config.hide.includes('stats')) return;
     const dec = this.config.decimals;
@@ -360,26 +386,64 @@ class MiniGraphCard extends LitElement {
         ha-card {
           flex-direction: column;
           flex: 1;
-          padding: 16px;
+          padding: 16px 0;
           position: relative;
+        }
+        ha-card[shadow] {
+          padding-bottom: 0;
+        }
+        ha-card[shadow] .graph {
+          padding: 0 0 0 0;
+          order: 10;
+        }
+        ha-card[shadow] path {
+          stroke-linecap: initial;
+          stroke-linejoin: initial;
+        }
+        ha-card[shadow] .graph__legend {
+          order: -1;
+          padding: 0 16px 8px 16px;
         }
         ha-card[group] {
           box-shadow: none;
           padding: 0;
         }
+        ha-card[group] > div {
+          padding: 0;
+        }
+        ha-card[group] .graph__legend {
+          padding-left: 0;
+          padding-right: 0;
+        }
         ha-card[more-info] {
           cursor: pointer;
         }
         ha-card > div {
-          padding: 20px 0 0 8px;
+          padding: 0px 16px 16px 16px;
         }
-        ha-card > div:first-child {
-          padding-top: 0;
+        ha-card > div:last-child {
+          padding-bottom: 0;
+        }
+        .header:empty {
+          display: none !important;
+          background: red;
         }
         .flex {
           display: flex;
           display: -webkit-flex;
           min-width: 0;
+        }
+        .header {
+          justify-content: space-between;
+        }
+        .header[loc="center"] {
+          align-self: center;
+        }
+        .header[loc="left"] {
+          align-self: flex-start;
+        }
+        .header[loc="right"] {
+          align-self: flex-end;
         }
         .name {
           align-items: center;
@@ -388,7 +452,7 @@ class MiniGraphCard extends LitElement {
         }
         .name > span {
           font-size: 1.2rem;
-          font-weight: 500;
+          font-weight: 400;
           max-height: 1.4rem;
           opacity: .75;
         }
@@ -396,22 +460,36 @@ class MiniGraphCard extends LitElement {
           color: var(--paper-item-icon-color, #44739e);
           display: inline-block;
           flex: 0 0 24px;
-          margin-right: 8px;
           text-align: center;
           width: 24px;
+          margin-left: auto;
         }
-        .info {
+        .icon[loc="left"] {
+          order: -1;
+          margin-right: 8px;
+          margin-left: 0;
+        }
+        .icon[loc="state"] {
+          align-self: center;
+        }
+        .state {
           flex-wrap: wrap;
           font-weight: 300;
         }
-        .state {
+        .state[loc="center"] {
+          align-self: center;
+        }
+        .state[loc="right"] {
+          align-self: flex-end;
+        }
+        .state__value {
           display: inline-block;
           font-size: 2.4em;
           line-height: 1em;
-          margin-right: 4px;
           max-size: 100%;
+          margin-right: .25rem;
         }
-        .uom {
+        .state__uom {
           align-self: flex-end;
           display: inline-block;
           font-size: 1.4em;
@@ -427,18 +505,19 @@ class MiniGraphCard extends LitElement {
           display: flex;
           flex-direction: column;
           margin-top: auto;
-          padding-right: 8px;
           width: 100%;
         }
-        .graph .upper {
+        .graph__container {
           display: flex;
           flex-direction: row;
         }
-        .graph .line {
+        .graph__container__svg {
           flex: 1;
-        }
-        svg {
           overflow: hidden;
+        }
+        path {
+          stroke-linecap: round;
+          stroke-linejoin: round;
         }
         path[anim] {
           opacity: 0;
@@ -446,7 +525,10 @@ class MiniGraphCard extends LitElement {
         path[anim][init] {
           animation: dash 1s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
         }
-        .label {
+        .line--shadow[anim][init] {
+          animation: reveal .5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+        }
+        .labels {
           flex-direction: column;
           font-size: .8em;
           font-weight: 400;
@@ -454,21 +536,26 @@ class MiniGraphCard extends LitElement {
           margin-right: 10px;
           opacity: .75;
         }
-        .label > span {
+        .labels > span {
           align-self: flex-end;
           position: relative;
           width: 100%;
         }
-        .label > span:after {
+        .labels > span:after {
           position: absolute;
           right: -6px;
           content: ' -';
           opacity: .75;
         }
-        .legend {
+        .graph__legend {
           display: flex;
           flex-direction: row;
           justify-content: space-evenly;
+          padding-top: 16px;
+        }
+        .graph__legend span {
+          opacity: .75;
+        }
         .info {
           justify-content: space-between;
           align-items: middle;
@@ -495,7 +582,14 @@ class MiniGraphCard extends LitElement {
           text-overflow: ellipsis;
           white-space: nowrap;
         }
+        @keyframes reveal {
+          0% { opacity: 0; }
+          100% { opacity: .15; }
+        }
         @keyframes dash {
+          0% {
+            opacity: 0;
+          }
           25% {
             opacity: 1;
           }
