@@ -1,11 +1,12 @@
 export default class Graph {
-  constructor(width, height, margin) {
+  constructor(width, height, margin, points = 1) {
     this.coords = [];
     this.width = width - margin * 2;
     this.height = height - margin * 4;
     this.margin = margin;
     this._max = 0;
     this._min = 0;
+    this.points = points;
   }
 
   get max() {
@@ -23,59 +24,52 @@ export default class Graph {
 
   update(history, hours, detail) {
     history = history.filter(item => !Number.isNaN(Number(item.state)));
-    const now = new Date().getTime();
 
-    const reduce = (res, item, min = false) => {
+    const now = new Date().getTime();
+    const reduce = (res, item) => {
       const age = now - new Date(item.last_changed).getTime();
-      let key = Math.abs(age / (1000 * 3600) - hours);
-      if (min) {
-        key = ((key - Math.floor(key)) * 60);
-        key = (Math.round(key / 10) * 10).toString()[0];
-      } else {
-        key = Math.floor(key);
-      }
+      const interval = (age / (1000 * 3600) * this.points) - hours * this.points;
+      const key = Math.abs(Math.floor(interval));
       if (!res[key]) res[key] = [];
       res[key].push(item);
       return res;
     }
     history = history.reduce((res, item) => reduce(res, item), []);
-    if (detail > 1) {
-      history = history.map(entry => {
-        return entry.reduce((res, item) => reduce(res, item, true), []);
-      });
-    }
-    this.coords = this._calcCoords(history, hours, detail);
 
-    this.min = Math.min.apply(Math, this.coords.map(item =>  Number(item[1])));
-    this.max = Math.max.apply(Math, this.coords.map(item =>  Number(item[1])));
+    this.coords = this._calcPoints(history, hours);
+
+    this.min = Math.min(...this.coords.map(item => Number(item[2])));
+    this.max = Math.max(...this.coords.map(item => Number(item[2])));
   }
 
-  _calcCoords(history, hours, detail = 1) {
+  _calcPoints(history, hours) {
     const coords = []
-    let xRatio = this.width / (hours - (detail === 1 ? 1 : 0));
+    let xRatio = this.width / (hours * this.points);
     xRatio = isFinite(xRatio) ? xRatio : this.width;
 
-    const getCoords = (item, i, offset = 0, depth = 1) => {
-      if (depth > 1)
-        return item.forEach((item, index) => getCoords(item, i, index, depth - 1));
+    const getCoords = (item, i) => {
       const average = item.reduce((sum, entry) => {
         return (sum + parseFloat(entry.state));
       }, 0) / item.length;
-      const x = xRatio * (i + (offset / 6)) + this.margin;
-      coords.push([x,average]);
+      const x = xRatio * i + this.margin;
+      coords.push([x, 0, average]);
     }
-    history.forEach((item, i) => getCoords(item, i, 0, detail))
-    if (coords.length === 1) coords[1] = [this.width + this.margin, coords[0][1]];
-    coords.push([this.width + this.margin, coords[coords.length -1][1]]);
+    history.forEach((item, i) => getCoords(item, i))
+    if (coords.length === 1) coords[1] = [this.width + this.margin, 0, coords[0][2]];
+    coords.push([this.width + this.margin, 0, coords[coords.length -1][2]]);
     return coords;
   }
 
-  getPath(hours, detail = 1) {
-    const coords = this.coords;
+  _calcY(coords) {
     const yRatio = ((this.max - this.min) / this.height) || 1;
-    coords.forEach(coord => {
-      coord[1] = this.height - ((coord[1] - this.min) / yRatio) + this.margin * 2;
+    return coords.map(coord => {
+      coord[1] = this.height - ((coord[2] - this.min) / yRatio) + this.margin * 2;
+      return coord;
     });
+  }
+
+  getPath() {
+    const coords = this._calcY(this.coords);
     let next, Z;
     const X = 0;
     const Y = 1;
