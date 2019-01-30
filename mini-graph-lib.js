@@ -40,7 +40,7 @@ export default class Graph {
     }
     history = history.reduce((res, item) => reduce(res, item), []);
     history.length = this.hours * this.points + 1;
-    this.coords = this._calcPoints(history);
+    this.coords = this._calcPoints(history).filter(point => point[2] !== null);;
 
     this.min = Math.min(...this.coords.map(item => Number(item[2])));
     this.max = Math.max(...this.coords.map(item => Number(item[2])));
@@ -48,7 +48,7 @@ export default class Graph {
 
   _calcPoints(history) {
     const coords = []
-    let last;
+    let last = [0, null];
     let xRatio = this.width / (this.hours * this.points);
     xRatio = isFinite(xRatio) ? xRatio : this.width;
 
@@ -115,7 +115,7 @@ export default class Graph {
   getFill(path) {
     const height = this.height + this.margin[Y] * 2;
     path += ` L ${this.width - this.margin[X] * 2}, ${height}`;
-    path += ` L 0, ${height} z`;
+    path += ` L ${this.coords[0][X]}, ${height} z`;
     return path;
   }
 
