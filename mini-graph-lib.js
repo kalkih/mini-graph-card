@@ -39,7 +39,7 @@ export default class Graph {
       return res;
     }
     history = history.reduce((res, item) => reduce(res, item), []);
-    history.length = this.hours * this.points + 1;
+    history.length = Math.ceil(this.hours * this.points + 1);
     this.coords = this._calcPoints(history).filter(point => point[2] !== null);;
 
     this.min = Math.min(...this.coords.map(item => Number(item[2])));
