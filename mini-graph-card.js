@@ -201,17 +201,17 @@ class MiniGraphCard extends LitElement {
   }
 
   renderHeader() {
-    const {show, location_icon, location_header} = this.config;
-    return show.name || (show.icon && location_icon !== 'state') ? html`
-      <div class='header flex' loc=${location_header}>
+    const {show, align_icon, align_header} = this.config;
+    return show.name || (show.icon && align_icon !== 'state') ? html`
+      <div class='header flex' loc=${align_header}>
         ${this.renderName()}
-        ${location_icon !== 'state' ? this.renderIcon() : ''}
+        ${align_icon !== 'state' ? this.renderIcon() : ''}
       </div>` : '';
   }
 
   renderIcon() {
     return this.config.show.icon ? html`
-      <div class='icon' loc=${this.config.location_icon}>
+      <div class='icon' loc=${this.config.align_icon}>
         <ha-icon .icon=${this.computeIcon(this.entity[0])}></ha-icon>
       </div>` : '';
   }
@@ -226,7 +226,7 @@ class MiniGraphCard extends LitElement {
   renderState() {
     if (!this.config.show.state) return;
     return html`
-      <div class='state flex' loc=${this.config.location_state}>
+      <div class='state flex' loc=${this.config.align_state}>
         <div class='flex'>
           <span class='state__value ellipsis'>
             ${this.computeState(this.tooltip.value || this.entity[0].state)}
@@ -236,7 +236,7 @@ class MiniGraphCard extends LitElement {
           </span>
           ${this.renderStateTime()}
         </div>
-        ${this.config.location_icon === 'state' ? this.renderIcon() : ''}
+        ${this.config.align_icon === 'state' ? this.renderIcon() : ''}
       </div>`;
   }
 
