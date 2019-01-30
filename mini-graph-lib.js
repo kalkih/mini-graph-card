@@ -1,8 +1,11 @@
+const X = 0;
+const Y = 1;
+
 export default class Graph {
   constructor(width, height, margin, hours = 24, points = 1) {
     this.coords = [];
-    this.width = width - margin * 2;
-    this.height = height - margin * 4;
+    this.width = width - margin[X] * 2;
+    this.height = height - margin[Y] * 2;
     this.margin = margin;
     this._max = 0;
     this._min = 0;
@@ -36,7 +39,7 @@ export default class Graph {
       return res;
     }
     history = history.reduce((res, item) => reduce(res, item), []);
-
+    history.length = this.hours * this.points + 1;
     this.coords = this._calcPoints(history);
 
     this.min = Math.min(...this.coords.map(item => Number(item[2])));
@@ -45,35 +48,54 @@ export default class Graph {
 
   _calcPoints(history) {
     const coords = []
+    let last;
     let xRatio = this.width / (this.hours * this.points);
     xRatio = isFinite(xRatio) ? xRatio : this.width;
 
     const getCoords = (item, i) => {
-      const average = item.reduce((sum, entry) => {
-        return (sum + parseFloat(entry.state));
-      }, 0) / item.length;
-      const x = xRatio * i + this.margin;
-      coords.push([x, 0, average]);
+      const x = xRatio * i + this.margin[X];
+      if (item) {
+        const average = item.reduce((sum, entry) => {
+          return (sum + parseFloat(entry.state));
+        }, 0) / item.length;
+        last = [0, average];
+      }
+      return coords.push([x, ...last]);
     }
-    history.forEach((item, i) => getCoords(item, i))
-    if (coords.length === 1) coords[1] = [this.width + this.margin, 0, coords[0][2]];
-    coords.push([this.width + this.margin, 0, coords[coords.length -1][2]]);
+
+    for (let i = 0; i < history.length; i++)
+      getCoords(history[i], i);
+
+    if (coords.length === 1) coords[1] = [this.width + this.margin[X], 0, coords[0][2]];
     return coords;
   }
 
   _calcY(coords) {
     const yRatio = ((this.max - this.min) / this.height) || 1;
     return coords.map(coord => {
-      coord[1] = this.height - ((coord[2] - this.min) / yRatio) + this.margin * 2;
+      coord[Y] = this.height - ((coord[2] - this.min) / yRatio) + this.margin[Y] * 1.5;
       return coord;
     });
+  }
+
+  getPoints() {
+    let coords = this._calcY(this.coords);
+    let next, Z;
+    let path = '';
+    let last = coords.filter(Boolean)[0]
+    coords.shift();
+    const coords2 = coords.map((point, i) => {
+      next = point;
+      Z = this._midPoint(last[X], last[Y], next[X], next[Y]);
+      last = next;
+      return [Z[X], Z[Y], point[2]];
+    });
+    return coords2;
   }
 
   getPath() {
     const coords = this._calcY(this.coords);
     let next, Z;
-    const X = 0;
-    const Y = 1;
     let path = '';
     let last = coords.filter(Boolean)[0]
     path += `M${last[X]},${last[Y]}`;
@@ -90,9 +112,9 @@ export default class Graph {
     return path;
   }
 
-  getShadow(path) {
-    const height = this.height + this.margin * 4;
-    path += ` L ${this.width + this.margin}, ${height}`;
+  getFill(path) {
+    const height = this.height + this.margin[Y] * 2;
+    path += ` L ${this.width - this.margin[X] * 2}, ${height}`;
     path += ` L 0, ${height} z`;
     return path;
   }

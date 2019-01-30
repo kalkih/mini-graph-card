@@ -9,9 +9,7 @@ const ICON = {
   battery: 'hass:battery'
 };
 const DEFAULT_COLORS = ['var(--accent-color)', '#3498db', '#e74c3c', '#9b59b6', '#f1c40f', '#2ecc71'];
-
-const UPDATE_PROPS = ['entity', '_line', 'length', 'shadow'];
-
+const UPDATE_PROPS = ['entity', 'line', 'length', 'fill', 'points', 'tooltip'];
 const DEFAULT_SHOW = {
   name: true,
   icon: true,
@@ -21,6 +19,7 @@ const DEFAULT_SHOW = {
   extrema: false,
   legend: true,
   fill: true,
+  points: 'hover',
 };
 
 const getMin = (arr, val) => {
@@ -29,7 +28,6 @@ const getMin = (arr, val) => {
 const getMax = (arr, val) => {
   return arr.reduce((max, p) => p[val] > max[val] ? p : max, arr[0]);
 }
-
 const getTime = (date) => date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
 
 class MiniGraphCard extends LitElement {
@@ -39,7 +37,10 @@ class MiniGraphCard extends LitElement {
     this.abs = [];
     this.length = [];
     this.entity = [];
+    this.line = [];
     this.fill = [];
+    this.points = [];
+    this.tooltip = {};
   }
 
   set hass(hass) {
@@ -54,17 +55,8 @@ class MiniGraphCard extends LitElement {
     });
     if (update) {
       this.entity = [...this.entity];
-      this.updateGraph();
+      this.updateData();
     }
-  }
-
-  set line(line) {
-    if (this._line !== line)
-      this._line = line;
-  }
-
-  get line() {
-    return this._line;
   }
 
   static get properties() {
@@ -73,20 +65,21 @@ class MiniGraphCard extends LitElement {
       config: {},
       entity: [],
       Graph: [],
-      _line: [],
+      line: [],
       shadow: [],
       length: Number,
       bound: [],
       abs: [],
+      tooltip: {},
     };
   }
 
   setConfig(config) {
     this.style = 'display: flex; flex-direction: column;';
     const conf = {
+      animate: false,
       font_size: FONT_SIZE,
       height: 100,
-      hide: [],
       hours_to_show: 24,
       points_per_hour: 1,
       line_color: [...DEFAULT_COLORS],
@@ -94,9 +87,9 @@ class MiniGraphCard extends LitElement {
       line_color_below: [],
       line_width: 5,
       more_info: true,
-      show: {...DEFAULT_SHOW},
       entities: config.entity,
       ...config,
+      show: {...DEFAULT_SHOW, ...config.show},
     };
 
     if (typeof conf.entities === 'string')
@@ -105,7 +98,6 @@ class MiniGraphCard extends LitElement {
       if (typeof entity === 'string')
         conf.entities[i] = { entity: entity };
     });
-
     if (typeof config.line_color === 'string')
       conf.line_color = [config.line_color, ...DEFAULT_COLORS];
 
@@ -113,16 +105,13 @@ class MiniGraphCard extends LitElement {
     conf.hours_to_show = Math.floor(Number(conf.hours_to_show)) || 24;
     conf.line_color_above.reverse();
     conf.line_color_below.reverse();
-
-    this.line = conf.entities.map(x => ' ');
-    const margin = conf.show.fill ? 0 : conf.line_width;
     if (!this.Graph) {
       this.Graph = [];
       conf.entities.forEach((entity, index) => {
         this.Graph[index] = new Graph(
           500,
           conf.height,
-          margin,
+          [conf.show.fill ? 0 : conf.line_width, conf.line_width],
           conf.hours_to_show,
           conf.points_per_hour
         );
@@ -132,34 +121,39 @@ class MiniGraphCard extends LitElement {
     this.config = conf;
   }
 
-  async updateGraph({config} = this) {
+  async updateData({config} = this) {
     const endTime = new Date();
     const startTime = new Date();
     startTime.setHours(endTime.getHours() - config.hours_to_show);
 
-    const updates = this.entity.map((entity, index) =>
-      this.updateLine(entity, index, startTime, endTime));
-    await Promise.all(updates);
+    const promise = this.entity.map((entity, index) =>
+      this.updateEntity(entity, index, startTime, endTime));
+    await Promise.all(promise);
 
     this.bound[0] = Math.min(...this.Graph.map(ele => ele.min)) || this.bound[0];
     this.bound[1] = Math.max(...this.Graph.map(ele => ele.max)) || this.bound[1];
 
-    this.entity.map((entity, index) => {
-      this.Graph[index].min = this.bound[0];
-      this.Graph[index].max = this.bound[1];
-      this.line[index] = this.Graph[index].getPath();
-      if (config.show.fill) {
-        this.fill[index] = this.Graph[index].getShadow(this.line[index]);
-      }
-    });
-    this.line = [...this.line];
+    if (config.show.graph) {
+      this.entity.map((entity, index) => {
+        if (!entity) return;
+        this.Graph[index].min = this.bound[0];
+        this.Graph[index].max = this.bound[1];
+        this.line[index] = this.Graph[index].getPath();
+        if (config.show.fill)
+          this.fill[index] = this.Graph[index].getFill(this.line[index]);
+        if (config.show.points)
+          this.points[index] = this.Graph[index].getPoints();
+      });
+      this.line = [...this.line];
+    }
   }
 
-  async updateLine(entity, index, startTime, endTime) {
-    const stateHistory = await this.fetchRecent(entity.entity_id, startTime, endTime);
+  async updateEntity(entity, index, start, end) {
+    if (!entity) return;
+    const stateHistory = await this.fetchRecent(entity.entity_id, start, end);
     if (stateHistory[0].length < 1) return;
 
-    if (entity === this.entity[0]) {
+    if (entity.entity_id === this.entity[0].entity_id) {
       this.abs[0] = {
         type: 'min',
         ...getMin(stateHistory[0], 'state')
@@ -178,10 +172,10 @@ class MiniGraphCard extends LitElement {
   }
 
   updated(changedProperties) {
-    if (this.config.animate && changedProperties.has('_line')) {
+    if (this.config.animate && changedProperties.has('line')) {
       if (this.length.length < this.entity.length) {
-        this.shadowRoot.querySelectorAll('svg path').forEach(ele => {
-          if (ele.set) this.length[ele.id] = ele.getTotalLength();
+        this.shadowRoot.querySelectorAll('svg path.line').forEach(ele => {
+          this.length[ele.id] = ele.getTotalLength();
         });
         this.length = [...this.length];
       }
@@ -195,6 +189,7 @@ class MiniGraphCard extends LitElement {
         class='flex'
         ?group=${config.group}
         ?fill=${this.config.show.fill}
+        ?points=${this.config.show.points === 'hover'}
         ?more-info=${config.more_info}
         style='font-size: ${config.font_size}px;'
         @click='${(e) => this.handleMore()}'>
@@ -206,17 +201,17 @@ class MiniGraphCard extends LitElement {
   }
 
   renderHeader() {
-    const {show, icon_location, header_location} = this.config;
-    return show.name || (show.icon && icon_location !== 'state') ? html`
-      <div class='header flex' loc=${header_location}>
+    const {show, location_icon, location_header} = this.config;
+    return show.name || (show.icon && location_icon !== 'state') ? html`
+      <div class='header flex' loc=${location_header}>
         ${this.renderName()}
-        ${icon_location !== 'state' ? this.renderIcon() : ''}
+        ${location_icon !== 'state' ? this.renderIcon() : ''}
       </div>` : '';
   }
 
   renderIcon() {
     return this.config.show.icon ? html`
-      <div class='icon' loc=${this.config.icon_location}>
+      <div class='icon' loc=${this.config.location_icon}>
         <ha-icon .icon=${this.computeIcon(this.entity[0])}></ha-icon>
       </div>` : '';
   }
@@ -229,23 +224,37 @@ class MiniGraphCard extends LitElement {
   }
 
   renderState() {
-    return this.config.show.state ? html`
-      <div class='state flex' loc=${this.config.state_location}>
+    if (!this.config.show.state) return;
+    return html`
+      <div class='state flex' loc=${this.config.location_state}>
         <div class='flex'>
-          <span class='state__value ellipsis'>${this.computeState(this.entity[0].state)}</span>
-          <span class='state__uom ellipsis'>${this.computeUom(this.entity[0])}</span>
+          <span class='state__value ellipsis'>
+            ${this.computeState(this.tooltip.value || this.entity[0].state)}
+          </span>
+          <span class='state__uom ellipsis'>
+            ${this.computeUom(this.entity[this.tooltip.entity || 0])}
+          </span>
+          ${this.renderStateTime()}
         </div>
-        ${this.config.icon_location === 'state' ? this.renderIcon() : ''}
-      </div> `: '';
+        ${this.config.location_icon === 'state' ? this.renderIcon() : ''}
+      </div>`;
+  }
+
+  renderStateTime() {
+    if (!this.tooltip.value) return;
+    return html`
+      <div class='state__time'>
+        <span>${this.tooltip.time[0]}</span> - <span>${this.tooltip.time[1]}</span>
+      </div>`;
   }
 
   renderGraph() {
     return this.config.show.graph ? html`
       <div class='graph'>
         <div class='graph__container'>
-          ${this.config.labels ? this.renderLabels() : ''}
+          ${this.renderLabels()}
           <div class='graph__container__svg'>
-            ${this.line ? this.renderLine() : ''}
+            ${this.renderSvg()}
           </div>
         </div>
         ${this.renderLegend()}
@@ -267,42 +276,89 @@ class MiniGraphCard extends LitElement {
       </div>`;
   }
 
-  renderLine() {
+  renderSvgFill(fill, i) {
+    if (!fill) return;
     return svg`
-      <svg width='100%' height=${'100%'} viewBox='0 0 500 ${this.config.height}'>
-        ${this.fill.map((fill, i) => svg`
-          <path
-            class='line--fill'
-            .id=${i}
-            .set=${fill !== ' '}
-            ?anim=${this.config.animate}
-            ?init=${this.length[i]}
-            style="animation-delay: ${i * 0.5 + 's'}"
-            fill=${this.computeColor(this.entity[i], i)}
-            stroke=${this.computeColor(this.entity[i], i)}
-            stroke-width=${this.config.line_width}
-            d=${this.fill[i]}
+      <path
+        class='line--fill'
+        .id=${i} anim=${this.config.animate} ?init=${this.length[i]}
+        style="animation-delay: ${this.config.animate ? i * 0.5 + 's' : '0s'}"
+        fill=${this.computeColor(this.entity[i], i)}
+        stroke=${this.computeColor(this.entity[i], i)}
+        stroke-width=${this.config.line_width}
+        d=${this.fill[i]}
+      />`;
+  }
+
+  renderSvgLine(line, i) {
+    if (!line) return;
+    return svg`
+      <path
+        class='line'
+        .id=${i} anim=${this.config.animate} ?init=${this.length[i]}
+        style="animation-delay: ${this.config.animate ? i * 0.5 + 's' : '0s'}"
+        fill='none'
+        stroke-dasharray=${this.length[i]} stroke-dashoffset=${this.length[i]}
+        stroke=${this.computeColor(this.entity[i], i)}
+        stroke-width=${this.config.line_width}
+        d=${this.line[i]}
+      />`;
+  }
+
+  renderSvgPoints(points, i) {
+    if (!points) return;
+    return svg`
+      <g class='line--points'
+        anim=${this.config.animate && this.config.show.points !== 'hover'}
+        style="animation-delay: ${this.config.animate ? i * 0.5 + 0.5 + 's' : '0s'}"
+        ?init=${this.length[i]} fill=${this.computeColor(this.config.entities[i], i)}>
+        ${points.map((point, index) => svg`
+          <circle
+            class='line--point' .id=${index} .value=${point[2]} .entity=${i}
+            @mouseover='${e => this.openTooltip(e)}'
+            @mouseout='${e => this.closeTooltip()}'
+            cx=${point[0]} cy=${point[1]} r=${this.config.line_width}
+            stroke=${this.computeColor(this.config.entities[i], i)}
+            stroke-width=${this.config.line_width / 2 }
           />`
         )}
-        ${this.line.map((line, i) => svg`
-          <path
-            .id=${i}
-            .set=${line !== ' '}
-            ?anim=${this.config.animate}
-            ?init=${this.length[i]}
-            stroke-dasharray=${this.length[i]}
-            stroke-dashoffset=${this.length[i]}
-            style="animation-delay: ${i * 0.5 + 's'}"
-            d=${this.line[i]}
-            fill='none'
-            stroke=${this.computeColor(this.entity[i], i)}
-            stroke-width=${this.config.line_width}
-          />`
-        )}
+      </g>`;
+  }
+  renderSvg() {
+    return svg`
+      <svg width='100%' height='100%' viewBox='0 0 500 ${this.config.height}'>
+        <g>
+          ${this.fill.map((fill, i) => this.renderSvgFill(fill, i))}
+          ${this.line.map((line, i) => this.renderSvgLine(line, i))}
+        </g>
+        ${this.points.map((points, i) => this.renderSvgPoints(points, i))}
       </svg>`;
   }
 
+  openTooltip(e) {
+    const offset = 60 / this.config.points_per_hour * 0.5;
+    const id = (Number(e.target.id) + 1) - this.config.hours_to_show * this.config.points_per_hour;
+    const now = new Date();
+    now.setHours(now.getHours() - id);
+    now.setMinutes(now.getMinutes() - offset);
+    const start = getTime(now);
+    now.setMinutes(now.getMinutes() + offset * 2);
+    const end = getTime(now);
+
+    this.tooltip = {
+      value: Number(e.target.value),
+      id: Math.abs(id),
+      entity: e.target.entity,
+      time: [start, end],
+    };
+  }
+
+  closeTooltip() {
+    this.tooltip = {};
+  }
+
   renderLabels() {
+    if (!this.config.show.labels) return;
     return html`
       <div class='graph__labels flex'>
         <span class='label--max'>${this.computeState(this.bound[1])}</span>
@@ -375,17 +431,17 @@ class MiniGraphCard extends LitElement {
   computeState(state) {
     const dec = this.config.decimals;
     if (dec === null || isNaN(dec) || Number.isNaN(state))
-      return state;
+      return Math.round(state * 100) / 100
 
     const x = Math.pow(10, dec);
     return (Math.round(state * x) / x).toFixed(dec);
   }
 
-  async fetchRecent(entityId, startTime, endTime) {
+  async fetchRecent(entityId, start, end) {
     let url = 'history/period';
-    if (startTime) url += `/${startTime.toISOString()}`;
+    if (start) url += `/${start.toISOString()}`;
     url += `?filter_entity_id=${entityId}`;
-    if (endTime) url += `&end_time=${endTime.toISOString()}`;
+    if (end) url += `&end_time=${end.toISOString()}`;
     return await this._hass.callApi('GET', url);
   }
 
@@ -402,6 +458,15 @@ class MiniGraphCard extends LitElement {
           flex: 1;
           padding: 16px 0;
           position: relative;
+          overflow: visible;
+        }
+        ha-card[points] .line--points {
+          opacity: 0;
+          transition: opacity .25s;
+          animation: none;
+        }
+        ha-card[points]:hover .line--points {
+          opacity: 1;
         }
         ha-card[fill] {
           padding-bottom: 0;
@@ -489,6 +554,9 @@ class MiniGraphCard extends LitElement {
           flex-wrap: wrap;
           font-weight: 300;
         }
+        .state > .flex {
+          position: relative;
+        }
         .state[loc="center"] {
           align-self: center;
         }
@@ -512,6 +580,15 @@ class MiniGraphCard extends LitElement {
           opacity: .6;
           vertical-align: bottom;
         }
+        .state__time {
+          white-space: nowrap;
+          font-weight: 500;
+          position: absolute;
+          bottom: -1.1rem;
+          left: 0;
+          opacity: .75;
+          font-size: 0.95rem;
+        }
         .graph {
           align-self: flex-end;
           box-sizing: border-box;
@@ -526,22 +603,44 @@ class MiniGraphCard extends LitElement {
         }
         .graph__container__svg {
           flex: 1;
+        }
+        svg {
           overflow: hidden;
         }
         path {
           stroke-linecap: round;
           stroke-linejoin: round;
         }
-        path[anim] {
+        .line--fill[anim="false"] {
+          animation: reveal .25s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+        }
+        .line--points[anim="false"],
+        .line[anim="false"] {
+          animation: pop .25s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+        }
+        .line--point {
+          cursor: pointer;
+          fill: var(--paper-card-background-color, white);
+          transition: fill .15s cubic-bezier(0.215, 0.61, 0.355, 1);
+        }
+        .line--point:hover {
+          fill: inherit;
+        }
+        path,
+        .line--points,
+        .line--fill {
           opacity: 0;
         }
-        path[anim][init] {
-          animation: dash 1s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+        .line--points[anim="true"][init] {
+          animation: pop .5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
         }
-        .line--fill[anim][init] {
+        .line--fill[anim="true"][init] {
           animation: reveal .5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
         }
-        .labels {
+        .line[anim="true"][init] {
+          animation: dash 1s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+        }
+        .graph__labels {
           flex-direction: column;
           font-size: .8em;
           font-weight: 400;
@@ -549,12 +648,12 @@ class MiniGraphCard extends LitElement {
           margin-right: 10px;
           opacity: .75;
         }
-        .labels > span {
+        .graph__labels > span {
           align-self: flex-end;
           position: relative;
           width: 100%;
         }
-        .labels > span:after {
+        .graph__labels > span:after {
           position: absolute;
           right: -6px;
           content: ' -';
@@ -598,6 +697,10 @@ class MiniGraphCard extends LitElement {
         @keyframes reveal {
           0% { opacity: 0; }
           100% { opacity: .15; }
+        }
+        @keyframes pop {
+          0% { opacity: 0; }
+          100% { opacity: 1; }
         }
         @keyframes dash {
           0% {
