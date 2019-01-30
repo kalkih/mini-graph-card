@@ -1,4 +1,25 @@
 {
+  "name": "mini-graph-card",
+  "version": "0.2.0",
+  "description": "A minimalistic and customizable graph card for Home Assistant Lovelace UI",
+  "keywords": [
+    "home-assistant",
+    "homeassistant",
+    "hass",
+    "automation",
+    "lovelace",
+    "sensor",
+    "graph",
+    "svg",
+    "custom-cards"
+  ],
+  "main": "mini-graph-card.js",
+  "repository": "git@github.com:kalkih/mini-graph-card.git",
+  "author": "Karl Kihlström <mrkihlstrom@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@polymer/lit-element": "0.6.3"
+  },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.2.2",
@@ -6,7 +27,6 @@
     "@babel/plugin-proposal-decorators": "^7.2.3",
     "@babel/plugin-transform-template-literals": "^7.2.0",
     "@babel/preset-env": "^7.2.3",
-    "@polymer/lit-element": "^0.6.2",
     "babel-preset-minify": "^0.5.0",
     "rollup": "^0.66.6",
     "rollup-plugin-node-resolve": "^3.4.0",
