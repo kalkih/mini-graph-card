@@ -1,4 +1,3 @@
-import replace from 'rollup-plugin-replace';
 import resolve from 'rollup-plugin-node-resolve';
 import { terser } from "rollup-plugin-terser";
 
@@ -9,10 +8,6 @@ export default {
     format: 'umd'
   },
   plugins: [
-    replace({
-      include: 'mini-graph-card.js',
-      'https://unpkg.com/@polymer/lit-element@^0.6.3/lit-element.js?module': '@polymer/lit-element'
-    }),
     resolve(),
     terser()
   ]

@@ -1,4 +1,4 @@
-import { LitElement, html, svg } from 'https://unpkg.com/@polymer/lit-element@^0.6.3/lit-element.js?module';
+import { LitElement, html, svg } from '@polymer/lit-element';
 import Graph from './mini-graph-lib.js';
 
 const FONT_SIZE = 14;
