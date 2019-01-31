@@ -337,8 +337,9 @@ class MiniGraphCard extends LitElement {
   }
 
   openTooltip(e) {
-    const offset = 60 / this.config.points_per_hour * 0.5;
-    const id = (Number(e.target.id) + 1) - this.config.hours_to_show * this.config.points_per_hour;
+    const {points_per_hour, hours_to_show} = this.config;
+    const offset = 60 / points_per_hour * 0.5;
+    const id = Math.abs((Number(e.target.id) + 1) - hours_to_show * points_per_hour);
     const now = new Date();
     now.setHours(now.getHours() - id);
     now.setMinutes(now.getMinutes() - offset);
@@ -348,7 +349,7 @@ class MiniGraphCard extends LitElement {
 
     this.tooltip = {
       value: Number(e.target.value),
-      id: Math.abs(id),
+      id: id,
       entity: e.target.entity,
       time: [start, end],
     };
