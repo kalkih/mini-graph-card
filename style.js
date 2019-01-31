@@ -157,6 +157,7 @@ export function style() {
         flex-direction: row;
       }
       .graph__container__svg {
+        cursor: default;
         flex: 1;
       }
       svg {
@@ -220,7 +221,10 @@ export function style() {
         justify-content: space-evenly;
         padding-top: 16px;
       }
-      .graph__legend span {
+      .graph__legend__item {
+        cursor: pointer;
+      }
+      .graph__legend__item span {
         opacity: .75;
       }
       .info {

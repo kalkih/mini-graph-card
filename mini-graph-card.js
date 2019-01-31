@@ -196,7 +196,7 @@ class MiniGraphCard extends LitElement {
         ?points=${this.config.show.points === 'hover'}
         ?more-info=${config.more_info}
         style='font-size: ${config.font_size}px;'
-        @click='${(e) => this.handleMore()}'>
+        @click=${e => this.handlePopup(e, this.entity[0])}>
         ${this.renderHeader()}
         ${this.renderState()}
         ${this.renderGraph()}
@@ -270,7 +270,7 @@ class MiniGraphCard extends LitElement {
     return html`
       <div class='graph__legend'>
       ${this.entity.map((entity, i) => html`
-        <div>
+        <div class='graph__legend__item' @click=${e => this.handlePopup(e, entity)}>
           <svg width='10' height='10'>
             <rect width='10' height='10' fill=${this.computeColor(entity, i)} />
           </svg>
@@ -319,8 +319,8 @@ class MiniGraphCard extends LitElement {
         ${points.map((point, index) => svg`
           <circle
             class='line--point' .id=${index} .value=${point[2]} .entity=${i}
-            @mouseover='${e => this.openTooltip(e)}'
-            @mouseout='${e => this.closeTooltip()}'
+            @mouseover=${e => this.openTooltip(e)}
+            @mouseout=${e => this.tooltip = {}}
             cx=${point[0]} cy=${point[1]} r=${this.config.line_width}
             stroke=${this.computeColor(this.config.entities[i], i)}
             stroke-width=${this.config.line_width / 2 }
@@ -328,9 +328,11 @@ class MiniGraphCard extends LitElement {
         )}
       </g>`;
   }
+
   renderSvg() {
     return svg`
-      <svg width='100%' height='100%' viewBox='0 0 500 ${this.config.height}'>
+      <svg width='100%' height='100%' viewBox='0 0 500 ${this.config.height}'
+        @click=${e => e.stopPropagation()}>
         <g>
           ${this.fill.map((fill, i) => this.renderSvgFill(fill, i))}
           ${this.line.map((line, i) => this.renderSvgLine(line, i))}
@@ -356,10 +358,6 @@ class MiniGraphCard extends LitElement {
       entity: e.target.entity,
       time: [start, end],
     };
-  }
-
-  closeTooltip() {
-    this.tooltip = {};
   }
 
   renderLabels() {
@@ -392,9 +390,10 @@ class MiniGraphCard extends LitElement {
       </div>`;
   }
 
-  handleMore({config} = this) {
-    if(config.more_info)
-      this.fire('hass-more-info', { entityId: config.entities[0].entity });
+  handlePopup(e, entity) {
+    e.stopPropagation();
+    if (this.config.more_info)
+      this.fire('hass-more-info', { entityId: entity.entity_id });
   }
 
   fire(type, detail, options) {
