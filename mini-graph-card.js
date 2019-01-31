@@ -29,7 +29,7 @@ const getMin = (arr, val) => {
 const getMax = (arr, val) => {
   return arr.reduce((max, p) => p[val] > max[val] ? p : max, arr[0]);
 }
-const getTime = (date) => date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+const getTime = (date, hour24) => date.toLocaleString('se-SV', { hour: 'numeric', minute: 'numeric', hour12: !hour24 });
 
 class MiniGraphCard extends LitElement {
   constructor() {
@@ -79,6 +79,7 @@ class MiniGraphCard extends LitElement {
     this.style = 'display: flex; flex-direction: column;';
     const conf = {
       animate: false,
+      clock24: false,
       font_size: FONT_SIZE,
       height: 100,
       hours_to_show: 24,
@@ -131,8 +132,10 @@ class MiniGraphCard extends LitElement {
       this.updateEntity(entity, index, startTime, endTime));
     await Promise.all(promise);
 
-    this.bound[0] = Math.min(...this.Graph.map(ele => ele.min)) || this.bound[0];
-    this.bound[1] = Math.max(...this.Graph.map(ele => ele.max)) || this.bound[1];
+    this.bound = [
+      Math.min(...this.Graph.map(ele => ele.min)) || this.bound[0],
+      Math.max(...this.Graph.map(ele => ele.max)) || this.bound[1],
+    ];
 
     if (config.show.graph) {
       this.entity.map((entity, index) => {
@@ -343,9 +346,9 @@ class MiniGraphCard extends LitElement {
     const now = new Date();
     now.setHours(now.getHours() - id);
     now.setMinutes(now.getMinutes() - offset);
-    const start = getTime(now);
+    const start = getTime(now, this.config.clock24);
     now.setMinutes(now.getMinutes() + offset * 2);
-    const end = getTime(now);
+    const end = getTime(now, this.config.clock24);
 
     this.tooltip = {
       value: Number(e.target.value),
@@ -381,7 +384,9 @@ class MiniGraphCard extends LitElement {
                 ${this.computeUom(entry)}
               </span>
             </div>
-            <span class='info__item__time'>${getTime(new Date(entry.last_changed))}</span>
+            <span class='info__item__time'>
+              ${getTime(new Date(entry.last_changed), this.config.clock24)}
+            </span>
           </div>`
         )}
       </div>`;
