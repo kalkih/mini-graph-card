@@ -10,7 +10,7 @@ const ICON = {
   battery: 'hass:battery'
 };
 const DEFAULT_COLORS = ['var(--accent-color)', '#3498db', '#e74c3c', '#9b59b6', '#f1c40f', '#2ecc71'];
-const UPDATE_PROPS = ['entity', 'line', 'length', 'fill', 'points', 'tooltip'];
+const UPDATE_PROPS = ['entity', 'line', 'length', 'fill', 'points', 'tooltip', 'abs'];
 const DEFAULT_SHOW = {
   name: true,
   icon: true,
@@ -158,14 +158,13 @@ class MiniGraphCard extends LitElement {
     if (stateHistory[0].length < 1) return;
 
     if (entity.entity_id === this.entity[0].entity_id) {
-      this.abs[0] = {
+      this.abs = [{
         type: 'min',
-        ...getMin(stateHistory[0], 'state')
-      };
-      this.abs[1] = {
+        ...getMin(stateHistory[0], 'state'),
+      }, {
         type: 'max',
-        ...getMax(stateHistory[0], 'state')
-      };
+        ...getMax(stateHistory[0], 'state'),
+      }];
     }
 
     this.Graph[index].update(stateHistory[0]);
