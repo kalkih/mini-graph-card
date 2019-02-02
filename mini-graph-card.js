@@ -79,7 +79,7 @@ class MiniGraphCard extends LitElement {
     this.style = 'display: flex; flex-direction: column;';
     const conf = {
       animate: false,
-      clock24: false,
+      hour24: false,
       font_size: FONT_SIZE,
       height: 100,
       hours_to_show: 24,
@@ -348,9 +348,9 @@ class MiniGraphCard extends LitElement {
     const now = new Date();
     now.setHours(now.getHours() - id);
     now.setMinutes(now.getMinutes() - offset);
-    const start = getTime(now, this.config.clock24);
+    const start = getTime(now, this.config.hour24);
     now.setMinutes(now.getMinutes() + offset * 2);
-    const end = getTime(now, this.config.clock24);
+    const end = getTime(now, this.config.hour24);
 
     this.tooltip = {
       value: Number(e.target.value),
@@ -383,7 +383,7 @@ class MiniGraphCard extends LitElement {
               </span>
             </div>
             <span class='info__item__time'>
-              ${getTime(new Date(entry.last_changed), this.config.clock24)}
+              ${getTime(new Date(entry.last_changed), this.config.hour24)}
             </span>
           </div>`
         )}
