@@ -27,8 +27,6 @@ export default class Graph {
   }
 
   update(history) {
-    history = history.filter(item => !Number.isNaN(Number(item.state)));
-
     const now = new Date().getTime();
     const reduce = (res, item) => {
       const age = now - new Date(item.last_changed).getTime();

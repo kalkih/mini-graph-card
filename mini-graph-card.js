@@ -154,20 +154,21 @@ class MiniGraphCard extends LitElement {
 
   async updateEntity(entity, index, start, end) {
     if (!entity) return;
-    const stateHistory = await this.fetchRecent(entity.entity_id, start, end);
-    if (stateHistory[0].length < 1) return;
+    let stateHistory = await this.fetchRecent(entity.entity_id, start, end);
+    stateHistory = stateHistory[0].filter(item => !Number.isNaN(Number(item.state)));
+    if (stateHistory.length < 1) return;
 
     if (entity.entity_id === this.entity[0].entity_id) {
       this.abs = [{
         type: 'min',
-        ...getMin(stateHistory[0], 'state'),
+        ...getMin(stateHistory, 'state'),
       }, {
         type: 'max',
-        ...getMax(stateHistory[0], 'state'),
+        ...getMax(stateHistory, 'state'),
       }];
     }
 
-    this.Graph[index].update(stateHistory[0]);
+    this.Graph[index].update(stateHistory);
   }
 
   shouldUpdate(changedProps) {
