@@ -188,7 +188,7 @@ class MiniGraphCard extends LitElement {
 
   render({config, entity} = this) {
     return html`
-      ${style()}
+      ${style}
       <ha-card
         class='flex'
         ?group=${config.group}
