@@ -13,7 +13,7 @@
     "svg",
     "custom-cards"
   ],
-  "main": "mini-graph-card.js",
+  "main": "main.js",
   "repository": "git@github.com:kalkih/mini-graph-card.git",
   "author": "Karl Kihlström <mrkihlstrom@gmail.com>",
   "license": "MIT",

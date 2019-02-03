@@ -78,15 +78,16 @@ export default class Graph {
 
   getPoints() {
     let coords = this._calcY(this.coords);
+    // console.log(coords)
+    // return coords;
     let next, Z;
-    let path = '';
     let last = coords.filter(Boolean)[0]
     coords.shift();
     const coords2 = coords.map((point, i) => {
       next = point;
       Z = this._midPoint(last[X], last[Y], next[X], next[Y]);
       last = next;
-      return [Z[X], Z[Y], point[2]];
+      return [Z[X], Z[Y], next[2]];
     });
     return coords2;
   }

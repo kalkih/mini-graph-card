@@ -1,5 +1,5 @@
 import { LitElement, html, svg } from '@polymer/lit-element';
-import Graph from './mini-graph-lib';
+import Graph from './graph';
 import { style } from './style'
 
 const FONT_SIZE = 14;
@@ -29,7 +29,7 @@ const getMin = (arr, val) => {
 const getMax = (arr, val) => {
   return arr.reduce((max, p) => Number(p[val]) > Number(max[val]) ? p : max, arr[0]);
 }
-const getTime = (date, hour24) => date.toLocaleString('se-SV', { hour: 'numeric', minute: 'numeric', hour12: !hour24 });
+const getTime = (date, hour24) => date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: !hour24 });
 
 class MiniGraphCard extends LitElement {
   constructor() {
