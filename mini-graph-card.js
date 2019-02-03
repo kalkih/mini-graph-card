@@ -198,7 +198,7 @@ class MiniGraphCard extends LitElement {
         style='font-size: ${config.font_size}px;'
         @click=${e => this.handlePopup(e, this.entity[0])}>
         ${this.renderHeader()}
-        ${this.renderState()}
+        ${this.renderStates()}
         ${this.renderGraph()}
         ${this.renderInfo()}
       </ha-card>`;
@@ -227,21 +227,35 @@ class MiniGraphCard extends LitElement {
       </div>` : '';
   }
 
-  renderState() {
-    if (!this.config.show.state) return;
-    return html`
-      <div class='state flex' loc=${this.config.align_state}>
-        <div class='flex'>
+  renderStates() {
+    if (this.config.show.state)
+      return html`
+        <div class='states flex' loc=${this.config.align_state}>
+          <div class='state'>
+            <span class='state__value ellipsis'>
+              ${this.computeState(this.tooltip.value || this.entity[0].state)}
+            </span>
+            <span class='state__uom ellipsis'>
+              ${this.computeUom(this.entity[this.tooltip.entity || 0])}
+            </span>
+            ${this.renderStateTime()}
+          </div>
+          <div class='states--secondary'>${this.config.entities.map((entity, i) => this.renderState(entity, i))}</div>
+          ${this.config.align_icon === 'state' ? this.renderIcon() : ''}
+        </div>`;
+  }
+
+  renderState(config, id) {
+    if (config.show_state && id !== 0)
+      return html`
+        <div class='state state--small'>
           <span class='state__value ellipsis'>
-            ${this.computeState(this.tooltip.value || this.entity[0].state)}
+            ${this.computeState(this.entity[id].state)}
           </span>
           <span class='state__uom ellipsis'>
-            ${this.computeUom(this.entity[this.tooltip.entity || 0])}
+            ${this.computeUom(this.entity[id])}
           </span>
-          ${this.renderStateTime()}
-        </div>
-        ${this.config.align_icon === 'state' ? this.renderIcon() : ''}
-      </div>`;
+        </div>`;
   }
 
   renderStateTime() {
@@ -376,12 +390,10 @@ class MiniGraphCard extends LitElement {
         ${this.abs.map(entry => html`
           <div class='info__item'>
             <span class='info__item__type'>${entry.type}</span>
-            <div>
-              <span class='info__item__value'>
-                ${this.computeState(entry.state)}
-                ${this.computeUom(entry)}
-              </span>
-            </div>
+            <span class='info__item__value'>
+              ${this.computeState(entry.state)}
+              ${this.computeUom(entry)}
+            </span>
             <span class='info__item__time'>
               ${getTime(new Date(entry.last_changed), this.config.hour24)}
             </span>

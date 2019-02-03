@@ -105,25 +105,58 @@ export function style() {
       .icon[loc="state"] {
         align-self: center;
       }
-      .state {
-        flex-wrap: wrap;
+      .states {
+        align-items: flex-start;
         font-weight: 300;
+        justify-content: space-between;
+        flex-wrap: nowrap;
       }
-      .state > .flex {
-        position: relative;
-      }
-      .state[loc="center"] {
+      .states .icon {
         align-self: center;
+        margin-left: 0;
       }
-      .state[loc="right"] {
-        align-self: flex-end;
+      .states[loc="center"] {
+        justify-content: space-around;
+      }
+      .states[loc="right"] > .state {
+        margin-left: auto;
+        order: 2;
+      }
+      .states[loc="right"] > .icon {
+        margin-left: 0;
+      }
+      .states[loc="center"] .states--secondary,
+      .states[loc="right"] .states--secondary {
+        margin-left: 0;
+      }
+      .states--secondary {
+        display: flex;
+        font-size: 0.6em;
+        flex-flow: column;
+        flex-wrap: wrap;
+        margin-left: 1rem;
+        min-width: 0;
+      }
+      .states--secondary:empty {
+        display: none;
+      }
+      .state {
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        max-width: 100%;
+        min-width: 0;
+      }
+      .state--small {
+        margin-bottom: .6rem;
+        flex-wrap: nowrap;
       }
       .state__value {
         display: inline-block;
         font-size: 2.4em;
         line-height: 1em;
-        max-size: 100%;
         margin-right: .25rem;
+        max-size: 100%;
       }
       .state__uom {
         align-self: flex-end;
@@ -135,14 +168,17 @@ export function style() {
         opacity: .6;
         vertical-align: bottom;
       }
+      .state--small .state__uom {
+        flex: 1;
+      }
       .state__time {
-        white-space: nowrap;
+        font-size: .95rem;
         font-weight: 500;
-        position: absolute;
         bottom: -1.1rem;
         left: 0;
         opacity: .75;
-        font-size: 0.95rem;
+        position: absolute;
+        white-space: nowrap;
       }
       .graph {
         align-self: flex-end;
@@ -234,10 +270,12 @@ export function style() {
       .info__item {
         display: flex;
         flex-flow: column;
-        align-items: flex-end
+        align-items: flex-end;
+        text-align: right;
       }
       .info__item:first-child {
         align-items: flex-start;
+        text-align: left;
       }
       .info__item__type {
         text-transform: capitalize;
