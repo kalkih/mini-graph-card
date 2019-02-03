@@ -24,10 +24,10 @@ const DEFAULT_SHOW = {
 };
 
 const getMin = (arr, val) => {
-  return arr.reduce((min, p) => p[val] < min[val] ? p : min, arr[0]);
+  return arr.reduce((min, p) => Number(p[val]) < Number(min[val]) ? p : min, arr[0]);
 }
 const getMax = (arr, val) => {
-  return arr.reduce((max, p) => p[val] > max[val] ? p : max, arr[0]);
+  return arr.reduce((max, p) => Number(p[val]) > Number(max[val]) ? p : max, arr[0]);
 }
 const getTime = (date, hour24) => date.toLocaleString('se-SV', { hour: 'numeric', minute: 'numeric', hour12: !hour24 });
 
