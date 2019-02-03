@@ -256,12 +256,17 @@ export function style() {
         flex-direction: row;
         justify-content: space-evenly;
         padding-top: 16px;
+        flex-wrap: wrap;
       }
       .graph__legend__item {
         cursor: pointer;
+        display: flex;
+        min-width: 0;
+        margin: .4em;
       }
       .graph__legend__item span {
         opacity: .75;
+        margin-left: .4em;
       }
       .info {
         justify-content: space-between;

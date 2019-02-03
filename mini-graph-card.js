@@ -288,7 +288,7 @@ class MiniGraphCard extends LitElement {
           <svg width='10' height='10'>
             <rect width='10' height='10' fill=${this.computeColor(entity, i)} />
           </svg>
-          <span>${this.computeName(i)}</span>
+          <span class='ellipsis'>${this.computeName(i)}</span>
         </div>
       `)}
       </div>`;
