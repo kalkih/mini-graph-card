@@ -1,25 +1,35 @@
+## v0.2.1
+- **Added:** New `hour24` option to choose time format between 12-hour/24-hour clock
+- **Added:** Support for showing multiple sensor states, see new `show_state` option for the entity object (#33)
+- **Added:** Ability to press/click on entities in the graph legend to bring up their "more info" dialog (#31)
+- **Fixed:** Responsive design of the graph legend
+- **Fixed:** NaN values in extrema (#34)
+- **Fixed:** Extrema not rendering (#32)
+- **Fixed:** Times on points going backwards (#30)
+
+
 ## v0.2.0
-- UI redesign
-- Added support for multiple entities (**BETA**) #28
-- Added support for multiple `line_color` entries
-- Added graph data points with information on hover, see `points` option under the `show` option
-- Added `animate` option to have the graph animated on initial load
-- Added `points_per_hour` option to specify amount of data points that should be rendered for each hour (basically the graph detail/accuracy).
-- Added support for multiple color thresholds with new `line_color_above` & `line_color_below` options
-- Added allocated space for the graph -> less jerky movements when loading in
-- Added graph legend, visible if multiple entities is present
-- Added `align_header`, `align_icon` & `align_state` options #27
-- Added `show` option, to manage visible/hidden UI elements
-- Added `entities` option
-- Added `group` option to remove paddings/box-shadow #26 (@iantrich)
-- Fixed bug were history data would be fetched when graph was hidden
-- Fixed `decimals` option not being applied to labels #19
-- Fixed Y-scale based on absolute extrema causing inconsistent results, now based on moving average same as the rest of the graph.
-- Deprecated `entity` option, use new `entities`, accepts string or list (**deprecated**)
-- Removed `detail` option, use new `points_per_hour` option (**Breaking change**)
-- Removed `hide` options, use new `show` option (**Breaking change**)
-- Removed `labels` option, use `labels` in new `show` option (**Breaking change**)
-- Removed `line_value_above`, `line_color_above`, `line_value_below` & `line_color_below` options (**Breaking change**)
+- **UI redesign**
+- **Added:** support for multiple entities (**BETA**) #28
+- **Added:** support for multiple `line_color` entries
+- **Added:** graph data points with information on hover, see `points` option under the `show` option
+- **Added:** `animate` option to have the graph animated on initial load
+- **Added:** `points_per_hour` option to specify amount of data points that should be rendered for each hour (basically the graph detail/accuracy).
+- **Added:** support for multiple color thresholds with new `line_color_above` & `line_color_below` options
+- **Added:** allocated space for the graph -> less jerky movements when loading in
+- **Added:** graph legend, visible if multiple entities is present
+- **Added:** `align_header`, `align_icon` & `align_state` options #27
+- **Added:** `show` option, to manage visible/hidden UI elements
+- **Added:** `entities` option
+- **Added:** `group` option to remove paddings/box-shadow #26 (@iantrich)
+- **Fixed:** bug were history data would be fetched when graph was hidden
+- **Fixed:** `decimals` option not being applied to labels #19
+- **Fixed:** Y-scale based on absolute extrema causing inconsistent results, now based on moving average same as the rest of the graph.
+- **Deprecated:** `entity` option, use new `entities`, accepts string or list (**deprecated**)
+- **Removed:** `detail` option, use new `points_per_hour` option (**Breaking change**)
+- **Removed:** `hide` options, use new `show` option (**Breaking change**)
+- **Removed:** `labels` option, use `labels` in new `show` option (**Breaking change**)
+- **Removed:** `line_value_above`, `line_color_above`, `line_value_below` & `line_color_below` options (**Breaking change**)
 
 ## v0.1.0
 - Added `hide` option to hide specific UI elements

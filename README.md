@@ -15,7 +15,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.2.0
+    - url: /local/mini-graph-card-bundle.js?v=0.2.1
       type: module
   ```
 
@@ -26,14 +26,14 @@ The card works with entities from within the **sensor** domain and displays the 
 2. Grab `mini-graph-card-bundle.js`
 
   ```
-  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.2.0/mini-graph-card-bundle.js
+  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.2.1/mini-graph-card-bundle.js
   ```
 
 3. Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`.
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.2.0
+    - url: /local/mini-graph-card-bundle.js?v=0.2.1
       type: module
   ```
 
@@ -60,7 +60,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.2.0
+    - url: /local/mini-graph-card-bundle.js?v=0.2.1
       type: module
   ```
 
@@ -78,7 +78,7 @@ The card works with entities from within the **sensor** domain and displays the 
 | icon | string | optional | v0.0.1 | Set a custom icon from any of the available mdi icons.
 | name | string | optional | v0.0.1 | Set a custom name which is displayed beside the icon.
 | unit | string | optional | v0.0.1 | Set a custom unit of measurement.
-| more_info | boolean | true | v0.0.1 | Set to `false` to disable the "more info" dialog when pressing the card.
+| more_info | boolean | true | v0.0.1 | Set to `false` to disable the "more info" dialog popup when pressing on the card.
 | group | boolean | false | v0.2.0 | Disable paddings and box-shadow, useful when nesting the card.
 | hours_to_show | integer | 24 | v0.0.2 | Specify how many hours the line graph should render.
 | points_per_hour | integer | 1 | v0.2.0 | Specify amount of data points the graph should render for every hour, *(basically the detail/accuracy of the graph)*.
@@ -88,6 +88,7 @@ The card works with entities from within the **sensor** domain and displays the 
 | line_width | number | 5 | v0.0.1 | Set the thickness of the line.
 | line_color | string/list | var(--accent-color) | v0.0.1 | Set a custom color for the graph line, provide a list of colors for multiple graph entries.
 | decimals | integer | optional | v0.0.9 | Specify the exact number of decimals to show for states.
+| hour24 | boolean | false | v0.2.1 | Set to `true` to display times in 24-hour format.
 | font_size | number | 100 | v0.0.3 | Adjust the font size of the state displayed, as percentage of the original size.
 | align_header | string | `default` | v0.2.0 | Set the alignment of the header, `left`, `right`, `center` or `default`.
 | align_icon | string | `right` | v0.2.0 | Set the alignment of the icon, `left`, `right` or `state`.
@@ -100,14 +101,16 @@ Providing options are optional, entities can be listed directly, see example bel
 
 | Name | Type | Default | Description |
 |------|:----:|:-------:|:------------|
-| entity | string | **required** | Entity id of the sensor
+| entity | string | **required** | Entity id of the sensor.
 | name | string | optional | Set a custom display name, defaults to entity's friendly_name.
+| show_state | string | optional | Display the current state of the sensor.
 
 ```yaml
 entities:
   - sensor.temperature
-  - entities: sensor.pressure
+  - entity: sensor.pressure
     name: Pressure
+    show_state: true
   - sensor.humidity
 ```
 
@@ -269,7 +272,7 @@ resources:
 $ cd mini-graph-card && git checkout dev && npm install
 ```
 
-**Edit the source file `mini-graph-card.js`, build by running**
+**Edit the source, build by running**
 ```
 $ npm run build
 ```
