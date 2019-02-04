@@ -155,7 +155,6 @@ export const style = html`
       font-size: 2.4em;
       line-height: 1em;
       margin-right: .25rem;
-      max-size: 100%;
     }
     .state__uom {
       align-self: flex-end;
@@ -262,6 +261,7 @@ export const style = html`
       display: flex;
       min-width: 0;
       margin: .4em;
+      align-items: center
     }
     .graph__legend__item span {
       opacity: .75;
