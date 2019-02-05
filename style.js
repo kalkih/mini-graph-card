@@ -14,12 +14,14 @@ export const style = html`
       position: relative;
       overflow: visible;
     }
-    ha-card[points] .line--points {
+    ha-card[points] .line--points,
+    ha-card[labels] .graph__labels {
       opacity: 0;
       transition: opacity .25s;
       animation: none;
     }
-    ha-card[points]:hover .line--points {
+    ha-card[points]:hover .line--points,
+    ha-card:hover .graph__labels {
       opacity: 1;
     }
     ha-card[fill] {
@@ -189,6 +191,7 @@ export const style = html`
     .graph__container {
       display: flex;
       flex-direction: row;
+      position: relative;
     }
     .graph__container__svg {
       cursor: default;
@@ -231,23 +234,24 @@ export const style = html`
       animation: dash 1s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
     }
     .graph__labels {
+      align-items: flex-start;
       flex-direction: column;
       font-size: .8em;
       font-weight: 400;
       justify-content: space-between;
       margin-right: 10px;
+      padding: .6em;
+      position: absolute;
+      pointer-events: none;
+      top: 0; bottom: 0;
       opacity: .75;
     }
     .graph__labels > span {
-      align-self: flex-end;
-      position: relative;
-      width: 100%;
-    }
-    .graph__labels > span:after {
-      position: absolute;
-      right: -6px;
-      content: ' -';
-      opacity: .75;
+      cursor: pointer;
+      background: var(--primary-background-color, white);
+      border-radius: 1em;
+      padding: .2em .6em;
+      box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.24);
     }
     .graph__legend {
       display: flex;
