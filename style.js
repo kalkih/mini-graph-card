@@ -14,6 +14,12 @@ export const style = html`
       position: relative;
       overflow: visible;
     }
+    ha-card > div {
+      padding: 0px 16px 16px 16px;
+    }
+    ha-card > div:last-child {
+      padding-bottom: 0;
+    }
     ha-card[points] .line--points,
     ha-card[labels] .graph__labels {
       opacity: 0;
@@ -55,12 +61,6 @@ export const style = html`
     }
     ha-card[more-info] {
       cursor: pointer;
-    }
-    ha-card > div {
-      padding: 0px 16px 16px 16px;
-    }
-    ha-card > div:last-child {
-      padding-bottom: 0;
     }
     .flex {
       display: flex;

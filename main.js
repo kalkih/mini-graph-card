@@ -192,7 +192,7 @@ class MiniGraphCard extends LitElement {
       <ha-card
         class='flex'
         ?group=${config.group}
-        ?fill=${this.config.show.fill}
+        ?fill=${this.config.show.graph && this.config.show.fill}
         ?points=${this.config.show.points === 'hover'}
         ?labels=${this.config.show.labels === 'hover'}
         ?more-info=${config.more_info}
