@@ -16,7 +16,7 @@ const DEFAULT_SHOW = {
   icon: true,
   state: true,
   graph: true,
-  labels: false,
+  labels: 'hover',
   extrema: false,
   legend: true,
   fill: true,
@@ -194,6 +194,7 @@ class MiniGraphCard extends LitElement {
         ?group=${config.group}
         ?fill=${this.config.show.fill}
         ?points=${this.config.show.points === 'hover'}
+        ?labels=${this.config.show.labels === 'hover'}
         ?more-info=${config.more_info}
         style='font-size: ${config.font_size}px;'
         @click=${e => this.handlePopup(e, this.entity[0])}>
