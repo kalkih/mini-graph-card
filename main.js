@@ -328,17 +328,18 @@ class MiniGraphCard extends LitElement {
     if (!points) return;
     return svg`
       <g class='line--points'
+        ?init=${this.length[i]}
         anim=${this.config.animate && this.config.show.points !== 'hover'}
         style="animation-delay: ${this.config.animate ? i * 0.5 + 0.5 + 's' : '0s'}"
-        ?init=${this.length[i]} fill=${this.computeColor(this.config.entities[i], i)}>
+        fill=${this.computeColor(this.entity[i], i)}
+        stroke=${this.computeColor(this.entity[i], i)}
+        stroke-width=${this.config.line_width / 2}>
         ${points.map((point, index) => svg`
           <circle
             class='line--point' .id=${index} .value=${point[2]} .entity=${i}
+            cx=${point[0]} cy=${point[1]} r=${this.config.line_width}
             @mouseover=${e => this.openTooltip(e)}
             @mouseout=${e => this.tooltip = {}}
-            cx=${point[0]} cy=${point[1]} r=${this.config.line_width}
-            stroke=${this.computeColor(this.config.entities[i], i)}
-            stroke-width=${this.config.line_width / 2 }
           />`
         )}
       </g>`;

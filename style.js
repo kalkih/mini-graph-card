@@ -214,6 +214,8 @@ export const style = html`
     .line--point {
       cursor: pointer;
       fill: var(--paper-card-background-color, white);
+      stroke: inherit;
+      stroke-width: inherit;
       transition: fill .15s cubic-bezier(0.215, 0.61, 0.355, 1);
     }
     .line--point:hover {
