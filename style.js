@@ -236,7 +236,7 @@ export const style = html`
     .graph__labels {
       align-items: flex-start;
       flex-direction: column;
-      font-size: .8em;
+      font-size: calc(.15em + 8.5px);
       font-weight: 400;
       justify-content: space-between;
       margin-right: 10px;
