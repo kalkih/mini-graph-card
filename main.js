@@ -222,10 +222,15 @@ class MiniGraphCard extends LitElement {
   }
 
   renderName() {
-    return this.config.show.name ? html`
+    if (!this.config.show.name) return;
+    const name = this.tooltip.entity !== undefined
+      ? this.computeName(this.tooltip.entity)
+      : this.config.name || this.computeName(0);
+
+    return html`
       <div class='name flex'>
-        <span class='ellipsis'>${this.config.name || this.computeName(0)}</span>
-      </div>` : '';
+        <span class='ellipsis'>${name}</span>
+      </div>`;
   }
 
   renderStates() {
@@ -260,7 +265,7 @@ class MiniGraphCard extends LitElement {
   }
 
   renderStateTime() {
-    if (!this.tooltip.value) return;
+    if (this.tooltip.value === undefined) return;
     return html`
       <div class='state__time'>
         <span>${this.tooltip.time[0]}</span> - <span>${this.tooltip.time[1]}</span>
