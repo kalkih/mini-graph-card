@@ -361,8 +361,7 @@ class MiniGraphCard extends LitElement {
     const offset = 60 / points_per_hour * 0.5;
     const id = Math.abs((Number(e.target.id) + 1) - hours_to_show * points_per_hour);
     const now = new Date();
-    now.setHours(now.getHours() - id);
-    now.setMinutes(now.getMinutes() - offset);
+    now.setMinutes(now.getMinutes() - (offset * 2 * id) - offset);
     const start = getTime(now, this.config.hour24);
     now.setMinutes(now.getMinutes() + offset * 2);
     const end = getTime(now, this.config.hour24);
