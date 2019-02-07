@@ -137,6 +137,8 @@ class MiniGraphCard extends LitElement {
           this.length[ele.id] = ele.getTotalLength();
         });
         this.length = [...this.length];
+      } else {
+        this.length = Array(this.entity.length).fill('none');
       }
     }
   }
@@ -277,7 +279,7 @@ class MiniGraphCard extends LitElement {
         .id=${i} anim=${this.config.animate} ?init=${this.length[i]}
         style="animation-delay: ${this.config.animate ? i * 0.5 + 's' : '0s'}"
         fill='none'
-        stroke-dasharray=${this.length[i]} stroke-dashoffset=${this.length[i]}
+        stroke-dasharray=${this.length[i] || 'none'} stroke-dashoffset=${this.length[i] || 'none'}
         stroke=${this.computeColor(this.entity[i], i)}
         stroke-width=${this.config.line_width}
         d=${this.line[i]}
