@@ -38,8 +38,8 @@ export default class Graph {
     }
     history = history.reduce((res, item) => reduce(res, item), []);
     history.length = Math.ceil(this.hours * this.points + 1);
-    this.coords = this._calcPoints(history).filter(point => point[2] !== null);;
 
+    this.coords = this._calcPoints(history).filter(point => point[2] !== null);
     this.min = Math.min(...this.coords.map(item => Number(item[2])));
     this.max = Math.max(...this.coords.map(item => Number(item[2])));
   }
@@ -78,8 +78,6 @@ export default class Graph {
 
   getPoints() {
     let coords = this._calcY(this.coords);
-    // console.log(coords)
-    // return coords;
     let next, Z;
     let last = coords.filter(Boolean)[0]
     coords.shift();

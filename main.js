@@ -42,6 +42,7 @@ class MiniGraphCard extends LitElement {
     this.fill = [];
     this.points = [];
     this.tooltip = {};
+    this.updateQueue = [];
   }
 
   set hass(hass) {
@@ -51,6 +52,7 @@ class MiniGraphCard extends LitElement {
       const entityState = hass.states[entity.entity];
       if (entityState && this.entity[index] !== entityState) {
         this.entity[index] = entityState;
+        this.updateQueue.push(entityState.entity_id);
         update = true;
       }
     });
@@ -72,6 +74,7 @@ class MiniGraphCard extends LitElement {
       bound: [],
       abs: [],
       tooltip: {},
+      updateQueue: [],
     };
   }
 
@@ -121,54 +124,6 @@ class MiniGraphCard extends LitElement {
     }
 
     this.config = conf;
-  }
-
-  async updateData({config} = this) {
-    const endTime = new Date();
-    const startTime = new Date();
-    startTime.setHours(endTime.getHours() - config.hours_to_show);
-
-    const promise = this.entity.map((entity, index) =>
-      this.updateEntity(entity, index, startTime, endTime));
-    await Promise.all(promise);
-
-    this.bound = [
-      Math.min(...this.Graph.map(ele => ele.min)) || this.bound[0],
-      Math.max(...this.Graph.map(ele => ele.max)) || this.bound[1],
-    ];
-
-    if (config.show.graph) {
-      this.entity.map((entity, index) => {
-        if (!entity) return;
-        this.Graph[index].min = this.bound[0];
-        this.Graph[index].max = this.bound[1];
-        this.line[index] = this.Graph[index].getPath();
-        if (config.show.fill)
-          this.fill[index] = this.Graph[index].getFill(this.line[index]);
-        if (config.show.points)
-          this.points[index] = this.Graph[index].getPoints();
-      });
-      this.line = [...this.line];
-    }
-  }
-
-  async updateEntity(entity, index, start, end) {
-    if (!entity) return;
-    let stateHistory = await this.fetchRecent(entity.entity_id, start, end);
-    stateHistory = stateHistory[0].filter(item => !Number.isNaN(Number(item.state)));
-    if (stateHistory.length < 1) return;
-
-    if (entity.entity_id === this.entity[0].entity_id) {
-      this.abs = [{
-        type: 'min',
-        ...getMin(stateHistory, 'state'),
-      }, {
-        type: 'max',
-        ...getMax(stateHistory, 'state'),
-      }];
-    }
-
-    this.Graph[index].update(stateHistory);
   }
 
   shouldUpdate(changedProps) {
@@ -459,6 +414,55 @@ class MiniGraphCard extends LitElement {
 
     const x = Math.pow(10, dec);
     return (Math.round(state * x) / x).toFixed(dec);
+  }
+
+  async updateData({config} = this) {
+    const endTime = new Date();
+    const startTime = new Date();
+    startTime.setHours(endTime.getHours() - config.hours_to_show);
+
+    const promise = this.entity.map((entity, index) =>
+      this.updateEntity(entity, index, startTime, endTime));
+    await Promise.all(promise);
+    this.updateQueue = [];
+
+    this.bound = [
+      Math.min(...this.Graph.map(ele => ele.min)) || this.bound[0],
+      Math.max(...this.Graph.map(ele => ele.max)) || this.bound[1],
+    ];
+
+    if (config.show.graph) {
+      this.entity.map((entity, index) => {
+        if (!entity) return;
+        this.Graph[index].min = this.bound[0];
+        this.Graph[index].max = this.bound[1];
+        this.line[index] = this.Graph[index].getPath();
+        if (config.show.fill)
+          this.fill[index] = this.Graph[index].getFill(this.line[index]);
+        if (config.show.points)
+          this.points[index] = this.Graph[index].getPoints();
+      });
+      this.line = [...this.line];
+    }
+  }
+
+  async updateEntity(entity, index, start, end) {
+    if (!entity || !this.updateQueue.includes(entity.entity_id)) return;
+    let stateHistory = await this.fetchRecent(entity.entity_id, start, end);
+    stateHistory = stateHistory[0].filter(item => !Number.isNaN(Number(item.state)));
+    if (stateHistory.length < 1) return;
+
+    if (entity.entity_id === this.entity[0].entity_id) {
+      this.abs = [{
+        type: 'min',
+        ...getMin(stateHistory, 'state'),
+      }, {
+        type: 'max',
+        ...getMax(stateHistory, 'state'),
+      }];
+    }
+
+    this.Graph[index].update(stateHistory);
   }
 
   async fetchRecent(entityId, start, end) {
