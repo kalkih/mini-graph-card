@@ -296,9 +296,9 @@ class MiniGraphCard extends LitElement {
         fill=${this.computeColor(this.entity[i], i)}
         stroke=${this.computeColor(this.entity[i], i)}
         stroke-width=${this.config.line_width / 2}>
-        ${points.map((point, index) => svg`
+        ${points.map(point => svg`
           <circle
-            class='line--point' .id=${index} .value=${point[2]} .entity=${i}
+            class='line--point' .id=${point[3]} .value=${point[2]} .entity=${i}
             cx=${point[0]} cy=${point[1]} r=${this.config.line_width}
             @mouseover=${e => this.openTooltip(e)}
             @mouseout=${e => this.tooltip = {}}

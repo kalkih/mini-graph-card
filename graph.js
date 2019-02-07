@@ -39,25 +39,22 @@ export default class Graph {
     history = history.reduce((res, item) => reduce(res, item), []);
     history.length = Math.ceil(this.hours * this.points + 1);
 
-    this.coords = this._calcPoints(history).filter(point => point[2] !== null);
+    this.coords = this._calcPoints(history);
     this.min = Math.min(...this.coords.map(item => Number(item[2])));
     this.max = Math.max(...this.coords.map(item => Number(item[2])));
   }
 
   _calcPoints(history) {
     const coords = []
-    let last = [0, null];
     let xRatio = this.width / (this.hours * this.points);
     xRatio = isFinite(xRatio) ? xRatio : this.width;
 
+    let first = history.filter(Boolean)[0];
+    let last = [0, this._average(first)];
     const getCoords = (item, i) => {
       const x = xRatio * i + this.margin[X];
-      if (item) {
-        const average = item.reduce((sum, entry) => {
-          return (sum + parseFloat(entry.state));
-        }, 0) / item.length;
-        last = [0, average];
-      }
+      if (item)
+        last = [0, this._average(item)];
       return coords.push([x, ...last]);
     }
 
@@ -79,7 +76,7 @@ export default class Graph {
   getPoints() {
     let coords = this._calcY(this.coords);
     let next, Z;
-    let last = coords.filter(Boolean)[0]
+    let last = coords[0];
     coords.shift();
     const coords2 = coords.map((point, i) => {
       next = point;
@@ -120,5 +117,11 @@ export default class Graph {
     const Zx = (Ax-Bx) / 2 + Bx;
     const Zy = (Ay-By) / 2 + By;
     return new Array(Zx, Zy);
+  }
+
+  _average(item) {
+    return item.reduce((sum, entry) => {
+      return (sum + parseFloat(entry.state));
+    }, 0) / item.length;
   }
 }
