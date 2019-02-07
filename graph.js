@@ -81,8 +81,9 @@ export default class Graph {
     const coords2 = coords.map((point, i) => {
       next = point;
       Z = this._midPoint(last[X], last[Y], next[X], next[Y]);
+      const sum = (next[2] + last[2]) / 2;
       last = next;
-      return [Z[X], Z[Y], next[2]];
+      return [Z[X], Z[Y], sum, i];
     });
     return coords2;
   }
