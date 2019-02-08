@@ -180,6 +180,10 @@ export const style = html`
       position: absolute;
       white-space: nowrap;
     }
+    .states[loc="right"] .state__time {
+      left: initial;
+      right: 0;
+    }
     .graph {
       align-self: flex-end;
       box-sizing: border-box;
