@@ -1,3 +1,19 @@
+## v0.2.2
+- **New:** Label design (#35)
+- **New:** Entity name now visible in title when graph point is hovered over (#39)
+- **New:** `hover` parameter for labels
+- **New:** Now rendering missing history as a horizontal line up to the first available history entry (similar to the default history-graph)
+- **Change:** Made labels visible on hover by default
+- **Change:** Label font size now has a min size and scales relative to the `font_size` option
+- **Fixed:** Significantly improved accuracy of graph point values
+- **Fixed:** Only fetch history for updated entities, use cache to update rest
+- **Fixed:** Graph points not applying threshold color from `line_color_above` / `line_color_below` (#38)
+- **Fixed:** Invalid timestamps when combining `points_per_hour` & `hours_to_show` (#37, #36)
+- **Fixed:** Misaligned legend text
+- **Fixed:** Missing bottom padding when graph is hidden
+- **Fixed:** Invisible lines when graph was updated after not covering the full width on load
+- **Fixed:** Align timestamps right when `align_state` is set to `right`
+
 ## v0.2.1
 - **Added:** New `hour24` option to choose time format between 12-hour/24-hour clock
 - **Added:** Support for showing multiple sensor states, see new `show_state` option for the entity object (#33)
@@ -6,7 +22,6 @@
 - **Fixed:** NaN values in extrema (#34)
 - **Fixed:** Extrema not rendering (#32)
 - **Fixed:** Times on points going backwards (#30)
-
 
 ## v0.2.0
 - **UI redesign**

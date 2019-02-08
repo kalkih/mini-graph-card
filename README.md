@@ -15,7 +15,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.2.1
+    - url: /local/mini-graph-card-bundle.js?v=0.2.2
       type: module
   ```
 
@@ -26,14 +26,14 @@ The card works with entities from within the **sensor** domain and displays the 
 2. Grab `mini-graph-card-bundle.js`
 
   ```
-  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.2.1/mini-graph-card-bundle.js
+  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.2.2/mini-graph-card-bundle.js
   ```
 
 3. Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`.
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.2.1
+    - url: /local/mini-graph-card-bundle.js?v=0.2.2
       type: module
   ```
 
@@ -60,7 +60,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.2.1
+    - url: /local/mini-graph-card-bundle.js?v=0.2.2
       type: module
   ```
 
@@ -127,7 +127,7 @@ All options are optional.
 | points | hover | `true` / `false` / `hover` | Display graph data points
 | legend | true | `true` / `false` | Display the graph legend (only shown when graph contains multiple entities)
 | extrema | false | `true` / `false` | Display max/min information
-| labels | false | `true` / `false` | Display Y-axis labels
+| labels | hover | `true` / `false` / `hover` | Display Y-axis labels
 
 #### Line color object
 See [adaptive line color](#adaptive-line-color) for example usage.
