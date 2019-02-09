@@ -40,7 +40,7 @@
     "build": "npm run lint && npm run rollup && npm run babel",
     "rollup": "rollup -c",
     "babel": "babel mini-graph-card-bundle.js --out-file mini-graph-card-bundle.js",
-    "lint": "eslint main.js",
+    "lint": "eslint main.js style.js graph.js",
     "watch": "rollup -c --watch"
   }
 }

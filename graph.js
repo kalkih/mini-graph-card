@@ -1,5 +1,6 @@
 const X = 0;
 const Y = 1;
+const V = 2;
 
 export default class Graph {
   constructor(width, height, margin, hours = 24, points = 1) {
@@ -10,21 +11,16 @@ export default class Graph {
     this._max = 0;
     this._min = 0;
     this.points = points;
-    this.hours = hours
+    this.hours = hours;
   }
 
-  get max() {
-    return this._max;
-  }
-  set max(max) {
-    this._max = max;
-  }
-  get min() {
-    return this._min;
-  }
-  set min(min) {
-    this._min = min;
-  }
+  get max() { return this._max; }
+
+  set max(max) { this._max = max; }
+
+  get min() { return this._min; }
+
+  set min(min) { this._min = min; }
 
   update(history) {
     const now = new Date().getTime();
@@ -35,53 +31,53 @@ export default class Graph {
       if (!res[key]) res[key] = [];
       res[key].push(item);
       return res;
-    }
-    history = history.reduce((res, item) => reduce(res, item), []);
-    history.length = Math.ceil(this.hours * this.points + 1);
+    };
+    const coords = history.reduce((res, item) => reduce(res, item), []);
+    coords.length = Math.ceil(this.hours * this.points + 1);
 
-    this.coords = this._calcPoints(history);
-    this.min = Math.min(...this.coords.map(item => Number(item[2])));
-    this.max = Math.max(...this.coords.map(item => Number(item[2])));
+    this.coords = this._calcPoints(coords);
+    this.min = Math.min(...this.coords.map(item => Number(item[V])));
+    this.max = Math.max(...this.coords.map(item => Number(item[V])));
   }
 
   _calcPoints(history) {
-    const coords = []
+    const coords = [];
     let xRatio = this.width / (this.hours * this.points);
-    xRatio = isFinite(xRatio) ? xRatio : this.width;
+    xRatio = Number.isFinite(xRatio) ? xRatio : this.width;
 
-    let first = history.filter(Boolean)[0];
-    let last = [0, this._average(first)];
+    let last = [0, this._average(history.filter(Boolean)[0])];
     const getCoords = (item, i) => {
       const x = xRatio * i + this.margin[X];
       if (item)
         last = [0, this._average(item)];
       return coords.push([x, ...last]);
-    }
+    };
 
-    for (let i = 0; i < history.length; i++)
+    for (let i = 0; i < history.length; i += 1)
       getCoords(history[i], i);
 
-    if (coords.length === 1) coords[1] = [this.width + this.margin[X], 0, coords[0][2]];
+    if (coords.length === 1) coords[1] = [this.width + this.margin[X], 0, coords[0][V]];
     return coords;
   }
 
   _calcY(coords) {
     const yRatio = ((this.max - this.min) / this.height) || 1;
-    return coords.map(coord => {
-      coord[Y] = this.height - ((coord[2] - this.min) / yRatio) + this.margin[Y] * 1.5;
-      return coord;
-    });
+    return coords.map(coord => [
+      coord[X],
+      this.height - ((coord[V] - this.min) / yRatio) + this.margin[Y] * 1.5,
+      coord[V],
+    ]);
   }
 
   getPoints() {
-    let coords = this._calcY(this.coords);
-    let next, Z;
+    const coords = this._calcY(this.coords);
+    let next; let Z;
     let last = coords[0];
     coords.shift();
     const coords2 = coords.map((point, i) => {
       next = point;
       Z = this._midPoint(last[X], last[Y], next[X], next[Y]);
-      const sum = (next[2] + last[2]) / 2;
+      const sum = (next[V] + last[V]) / 2;
       last = next;
       return [Z[X], Z[Y], sum, i];
     });
@@ -90,12 +86,12 @@ export default class Graph {
 
   getPath() {
     const coords = this._calcY(this.coords);
-    let next, Z;
+    let next; let Z;
     let path = '';
-    let last = coords.filter(Boolean)[0]
+    let last = coords[0];
     path += `M${last[X]},${last[Y]}`;
 
-    coords.forEach(point => {
+    coords.forEach((point) => {
       next = point;
       Z = this._midPoint(last[X], last[Y], next[X], next[Y]);
       path += ` ${Z[X]},${Z[Y]}`;
@@ -109,20 +105,19 @@ export default class Graph {
 
   getFill(path) {
     const height = this.height + this.margin[Y] * 2;
-    path += ` L ${this.width - this.margin[X] * 2}, ${height}`;
-    path += ` L ${this.coords[0][X]}, ${height} z`;
-    return path;
+    let fill = path;
+    fill += ` L ${this.width - this.margin[X] * 2}, ${height}`;
+    fill += ` L ${this.coords[0][X]}, ${height} z`;
+    return fill;
   }
 
   _midPoint(Ax, Ay, Bx, By) {
-    const Zx = (Ax-Bx) / 2 + Bx;
-    const Zy = (Ay-By) / 2 + By;
-    return new Array(Zx, Zy);
+    const Zx = (Ax - Bx) / 2 + Bx;
+    const Zy = (Ay - By) / 2 + By;
+    return [Zx, Zy];
   }
 
   _average(item) {
-    return item.reduce((sum, entry) => {
-      return (sum + parseFloat(entry.state));
-    }, 0) / item.length;
+    return item.reduce((sum, entry) => (sum + parseFloat(entry.state)), 0) / item.length;
   }
 }
