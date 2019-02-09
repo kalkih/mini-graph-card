@@ -1,6 +1,6 @@
-import { LitElement, html, svg } from '@polymer/lit-element';
+import { LitElement, html, svg } from 'lit-element';
 import Graph from './graph';
-import { style } from './style';
+import style from './style';
 
 const FONT_SIZE = 14;
 const ICON = {

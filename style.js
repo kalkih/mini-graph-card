@@ -1,6 +1,6 @@
-import { html } from '@polymer/lit-element';
+import { html } from 'lit-element';
 
-export const style = html`
+const style = html`
   <style is="custom-style">
     :host {
       display: flex;
@@ -326,3 +326,5 @@ export const style = html`
       }
     }
   </style>`;
+
+export default style;
