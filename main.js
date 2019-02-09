@@ -45,6 +45,10 @@ class MiniGraphCard extends LitElement {
     this.updateQueue = [];
   }
 
+  static get styles() {
+    return style;
+  }
+
   set hass(hass) {
     this._hass = hass;
     let update = false;
@@ -145,7 +149,6 @@ class MiniGraphCard extends LitElement {
 
   render({ config } = this) {
     return html`
-      ${style}
       <ha-card
         class='flex'
         ?group=${config.group}
