@@ -1,0 +1,8 @@
+language: node_js
+node_js:
+  - "10.15.0"
+  - "8.12.0"
+script:
+  - npm run lint
+  - npm run rollup
+  - npm run babel

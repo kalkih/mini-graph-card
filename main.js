@@ -1,13 +1,13 @@
 import { LitElement, html, svg } from '@polymer/lit-element';
 import Graph from './graph';
-import { style } from './style'
+import { style } from './style';
 
 const FONT_SIZE = 14;
 const ICON = {
   humidity: 'hass:water-percent',
   illuminance: 'hass:brightness-5',
   temperature: 'hass:thermometer',
-  battery: 'hass:battery'
+  battery: 'hass:battery',
 };
 const DEFAULT_COLORS = ['var(--accent-color)', '#3498db', '#e74c3c', '#9b59b6', '#f1c40f', '#2ecc71'];
 const UPDATE_PROPS = ['entity', 'line', 'length', 'fill', 'points', 'tooltip', 'abs'];
@@ -24,17 +24,17 @@ const DEFAULT_SHOW = {
 };
 
 const getMin = (arr, val) => {
-  return arr.reduce((min, p) => Number(p[val]) < Number(min[val]) ? p : min, arr[0]);
-}
+  arr.reduce((min, p) => (Number(p[val]) < Number(min[val]) ? p : min), arr[0]);
+};
 const getMax = (arr, val) => {
-  return arr.reduce((max, p) => Number(p[val]) > Number(max[val]) ? p : max, arr[0]);
-}
+  arr.reduce((max, p) => (Number(p[val]) > Number(max[val]) ? p : max), arr[0]);
+};
 const getTime = (date, hour24) => date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: !hour24 });
 
 class MiniGraphCard extends LitElement {
   constructor() {
     super();
-    this.bound = [0,0];
+    this.bound = [0, 0];
     this.abs = [];
     this.length = [];
     this.entity = [];
@@ -94,14 +94,14 @@ class MiniGraphCard extends LitElement {
       more_info: true,
       entities: config.entity,
       ...config,
-      show: {...DEFAULT_SHOW, ...config.show},
+      show: { ...DEFAULT_SHOW, ...config.show },
     };
 
     if (typeof conf.entities === 'string')
-      conf.entities = [{entity: conf.entities}];
+      conf.entities = [{ entity: conf.entities }];
     conf.entities.forEach((entity, i) => {
       if (typeof entity === 'string')
-        conf.entities[i] = { entity: entity };
+        conf.entities[i] = { entity };
     });
     if (typeof config.line_color === 'string')
       conf.line_color = [config.line_color, ...DEFAULT_COLORS];
@@ -118,7 +118,7 @@ class MiniGraphCard extends LitElement {
           conf.height,
           [conf.show.fill ? 0 : conf.line_width, conf.line_width],
           conf.hours_to_show,
-          conf.points_per_hour
+          conf.points_per_hour,
         );
       });
     }
@@ -133,7 +133,7 @@ class MiniGraphCard extends LitElement {
   updated(changedProperties) {
     if (this.config.animate && changedProperties.has('line')) {
       if (this.length.length < this.entity.length) {
-        this.shadowRoot.querySelectorAll('svg path.line').forEach(ele => {
+        this.shadowRoot.querySelectorAll('svg path.line').forEach((ele) => {
           this.length[ele.id] = ele.getTotalLength();
         });
         this.length = [...this.length];
@@ -143,7 +143,7 @@ class MiniGraphCard extends LitElement {
     }
   }
 
-  render({config, entity} = this) {
+  render({ config } = this) {
     return html`
       ${style}
       <ha-card
@@ -163,7 +163,7 @@ class MiniGraphCard extends LitElement {
   }
 
   renderHeader() {
-    const {show, align_icon, align_header} = this.config;
+    const { show, align_icon, align_header } = this.config;
     return show.name || (show.icon && align_icon !== 'state') ? html`
       <div class='header flex' loc=${align_header}>
         ${this.renderName()}
@@ -263,7 +263,7 @@ class MiniGraphCard extends LitElement {
       <path
         class='line--fill'
         .id=${i} anim=${this.config.animate} ?init=${this.length[i]}
-        style="animation-delay: ${this.config.animate ? i * 0.5 + 's' : '0s'}"
+        style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
         fill=${this.computeColor(this.entity[i], i)}
         stroke=${this.computeColor(this.entity[i], i)}
         stroke-width=${this.config.line_width}
@@ -277,7 +277,7 @@ class MiniGraphCard extends LitElement {
       <path
         class='line'
         .id=${i} anim=${this.config.animate} ?init=${this.length[i]}
-        style="animation-delay: ${this.config.animate ? i * 0.5 + 's' : '0s'}"
+        style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
         fill='none'
         stroke-dasharray=${this.length[i] || 'none'} stroke-dashoffset=${this.length[i] || 'none'}
         stroke=${this.computeColor(this.entity[i], i)}
@@ -292,7 +292,7 @@ class MiniGraphCard extends LitElement {
       <g class='line--points'
         ?init=${this.length[i]}
         anim=${this.config.animate && this.config.show.points !== 'hover'}
-        style="animation-delay: ${this.config.animate ? i * 0.5 + 0.5 + 's' : '0s'}"
+        style="animation-delay: ${this.config.animate ? `${i * 0.5 + 0.5}s` : '0s'}"
         fill=${this.computeColor(this.entity[i], i)}
         stroke=${this.computeColor(this.entity[i], i)}
         stroke-width=${this.config.line_width / 2}>
@@ -301,9 +301,8 @@ class MiniGraphCard extends LitElement {
             class='line--point' .id=${point[3]} .value=${point[2]} .entity=${i}
             cx=${point[0]} cy=${point[1]} r=${this.config.line_width}
             @mouseover=${e => this.openTooltip(e)}
-            @mouseout=${e => this.tooltip = {}}
-          />`
-        )}
+            @mouseout=${() => this.tooltip = {}}
+          />`)}
       </g>`;
   }
 
@@ -320,7 +319,7 @@ class MiniGraphCard extends LitElement {
   }
 
   openTooltip(e) {
-    const {points_per_hour, hours_to_show} = this.config;
+    const { points_per_hour, hours_to_show } = this.config;
     const offset = 60 / points_per_hour * 0.5;
     const id = Math.abs((Number(e.target.id) + 1) - hours_to_show * points_per_hour);
     const now = new Date();
@@ -331,7 +330,7 @@ class MiniGraphCard extends LitElement {
 
     this.tooltip = {
       value: Number(e.target.value),
-      id: id,
+      id,
       entity: e.target.entity,
       time: [start, end],
     };
@@ -360,8 +359,7 @@ class MiniGraphCard extends LitElement {
             <span class='info__item__time'>
               ${getTime(new Date(entry.last_changed), this.config.hour24)}
             </span>
-          </div>`
-        )}
+          </div>`)}
       </div>`;
   }
 
@@ -371,13 +369,13 @@ class MiniGraphCard extends LitElement {
       this.fire('hass-more-info', { entityId: entity.entity_id });
   }
 
-  fire(type, detail, options) {
-    options = options || {};
-    detail = (detail === null || detail === undefined) ? {} : detail;
+  fire(type, inDetail, inOptions) {
+    const options = inOptions || {};
+    const detail = (inDetail === null || inDetail === undefined) ? {} : inDetail;
     const e = new Event(type, {
       bubbles: options.bubbles === undefined ? true : options.bubbles,
       cancelable: Boolean(options.cancelable),
-      composed: options.composed === undefined ? true : options.composed
+      composed: options.composed === undefined ? true : options.composed,
     });
     e.detail = detail;
     this.dispatchEvent(e);
@@ -386,11 +384,15 @@ class MiniGraphCard extends LitElement {
 
   computeColor(entity, i) {
     const state = Number(entity.state) || 0;
-    for (const item of this.config.line_color_above)
-      if (state > item.value) return item.color;
-    for (const item of this.config.line_color_below)
-      if (state < item.value) return item.color;
-    return this.config.line_color[i] || this.config.line_color[0];
+    const above = {
+      color: undefined,
+      ...this.config.line_color_above.find(ele => state > ele.value),
+    };
+    const below = {
+      color: undefined,
+      ...this.config.line_color_below.find(ele => state < ele.value),
+    };
+    return above.color || below.color || this.config.line_color[i] || this.config.line_color[0];
   }
 
   computeName(index) {
@@ -409,22 +411,22 @@ class MiniGraphCard extends LitElement {
     return this.config.unit || entity.attributes.unit_of_measurement || '';
   }
 
-  computeState(state) {
+  computeState(inState) {
+    const state = Number(inState);
     const dec = this.config.decimals;
-    if (dec === null || isNaN(dec) || Number.isNaN(state))
-      return Math.round(state * 100) / 100
+    if (dec === undefined || Number.isNaN(dec) || Number.isNaN(state))
+      return Math.round(state * 100) / 100;
 
-    const x = Math.pow(10, dec);
+    const x = 10 ** dec;
     return (Math.round(state * x) / x).toFixed(dec);
   }
 
-  async updateData({config} = this) {
-    const endTime = new Date();
-    const startTime = new Date();
-    startTime.setHours(endTime.getHours() - config.hours_to_show);
+  async updateData({ config } = this) {
+    const end = new Date();
+    const start = new Date();
+    start.setHours(end.getHours() - config.hours_to_show);
 
-    const promise = this.entity.map((entity, index) =>
-      this.updateEntity(entity, index, startTime, endTime));
+    const promise = this.entity.map((entity, i) => this.updateEntity(entity, i, start, end));
     await Promise.all(promise);
     this.updateQueue = [];
 
@@ -434,10 +436,9 @@ class MiniGraphCard extends LitElement {
     ];
 
     if (config.show.graph) {
-      this.entity.map((entity, index) => {
+      this.entity.forEach((entity, index) => {
         if (!entity) return;
-        this.Graph[index].min = this.bound[0];
-        this.Graph[index].max = this.bound[1];
+        [this.Graph[index].min, this.Graph[index].max] = [this.bound[0], this.bound[1]];
         this.line[index] = this.Graph[index].getPath();
         if (config.show.fill)
           this.fill[index] = this.Graph[index].getFill(this.line[index]);
@@ -472,7 +473,7 @@ class MiniGraphCard extends LitElement {
     if (start) url += `/${start.toISOString()}`;
     url += `?filter_entity_id=${entityId}`;
     if (end) url += `&end_time=${end.toISOString()}`;
-    return await this._hass.callApi('GET', url);
+    return this._hass.callApi('GET', url);
   }
 
   getCardSize() {

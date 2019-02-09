@@ -28,14 +28,19 @@
     "@babel/plugin-transform-template-literals": "^7.2.0",
     "@babel/preset-env": "^7.2.3",
     "babel-preset-minify": "^0.5.0",
+    "eslint": "^5.13.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.16.0",
     "rollup": "^0.66.6",
     "rollup-plugin-node-resolve": "^3.4.0",
     "rollup-plugin-replace": "^2.1.0",
     "rollup-plugin-terser": "^3.0.0"
   },
   "scripts": {
-    "build": "rollup -c && babel mini-graph-card-bundle.js --out-file mini-graph-card-bundle.js",
-    "watch": "rollup -c --watch",
-    "rollup": "rollup -c"
+    "build": "npm run lint && npm run rollup && npm run babel",
+    "rollup": "rollup -c",
+    "babel": "babel mini-graph-card-bundle.js --out-file mini-graph-card-bundle.js",
+    "lint": "eslint main.js",
+    "watch": "rollup -c --watch"
   }
 }
