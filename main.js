@@ -435,8 +435,12 @@ class MiniGraphCard extends LitElement {
     this.updateQueue = [];
 
     this.bound = [
-      Math.min(...this.Graph.map(ele => ele.min)) || this.bound[0],
-      Math.max(...this.Graph.map(ele => ele.max)) || this.bound[1],
+      config.lower_bound !== undefined
+        ? config.lower_bound
+        : Math.min(...this.Graph.map(ele => ele.min)) || this.bound[0],
+      config.upper_bound !== undefined
+        ? config.upper_bound
+        : Math.max(...this.Graph.map(ele => ele.max)) || this.bound[1],
     ];
 
     if (config.show.graph) {
