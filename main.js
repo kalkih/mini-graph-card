@@ -194,12 +194,13 @@ class MiniGraphCard extends LitElement {
   }
 
   renderStates() {
+    const state = this.tooltip.value !== undefined ? this.tooltip.value : this.entity[0].state;
     if (this.config.show.state)
       return html`
         <div class='states flex' loc=${this.config.align_state}>
           <div class='state'>
             <span class='state__value ellipsis'>
-              ${this.computeState(this.tooltip.value || this.entity[0].state)}
+              ${this.computeState(state)}
             </span>
             <span class='state__uom ellipsis'>
               ${this.computeUom(this.entity[this.tooltip.entity || 0])}
