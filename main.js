@@ -445,7 +445,7 @@ class MiniGraphCard extends LitElement {
 
     if (config.show.graph) {
       this.entity.forEach((entity, index) => {
-        if (!entity) return;
+        if (!entity || this.Graph[index].coords.length === 0) return;
         [this.Graph[index].min, this.Graph[index].max] = [this.bound[0], this.bound[1]];
         this.line[index] = this.Graph[index].getPath();
         if (config.show.fill)
@@ -460,6 +460,7 @@ class MiniGraphCard extends LitElement {
   async updateEntity(entity, index, start, end) {
     if (!entity || !this.updateQueue.includes(entity.entity_id)) return;
     let stateHistory = await this.fetchRecent(entity.entity_id, start, end);
+    if (!stateHistory[0]) return;
     stateHistory = stateHistory[0].filter(item => !Number.isNaN(Number(item.state)));
     if (stateHistory.length < 1) return;
 
