@@ -2,6 +2,7 @@ import { LitElement, html, svg } from 'lit-element';
 import Graph from './graph';
 import style from './style';
 
+const URL_DOCS = 'https://github.com/kalkih/mini-graph-card/blob/master/README.md';
 const FONT_SIZE = 14;
 const ICON = {
   humidity: 'hass:water-percent',
@@ -83,7 +84,11 @@ class MiniGraphCard extends LitElement {
   }
 
   setConfig(config) {
-    this.style = 'display: flex; flex-direction: column;';
+    if (config.entity)
+      throw new Error(`The "entity" option was removed, please use "entities".\n See ${URL_DOCS}`);
+    if (!Array.isArray(config.entities))
+      throw new Error(`Please provide the "entities" option as a list.\n See ${URL_DOCS}`);
+
     const conf = {
       animate: false,
       hour24: false,
@@ -96,13 +101,10 @@ class MiniGraphCard extends LitElement {
       line_color_below: [],
       line_width: 5,
       more_info: true,
-      entities: config.entity,
       ...config,
       show: { ...DEFAULT_SHOW, ...config.show },
     };
 
-    if (typeof conf.entities === 'string')
-      conf.entities = [{ entity: conf.entities }];
     conf.entities.forEach((entity, i) => {
       if (typeof entity === 'string')
         conf.entities[i] = { entity };
@@ -127,6 +129,7 @@ class MiniGraphCard extends LitElement {
       });
     }
 
+    this.style = 'display: flex; flex-direction: column;';
     this.config = conf;
   }
 
