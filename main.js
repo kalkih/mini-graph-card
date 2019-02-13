@@ -129,7 +129,6 @@ class MiniGraphCard extends LitElement {
       ));
     }
 
-    this.style = 'display: flex; flex-direction: column;';
     this.config = conf;
   }
 

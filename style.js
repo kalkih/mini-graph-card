@@ -3,7 +3,6 @@ import { css } from 'lit-element';
 const style = css`
   :host {
     display: flex;
-    flex: 1;
     flex-direction: column;
   }
   ha-card {
