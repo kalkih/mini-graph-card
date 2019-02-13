@@ -489,7 +489,7 @@ class MiniGraphCard extends LitElement {
     if (!entity || !this.updateQueue.includes(entity.entity_id)) return;
     let stateHistory = await this.fetchRecent(entity.entity_id, start, end);
     if (!stateHistory[0]) return;
-    stateHistory = stateHistory[0].filter(item => !Number.isNaN(Number(item.state)));
+    stateHistory = stateHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
     if (stateHistory.length < 1) return;
 
     if (entity.entity_id === this.entity[0].entity_id) {
