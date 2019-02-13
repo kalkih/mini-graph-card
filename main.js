@@ -118,16 +118,15 @@ class MiniGraphCard extends LitElement {
     conf.hours_to_show = Math.floor(Number(conf.hours_to_show)) || 24;
     conf.color_thresholds.sort((a, b) => b.value - a.value);
     if (!this.Graph) {
-      this.Graph = [];
-      conf.entities.forEach((entity, index) => {
-        this.Graph[index] = new Graph(
+      this.Graph = conf.entities.map(() => (
+        new Graph(
           500,
           conf.height,
           [conf.show.fill ? 0 : conf.line_width, conf.line_width],
           conf.hours_to_show,
           conf.points_per_hour,
-        );
-      });
+        )
+      ));
     }
 
     this.style = 'display: flex; flex-direction: column;';
@@ -416,10 +415,10 @@ class MiniGraphCard extends LitElement {
     const { color_thresholds, line_color } = this.config;
     const state = Number(inState) || 0;
     const threshold = {
-      color: line_color[i],
+      color: line_color[i] || line_color[0],
       ...color_thresholds.find(ele => ele.value < state),
     };
-    return threshold.color || line_color[0];
+    return this.config.entities[i].color || threshold.color;
   }
 
   computeName(index) {
@@ -467,19 +466,19 @@ class MiniGraphCard extends LitElement {
     ];
 
     if (config.show.graph) {
-      this.entity.forEach((entity, index) => {
-        if (!entity || this.Graph[index].coords.length === 0) return;
-        [this.Graph[index].min, this.Graph[index].max] = [this.bound[0], this.bound[1]];
-        this.line[index] = this.Graph[index].getPath();
-        if (config.show.fill)
-          this.fill[index] = this.Graph[index].getFill(this.line[index]);
-        if (config.show.points)
-          this.points[index] = this.Graph[index].getPoints();
+      this.entity.forEach((entity, i) => {
+        if (!entity || this.Graph[i].coords.length === 0) return;
+        [this.Graph[i].min, this.Graph[i].max] = [this.bound[0], this.bound[1]];
+        this.line[i] = this.Graph[i].getPath();
 
-        if (config.color_thresholds.length > 0)
-          this.gradient[index] = this.Graph[index].computeGradient(
+        if (config.show.fill)
+          this.fill[i] = this.Graph[i].getFill(this.line[i]);
+        if (config.show.points)
+          this.points[i] = this.Graph[i].getPoints();
+        if (config.color_thresholds.length > 0 && !config.entities[i].color)
+          this.gradient[i] = this.Graph[i].computeGradient(
             config.color_thresholds,
-            config.line_color[index] || config.line_color[0],
+            config.entities[i].color || config.line_color[i] || config.line_color[0],
           );
       });
       this.line = [...this.line];
