@@ -15,7 +15,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.2.3
+    - url: /local/mini-graph-card-bundle.js?v=0.2.4
       type: module
   ```
 
@@ -26,14 +26,14 @@ The card works with entities from within the **sensor** domain and displays the 
 2. Grab `mini-graph-card-bundle.js`
 
   ```
-  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.2.3/mini-graph-card-bundle.js
+  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.2.4/mini-graph-card-bundle.js
   ```
 
 3. Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`.
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.2.3
+    - url: /local/mini-graph-card-bundle.js?v=0.2.4
       type: module
   ```
 
@@ -60,7 +60,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.2.3
+    - url: /local/mini-graph-card-bundle.js?v=0.2.4
       type: module
   ```
 
@@ -124,7 +124,7 @@ All options are optional.
 | name | true | `true` / `false` | Display name
 | icon | true | `true` / `false` | Display icon
 | state | true | `true` / `false` | Display current state
-| graph | true | `true` / `false` | Display the graph
+| graph | true | `true` / `false` / `fade` | Display the graph
 | fill | true | `true` / `false` | Display the graph fill
 | points | hover | `true` / `false` / `hover` | Display graph data points
 | legend | true | `true` / `false` | Display the graph legend (only shown when graph contains multiple entities)
@@ -136,7 +136,7 @@ See [dynamic line color](#dynamic-line-color) for example usage.
 
 | Name | Type | Default | Description |
 |------|:----:|:-------:|:------------|
-| value | number | **required** | The threshold at where the color should apply if state is above/below.
+| value | number | **required** | The threshold at where the color should apply if state is above.
 | color | string | **required** | Color to apply to line graph, most formats supported (`hex`, `rgb`, `rgba` or just the name of the color etc.)
 
 ### Example usage
@@ -238,7 +238,7 @@ Have the graph change line color dynamically.
     - sensor.sensor_temperature
   show:
     labels: true
-  line_color_threshold:
+  color_thresholds:
     - value: 20
       color: "#f39c12"
     - value: 21

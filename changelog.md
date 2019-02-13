@@ -1,9 +1,15 @@
+## v0.2.4
+- **New:** Parameter `fade` for `show` -> `fill` option, makes the fill fade out (#45)
+- **Fixed:** History entries with `null` state breaking graph (#46)
+- **Fixed:** compatibility issues with the custom swiper-card
+- **Fixed:** Broken extrema
+
 ## v0.2.3
 - **New:** Option `color_thresholds` (#45)
 - **New:** Color thresholds now changes dynamically with the history (#45)
 - **New:** Options `lower_bound` & `upper_bound` added (#40)
 - **New:** Option `color` to entity object, overrides other color options
-- **Change:** `entities` option now always requires a list, changed in order to be compatible with "Unused entities" UI (#44) **(BREAKING CHANGE)**`
+- **Change:** `entities` option now always requires a list, changed in order to be compatible with "Unused entities" UI (#44) **(BREAKING CHANGE)**
 - **Change:** Default value for `points_per_hour` changed from `1` to `0.5`.
 - **Fixed:** Updated lit-element to v2.0.1
 - **Fixed:** Zero values show up as current value when hovered over (#41)
