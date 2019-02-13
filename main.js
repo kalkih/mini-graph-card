@@ -268,13 +268,21 @@ class MiniGraphCard extends LitElement {
   renderSvgFill(fill, i) {
     if (!fill) return;
     const color = this.computeColor(this.entity[i].state, i);
+    const fade = this.config.show.fill === 'fade';
     return svg`
+      <defs>
+        <linearGradient id=${`fill-grad-${i}`} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop stop-color=${color} offset='0%' stop-opacity='1'/>
+          <stop stop-color=${color} offset='100%' stop-opacity='.15'/>
+        </linearGradient>
+      </defs>
       <path
         class='line--fill'
+        type=${this.config.show.fill}
         .id=${i} anim=${this.config.animate} ?init=${this.length[i]}
         style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
-        fill=${color}
-        stroke=${color}
+        fill=${fade ? `url(#fill-grad-${i})` : color}
+        stroke=${fade ? `url(#fill-grad-${i})` : color}
         stroke-width=${this.config.line_width}
         d=${this.fill[i]}
       />`;

@@ -210,6 +210,9 @@ const style = css`
   .line--fill[anim="false"] {
     animation: reveal .25s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   }
+  .line--fill[anim="false"][type="fade"] {
+    animation: reveal-2 .25s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+  }
   .line--points[anim="false"],
   .line[anim="false"] {
     animation: pop .25s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
@@ -236,6 +239,9 @@ const style = css`
   }
   .line--fill[anim="true"][init] {
     animation: reveal .5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+  }
+  .line--fill[anim="true"][init][type="fade"] {
+    animation: reveal-2 .5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   }
   .line[anim="true"][init] {
     animation: dash 1s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
@@ -309,6 +315,10 @@ const style = css`
   @keyframes reveal {
     0% { opacity: 0; }
     100% { opacity: .15; }
+  }
+  @keyframes reveal-2 {
+    0% { opacity: 0; }
+    100% { opacity: .4; }
   }
   @keyframes pop {
     0% { opacity: 0; }
