@@ -42,6 +42,7 @@ class MiniGraphCard extends LitElement {
     this.line = [];
     this.fill = [];
     this.points = [];
+    this.gradient = [];
     this.tooltip = {};
     this.updateQueue = [];
   }
@@ -88,6 +89,8 @@ class MiniGraphCard extends LitElement {
       throw new Error(`The "entity" option was removed, please use "entities".\n See ${URL_DOCS}`);
     if (!Array.isArray(config.entities))
       throw new Error(`Please provide the "entities" option as a list.\n See ${URL_DOCS}`);
+    if (config.line_color_above || config.line_color_below)
+      throw new Error(`"line_color_above/line_color_below" was removed, please use "color_thresholds".\n See ${URL_DOCS}`);
 
     const conf = {
       animate: false,
@@ -97,8 +100,7 @@ class MiniGraphCard extends LitElement {
       hours_to_show: 24,
       points_per_hour: 1,
       line_color: [...DEFAULT_COLORS],
-      line_color_above: [],
-      line_color_below: [],
+      color_thresholds: [],
       line_width: 5,
       more_info: true,
       ...config,
@@ -114,8 +116,7 @@ class MiniGraphCard extends LitElement {
 
     conf.font_size = (config.font_size / 100) * FONT_SIZE || FONT_SIZE;
     conf.hours_to_show = Math.floor(Number(conf.hours_to_show)) || 24;
-    conf.line_color_above.reverse();
-    conf.line_color_below.reverse();
+    conf.color_thresholds.sort((a, b) => b.value - a.value);
     if (!this.Graph) {
       this.Graph = [];
       conf.entities.forEach((entity, index) => {
@@ -155,9 +156,10 @@ class MiniGraphCard extends LitElement {
       <ha-card
         class='flex'
         ?group=${config.group}
-        ?fill=${this.config.show.graph && this.config.show.fill}
-        ?points=${this.config.show.points === 'hover'}
-        ?labels=${this.config.show.labels === 'hover'}
+        ?fill=${config.show.graph && config.show.fill}
+        ?points=${config.show.points === 'hover'}
+        ?labels=${config.show.labels === 'hover'}
+        ?gradient=${config.color_thresholds.length > 0}
         ?more-info=${config.more_info}
         style='font-size: ${config.font_size}px;'
         @click=${e => this.handlePopup(e, this.entity[0])}>
@@ -256,7 +258,7 @@ class MiniGraphCard extends LitElement {
       ${this.entity.map((entity, i) => html`
         <div class='graph__legend__item' @click=${e => this.handlePopup(e, entity)}>
           <svg width='10' height='10'>
-            <rect width='10' height='10' fill=${this.computeColor(entity, i)} />
+            <rect width='10' height='10' fill=${this.computeColor(entity.state, i)} />
           </svg>
           <span class='ellipsis'>${this.computeName(i)}</span>
         </div>
@@ -266,13 +268,14 @@ class MiniGraphCard extends LitElement {
 
   renderSvgFill(fill, i) {
     if (!fill) return;
+    const color = this.computeColor(this.entity[i].state, i);
     return svg`
       <path
         class='line--fill'
         .id=${i} anim=${this.config.animate} ?init=${this.length[i]}
         style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
-        fill=${this.computeColor(this.entity[i], i)}
-        stroke=${this.computeColor(this.entity[i], i)}
+        fill=${color}
+        stroke=${color}
         stroke-width=${this.config.line_width}
         d=${this.fill[i]}
       />`;
@@ -287,7 +290,7 @@ class MiniGraphCard extends LitElement {
         style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
         fill='none'
         stroke-dasharray=${this.length[i] || 'none'} stroke-dashoffset=${this.length[i] || 'none'}
-        stroke=${this.computeColor(this.entity[i], i)}
+        stroke=${this.gradient[i] ? `url(#grad-${i})` : this.computeColor(this.entity[i].state, i)}
         stroke-width=${this.config.line_width}
         d=${this.line[i]}
       />`;
@@ -295,17 +298,20 @@ class MiniGraphCard extends LitElement {
 
   renderSvgPoints(points, i) {
     if (!points) return;
+    const color = this.computeColor(this.entity[i].state, i);
     return svg`
       <g class='line--points'
         ?init=${this.length[i]}
         anim=${this.config.animate && this.config.show.points !== 'hover'}
         style="animation-delay: ${this.config.animate ? `${i * 0.5 + 0.5}s` : '0s'}"
-        fill=${this.computeColor(this.entity[i], i)}
-        stroke=${this.computeColor(this.entity[i], i)}
+        fill=${color}
+        stroke=${color}
         stroke-width=${this.config.line_width / 2}>
-        ${points.map(point => svg`
+        ${points.map((point, num) => svg`
           <circle
             class='line--point' .id=${point[3]} .value=${point[2]} .entity=${i}
+            stroke=${this.gradient[i] ? this.gradient[i][num].color : 'inherit'}
+            fill=${this.gradient[i] ? this.gradient[i][num].color : 'inherit'}
             cx=${point[0]} cy=${point[1]} r=${this.config.line_width}
             @mouseover=${e => this.openTooltip(e)}
             @mouseout=${() => this.tooltip = {}}
@@ -313,11 +319,28 @@ class MiniGraphCard extends LitElement {
       </g>`;
   }
 
+  renderSvgGradient(gradients) {
+    if (!gradients) return;
+    const items = gradients.map((gradient, i) => {
+      if (!gradient) return;
+      return svg`
+        <linearGradient id=${`grad-${i}`}>
+          ${gradient.map(stop => svg`
+            <stop stop-color=${stop.color}
+              offset=${`${stop.offset}%`}
+            />
+          `)}
+        </linearGradient>`;
+    });
+    return svg`<defs>${items}</defs>`;
+  }
+
   renderSvg() {
     return svg`
       <svg width='100%' height='100%' viewBox='0 0 500 ${this.config.height}'
         @click=${e => e.stopPropagation()}>
         <g>
+          ${this.renderSvgGradient(this.gradient)}
           ${this.fill.map((fill, i) => this.renderSvgFill(fill, i))}
           ${this.line.map((line, i) => this.renderSvgLine(line, i))}
         </g>
@@ -389,17 +412,14 @@ class MiniGraphCard extends LitElement {
     return e;
   }
 
-  computeColor(entity, i) {
-    const state = Number(entity.state) || 0;
-    const above = {
-      color: undefined,
-      ...this.config.line_color_above.find(ele => state > ele.value),
+  computeColor(inState, i) {
+    const { color_thresholds, line_color } = this.config;
+    const state = Number(inState) || 0;
+    const threshold = {
+      color: line_color[i],
+      ...color_thresholds.find(ele => ele.value < state),
     };
-    const below = {
-      color: undefined,
-      ...this.config.line_color_below.find(ele => state < ele.value),
-    };
-    return above.color || below.color || this.config.line_color[i] || this.config.line_color[0];
+    return threshold.color || line_color[0];
   }
 
   computeName(index) {
@@ -455,6 +475,12 @@ class MiniGraphCard extends LitElement {
           this.fill[index] = this.Graph[index].getFill(this.line[index]);
         if (config.show.points)
           this.points[index] = this.Graph[index].getPoints();
+
+        if (config.color_thresholds.length > 0)
+          this.gradient[index] = this.Graph[index].computeGradient(
+            config.color_thresholds,
+            config.line_color[index] || config.line_color[0],
+          );
       });
       this.line = [...this.line];
     }

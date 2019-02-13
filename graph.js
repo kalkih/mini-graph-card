@@ -103,6 +103,24 @@ export default class Graph {
     return path;
   }
 
+  computeGradient(thresholds, fallback) {
+    const length = 100 / this.coords.length;
+    const coords = this._calcY(this.coords);
+    let next;
+    let last = coords[0];
+    coords.shift();
+    return coords.map((coord, i) => {
+      next = coord;
+      const sum = (next[V] + last[V]) / 2;
+      last = next;
+      return {
+        offset: length * i + length,
+        color: fallback,
+        ...thresholds.find(ele => ele.value < sum),
+      };
+    });
+  }
+
   getFill(path) {
     const height = this.height + this.margin[Y] * 2;
     let fill = path;
