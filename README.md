@@ -15,7 +15,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.2.2
+    - url: /local/mini-graph-card-bundle.js?v=0.2.3
       type: module
   ```
 
@@ -26,14 +26,14 @@ The card works with entities from within the **sensor** domain and displays the 
 2. Grab `mini-graph-card-bundle.js`
 
   ```
-  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.2.2/mini-graph-card-bundle.js
+  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.2.3/mini-graph-card-bundle.js
   ```
 
 3. Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`.
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.2.2
+    - url: /local/mini-graph-card-bundle.js?v=0.2.3
       type: module
   ```
 
@@ -60,7 +60,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.2.2
+    - url: /local/mini-graph-card-bundle.js?v=0.2.3
       type: module
   ```
 
@@ -74,27 +74,28 @@ The card works with entities from within the **sensor** domain and displays the 
 | Name | Type | Default | Since | Description |
 |------|:----:|:-------:|:-----:|-------------|
 | type | string | **required** | v0.0.1 | `custom:mini-graph-card`.
-| entities | string/list | **required** | v0.0.1 | Single entity id as a string or multiple entities in a list, see [entities object](#entities-object) for additional entity options.
+| entities | list | **required** | v0.2.0 | One or more sensor entities in a list, see [entities object](#entities-object) for additional entity options.
 | icon | string | optional | v0.0.1 | Set a custom icon from any of the available mdi icons.
 | name | string | optional | v0.0.1 | Set a custom name which is displayed beside the icon.
 | unit | string | optional | v0.0.1 | Set a custom unit of measurement.
 | more_info | boolean | true | v0.0.1 | Set to `false` to disable the "more info" dialog popup when pressing on the card.
 | group | boolean | false | v0.2.0 | Disable paddings and box-shadow, useful when nesting the card.
 | hours_to_show | integer | 24 | v0.0.2 | Specify how many hours the line graph should render.
-| points_per_hour | integer | 1 | v0.2.0 | Specify amount of data points the graph should render for every hour, *(basically the detail/accuracy of the graph)*.
+| points_per_hour | number | 0.5 | v0.2.0 | Specify amount of data points the graph should render for every hour, *(basically the detail/accuracy of the graph)*.
 | show | list | optional | v0.2.0 | List of UI elements to display/hide, for available items see [available show options](#available-show-options).
 | animate | boolean | false | v0.2.0 | Add a reveal animation to the graph.
 | height | number | 150 | v0.0.1 | Set a custom height of the line graph.
 | line_width | number | 5 | v0.0.1 | Set the thickness of the line.
 | line_color | string/list | var(--accent-color) | v0.0.1 | Set a custom color for the graph line, provide a list of colors for multiple graph entries.
+| color_thresholds | list | optional | v0.2.3 | Set thresholds for dynamic graph colors, see [Line color object](#line-color-object).
 | decimals | integer | optional | v0.0.9 | Specify the exact number of decimals to show for states.
 | hour24 | boolean | false | v0.2.1 | Set to `true` to display times in 24-hour format.
 | font_size | number | 100 | v0.0.3 | Adjust the font size of the state displayed, as percentage of the original size.
 | align_header | string | `default` | v0.2.0 | Set the alignment of the header, `left`, `right`, `center` or `default`.
 | align_icon | string | `right` | v0.2.0 | Set the alignment of the icon, `left`, `right` or `state`.
 | align_state | string | `left` | v0.2.0 | Set the alignment of the current state, `left`, `right` or `center`.
-| line_color_above | list | optional | v0.2.0 | Set thresholds for different line graph colors, see [Line color object](#line-color-object).
-| line_color_below | list | optional | v0.2.0 | Set thresholds for different line graph colors, see [Line color object](#line-color-object).
+| lower_bound | number | optional | v0.2.3 | Set a fixed lower bound for the graph Y-axis.
+| upper_bound | number | optional | v0.2.3 | Set a fixed upper bound for the graph Y-axis.
 
 #### Entities object
 Providing options are optional, entities can be listed directly, see example below.
@@ -104,6 +105,7 @@ Providing options are optional, entities can be listed directly, see example bel
 | entity | string | **required** | Entity id of the sensor.
 | name | string | optional | Set a custom display name, defaults to entity's friendly_name.
 | show_state | string | optional | Display the current state of the sensor.
+| color | string | optional | Set a custom color, overrides all other color options including thresholds.
 
 ```yaml
 entities:
@@ -130,7 +132,7 @@ All options are optional.
 | labels | hover | `true` / `false` / `hover` | Display Y-axis labels
 
 #### Line color object
-See [adaptive line color](#adaptive-line-color) for example usage.
+See [dynamic line color](#dynamic-line-color) for example usage.
 
 | Name | Type | Default | Description |
 |------|:----:|:-------:|:------------|
@@ -142,7 +144,8 @@ See [adaptive line color](#adaptive-line-color) for example usage.
 #### Single entity card
 ```yaml
 - type: custom:mini-graph-card
-  entities: sensor.illumination
+  entities:
+   - sensor.illumination
 ```
 ![Single entity card](https://user-images.githubusercontent.com/457678/52009150-884d2500-24d2-11e9-9f2b-2981210d3897.png)
 
@@ -150,9 +153,10 @@ See [adaptive line color](#adaptive-line-color) for example usage.
 ```yaml
 # Example
 - type: custom:mini-graph-card
-  entities: sensor.illumination
-  location_icon: left
-  location_state: center
+  entities:
+   - sensor.illumination
+  align_icon: left
+  align_state: center
   show:
     fill: false
 ```
@@ -177,7 +181,8 @@ Use the `points_per_hour` option to specify the accuracy/detail of the graph.
 
 ```yaml
 - type: custom:mini-graph-card
-  entities: sensor.living_room_temp
+  entities:
+    - sensor.living_room_temp
   name: LIVONG ROOM
   hours_to_show: 168
   points_per_hour: 0.25
@@ -189,7 +194,8 @@ Use the `show` option to show/hide UI elements.
 
 ```yaml
 - type: custom:mini-graph-card
-  entities: sensor.humidity
+  entities:
+    - sensor.humidity
   show:
     icon: false
     name: false
@@ -203,47 +209,44 @@ You can stack cards horizontally by using one or more `horizontal-stack(s)`.
 - type: horizontal-stack
   cards:
     - type: custom:mini-graph-card
-      entities: sensor.humidity
+      entities:
+        - sensor.humidity
       line_color: blue
       line_width: 8
       font_size: 75
     - type: custom:mini-graph-card
-      entities: sensor.illumination
+      entities:
+        - sensor.illumination
       line_color: '#e74c3c'
       line_width: 8
       font_size: 75
     - type: custom:mini-graph-card
-      entities: sensor.temperature
+      entities:
+        - sensor.temperature
       line_color: var(--accent-color)
       line_width: 8
       font_size: 75
 ```
 ![Horizontally stacked cards](https://user-images.githubusercontent.com/457678/52009171-926f2380-24d2-11e9-9dd4-28f010608858.png)
 
-#### Adaptive line color
-Have the line color change with the current state.
-When listing more than one color entry, place them in order from *low -> high* for `line_color_above` and *high -> low* for `line_color_below`.
+#### dynamic line color
+Have the graph change line color dynamically.
 
 ```yaml
 - type: custom:mini-graph-card
-  entities: sensor.sensor_temperature
-  line_color_above:
-    - value: 10
-      color: yellow
+  entities:
+    - sensor.sensor_temperature
+  show:
+    labels: true
+  line_color_threshold:
     - value: 20
-      color: orange
-    - value: 30
-      color: red
-  line_color_below:
-    - value: -10
-      color: white
-    - value: -20
-      color: lightblue
-    - value: -30
-      color: blue
-    - value: -50
-      color: "#000000"
+      color: "#f39c12"
+    - value: 21
+      color: "#d35400"
+    - value: 21.5
+      color: "#c0392b"
 ```
+![Dynamic line color](https://user-images.githubusercontent.com/457678/52573150-cbd05900-2e19-11e9-9e01-740753169093.png)
 
 
 ## Development
