@@ -98,7 +98,7 @@ class MiniGraphCard extends LitElement {
       font_size: FONT_SIZE,
       height: 100,
       hours_to_show: 24,
-      points_per_hour: 1,
+      points_per_hour: 0.5,
       line_color: [...DEFAULT_COLORS],
       color_thresholds: [],
       line_width: 5,
