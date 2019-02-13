@@ -24,12 +24,12 @@ const DEFAULT_SHOW = {
   points: 'hover',
 };
 
-const getMin = (arr, val) => {
-  arr.reduce((min, p) => (Number(p[val]) < Number(min[val]) ? p : min), arr[0]);
-};
-const getMax = (arr, val) => {
-  arr.reduce((max, p) => (Number(p[val]) > Number(max[val]) ? p : max), arr[0]);
-};
+const getMin = (arr, val) => arr.reduce((min, p) => (
+  Number(p[val]) < Number(min[val]) ? p : min
+), arr[0]);
+const getMax = (arr, val) => arr.reduce((max, p) => (
+  Number(p[val]) > Number(max[val]) ? p : max
+), arr[0]);
 const getTime = (date, hour24) => date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: !hour24 });
 
 class MiniGraphCard extends LitElement {
@@ -390,7 +390,7 @@ class MiniGraphCard extends LitElement {
             <span class='info__item__type'>${entry.type}</span>
             <span class='info__item__value'>
               ${this.computeState(entry.state)}
-              ${this.computeUom(entry)}
+              ${this.computeUom(this.entity[0])}
             </span>
             <span class='info__item__time'>
               ${getTime(new Date(entry.last_changed), this.config.hour24)}
