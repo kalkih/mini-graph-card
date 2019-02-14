@@ -126,8 +126,8 @@ All options are optional.
 | icon | true | `true` / `false` | Display icon
 | state | true | `true` / `false` | Display current state
 | graph | line | `line` / `bar` / `false` | Display option for the graph
-| fill | true | `true` / `false` | Display the line graph fill
-| points | hover | `true` / `false` / `hover` | Display line graph data points
+| fill | true | `true` / `false` / `fade` | Display the line graph fill
+| points | hover | `true` / `false` / `hover` | Display graph data points
 | legend | true | `true` / `false` | Display the graph legend (only shown when graph contains multiple entities)
 | extrema | false | `true` / `false` | Display max/min information
 | labels | hover | `true` / `false` / `hover` | Display Y-axis labels
