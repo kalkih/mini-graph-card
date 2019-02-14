@@ -124,8 +124,8 @@ All options are optional.
 | name | true | `true` / `false` | Display name
 | icon | true | `true` / `false` | Display icon
 | state | true | `true` / `false` | Display current state
-| graph | true | `true` / `false` / `fade` | Display the graph
-| fill | true | `true` / `false` | Display the graph fill
+| graph | true | `true` / `false` | Display the graph
+| fill | true | `true` / `false` / `fade` | Display the graph fill
 | points | hover | `true` / `false` / `hover` | Display graph data points
 | legend | true | `true` / `false` | Display the graph legend (only shown when graph contains multiple entities)
 | extrema | false | `true` / `false` | Display max/min information
