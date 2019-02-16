@@ -35,6 +35,7 @@ const getTime = (date, hour24) => date.toLocaleString('en-US', { hour: 'numeric'
 class MiniGraphCard extends LitElement {
   constructor() {
     super();
+    this.id = Math.random().toString(36).substr(2, 9);
     this.bound = [0, 0];
     this.abs = [];
     this.length = [];
@@ -70,6 +71,7 @@ class MiniGraphCard extends LitElement {
 
   static get properties() {
     return {
+      id: String,
       _hass: {},
       config: {},
       entity: [],
@@ -270,7 +272,7 @@ class MiniGraphCard extends LitElement {
     const fade = this.config.show.fill === 'fade';
     return svg`
       <defs>
-        <linearGradient id=${`fill-grad-${i}`} x1="0%" y1="0%" x2="0%" y2="100%">
+        <linearGradient id=${`fill-grad-${this.id}-${i}`} x1="0%" y1="0%" x2="0%" y2="100%">
           <stop stop-color=${color} offset='0%' stop-opacity='1'/>
           <stop stop-color=${color} offset='100%' stop-opacity='.15'/>
         </linearGradient>
@@ -280,8 +282,8 @@ class MiniGraphCard extends LitElement {
         type=${this.config.show.fill}
         .id=${i} anim=${this.config.animate} ?init=${this.length[i]}
         style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
-        fill=${fade ? `url(#fill-grad-${i})` : color}
-        stroke=${fade ? `url(#fill-grad-${i})` : color}
+        fill=${fade ? `url(#fill-grad-${this.id}-${i})` : color}
+        stroke=${fade ? `url(#fill-grad-${this.id}-${i})` : color}
         stroke-width=${this.config.line_width}
         d=${this.fill[i]}
       />`;
@@ -296,7 +298,7 @@ class MiniGraphCard extends LitElement {
         style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
         fill='none'
         stroke-dasharray=${this.length[i] || 'none'} stroke-dashoffset=${this.length[i] || 'none'}
-        stroke=${this.gradient[i] ? `url(#grad-${i})` : this.computeColor(this.entity[i].state, i)}
+        stroke=${this.gradient[i] ? `url(#grad-${this.id}-${i})` : this.computeColor(this.entity[i].state, i)}
         stroke-width=${this.config.line_width}
         d=${this.line[i]}
       />`;
@@ -330,7 +332,7 @@ class MiniGraphCard extends LitElement {
     const items = gradients.map((gradient, i) => {
       if (!gradient) return;
       return svg`
-        <linearGradient id=${`grad-${i}`}>
+        <linearGradient id=${`grad-${this.id}-${i}`}>
           ${gradient.map(stop => svg`
             <stop stop-color=${stop.color}
               offset=${`${stop.offset}%`}
