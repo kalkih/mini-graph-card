@@ -33,9 +33,7 @@
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.16.0",
     "rollup": "^0.66.6",
-    "rollup-plugin-node-resolve": "^3.4.0",
-    "rollup-plugin-replace": "^2.1.0",
-    "rollup-plugin-terser": "^3.0.0"
+    "rollup-plugin-node-resolve": "^3.4.0"
   },
   "scripts": {
     "build": "npm run lint && npm run rollup && npm run babel",
