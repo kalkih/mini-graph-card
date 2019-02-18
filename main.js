@@ -226,7 +226,7 @@ class MiniGraphCard extends LitElement {
               ${this.computeState(state)}
             </span>
             <span class='state__uom ellipsis'>
-              ${this.computeUom(this.entity[this.tooltip.entity || 0])}
+              ${this.computeUom(this.tooltip.entity || 0)}
             </span>
             ${this.renderStateTime()}
           </div>
@@ -243,7 +243,7 @@ class MiniGraphCard extends LitElement {
             ${this.computeState(this.entity[id].state)}
           </span>
           <span class='state__uom ellipsis'>
-            ${this.computeUom(this.entity[id])}
+            ${this.computeUom(id)}
           </span>
         </div>`;
   }
@@ -426,7 +426,7 @@ class MiniGraphCard extends LitElement {
             <span class='info__item__type'>${entry.type}</span>
             <span class='info__item__value'>
               ${this.computeState(entry.state)}
-              ${this.computeUom(this.entity[0])}
+              ${this.computeUom(0)}
             </span>
             <span class='info__item__time'>
               ${getTime(new Date(entry.last_changed), this.config.hour24)}
@@ -476,8 +476,10 @@ class MiniGraphCard extends LitElement {
       || ICON.temperature;
   }
 
-  computeUom(entity) {
-    return this.config.unit || entity.attributes.unit_of_measurement || '';
+  computeUom(index) {
+    return this.config.entities[index].unit
+      || this.config.unit
+      || this.entity[index].attributes.unit_of_measurement || '';
   }
 
   computeState(inState) {
