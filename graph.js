@@ -132,7 +132,7 @@ export default class Graph {
   getBars(position, total) {
     const coords = this._calcY(this.coords);
     const margin = 4;
-    const xRatio = ((this.width - margin) / (this.hours * this.points + 1)) / total;
+    const xRatio = ((this.width - margin) / Math.ceil(this.hours * this.points + 1)) / total;
     return coords.map((coord, i) => ({
       x: (xRatio * i * total) + (xRatio * position) + margin,
       y: coord[Y],
