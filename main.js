@@ -16,7 +16,7 @@ const DEFAULT_SHOW = {
   name: true,
   icon: true,
   state: true,
-  graph: true,
+  graph: 'line',
   labels: 'hover',
   extrema: false,
   legend: true,
@@ -41,6 +41,7 @@ class MiniGraphCard extends LitElement {
     this.length = [];
     this.entity = [];
     this.line = [];
+    this.bar = [];
     this.fill = [];
     this.points = [];
     this.gradient = [];
@@ -343,6 +344,20 @@ class MiniGraphCard extends LitElement {
     return svg`<defs>${items}</defs>`;
   }
 
+  renderSvgBars(bars, index) {
+    if (!bars) return;
+    const items = bars.map((bar, i) => {
+      const color = this.computeColor(bar.value, index);
+      return svg`
+        <rect class='bar' x=${bar.x} y=${bar.y} height=${bar.height} width=${bar.width}
+          .id=${i} .value=${bar.value} .entity=${index} fill=${color}
+          @mouseover=${e => this.openTooltip(e)}
+          @mouseout=${() => this.tooltip = {}}
+        />`;
+    });
+    return svg`<g>${items}</g>`;
+  }
+
   renderSvg() {
     const { height } = this.config;
     return svg`
@@ -352,6 +367,7 @@ class MiniGraphCard extends LitElement {
           ${this.renderSvgGradient(this.gradient)}
           ${this.fill.map((fill, i) => this.renderSvgFill(fill, i))}
           ${this.line.map((line, i) => this.renderSvgLine(line, i))}
+          ${this.bar.map((bars, i) => this.renderSvgBars(bars, i))}
         </g>
         ${this.points.map((points, i) => this.renderSvgPoints(points, i))}
       </svg>`;
@@ -479,17 +495,20 @@ class MiniGraphCard extends LitElement {
       this.entity.forEach((entity, i) => {
         if (!entity || this.Graph[i].coords.length === 0) return;
         [this.Graph[i].min, this.Graph[i].max] = [this.bound[0], this.bound[1]];
-        this.line[i] = this.Graph[i].getPath();
-
-        if (config.show.fill)
-          this.fill[i] = this.Graph[i].getFill(this.line[i]);
-        if (config.show.points)
-          this.points[i] = this.Graph[i].getPoints();
-        if (config.color_thresholds.length > 0 && !config.entities[i].color)
-          this.gradient[i] = this.Graph[i].computeGradient(
-            config.color_thresholds,
-            config.entities[i].color || config.line_color[i] || config.line_color[0],
-          );
+        if (config.show.graph === 'bar') {
+          this.bar[i] = this.Graph[i].getBars(i, config.entities.length);
+        } else {
+          this.line[i] = this.Graph[i].getPath();
+          if (config.show.fill)
+            this.fill[i] = this.Graph[i].getFill(this.line[i]);
+          if (config.show.points)
+            this.points[i] = this.Graph[i].getPoints();
+          if (config.color_thresholds.length > 0 && !config.entities[i].color)
+            this.gradient[i] = this.Graph[i].computeGradient(
+              config.color_thresholds,
+              config.entities[i].color || config.line_color[i] || config.line_color[0],
+            );
+        }
       });
       this.line = [...this.line];
     }

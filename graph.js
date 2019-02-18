@@ -129,6 +129,19 @@ export default class Graph {
     return fill;
   }
 
+  getBars(position, total) {
+    const coords = this._calcY(this.coords);
+    const margin = 4;
+    const xRatio = ((this.width - margin) / (this.hours * this.points)) / total;
+    return coords.map((coord, i) => ({
+      x: (xRatio * i * total) + (xRatio * position) + margin,
+      y: coord[Y],
+      height: this.height - coord[Y] + this.margin[Y] * 3,
+      width: xRatio - margin,
+      value: coord[V],
+    }));
+  }
+
   _midPoint(Ax, Ay, Bx, By) {
     const Zx = (Ax - Bx) / 2 + Bx;
     const Zy = (Ay - By) / 2 + By;

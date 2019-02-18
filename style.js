@@ -225,6 +225,13 @@ const style = css`
   .line--point:hover {
     fill: inherit;
   }
+  .bar {
+    transition: opacity .25s cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+  .bar:hover {
+    opacity: .5;
+    cursor: pointer;
+  }
   ha-card[gradient] .line--point:hover {
     fill: var(--primary-text-color, white);
   }
