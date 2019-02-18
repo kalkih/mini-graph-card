@@ -128,6 +128,10 @@ const style = css`
   .states[loc="right"] .states--secondary {
     margin-left: 0;
   }
+  .states[loc="center"] .state__time {
+    left: 50%;
+    transform: translateX(-50%);
+  }
   .states--secondary {
     display: flex;
     font-size: 0.6em;
