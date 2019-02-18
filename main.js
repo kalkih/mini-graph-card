@@ -4,6 +4,7 @@ import style from './style';
 
 const URL_DOCS = 'https://github.com/kalkih/mini-graph-card/blob/master/README.md';
 const FONT_SIZE = 14;
+const MAX_BARS = 96;
 const ICON = {
   humidity: 'hass:water-percent',
   illuminance: 'hass:brightness-5',
@@ -120,6 +121,22 @@ class MiniGraphCard extends LitElement {
     conf.font_size = (config.font_size / 100) * FONT_SIZE || FONT_SIZE;
     conf.hours_to_show = Math.floor(Number(conf.hours_to_show)) || 24;
     conf.color_thresholds.sort((a, b) => b.value - a.value);
+
+    if (conf.show.graph === 'bar') {
+      const entities = conf.entities.length;
+      let hours = conf.hours_to_show;
+      if (hours * entities > MAX_BARS) {
+        hours = Math.floor((MAX_BARS / entities));
+        // eslint-disable-next-line no-console
+        console.warn('mini-graph-card: Not enough space, reducing hours_to_show to ', hours);
+        conf.hours_to_show = hours;
+      }
+      if ((hours * conf.points_per_hour) * entities > MAX_BARS) {
+        conf.points_per_hour = Math.log(hours * entities) / Math.log(MAX_BARS * entities);
+        // eslint-disable-next-line no-console
+        console.warn('mini-graph-card: Not enough space, adjusting points_per_hour to ', conf.points_per_hour);
+      }
+    }
     if (!this.Graph) {
       this.Graph = conf.entities.map(() => (
         new Graph(
