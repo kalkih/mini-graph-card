@@ -115,7 +115,7 @@ const style = css`
     margin-left: 0;
   }
   .states[loc="center"] {
-    justify-content: space-around;
+    justify-content: space-evenly;
   }
   .states[loc="right"] > .state {
     margin-left: auto;
@@ -134,7 +134,6 @@ const style = css`
   }
   .states--secondary {
     display: flex;
-    font-size: 0.6em;
     flex-flow: column;
     flex-wrap: wrap;
     margin-left: 1rem;
@@ -151,8 +150,13 @@ const style = css`
     min-width: 0;
   }
   .state--small {
+    font-size: 0.6em;
     margin-bottom: .6rem;
     flex-wrap: nowrap;
+  }
+  .states--secondary > :only-child {
+    font-size: 1em;
+    margin-bottom: 0;
   }
   .state__value {
     display: inline-block;
