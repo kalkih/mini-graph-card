@@ -214,6 +214,8 @@ const style = css`
     stroke-linecap: round;
     stroke-linejoin: round;
   }
+  animate {
+  }
   .line--fill[anim="false"] {
     animation: reveal .25s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   }
@@ -232,6 +234,12 @@ const style = css`
   }
   .line--point:hover {
     fill: inherit;
+  }
+  .bars {
+    animation: pop .25s cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+  .bars[anim] {
+    animation: bars .5s cubic-bezier(0.215, 0.61, 0.355, 1);
   }
   .bar {
     transition: opacity .25s cubic-bezier(0.215, 0.61, 0.355, 1);
@@ -336,6 +344,11 @@ const style = css`
   }
   @keyframes pop {
     0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  @keyframes bars {
+    0% { opacity: 0; }
+    50% { opacity: 0; }
     100% { opacity: 1; }
   }
   @keyframes dash {

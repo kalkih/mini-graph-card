@@ -364,15 +364,22 @@ class MiniGraphCard extends LitElement {
   renderSvgBars(bars, index) {
     if (!bars) return;
     const items = bars.map((bar, i) => {
+      const animation = this.config.animate
+        ? svg`
+          <animate attributeName='y' from=${this.config.height} to=${bar.y} dur='1s' fill='remove'
+            calcMode='spline' keyTimes='0; 1' keySplines='0.215 0.61 0.355 1'>
+          </animate>`
+        : '';
       const color = this.computeColor(bar.value, index);
       return svg`
         <rect class='bar' x=${bar.x} y=${bar.y} height=${bar.height} width=${bar.width}
           .id=${i} .value=${bar.value} .entity=${index} fill=${color}
           @mouseover=${e => this.openTooltip(e)}
-          @mouseout=${() => this.tooltip = {}}
-        />`;
+          @mouseout=${() => this.tooltip = {}}>
+          ${animation}
+        </rect>`;
     });
-    return svg`<g>${items}</g>`;
+    return svg`<g class='bars' ?anim=${this.config.animate}>${items}</g>`;
   }
 
   renderSvg() {
