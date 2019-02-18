@@ -3,7 +3,7 @@ A minimalistic and customizable graph card for [Home Assistant](https://github.c
 
 The card works with entities from within the **sensor** domain and displays the sensors current state as well as a line graph representation of the history.
 
-![Preview](https://user-images.githubusercontent.com/457678/52006705-145c4e00-24cd-11e9-849a-063bc5d7c296.png)
+![Preview](https://user-images.githubusercontent.com/457678/52977264-edf34980-33cc-11e9-903b-cee43b307ed8.png)
 
 ## Install
 
@@ -15,7 +15,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.2.4
+    - url: /local/mini-graph-card-bundle.js?v=0.3.0
       type: module
   ```
 
@@ -26,14 +26,14 @@ The card works with entities from within the **sensor** domain and displays the 
 2. Grab `mini-graph-card-bundle.js`
 
   ```
-  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.2.4/mini-graph-card-bundle.js
+  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.3.0/mini-graph-card-bundle.js
   ```
 
 3. Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`.
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.2.4
+    - url: /local/mini-graph-card-bundle.js?v=0.3.0
       type: module
   ```
 
@@ -60,7 +60,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.2.4
+    - url: /local/mini-graph-card-bundle.js?v=0.3.0
       type: module
   ```
 
@@ -80,8 +80,8 @@ The card works with entities from within the **sensor** domain and displays the 
 | unit | string | optional | v0.0.1 | Set a custom unit of measurement.
 | more_info | boolean | true | v0.0.1 | Set to `false` to disable the "more info" dialog popup when pressing on the card.
 | group | boolean | false | v0.2.0 | Disable paddings and box-shadow, useful when nesting the card.
-| hours_to_show | integer | 24 | v0.0.2 | Specify how many hours the line graph should render.
-| points_per_hour | number | 0.5 | v0.2.0 | Specify amount of data points the graph should render for every hour, *(basically the detail/accuracy of the graph)*.
+| hours_to_show | integer | 24 | v0.0.2 | Specify how many hours of history the graph should present.
+| points_per_hour | number | 0.5 | v0.2.0 | Specify amount of data points the graph should display for each hour, *(basically the detail/accuracy of the graph)*.
 | show | list | optional | v0.2.0 | List of UI elements to display/hide, for available items see [available show options](#available-show-options).
 | animate | boolean | false | v0.2.0 | Add a reveal animation to the graph.
 | height | number | 150 | v0.0.1 | Set a custom height of the line graph.
@@ -106,6 +106,7 @@ Providing options are optional, entities can be listed directly, see example bel
 | name | string | optional | Set a custom display name, defaults to entity's friendly_name.
 | show_state | string | optional | Display the current state of the sensor.
 | color | string | optional | Set a custom color, overrides all other color options including thresholds.
+| unit | string | optional | Set a custom unit of measurement, overrides `unit` set in base config.
 
 ```yaml
 entities:
@@ -124,9 +125,9 @@ All options are optional.
 | name | true | `true` / `false` | Display name
 | icon | true | `true` / `false` | Display icon
 | state | true | `true` / `false` | Display current state
-| graph | true | `true` / `false` / `fade` | Display the graph
-| fill | true | `true` / `false` | Display the graph fill
-| points | hover | `true` / `false` / `hover` | Display graph data points
+| graph | line | `line` / `bar` / `false` | Display option for the graph
+| fill | true | `true` / `false` | Display the line graph fill
+| points | hover | `true` / `false` / `hover` | Display line graph data points
 | legend | true | `true` / `false` | Display the graph legend (only shown when graph contains multiple entities)
 | extrema | false | `true` / `false` | Display max/min information
 | labels | hover | `true` / `false` / `hover` | Display Y-axis labels
@@ -151,7 +152,6 @@ See [dynamic line color](#dynamic-line-color) for example usage.
 
 #### Alternative style
 ```yaml
-# Example
 - type: custom:mini-graph-card
   entities:
    - sensor.illumination
@@ -174,6 +174,17 @@ See [dynamic line color](#dynamic-line-color) for example usage.
     - sensor.server_received
 ```
 ![Multiple entities card](https://user-images.githubusercontent.com/457678/52009165-900cc980-24d2-11e9-8cc6-c77de58465b5.png)
+
+#### Bar chart card
+```yaml
+- type: custom:mini-graph-card
+  entities:
+    - entity: sensor.energy_consumption
+  name: ENERGY CONSUMPTION
+  show:
+    graph: bar
+```
+![Bar chart card](https://user-images.githubusercontent.com/457678/52970286-985e7300-33b3-11e9-89bc-1278c4e2ecf2.png)
 
 #### Show data from the past week
 Use the `hours_to_show` option to specify how many hours of history the graph should represent.

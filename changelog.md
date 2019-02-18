@@ -1,3 +1,13 @@
+## v0.3.0
+- **New:** Support for bar charts (#49)
+- **New:** Parameter `bar` added to `show` -> `graph`, display graph as a bar chart (#49)
+- **New:** Option `unit` added to entity object, overrides `unit` set in base
+- **Change:** `graph` option now defaults to `line` (#49)
+- **Change:** Font size of additional displayed state to the same as the main state (when a single additional state is displayed).
+- **Fixed:** Color thresholds not being applied correctly with several cards in the same view (#52, #54)
+- **Fixed:** `height` option can now be set to zero
+- **Fixed:** Timestamps are now properly center aligned if state is center aligned
+
 ## v0.2.4
 - **New:** Parameter `fade` for `show` -> `fill` option, makes the fill fade out (#45)
 - **Fixed:** History entries with `null` state breaking graph (#46)
