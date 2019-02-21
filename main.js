@@ -32,7 +32,7 @@ const getMin = (arr, val) => arr.reduce((min, p) => (
 const getMax = (arr, val) => arr.reduce((max, p) => (
   Number(p[val]) > Number(max[val]) ? p : max
 ), arr[0]);
-const getTime = (date, hour24) => date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: !hour24 });
+const getTime = (date, extra) => date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', ...extra });
 
 class MiniGraphCard extends LitElement {
   constructor() {
@@ -123,6 +123,8 @@ class MiniGraphCard extends LitElement {
     conf.font_size = (config.font_size / 100) * FONT_SIZE || FONT_SIZE;
     conf.hours_to_show = Math.floor(Number(conf.hours_to_show)) || 24;
     conf.color_thresholds.sort((a, b) => b.value - a.value);
+    const additional = conf.hours_to_show > 24 ? { day: 'numeric', weekday: 'short' } : {};
+    conf.format = { hour12: !conf.hour24, ...additional };
 
     if (conf.show.graph === 'bar') {
       const entities = conf.entities.length;
@@ -402,14 +404,14 @@ class MiniGraphCard extends LitElement {
   }
 
   openTooltip(e) {
-    const { points_per_hour, hours_to_show } = this.config;
+    const { points_per_hour, hours_to_show, format } = this.config;
     const offset = 60 / points_per_hour * 0.5;
     const id = Math.abs((Number(e.target.id) + 1) - hours_to_show * points_per_hour);
     const now = new Date();
     now.setMinutes(now.getMinutes() - (offset * 2 * id) - offset);
-    const start = getTime(now, this.config.hour24);
+    const start = getTime(now, format);
     now.setMinutes(now.getMinutes() + offset * 2);
-    const end = getTime(now, this.config.hour24);
+    const end = getTime(now, { hour12: !this.config.hour24 });
 
     this.tooltip = {
       value: Number(e.target.value),
@@ -440,7 +442,7 @@ class MiniGraphCard extends LitElement {
               ${this.computeUom(0)}
             </span>
             <span class='info__item__time'>
-              ${getTime(new Date(entry.last_changed), this.config.hour24)}
+              ${getTime(new Date(entry.last_changed), this.config.format)}
             </span>
           </div>`)}
       </div>`;
