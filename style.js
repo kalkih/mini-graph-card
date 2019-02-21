@@ -83,22 +83,25 @@ const style = css`
     opacity: .8;
   }
   .name > span {
-    font-size: 1.2rem;
+    font-size: 1.2em;
     font-weight: 400;
-    max-height: 1.4rem;
+    max-height: 1.4em;
     opacity: .75;
   }
   .icon {
     color: var(--paper-item-icon-color, #44739e);
     display: inline-block;
-    flex: 0 0 24px;
+    flex: 0 0 1.7em;
     text-align: center;
-    width: 24px;
     margin-left: auto;
+  }
+  .icon > ha-icon {
+    height: 1.7em;
+    width: 1.7em;
   }
   .icon[loc="left"] {
     order: -1;
-    margin-right: 8px;
+    margin-right: .6em;
     margin-left: 0;
   }
   .icon[loc="state"] {

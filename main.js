@@ -4,6 +4,7 @@ import style from './style';
 
 const URL_DOCS = 'https://github.com/kalkih/mini-graph-card/blob/master/README.md';
 const FONT_SIZE = 14;
+const FONT_SIZE_HEADER = 14;
 const MAX_BARS = 96;
 const ICON = {
   humidity: 'hass:water-percent',
@@ -100,6 +101,7 @@ class MiniGraphCard extends LitElement {
       animate: false,
       hour24: false,
       font_size: FONT_SIZE,
+      font_size_header: FONT_SIZE_HEADER,
       height: 100,
       hours_to_show: 24,
       points_per_hour: 0.5,
@@ -189,9 +191,11 @@ class MiniGraphCard extends LitElement {
   }
 
   renderHeader() {
-    const { show, align_icon, align_header } = this.config;
+    const {
+      show, align_icon, align_header, font_size_header,
+    } = this.config;
     return show.name || (show.icon && align_icon !== 'state') ? html`
-      <div class='header flex' loc=${align_header}>
+      <div class='header flex' loc=${align_header} style='font-size: ${font_size_header}px;'>
         ${this.renderName()}
         ${align_icon !== 'state' ? this.renderIcon() : ''}
       </div>` : '';
