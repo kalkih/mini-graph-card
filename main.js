@@ -380,7 +380,7 @@ class MiniGraphCard extends LitElement {
       return svg`
         <rect class='bar' x=${bar.x} y=${bar.y} height=${bar.height} width=${bar.width}
           .id=${i} .value=${bar.value} .entity=${index} fill=${color}
-          @mouseover=${e => this.openTooltip(e)}
+          @mouseover=${e => this.openTooltip(e, 'bar')}
           @mouseout=${() => this.tooltip = {}}>
           ${animation}
         </rect>`;
@@ -403,14 +403,14 @@ class MiniGraphCard extends LitElement {
       </svg>`;
   }
 
-  openTooltip(e) {
+  openTooltip(e, type = 'point') {
     const { points_per_hour, hours_to_show, format } = this.config;
-    const offset = 60 / points_per_hour * 0.5;
+    const offset = 60 / points_per_hour;
     const id = Math.abs((Number(e.target.id) + 1) - hours_to_show * points_per_hour);
     const now = new Date();
-    now.setMinutes(now.getMinutes() - (offset * 2 * id) - offset);
+    now.setMinutes(now.getMinutes() - (offset * id) - (type === 'point' ? offset / 2 : offset));
     const start = getTime(now, format);
-    now.setMinutes(now.getMinutes() + offset * 2);
+    now.setMinutes(now.getMinutes() + offset);
     const end = getTime(now, { hour12: !this.config.hour24 });
 
     this.tooltip = {
