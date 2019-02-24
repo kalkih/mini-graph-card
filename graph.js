@@ -64,7 +64,7 @@ export default class Graph {
     const yRatio = ((this.max - this.min) / this.height) || 1;
     return coords.map(coord => [
       coord[X],
-      this.height - ((coord[V] - this.min) / yRatio) + this.margin[Y] * 1.5,
+      this.height - ((coord[V] - this.min) / yRatio) + this.margin[Y] * 1,
       coord[V],
     ]);
   }
