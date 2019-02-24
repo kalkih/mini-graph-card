@@ -27,13 +27,13 @@ export default class Graph {
     const reduce = (res, item) => {
       const age = now - new Date(item.last_changed).getTime();
       const interval = (age / (1000 * 3600) * this.points) - this.hours * this.points;
-      const key = Math.abs(Math.floor(interval));
+      const key = Math.floor(Math.abs(interval));
       if (!res[key]) res[key] = [];
       res[key].push(item);
       return res;
     };
     const coords = history.reduce((res, item) => reduce(res, item), []);
-    coords.length = Math.ceil(this.hours * this.points + 1);
+    coords.length = Math.ceil(this.hours * this.points);
 
     this.coords = this._calcPoints(coords);
     this.min = Math.min(...this.coords.map(item => Number(item[V])));
@@ -42,7 +42,7 @@ export default class Graph {
 
   _calcPoints(history) {
     const coords = [];
-    let xRatio = this.width / (this.hours * this.points);
+    let xRatio = this.width / (this.hours * this.points - 1);
     xRatio = Number.isFinite(xRatio) ? xRatio : this.width;
 
     let last = [0, this._average(history.filter(Boolean)[0])];
@@ -79,7 +79,7 @@ export default class Graph {
       Z = this._midPoint(last[X], last[Y], next[X], next[Y]);
       const sum = (next[V] + last[V]) / 2;
       last = next;
-      return [Z[X], Z[Y], sum, i];
+      return [Z[X], Z[Y], sum, i + 1];
     });
     return coords2;
   }
@@ -132,7 +132,7 @@ export default class Graph {
   getBars(position, total) {
     const coords = this._calcY(this.coords);
     const margin = 4;
-    const xRatio = ((this.width - margin) / Math.ceil(this.hours * this.points + 1)) / total;
+    const xRatio = ((this.width - margin) / Math.ceil(this.hours * this.points)) / total;
     return coords.map((coord, i) => ({
       x: (xRatio * i * total) + (xRatio * position) + margin,
       y: coord[Y],
