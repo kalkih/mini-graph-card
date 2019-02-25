@@ -70,7 +70,7 @@ const style = css`
     justify-content: space-between;
   }
   .header[loc="center"] {
-    align-self: center;
+    justify-content: space-around;
   }
   .header[loc="left"] {
     align-self: flex-start;
@@ -94,7 +94,6 @@ const style = css`
     display: inline-block;
     flex: 0 0 1.7em;
     text-align: center;
-    margin-left: auto;
   }
   .icon > ha-icon {
     height: 1.7em;
@@ -125,9 +124,6 @@ const style = css`
     margin-left: auto;
     order: 2;
   }
-  .states[loc="right"] > .icon {
-    margin-left: 0;
-  }
   .states[loc="center"] .states--secondary,
   .states[loc="right"] .states--secondary {
     margin-left: 0;
@@ -135,6 +131,10 @@ const style = css`
   .states[loc="center"] .state__time {
     left: 50%;
     transform: translateX(-50%);
+  }
+  .states > .icon > ha-icon {
+    height: 2em !important;
+    width: 2em !important;
   }
   .states--secondary {
     display: flex;
@@ -217,8 +217,6 @@ const style = css`
   path {
     stroke-linecap: round;
     stroke-linejoin: round;
-  }
-  animate {
   }
   .line--fill[anim="false"] {
     animation: reveal .25s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
