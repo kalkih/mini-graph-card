@@ -10,7 +10,7 @@ const style = css`
     flex: 1;
     padding: 16px 0;
     position: relative;
-    overflow: visible;
+    overflow: hidden;
   }
   ha-card > div {
     padding: 0px 16px 16px 16px;
