@@ -51,7 +51,8 @@ const style = css`
     padding: 0;
   }
   ha-card[group] > div {
-    padding: 0;
+    padding-left: 0;
+    padding-right: 0;
   }
   ha-card[group] .graph__legend {
     padding-left: 0;
