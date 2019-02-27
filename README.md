@@ -104,7 +104,7 @@ Providing options are optional, entities can be listed directly, see example bel
 |------|:----:|:-------:|:------------|
 | entity | string | **required** | Entity id of the sensor.
 | name | string | optional | Set a custom display name, defaults to entity's friendly_name.
-| show_state | string | optional | Display the current state of the sensor.
+| show_state | boolean | optional | Display the current state of the sensor.
 | color | string | optional | Set a custom color, overrides all other color options including thresholds.
 | unit | string | optional | Set a custom unit of measurement, overrides `unit` set in base config.
 
