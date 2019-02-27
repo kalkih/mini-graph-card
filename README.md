@@ -104,7 +104,7 @@ Providing options are optional, entities can be listed directly, see example bel
 |------|:----:|:-------:|:------------|
 | entity | string | **required** | Entity id of the sensor.
 | name | string | optional | Set a custom display name, defaults to entity's friendly_name.
-| show_state | string | optional | Display the current state of the sensor.
+| show_state | boolean | optional | Display the current state of the sensor.
 | color | string | optional | Set a custom color, overrides all other color options including thresholds.
 | unit | string | optional | Set a custom unit of measurement, overrides `unit` set in base config.
 
@@ -126,8 +126,8 @@ All options are optional.
 | icon | true | `true` / `false` | Display icon
 | state | true | `true` / `false` | Display current state
 | graph | line | `line` / `bar` / `false` | Display option for the graph
-| fill | true | `true` / `false` | Display the line graph fill
-| points | hover | `true` / `false` / `hover` | Display line graph data points
+| fill | true | `true` / `false` / `fade` | Display the line graph fill
+| points | hover | `true` / `false` / `hover` | Display graph data points
 | legend | true | `true` / `false` | Display the graph legend (only shown when graph contains multiple entities)
 | extrema | false | `true` / `false` | Display max/min information
 | labels | hover | `true` / `false` / `hover` | Display Y-axis labels
