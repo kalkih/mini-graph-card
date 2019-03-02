@@ -1,26 +1,22 @@
 {
   "presets": [
-    [
-      "@babel/preset-env",
-      {
-        "modules": false,
-        "targets": {
-          "esmodules": true
-        }
-      }
-    ],
-    "minify"
+    ["@babel/preset-env", {
+      "modules": "commonjs",
+      "targets": "> 2.5%, not dead",
+    }],
+    ["minify"],
   ],
   "comments": false,
   "plugins": [
-    [
-      "@babel/plugin-proposal-decorators",
-      { "legacy": true }
-    ],
-    [
-      "@babel/plugin-proposal-class-properties",
-      { "loose": true }
-    ],
-    ["@babel/plugin-transform-template-literals"]
-  ]
+    ["@babel/plugin-transform-template-literals"],
+    ["@babel/plugin-proposal-decorators", {
+      "legacy": true
+    }],
+    ["@babel/plugin-proposal-class-properties", {
+      "loose": true
+    }],
+    ["@babel/plugin-proposal-object-rest-spread"],
+    ["@babel/plugin-transform-spread"],
+    ["iife-wrap"],
+  ],
 }
