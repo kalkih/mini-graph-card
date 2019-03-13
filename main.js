@@ -33,6 +33,7 @@ const getMax = (arr, val) => arr.reduce((max, p) => (
   Number(p[val]) > Number(max[val]) ? p : max
 ), arr[0]);
 const getTime = (date, extra) => date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', ...extra });
+const getMilli = hours => (hours * 60 ** 2 * 10 ** 3);
 
 class MiniGraphCard extends LitElement {
   constructor() {
@@ -121,7 +122,6 @@ class MiniGraphCard extends LitElement {
       conf.line_color = [config.line_color, ...DEFAULT_COLORS];
 
     conf.font_size = (config.font_size / 100) * FONT_SIZE || FONT_SIZE;
-    conf.hours_to_show = Math.floor(Number(conf.hours_to_show)) || 24;
     conf.color_thresholds.sort((a, b) => b.value - a.value);
     const additional = conf.hours_to_show > 24 ? { day: 'numeric', weekday: 'short' } : {};
     conf.format = { hour12: !conf.hour24, ...additional };
@@ -341,11 +341,11 @@ class MiniGraphCard extends LitElement {
         stroke-width=${this.config.line_width / 2}>
         ${points.map((point, num) => svg`
           <circle
-            class='line--point' .id=${point[3]} .value=${point[2]} .entity=${i}
+            class='line--point'
             stroke=${this.gradient[i] ? this.gradient[i][num].color : 'inherit'}
             fill=${this.gradient[i] ? this.gradient[i][num].color : 'inherit'}
             cx=${point[0]} cy=${point[1]} r=${this.config.line_width}
-            @mouseover=${e => this.openTooltip(e)}
+            @mouseover=${() => this.setTooltip(i, point[3], point[2])}
             @mouseout=${() => this.tooltip = {}}
           />`)}
       </g>`;
@@ -378,9 +378,9 @@ class MiniGraphCard extends LitElement {
         : '';
       const color = this.computeColor(bar.value, index);
       return svg`
-        <rect class='bar' x=${bar.x} y=${bar.y} height=${bar.height} width=${bar.width}
-          .id=${i} .value=${bar.value} .entity=${index} fill=${color}
-          @mouseover=${e => this.openTooltip(e, 'bar')}
+        <rect class='bar' x=${bar.x} y=${bar.y}
+          height=${bar.height} width=${bar.width} fill=${color}
+          @mouseover=${() => this.setTooltip(index, i, bar.value)}
           @mouseout=${() => this.tooltip = {}}>
           ${animation}
         </rect>`;
@@ -403,21 +403,22 @@ class MiniGraphCard extends LitElement {
       </svg>`;
   }
 
-  openTooltip(e, type = 'point') {
+  setTooltip(entity, index, value) {
     const { points_per_hour, hours_to_show, format } = this.config;
-    const offset = 60 / points_per_hour;
-    const id = Math.abs((Number(e.target.id) + 1) - hours_to_show * points_per_hour);
+    const offset = hours_to_show < 1 && points_per_hour < 1
+      ? points_per_hour * hours_to_show
+      : 1 / points_per_hour;
+
+    const id = Math.abs((index + 1) - Math.ceil(hours_to_show * points_per_hour));
+
     const now = new Date();
-    now.setMinutes(now.getMinutes() - (offset * id) - (type === 'point' ? offset / 2 : offset));
-    const start = getTime(now, format);
-    now.setMinutes(now.getMinutes() + offset);
+    now.setMilliseconds(now.getMilliseconds() - getMilli(offset * id));
     const end = getTime(now, { hour12: !this.config.hour24 });
+    now.setMilliseconds(now.getMilliseconds() - getMilli(offset));
+    const start = getTime(now, format);
 
     this.tooltip = {
-      value: Number(e.target.value),
-      id,
-      entity: e.target.entity,
-      time: [start, end],
+      value, id, entity, time: [start, end],
     };
   }
 
@@ -508,7 +509,7 @@ class MiniGraphCard extends LitElement {
   async updateData({ config } = this) {
     const end = new Date();
     const start = new Date();
-    start.setHours(end.getHours() - config.hours_to_show);
+    start.setMilliseconds(end.getMilliseconds() - (getMilli(config.hours_to_show)));
 
     const promise = this.entity.map((entity, i) => this.updateEntity(entity, i, start, end));
     await Promise.all(promise);

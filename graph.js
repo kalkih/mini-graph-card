@@ -98,7 +98,6 @@ export default class Graph {
       path += ` Q ${next[X]},${next[Y]}`;
       last = next;
     });
-
     path += ` ${next[X]},${next[Y]}`;
     return path;
   }
