@@ -1,3 +1,18 @@
+## v0.3.1
+- **New:** Options `name_adaptive_color`, `icon_adaptive_color` in `show` option object to display the name/icon in the entity color (#67, #50)
+- **New:** Option `state_adaptive_color` in entity object, to display the state in the entity color (#67)
+- **New:** Option `show_indicator` in entity object, to display a color indicator next to the state (#72)
+- **New:** Option `font_size_header` added (#53)
+- **New** Added date (day/weekday) to timestamps when timeframe > 24 (#61)
+- **New** It's now possible to set `hours_to_show` to float values and values lower than one.
+- **Changed** Legend color indicators are now ciruclar instead of rectangular
+- **Fixed:** Bar chart now shows correct amount of bars
+- **Fixed:** Points should no longer be cut off when at the very bottom of the graph
+- **Fixed:** Timestamps for bars
+- **Fixed:** Missing paddings between card elements when group option was set to `true`
+- **Fixed:** Unwanted overflow when border radius applied
+- **Fixed:** Improved compatibility (#64)
+
 ## v0.3.0
 - **New:** Support for bar charts (#49)
 - **New:** Parameter `bar` added to `show` -> `graph`, display graph as a bar chart (#49)

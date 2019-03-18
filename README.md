@@ -11,11 +11,11 @@ The card works with entities from within the **sensor** domain and displays the 
 
 1. Download and copy `mini-graph-card-bundle.js` from the [latest release](https://github.com/kalkih/mini-graph-card/releases/latest) into your `config/www` directory.
 
-2. Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`.
+2. Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml` or at the top of the *raw config editor UI*.
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.3.0
+    - url: /local/mini-graph-card-bundle.js?v=0.3.1
       type: module
   ```
 
@@ -26,14 +26,14 @@ The card works with entities from within the **sensor** domain and displays the 
 2. Grab `mini-graph-card-bundle.js`
 
   ```
-  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.3.0/mini-graph-card-bundle.js
+  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.3.1/mini-graph-card-bundle.js
   ```
 
 3. Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`.
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.3.0
+    - url: /local/mini-graph-card-bundle.js?v=0.3.1
       type: module
   ```
 
@@ -60,7 +60,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.3.0
+    - url: /local/mini-graph-card-bundle.js?v=0.3.1
       type: module
   ```
 
@@ -90,7 +90,8 @@ The card works with entities from within the **sensor** domain and displays the 
 | color_thresholds | list | optional | v0.2.3 | Set thresholds for dynamic graph colors, see [Line color object](#line-color-object).
 | decimals | integer | optional | v0.0.9 | Specify the exact number of decimals to show for states.
 | hour24 | boolean | false | v0.2.1 | Set to `true` to display times in 24-hour format.
-| font_size | number | 100 | v0.0.3 | Adjust the font size of the state displayed, as percentage of the original size.
+| font_size | number | 100 | v0.0.3 | Adjust the font size of the state, as percentage of the original size.
+| font_size_header | number | 14 | v0.3.1 | Adjust the font size of the header, size in pixels.
 | align_header | string | `default` | v0.2.0 | Set the alignment of the header, `left`, `right`, `center` or `default`.
 | align_icon | string | `right` | v0.2.0 | Set the alignment of the icon, `left`, `right` or `state`.
 | align_state | string | `left` | v0.2.0 | Set the alignment of the current state, `left`, `right` or `center`.
@@ -104,9 +105,11 @@ Providing options are optional, entities can be listed directly, see example bel
 |------|:----:|:-------:|:------------|
 | entity | string | **required** | Entity id of the sensor.
 | name | string | optional | Set a custom display name, defaults to entity's friendly_name.
-| show_state | boolean | optional | Display the current state of the sensor.
 | color | string | optional | Set a custom color, overrides all other color options including thresholds.
 | unit | string | optional | Set a custom unit of measurement, overrides `unit` set in base config.
+| show_state | boolean | optional | Display the current state.
+| show_indicator | boolean | optional | Display a color indicator next to the state, (only when more than two states are visible).
+| state_adaptive_color | boolean | optional | Make the color of the state adapt to the entity color.
 
 ```yaml
 entities:
@@ -131,6 +134,8 @@ All options are optional.
 | legend | true | `true` / `false` | Display the graph legend (only shown when graph contains multiple entities)
 | extrema | false | `true` / `false` | Display max/min information
 | labels | hover | `true` / `false` / `hover` | Display Y-axis labels
+| name_adaptive_color | false | `true` / `false` | Make the name color adapt with the primary entity color
+| icon_adaptive_color | false | `true` / `false` | Make the icon color adapt with the primary entity color
 
 #### Line color object
 See [dynamic line color](#dynamic-line-color) for example usage.
@@ -272,33 +277,38 @@ $ git clone https://github.com/kalkih/mini-graph-card.git
 
 ```yaml
 resources:
-  - url: /local/mini-graph-card/mini-graph-card-bundle.js
+  - url: /local/mini-graph-card/dist/mini-graph-card-bundle.js
     type: module
 ```
 
-### Generate the bundle
+### Instructions
 
 *Requires `nodejs` & `npm`*
 
-**Move into the `mini-graph-card` repo, checkout the dev branch & install dependencies.**
-
-```
+1. Move into the `mini-graph-card` repo, checkout the *dev* branch & install dependencies.
+```console
 $ cd mini-graph-card && git checkout dev && npm install
 ```
 
-**Edit the source, build by running**
-```
+2. Make changes to the source code
+
+3. Build the source by running
+```console
 $ npm run build
 ```
 
-The `mini-graph-card-bundle.js` will be rebuilt and ready.
+4. Refresh the browser to see changes
 
-**For convenience, you can have the source build itself on file change by running**
-```
+    *Make sure cache is cleared or disabled*
+
+5. *(Optional)* Watch the source and automatically rebuild on save
+```console
 $ npm run watch
 ```
 
-**If you plan to submit a PR, please base it on the .dev` branch**
+*The new `mini-graph-card-bundle.js` will be build and ready inside `/dist`.*
+
+**If you plan to submit a PR, please base it on the `dev` branch**
 
 ## Getting errors?
 Make sure you have `javascript_version: latest` in your `configuration.yaml` under `frontend:`.
