@@ -70,6 +70,7 @@ class MiniGraphCard extends LitElement {
       abs: [],
       tooltip: {},
       updateQueue: [],
+      color: String,
     };
   }
 
@@ -140,7 +141,13 @@ class MiniGraphCard extends LitElement {
   }
 
   shouldUpdate(changedProps) {
-    return UPDATE_PROPS.some(prop => changedProps.has(prop));
+    if (UPDATE_PROPS.some(prop => changedProps.has(prop))) {
+      this.color = this.computeColor(
+        this.tooltip.value || this.entity[0].state,
+        this.tooltip.entity || 0,
+      );
+      return true;
+    }
   }
 
   updated(changedProperties) {
@@ -187,8 +194,10 @@ class MiniGraphCard extends LitElement {
   }
 
   renderIcon() {
-    return this.config.show.icon ? html`
-      <div class='icon' loc=${this.config.align_icon}>
+    const { icon, icon_adaptive_color } = this.config.show;
+    return icon ? html`
+      <div class='icon' loc=${this.config.align_icon}
+        style=${icon_adaptive_color ? `color: ${this.color};` : ''}>
         <ha-icon .icon=${this.computeIcon(this.entity[0])}></ha-icon>
       </div>` : '';
   }
@@ -198,32 +207,35 @@ class MiniGraphCard extends LitElement {
     const name = this.tooltip.entity !== undefined
       ? this.computeName(this.tooltip.entity)
       : this.config.name || this.computeName(0);
+    const color = this.config.show.name_adaptive_color
+      ? `opacity: 1; color: ${this.color};`
+      : '';
 
     return html`
       <div class='name flex'>
-        <span class='ellipsis'>${name}</span>
+        <span class='ellipsis' style=${color}>${name}</span>
       </div>`;
   }
 
   renderStates() {
     const { entity, value } = this.tooltip;
     const state = value !== undefined ? value : this.entity[0].state;
-    const color = this.config.entities[entity || 0].show_color
-      ? `color: ${this.computeColor(state, entity || 0)};`
+    const color = this.config.entities[0].show_color
+      ? `color: ${this.color};`
       : '';
     if (this.config.show.state)
       return html`
         <div class='states flex' loc=${this.config.align_state}>
-          <div class='state' style=${color}>
-            <span class='state__value ellipsis'>
+          <div class='state'>
+            <span class='state__value ellipsis' style=${color}>
               ${this.computeState(state)}
             </span>
-            <span class='state__uom ellipsis'>
+            <span class='state__uom ellipsis' style=${color}>
               ${this.computeUom(entity || 0)}
             </span>
             ${this.renderStateTime()}
           </div>
-          <div class='states--secondary'>${this.config.entities.map((entity, i) => this.renderState(entity, i))}</div>
+          <div class='states--secondary'>${this.config.entities.map((ent, i) => this.renderState(ent, i))}</div>
           ${this.config.align_icon === 'state' ? this.renderIcon() : ''}
         </div>`;
   }
