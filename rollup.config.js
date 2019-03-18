@@ -1,9 +1,9 @@
 import resolve from 'rollup-plugin-node-resolve';
 
 export default {
-  input: 'main.js',
+  input: 'src/main.js',
   output: {
-    file: 'mini-graph-card-bundle.js',
+    file: 'dist/mini-graph-card-bundle.js',
     format: 'umd',
     name: 'MiniGraphCard',
   },

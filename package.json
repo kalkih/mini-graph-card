@@ -13,8 +13,8 @@
     "svg",
     "custom-cards"
   ],
-  "main": "main.js",
-  "module": "main.js",
+  "main": "src/main.js",
+  "module": "src/main.js",
   "repository": "git@github.com:kalkih/mini-graph-card.git",
   "author": "Karl Kihlström <mrkihlstrom@gmail.com>",
   "license": "MIT",
@@ -41,8 +41,8 @@
   "scripts": {
     "build": "npm run lint && npm run rollup && npm run babel",
     "rollup": "rollup -c",
-    "babel": "babel mini-graph-card-bundle.js --out-file mini-graph-card-bundle.js",
-    "lint": "eslint main.js style.js graph.js",
+    "babel": "babel dist/mini-graph-card-bundle.js --out-file dist/mini-graph-card-bundle.js",
+    "lint": "eslint src/* --ext .js",
     "watch": "rollup -c --watch"
   }
 }
