@@ -308,6 +308,9 @@ const style = css`
     opacity: .75;
     margin-left: .4em;
   }
+  .graph__legend__item svg {
+    border-radius: 100%;
+  }
   .info {
     justify-content: space-between;
     align-items: middle;
