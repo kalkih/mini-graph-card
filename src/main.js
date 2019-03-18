@@ -220,7 +220,7 @@ class MiniGraphCard extends LitElement {
   renderStates() {
     const { entity, value } = this.tooltip;
     const state = value !== undefined ? value : this.entity[0].state;
-    const color = this.config.entities[0].show_color
+    const color = this.config.entities[0].state_adaptive_color
       ? `color: ${this.color};`
       : '';
     if (this.config.show.state)
@@ -245,7 +245,7 @@ class MiniGraphCard extends LitElement {
       const { state } = this.entity[id];
       return html`
         <div class='state state--small'
-          style=${entity.show_color ? `color: ${this.computeColor(state, id)};` : ''}>
+          style=${entity.state_adaptive_color ? `color: ${this.computeColor(state, id)};` : ''}>
           ${entity.show_indicator ? this.renderIndicator(state, id) : ''}
           <span class='state__value ellipsis'>
             ${this.computeState(state)}
