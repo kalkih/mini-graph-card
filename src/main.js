@@ -206,16 +206,20 @@ class MiniGraphCard extends LitElement {
   }
 
   renderStates() {
-    const state = this.tooltip.value !== undefined ? this.tooltip.value : this.entity[0].state;
+    const { entity, value } = this.tooltip;
+    const state = value !== undefined ? value : this.entity[0].state;
+    const color = this.config.entities[entity || 0].show_color
+      ? `color: ${this.computeColor(state, entity || 0)};`
+      : '';
     if (this.config.show.state)
       return html`
         <div class='states flex' loc=${this.config.align_state}>
-          <div class='state'>
+          <div class='state' style=${color}>
             <span class='state__value ellipsis'>
               ${this.computeState(state)}
             </span>
             <span class='state__uom ellipsis'>
-              ${this.computeUom(this.tooltip.entity || 0)}
+              ${this.computeUom(entity || 0)}
             </span>
             ${this.renderStateTime()}
           </div>
@@ -225,17 +229,20 @@ class MiniGraphCard extends LitElement {
   }
 
   renderState(entity, id) {
-    if (entity.show_state && id !== 0)
+    if (entity.show_state && id !== 0) {
+      const { state } = this.entity[id];
       return html`
-        <div class='state state--small'>
-          ${entity.show_indicator ? this.renderIndicator(this.entity[id].state, id) : ''}
+        <div class='state state--small'
+          style=${entity.show_color ? `color: ${this.computeColor(state, id)};` : ''}>
+          ${entity.show_indicator ? this.renderIndicator(state, id) : ''}
           <span class='state__value ellipsis'>
-            ${this.computeState(this.entity[id].state)}
+            ${this.computeState(state)}
           </span>
           <span class='state__uom ellipsis'>
             ${this.computeUom(id)}
           </span>
         </div>`;
+    }
   }
 
   renderStateTime() {
