@@ -224,10 +224,11 @@ class MiniGraphCard extends LitElement {
         </div>`;
   }
 
-  renderState(config, id) {
-    if (config.show_state && id !== 0)
+  renderState(entity, id) {
+    if (entity.show_state && id !== 0)
       return html`
         <div class='state state--small'>
+          ${entity.show_indicator ? this.renderIndicator(this.entity[id].state, id) : ''}
           <span class='state__value ellipsis'>
             ${this.computeState(this.entity[id].state)}
           </span>
@@ -264,13 +265,19 @@ class MiniGraphCard extends LitElement {
       <div class='graph__legend'>
       ${this.entity.map((entity, i) => html`
         <div class='graph__legend__item' @click=${e => this.handlePopup(e, entity)}>
-          <svg width='10' height='10'>
-            <rect width='10' height='10' fill=${this.computeColor(entity.state, i)} />
-          </svg>
+          ${this.renderIndicator(entity.state, i)}
           <span class='ellipsis'>${this.computeName(i)}</span>
         </div>
       `)}
       </div>`;
+  }
+
+  renderIndicator(state, index) {
+    return svg`
+      <svg width='10' height='10'>
+        <rect width='10' height='10' fill=${this.computeColor(state, index)} />
+      </svg>
+    `;
   }
 
   renderSvgFill(fill, i) {

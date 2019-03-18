@@ -82,6 +82,7 @@ const style = css`
     align-items: center;
     min-width: 0;
     opacity: .8;
+    letter-spacing: .05em;
   }
   .name > span {
     font-size: 1.2em;
@@ -142,6 +143,7 @@ const style = css`
     flex-wrap: wrap;
     margin-left: 1rem;
     min-width: 0;
+    margin-left: 1.4em;
   }
   .states--secondary:empty {
     display: none;
@@ -154,13 +156,25 @@ const style = css`
     min-width: 0;
   }
   .state--small {
-    font-size: 0.6em;
+    font-size: .6em;
     margin-bottom: .6rem;
     flex-wrap: nowrap;
+  }
+  .state--small > svg {
+    position: absolute;
+    left: -1.6em;
+    align-self: center;
+    height: 1em;
+    width: 1em;
+    border-radius: 100%;
+    margin-right: 1em;
   }
   .states--secondary > :only-child {
     font-size: 1em;
     margin-bottom: 0;
+  }
+  .states--secondary > :only-child svg {
+    display: none;
   }
   .state__value {
     display: inline-block;
