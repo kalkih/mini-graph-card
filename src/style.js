@@ -129,6 +129,12 @@ const style = css`
   .states[loc="right"] .states--secondary {
     margin-left: 0;
   }
+  .states[loc="center"] .states--secondary {
+    align-items: center;
+  }
+  .states[loc="right"] .states--secondary {
+    align-items: flex-start;
+  }
   .states[loc="center"] .state__time {
     left: 50%;
     transform: translateX(-50%);
@@ -141,6 +147,7 @@ const style = css`
     display: flex;
     flex-flow: column;
     flex-wrap: wrap;
+    align-items: flex-end;
     margin-left: 1rem;
     min-width: 0;
     margin-left: 1.4em;
@@ -168,6 +175,9 @@ const style = css`
     width: 1em;
     border-radius: 100%;
     margin-right: 1em;
+  }
+  .state--small:last-child {
+    margin-bottom: 0;
   }
   .states--secondary > :only-child {
     font-size: 1em;
