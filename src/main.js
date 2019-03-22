@@ -112,15 +112,8 @@ class MiniGraphCard extends LitElement {
 
     if (conf.show.graph === 'bar') {
       const entities = conf.entities.length;
-      let hours = conf.hours_to_show;
-      if (hours * entities > MAX_BARS) {
-        hours = Math.floor((MAX_BARS / entities));
-        // eslint-disable-next-line no-console
-        console.warn('mini-graph-card: Not enough space, reducing hours_to_show to ', hours);
-        conf.hours_to_show = hours;
-      }
-      if ((hours * conf.points_per_hour) * entities > MAX_BARS) {
-        conf.points_per_hour = Math.log(hours * entities) / Math.log(MAX_BARS * entities);
+      if ((conf.hours_to_show * conf.points_per_hour) * entities > MAX_BARS) {
+        conf.points_per_hour = MAX_BARS / (conf.hours_to_show * entities);
         // eslint-disable-next-line no-console
         console.warn('mini-graph-card: Not enough space, adjusting points_per_hour to ', conf.points_per_hour);
       }
