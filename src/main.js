@@ -416,9 +416,9 @@ class MiniGraphCard extends LitElement {
 
     const now = new Date();
     now.setMilliseconds(now.getMilliseconds() - getMilli(offset * id));
-    const end = getTime(now, { hour12: !this.config.hour24 });
+    const end = getTime(now, { hour12: !this.config.hour24 }, this._hass.language);
     now.setMilliseconds(now.getMilliseconds() - getMilli(offset));
-    const start = getTime(now, format);
+    const start = getTime(now, format, this._hass.language);
 
     this.tooltip = {
       value, id, entity, time: [start, end],
@@ -446,7 +446,7 @@ class MiniGraphCard extends LitElement {
               ${this.computeUom(0)}
             </span>
             <span class='info__item__time'>
-              ${getTime(new Date(entry.last_changed), this.config.format)}
+              ${getTime(new Date(entry.last_changed), this.config.format, this._hass.language)}
             </span>
           </div>`)}
       </div>`;
