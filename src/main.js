@@ -10,7 +10,8 @@ import {
   DEFAULT_COLORS,
   UPDATE_PROPS,
   DEFAULT_SHOW,
-} from './constants';
+  X, Y, V,
+} from './const';
 import {
   getMin,
   getMax,
@@ -346,8 +347,8 @@ class MiniGraphCard extends LitElement {
             class='line--point'
             stroke=${this.gradient[i] ? this.gradient[i][num].color : 'inherit'}
             fill=${this.gradient[i] ? this.gradient[i][num].color : 'inherit'}
-            cx=${point[0]} cy=${point[1]} r=${this.config.line_width}
-            @mouseover=${() => this.setTooltip(i, point[3], point[2])}
+            cx=${point[X]} cy=${point[Y]} r=${this.config.line_width}
+            @mouseover=${() => this.setTooltip(i, point[3], point[V])}
             @mouseout=${() => this.tooltip = {}}
           />`)}
       </g>`;

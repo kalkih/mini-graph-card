@@ -1,6 +1,4 @@
-const X = 0;
-const Y = 1;
-const V = 2;
+import { X, Y, V } from './const';
 
 export default class Graph {
   constructor(width, height, margin, hours = 24, points = 1) {

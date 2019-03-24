@@ -22,6 +22,10 @@ const DEFAULT_SHOW = {
   points: 'hover',
 };
 
+const X = 0;
+const Y = 1;
+const V = 2;
+
 export {
   URL_DOCS,
   FONT_SIZE,
@@ -31,4 +35,5 @@ export {
   DEFAULT_COLORS,
   UPDATE_PROPS,
   DEFAULT_SHOW,
+  X, Y, V,
 };
