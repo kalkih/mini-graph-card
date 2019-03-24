@@ -1,3 +1,8 @@
+## v0.3.2
+- **New:** Dates are now formatted by locale
+- **Fixed:** Improved secondary state text alignment (#75)
+- **Fixed:** Max bars check in bar graph
+
 ## v0.3.1
 - **New:** Options `name_adaptive_color`, `icon_adaptive_color` in `show` option object to display the name/icon in the entity color (#67, #50)
 - **New:** Option `state_adaptive_color` in entity object, to display the state in the entity color (#67)
