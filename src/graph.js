@@ -43,12 +43,13 @@ export default class Graph {
     let xRatio = this.width / (this.hours * this.points - 1);
     xRatio = Number.isFinite(xRatio) ? xRatio : this.width;
 
-    let last = [0, this._average(history.filter(Boolean)[0])];
+    const first = history.filter(Boolean)[0];
+    let last = [this._average(first), first[first.length - 1].state];
     const getCoords = (item, i) => {
       const x = xRatio * i + this.margin[X];
       if (item)
-        last = [0, this._average(item)];
-      return coords.push([x, ...last]);
+        last = [this._average(item), item[item.length - 1].state];
+      return coords.push([x, 0, item ? last[0] : last[1]]);
     };
 
     for (let i = 0; i < history.length; i += 1)
