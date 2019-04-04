@@ -44,11 +44,11 @@ export default class Graph {
     xRatio = Number.isFinite(xRatio) ? xRatio : this.width;
 
     const first = history.filter(Boolean)[0];
-    let last = [this._average(first), first[first.length - 1].state];
+    let last = [this._average(first), this._last(first)];
     const getCoords = (item, i) => {
       const x = xRatio * i + this.margin[X];
       if (item)
-        last = [this._average(item), item[item.length - 1].state];
+        last = [this._average(item), this._last(item)];
       return coords.push([x, 0, item ? last[0] : last[1]]);
     };
 
@@ -148,5 +148,9 @@ export default class Graph {
 
   _average(item) {
     return item.reduce((sum, entry) => (sum + parseFloat(entry.state)), 0) / item.length;
+  }
+
+  _last(item) {
+    return parseFloat(item[item.length - 1].state) || 0;
   }
 }
