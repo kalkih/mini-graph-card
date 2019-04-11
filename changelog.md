@@ -1,3 +1,6 @@
+## v0.3.3
+- **Fixed:** Fixed values for missing history, was assigned the previous known average value instead of the previous known absolute value (#41)
+
 ## v0.3.2
 - **New:** Dates are now formatted by locale
 - **Fixed:** Improved secondary state text alignment (#75)
