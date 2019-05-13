@@ -617,9 +617,10 @@ class MiniGraphCard extends LitElement {
     }
   }
 
-  async updateEntity(entity, index, start, end) {
+  async updateEntity(entity, index, initStart, end) {
     if (!entity || !this.updateQueue.includes(entity.entity_id)) return;
     let stateHistory = [];
+    let start = initStart;
     if (this.history[index]) {
       stateHistory = this.history[index].data;
       start = this.history[index].last_fetched;
