@@ -19,7 +19,7 @@
   "author": "Karl Kihlström <mrkihlstrom@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "lit-element": "^2.0.1"
+    "lit-element": "^2.1.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
