@@ -622,13 +622,14 @@ class MiniGraphCard extends LitElement {
     let stateHistory = [];
     let start = initStart;
 
-    let history;
-    if (localStorage.getItem(HISTORY_STORAGE)) {
-      history = JSON.parse(localStorage.getItem(HISTORY_STORAGE));
+    let history = JSON.parse(localStorage.getItem(HISTORY_STORAGE));
+    if (history) {
       if (history[entity.entity_id]) {
         stateHistory = history[entity.entity_id].data;
         start = new Date(history[entity.entity_id].last_fetched);
       }
+    } else {
+      history = {};
     }
 
     let newStateHistory = await this.fetchRecent(entity.entity_id, start, end);
@@ -639,9 +640,8 @@ class MiniGraphCard extends LitElement {
 
     stateHistory = [...stateHistory, ...newStateHistory];
 
-    if (localStorage.getItem(HISTORY_STORAGE)) {
-      history = JSON.parse(localStorage.getItem(HISTORY_STORAGE));
-    } else {
+    history = JSON.parse(localStorage.getItem(HISTORY_STORAGE));
+    if (!history) {
       history = {};
     }
     history[entity.entity_id] = { last_fetched: end, data: stateHistory };
