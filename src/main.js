@@ -633,7 +633,7 @@ class MiniGraphCard extends LitElement {
 
     stateHistory = [...stateHistory, ...newStateHistory];
 
-    this.history[index] = { last_fetched: new Date(), data: stateHistory };
+    this.history[index] = { last_fetched: end, data: stateHistory };
 
     if (entity.entity_id === this.entity[0].entity_id) {
       this.abs = [
