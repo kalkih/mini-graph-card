@@ -3,6 +3,7 @@ import Graph from './graph';
 import style from './style';
 import {
   URL_DOCS,
+  HISTORY_STORAGE,
   FONT_SIZE,
   FONT_SIZE_HEADER,
   MAX_BARS,
@@ -35,7 +36,6 @@ class MiniGraphCard extends LitElement {
     this.gradient = [];
     this.tooltip = {};
     this.updateQueue = [];
-    this.history = [];
     this.updating = false;
     this.stateChanged = false;
   }
@@ -621,10 +621,16 @@ class MiniGraphCard extends LitElement {
     if (!entity || !this.updateQueue.includes(entity.entity_id)) return;
     let stateHistory = [];
     let start = initStart;
-    if (this.history[index]) {
-      stateHistory = this.history[index].data;
-      start = this.history[index].last_fetched;
+
+    let history;
+    if (localStorage.getItem(HISTORY_STORAGE)) {
+      history = JSON.parse(localStorage.getItem(HISTORY_STORAGE));
+      if (history[entity.entity_id]) {
+        stateHistory = history[entity.entity_id].data;
+        start = new Date(history[entity.entity_id].last_fetched);
+      }
     }
+
     let newStateHistory = await this.fetchRecent(entity.entity_id, start, end);
 
     if (!newStateHistory[0]) return;
@@ -633,7 +639,13 @@ class MiniGraphCard extends LitElement {
 
     stateHistory = [...stateHistory, ...newStateHistory];
 
-    this.history[index] = { last_fetched: new Date(), data: stateHistory };
+    if (localStorage.getItem(HISTORY_STORAGE)) {
+      history = JSON.parse(localStorage.getItem(HISTORY_STORAGE));
+    } else {
+      history = {};
+    }
+    history[entity.entity_id] = { last_fetched: end, data: stateHistory };
+    localStorage.setItem(HISTORY_STORAGE, JSON.stringify(history));
 
     if (entity.entity_id === this.entity[0].entity_id) {
       this.abs = [
