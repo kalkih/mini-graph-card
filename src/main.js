@@ -154,6 +154,7 @@ class MiniGraphCard extends LitElement {
   }
 
   shouldUpdate(changedProps) {
+    if (!this.entity[0]) return false;
     if (UPDATE_PROPS.some(prop => changedProps.has(prop))) {
       this.color = this.computeColor(
         this.tooltip.value || this.entity[0].state,
@@ -621,18 +622,29 @@ class MiniGraphCard extends LitElement {
     if (!entity || !this.updateQueue.includes(entity.entity_id)) return;
     let stateHistory = [];
     let start = initStart;
+    let skipInitialState = false;
 
     let history = JSON.parse(localStorage.getItem(HISTORY_STORAGE));
     if (history) {
       if (history[entity.entity_id]) {
         stateHistory = history[entity.entity_id].data;
-        start = new Date(history[entity.entity_id].last_fetched);
+        stateHistory = stateHistory.filter(item => new Date(item.last_updated) > initStart);
+        if (stateHistory.length > 0) {
+          skipInitialState = true;
+          if (this.Graph[index].coords.length == 0) {
+            this.Graph[index].update(stateHistory);
+          }
+        }
+        const lastFetched = new Date(history[entity.entity_id].last_fetched);
+        if (lastFetched > start) {
+          start = new Date(lastFetched - 1);
+        }
       }
     } else {
       history = {};
     }
 
-    let newStateHistory = await this.fetchRecent(entity.entity_id, start, end);
+    let newStateHistory = await this.fetchRecent(entity.entity_id, start, end, skipInitialState);
 
     if (!newStateHistory[0]) return;
     newStateHistory = newStateHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
@@ -663,11 +675,12 @@ class MiniGraphCard extends LitElement {
     this.Graph[index].update(stateHistory);
   }
 
-  async fetchRecent(entityId, start, end) {
+  async fetchRecent(entityId, start, end, skipInitialState) {
     let url = 'history/period';
     if (start) url += `/${start.toISOString()}`;
     url += `?filter_entity_id=${entityId}`;
     if (end) url += `&end_time=${end.toISOString()}`;
+    if (skipInitialState) url += '&skip_initial_state';
     return this._hass.callApi('GET', url);
   }
 
