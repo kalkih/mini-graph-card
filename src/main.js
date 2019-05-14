@@ -19,6 +19,8 @@ import {
   getMin, getMax, getTime, getMilli,
 } from './utils';
 
+const storage = window.localStorage || {};
+
 class MiniGraphCard extends LitElement {
   constructor() {
     super();
@@ -624,40 +626,31 @@ class MiniGraphCard extends LitElement {
     let start = initStart;
     let skipInitialState = false;
 
-    let history = JSON.parse(localStorage.getItem(HISTORY_STORAGE));
-    if (history) {
-      if (history[entity.entity_id]) {
-        stateHistory = history[entity.entity_id].data;
-        stateHistory = stateHistory.filter(item => new Date(item.last_updated) > initStart);
-        if (stateHistory.length > 0) {
-          skipInitialState = true;
-          if (this.Graph[index].coords.length == 0) {
-            this.Graph[index].update(stateHistory);
-          }
-        }
-        const lastFetched = new Date(history[entity.entity_id].last_fetched);
-        if (lastFetched > start) {
-          start = new Date(lastFetched - 1);
-        }
+    let history = JSON.parse(storage[HISTORY_STORAGE]);
+    if (history && history[entity.entity_id]) {
+      stateHistory = history[entity.entity_id].data;
+      stateHistory = stateHistory.filter(item => new Date(item.last_updated) > initStart);
+      if (stateHistory.length > 0) {
+        skipInitialState = true;
       }
-    } else {
-      history = {};
+      const lastFetched = new Date(history[entity.entity_id].last_fetched);
+      if (lastFetched > start) {
+        start = new Date(lastFetched - 1);
+      }
     }
 
-    let newStateHistory = await this.fetchRecent(entity.entity_id, start, end, skipInitialState);
+    let newStateHistory = await this.fetchRecent(entity.entity_id, start, end, skipInitialState)[0];
+    if (newStateHistory && newStateHistory.length < 1) {
+      newStateHistory = newStateHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
+      stateHistory = [...stateHistory, ...newStateHistory];
 
-    if (!newStateHistory[0]) return;
-    newStateHistory = newStateHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
-    if (newStateHistory.length < 1) return;
-
-    stateHistory = [...stateHistory, ...newStateHistory];
-
-    history = JSON.parse(localStorage.getItem(HISTORY_STORAGE));
-    if (!history) {
-      history = {};
+      history = JSON.parse(storage[HISTORY_STORAGE]);
+      if (!history) {
+        history = {};
+      }
+      history[entity.entity_id] = { last_fetched: end, data: stateHistory };
+      storage[HISTORY_STORAGE] = JSON.stringify(history);
     }
-    history[entity.entity_id] = { last_fetched: end, data: stateHistory };
-    localStorage.setItem(HISTORY_STORAGE, JSON.stringify(history));
 
     if (entity.entity_id === this.entity[0].entity_id) {
       this.abs = [
