@@ -626,7 +626,7 @@ class MiniGraphCard extends LitElement {
     let start = initStart;
     let skipInitialState = false;
 
-    let history = JSON.parse(storage[HISTORY_STORAGE]);
+    let history = storage[HISTORY_STORAGE] ? JSON.parse(storage[HISTORY_STORAGE]) : undefined;
     if (history && history[entity.entity_id]) {
       stateHistory = history[entity.entity_id].data;
       stateHistory = stateHistory.filter(item => new Date(item.last_updated) > initStart);
@@ -639,18 +639,17 @@ class MiniGraphCard extends LitElement {
       }
     }
 
-    let newStateHistory = await this.fetchRecent(entity.entity_id, start, end, skipInitialState)[0];
-    if (newStateHistory && newStateHistory.length < 1) {
+    let newStateHistory = await this.fetchRecent(entity.entity_id, start, end, skipInitialState);
+    if (newStateHistory[0] && newStateHistory[0].length > 0) {
       newStateHistory = newStateHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
       stateHistory = [...stateHistory, ...newStateHistory];
 
-      history = JSON.parse(storage[HISTORY_STORAGE]);
-      if (!history) {
-        history = {};
-      }
+      history = storage[HISTORY_STORAGE] ? JSON.parse(storage[HISTORY_STORAGE]) : {};
       history[entity.entity_id] = { last_fetched: end, data: stateHistory };
       storage[HISTORY_STORAGE] = JSON.stringify(history);
     }
+
+    if (stateHistory.length === 0) return;
 
     if (entity.entity_id === this.entity[0].entity_id) {
       this.abs = [
