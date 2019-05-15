@@ -627,7 +627,11 @@ class MiniGraphCard extends LitElement {
     let skipInitialState = false;
 
     let history = storage[HISTORY_STORAGE] ? JSON.parse(storage[HISTORY_STORAGE]) : undefined;
-    if (history && history[entity.entity_id]) {
+    if (
+      history
+      && history[entity.entity_id]
+      && history[entity.entity_id].hours_to_show === this.config.hours_to_show
+    ) {
       stateHistory = history[entity.entity_id].data;
       stateHistory = stateHistory.filter(item => new Date(item.last_updated) > initStart);
       if (stateHistory.length > 0) {
@@ -645,7 +649,11 @@ class MiniGraphCard extends LitElement {
       stateHistory = [...stateHistory, ...newStateHistory];
 
       history = storage[HISTORY_STORAGE] ? JSON.parse(storage[HISTORY_STORAGE]) : {};
-      history[entity.entity_id] = { last_fetched: end, data: stateHistory };
+      history[entity.entity_id] = {
+        hours_to_show: this.config.hours_to_show,
+        last_fetched: end,
+        data: stateHistory,
+      };
       storage[HISTORY_STORAGE] = JSON.stringify(history);
     }
 
