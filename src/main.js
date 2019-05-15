@@ -148,11 +148,22 @@ class MiniGraphCard extends LitElement {
     this.config = conf;
   }
 
-  firstUpdated() {
+  connectedCallback() {
+    super.connectedCallback();
     if (this.config.update_interval) {
       this.updateOnInterval();
-      setInterval(() => this.updateOnInterval(), this.config.update_interval * 1000);
+      this.interval = setInterval(
+        () => this.updateOnInterval(),
+        this.config.update_interval * 1000,
+      );
     }
+  }
+
+  disconnectedCallback() {
+    if (this.interval) {
+      clearInterval(this.interval);
+    }
+    super.disconnectedCallback();
   }
 
   shouldUpdate(changedProps) {
