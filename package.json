@@ -19,7 +19,7 @@
   "author": "Karl Kihlström <mrkihlstrom@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "lit-element": "^2.0.1"
+    "lit-element": "^2.1.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
@@ -32,9 +32,9 @@
     "@babel/preset-env": "^7.3.1",
     "babel-plugin-iife-wrap": "^1.1.0",
     "babel-preset-minify": "^0.5.0",
-    "eslint": "^5.14.0",
+    "eslint": "^5.3.0",
     "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-import": "^2.17.2",
     "rollup": "^0.66.6",
     "rollup-plugin-node-resolve": "^3.4.0"
   },
