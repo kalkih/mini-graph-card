@@ -88,6 +88,7 @@ const style = css`
     font-size: 1.2em;
     font-weight: 400;
     max-height: 1.4em;
+    min-height: 1.4em;
     opacity: .75;
   }
   .icon {
