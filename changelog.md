@@ -1,3 +1,12 @@
+## v0.4.1
+
+### CHANGED
+- Changed/improved appearance of color thresholds
+- Color thresholds are now rendered vertically instead of horizontally (#90)
+
+### FIXED
+- Broken line color thresholds
+
 ## v0.4.0
 This version brings many improvements to how sensor history is fetched and handled, this should result in much quicker loading of the graph.
 These improvements should also reduce stress on the HA backend, since the card now cache history data locally in the browser and only request data it's missing.

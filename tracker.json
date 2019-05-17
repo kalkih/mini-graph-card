@@ -1,8 +1,8 @@
 {
     "mini-graph-card-bundle": {
       "updated_at": "2019-05-17",
-      "version": "0.4.0",
-      "remote_location": "https://github.com/kalkih/mini-graph-card/releases/download/v0.4.0/mini-graph-card-bundle.js",
+      "version": "0.4.1",
+      "remote_location": "https://github.com/kalkih/mini-graph-card/releases/download/v0.4.1/mini-graph-card-bundle.js",
       "visit_repo": "https://github.com/kalkih/mini-graph-card",
       "changelog": "https://github.com/kalkih/mini-graph-card/releases/latest"
     }
