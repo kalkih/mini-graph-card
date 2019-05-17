@@ -101,22 +101,15 @@ export default class Graph {
     return path;
   }
 
-  computeGradient(thresholds, fallback) {
-    const length = 100 / this.coords.length;
-    const coords = this._calcY(this.coords);
-    let next;
-    let last = coords[0];
-    coords.shift();
-    return coords.map((coord, i) => {
-      next = coord;
-      const sum = (next[V] + last[V]) / 2;
-      last = next;
-      return {
-        offset: length * i + length,
-        color: fallback,
-        ...thresholds.find(ele => ele.value < sum),
-      };
-    });
+  computeGradient(thresholds) {
+    const length = this._max - this._min;
+
+    return thresholds
+      .filter(stop => stop.value > this._min && stop.value < this._max)
+      .map(stop => ({
+        color: stop.color,
+        offset: 100 - (stop.value / length) * 100,
+      }));
   }
 
   getFill(path) {

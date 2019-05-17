@@ -382,11 +382,11 @@ class MiniGraphCard extends LitElement {
         fill=${color}
         stroke=${color}
         stroke-width=${this.config.line_width / 2}>
-        ${points.map((point, num) => svg`
+        ${points.map(point => svg`
           <circle
             class='line--point'
-            stroke=${this.gradient[i] ? this.gradient[i][num].color : 'inherit'}
-            fill=${this.gradient[i] ? this.gradient[i][num].color : 'inherit'}
+            stroke=${this.gradient[i] ? this.computeColor(point[V], i) : 'inherit'}
+            fill=${this.gradient[i] ? this.computeColor(point[V], i) : 'inherit'}
             cx=${point[X]} cy=${point[Y]} r=${this.config.line_width}
             @mouseover=${() => this.setTooltip(i, point[3], point[V])}
             @mouseout=${() => (this.tooltip = {})}
@@ -400,7 +400,7 @@ class MiniGraphCard extends LitElement {
     const items = gradients.map((gradient, i) => {
       if (!gradient) return;
       return svg`
-        <linearGradient id=${`grad-${this.id}-${i}`}>
+        <linearGradient id=${`grad-${this.id}-${i}`} gradientTransform="rotate(90)">
           ${gradient.map(stop => svg`
             <stop stop-color=${stop.color} offset=${`${stop.offset}%`} />
           `)}
@@ -519,6 +519,7 @@ class MiniGraphCard extends LitElement {
     const state = Number(inState) || 0;
     const threshold = {
       color: line_color[i] || line_color[0],
+      ...color_thresholds.slice(-1)[0],
       ...color_thresholds.find(ele => ele.value < state),
     };
     return this.config.entities[i].color || threshold.color;
@@ -599,10 +600,7 @@ class MiniGraphCard extends LitElement {
           if (config.show.fill) this.fill[i] = this.Graph[i].getFill(this.line[i]);
           if (config.show.points) this.points[i] = this.Graph[i].getPoints();
           if (config.color_thresholds.length > 0 && !config.entities[i].color)
-            this.gradient[i] = this.Graph[i].computeGradient(
-              config.color_thresholds,
-              config.entities[i].color || config.line_color[i] || config.line_color[0],
-            );
+            this.gradient[i] = this.Graph[i].computeGradient(config.color_thresholds);
         }
       });
       this.line = [...this.line];
