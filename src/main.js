@@ -402,7 +402,7 @@ class MiniGraphCard extends LitElement {
       return svg`
         <linearGradient id=${`grad-${this.id}-${i}`}>
           ${gradient.map(stop => svg`
-            <stop stop-color=${stop.color} offset=${`${stop.offset}%`}/>
+            <stop stop-color=${stop.color} offset=${`${stop.offset}%`} />
           `)}
         </linearGradient>`;
     });
