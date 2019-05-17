@@ -1,3 +1,19 @@
+## v0.4.0
+This version brings many improvements to how sensor history is fetched and handled, this should result in much quicker loading of the graph.
+These improvements should also reduce stress on the HA backend, since the card now cache history data locally in the browser and only request data it's missing.
+
+Thanks @bramkragten for the contributions!
+
+### ADDED
+- Local caching of history data (#88) - (@bramkragten)
+- New `update_interval` option, set a custom update interval of history data, instead of on every state change (#88) - (@bramkragten)
+
+### CHANGED
+- Now only fetching new history since last update, instead of all history every time (#88) - (@bramkragten)
+
+### FIXED
+- Jitter when hovering over points in particular configs (#87)
+
 ## v0.3.3
 - **Fixed:** Fixed values for missing history, was assigned the previous known average value instead of the previous known absolute value (#41)
 

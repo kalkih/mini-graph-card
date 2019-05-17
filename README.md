@@ -15,7 +15,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.3.3
+    - url: /local/mini-graph-card-bundle.js?v=0.4.0
       type: module
   ```
 
@@ -26,14 +26,14 @@ The card works with entities from within the **sensor** domain and displays the 
 2. Grab `mini-graph-card-bundle.js`
 
   ```
-  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.3.3/mini-graph-card-bundle.js
+  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.4.0/mini-graph-card-bundle.js
   ```
 
 3. Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`.
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.3.3
+    - url: /local/mini-graph-card-bundle.js?v=0.4.0
       type: module
   ```
 
@@ -60,7 +60,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.3.3
+    - url: /local/mini-graph-card-bundle.js?v=0.4.0
       type: module
   ```
 
@@ -81,7 +81,8 @@ The card works with entities from within the **sensor** domain and displays the 
 | more_info | boolean | true | v0.0.1 | Set to `false` to disable the "more info" dialog popup when pressing on the card.
 | group | boolean | false | v0.2.0 | Disable paddings and box-shadow, useful when nesting the card.
 | hours_to_show | integer | 24 | v0.0.2 | Specify how many hours of history the graph should present.
-| points_per_hour | number | 0.5 | v0.2.0 | Specify amount of data points the graph should display for each hour, *(basically the detail/accuracy of the graph)*.
+| points_per_hour | number | 0.5 | v0.2.0 | Specify amount of data points the graph should display for each hour, *(basically the detail/accuracy/smoothing of the graph)*.
+| update_interval | number | optional | v0.4.0 | Specify a custom update interval of the history data (in seconds), instead of on every state change.
 | show | list | optional | v0.2.0 | List of UI elements to display/hide, for available items see [available show options](#available-show-options).
 | animate | boolean | false | v0.2.0 | Add a reveal animation to the graph.
 | height | number | 150 | v0.0.1 | Set a custom height of the line graph.
