@@ -1,3 +1,8 @@
+## v0.4.2
+
+### FIXED
+- Issues related to color_thresholds (#91, #92, #93)
+
 ## v0.4.1
 
 ### CHANGED
