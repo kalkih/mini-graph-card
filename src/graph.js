@@ -105,7 +105,6 @@ export default class Graph {
     const length = this._max - this._min;
 
     return thresholds
-      .filter(stop => stop.value > this._min && stop.value < this._max)
       .map(stop => ({
         color: stop.color,
         offset: 100 - (stop.value / length) * 100,
