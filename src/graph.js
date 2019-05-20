@@ -102,13 +102,12 @@ export default class Graph {
   }
 
   computeGradient(thresholds) {
-    const length = this._max - this._min;
+    const scale = this._max - this._min;
 
-    return thresholds
-      .map(stop => ({
-        color: stop.color,
-        offset: 100 - (stop.value / length) * 100,
-      }));
+    return thresholds.map(stop => ({
+      color: stop.color,
+      offset: (this._max - stop.value) * (100 / scale),
+    }));
   }
 
   getFill(path) {
