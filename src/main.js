@@ -667,7 +667,13 @@ class MiniGraphCard extends LitElement {
         last_fetched: end,
         data: stateHistory,
       };
-      storage[HISTORY_STORAGE] = JSON.stringify(history);
+      try {
+        storage[HISTORY_STORAGE] = JSON.stringify(history);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn('mini-graph-card: Failed to cache, not enough space.');
+        storage.removeItem(HISTORY_STORAGE);
+      }
     }
 
     if (stateHistory.length === 0) return;
