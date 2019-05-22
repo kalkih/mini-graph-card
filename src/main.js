@@ -27,7 +27,7 @@ localForage.config({
 });
 
 localForage.iterate((data, key) => {
-  value = uncompress(data);
+  const value = uncompress(data);
   const start = new Date();
   start.setHours(start.getHours() - value.hours_to_show);
   if (new Date(value.last_fetched) < start) {
