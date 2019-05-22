@@ -253,14 +253,22 @@ const style = css`
   .line[anim="false"] {
     animation: pop .25s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   }
+  .line--points[inactive],
+  .line--rect[inactive],
+  .line--fill[inactive] {
+    opacity: 0 !important;
+    animation: none !important;
+  }
+  .line--points[tooltip] .line--point[inactive] {
+    opacity: 0;
+  }
   .line--point {
     cursor: pointer;
     fill: var(--paper-card-background-color, white);
     stroke-width: inherit;
-    transition: fill .15s cubic-bezier(0.215, 0.61, 0.355, 1);
   }
   .line--point:hover {
-    fill: inherit;
+    fill: var(--mcg-hover, inherit) !important;
   }
   .bars {
     animation: pop .25s cubic-bezier(0.215, 0.61, 0.355, 1);

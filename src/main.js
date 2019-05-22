@@ -352,8 +352,8 @@ class MiniGraphCard extends LitElement {
           <stop stop-color=${color} offset='100%' stop-opacity='.15'/>
         </linearGradient>
       </defs>
-      <path
-        class='line--fill'
+      <path class='line--fill'
+        ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== i}
         type=${this.config.show.fill}
         .id=${i} anim=${this.config.animate} ?init=${this.length[i]}
         style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
@@ -387,27 +387,36 @@ class MiniGraphCard extends LitElement {
     `;
   }
 
+  renderSvgPoint(point, i) {
+    const color = this.gradient[i] ? this.computeColor(point[V], i) : 'inherit';
+    return svg`
+      <circle
+        class='line--point'
+        ?inactive=${this.tooltip.index !== point[3]}
+        style=${`--mcg-hover: ${color};`}
+        stroke=${color}
+        fill=${color}
+        cx=${point[X]} cy=${point[Y]} r=${this.config.line_width}
+        @mouseover=${() => this.setTooltip(i, point[3], point[V])}
+        @mouseout=${() => (this.tooltip = {})}
+      />
+    `;
+  }
+
   renderSvgPoints(points, i) {
     if (!points) return;
     const color = this.computeColor(this.entity[i].state, i);
     return svg`
       <g class='line--points'
+        ?tooltip=${this.tooltip.entity === i}
+        ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== i}
         ?init=${this.length[i]}
         anim=${this.config.animate && this.config.show.points !== 'hover'}
         style="animation-delay: ${this.config.animate ? `${i * 0.5 + 0.5}s` : '0s'}"
         fill=${color}
         stroke=${color}
         stroke-width=${this.config.line_width / 2}>
-        ${points.map(point => svg`
-          <circle
-            class='line--point'
-            stroke=${this.gradient[i] ? this.computeColor(point[V], i) : 'inherit'}
-            fill=${this.gradient[i] ? this.computeColor(point[V], i) : 'inherit'}
-            cx=${point[X]} cy=${point[Y]} r=${this.config.line_width}
-            @mouseover=${() => this.setTooltip(i, point[3], point[V])}
-            @mouseout=${() => (this.tooltip = {})}
-          />
-        `)}
+        ${points.map(point => this.renderSvgPoint(point, i))}
       </g>`;
   }
 
@@ -431,7 +440,9 @@ class MiniGraphCard extends LitElement {
       ? `url(#grad-${this.id}-${i})`
       : this.computeColor(this.entity[i].state, i);
     return svg`
-      <rect id=${`rect-${this.id}-${i}`}
+      <rect class='line--rect'
+        ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== i}
+        id=${`rect-${this.id}-${i}`}
         fill=${fill} height="100%" width="100%"
         mask=${`url(#line-${this.id}-${i})`}
       />`;
@@ -495,6 +506,7 @@ class MiniGraphCard extends LitElement {
       id,
       entity,
       time: [start, end],
+      index,
     };
   }
 
