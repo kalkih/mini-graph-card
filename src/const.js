@@ -1,5 +1,4 @@
 const URL_DOCS = 'https://github.com/kalkih/mini-graph-card/blob/master/README.md';
-const HISTORY_STORAGE = 'mcg-history';
 const FONT_SIZE = 14;
 const FONT_SIZE_HEADER = 14;
 const MAX_BARS = 96;
@@ -36,7 +35,6 @@ const V = 2;
 
 export {
   URL_DOCS,
-  HISTORY_STORAGE,
   FONT_SIZE,
   FONT_SIZE_HEADER,
   MAX_BARS,

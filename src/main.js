@@ -1,9 +1,9 @@
 import { LitElement, html, svg } from 'lit-element';
+import localForage from 'localforage/src/localforage';
 import Graph from './graph';
 import style from './style';
 import {
   URL_DOCS,
-  HISTORY_STORAGE,
   FONT_SIZE,
   FONT_SIZE_HEADER,
   MAX_BARS,
@@ -19,7 +19,12 @@ import {
   getMin, getMax, getTime, getMilli,
 } from './utils';
 
-const storage = window.localStorage || {};
+localForage.config({
+  name: 'mini-graph-card',
+  version: 1.0,
+  storeName: 'entity_history_cache',
+  description: 'Mini graph card uses caching for the entity history',
+});
 
 class MiniGraphCard extends LitElement {
   constructor() {
@@ -223,12 +228,17 @@ class MiniGraphCard extends LitElement {
 
   renderIcon() {
     const { icon, icon_adaptive_color } = this.config.show;
-    return icon ? html`
-      <div class="icon" loc=${this.config.align_icon}
-        style=${icon_adaptive_color ? `color: ${this.color};` : ''}>
-        <ha-icon .icon=${this.computeIcon(this.entity[0])}></ha-icon>
-      </div>
-    ` : '';
+    return icon
+      ? html`
+          <div
+            class="icon"
+            loc=${this.config.align_icon}
+            style=${icon_adaptive_color ? `color: ${this.color};` : ''}
+          >
+            <ha-icon .icon=${this.computeIcon(this.entity[0])}></ha-icon>
+          </div>
+        `
+      : '';
   }
 
   renderName() {
@@ -275,7 +285,8 @@ class MiniGraphCard extends LitElement {
       return html`
         <div
           class="state state--small"
-          style=${entity.state_adaptive_color ? `color: ${this.computeColor(state, id)};` : ''}>
+          style=${entity.state_adaptive_color ? `color: ${this.computeColor(state, id)};` : ''}
+        >
           ${entity.show_indicator ? this.renderIndicator(state, id) : ''}
           <span class="state__value ellipsis">
             ${this.computeState(state)}
@@ -299,28 +310,33 @@ class MiniGraphCard extends LitElement {
   }
 
   renderGraph() {
-    return this.config.show.graph ? html`
-      <div class="graph">
-        <div class="graph__container">
-          ${this.renderLabels()}
-          <div class="graph__container__svg">
-            ${this.renderSvg()}
+    return this.config.show.graph
+      ? html`
+          <div class="graph">
+            <div class="graph__container">
+              ${this.renderLabels()}
+              <div class="graph__container__svg">
+                ${this.renderSvg()}
+              </div>
+            </div>
+            ${this.renderLegend()}
           </div>
-        </div>
-        ${this.renderLegend()}
-      </div>` : '';
+        `
+      : '';
   }
 
   renderLegend() {
     if (this.config.entities.length <= 1 || !this.config.show.legend) return;
     return html`
       <div class="graph__legend">
-        ${this.entity.map((entity, i) => html`
-          <div class="graph__legend__item" @click=${e => this.handlePopup(e, entity)}>
-            ${this.renderIndicator(entity.state, i)}
-            <span class="ellipsis">${this.computeName(i)}</span>
-          </div>
-        `)}
+        ${this.entity.map(
+    (entity, i) => html`
+            <div class="graph__legend__item" @click=${e => this.handlePopup(e, entity)}>
+              ${this.renderIndicator(entity.state, i)}
+              <span class="ellipsis">${this.computeName(i)}</span>
+            </div>
+          `,
+  )}
       </div>
     `;
   }
@@ -337,9 +353,7 @@ class MiniGraphCard extends LitElement {
     if (!fill) return;
     const color = this.computeColor(this.entity[i].state, i);
     const fade = this.config.show.fill === 'fade';
-    const mask = fade
-      ? `url(#fill-grad-${this.id}-${i})`
-      : color;
+    const mask = fade ? `url(#fill-grad-${this.id}-${i})` : color;
     return svg`
       <defs>
         <linearGradient id=${`fill-grad-${this.id}-${i}`} x1="0%" y1="0%" x2="0%" y2="100%">
@@ -393,7 +407,8 @@ class MiniGraphCard extends LitElement {
         fill=${color}
         stroke=${color}
         stroke-width=${this.config.line_width / 2}>
-        ${points.map(point => svg`
+        ${points.map(
+    point => svg`
           <circle
             class='line--point'
             stroke=${this.gradient[i] ? this.computeColor(point[V], i) : 'inherit'}
@@ -402,7 +417,8 @@ class MiniGraphCard extends LitElement {
             @mouseover=${() => this.setTooltip(i, point[3], point[V])}
             @mouseout=${() => (this.tooltip = {})}
           />
-        `)}
+        `,
+  )}
       </g>`;
   }
 
@@ -412,9 +428,11 @@ class MiniGraphCard extends LitElement {
       if (!gradient) return;
       return svg`
         <linearGradient id=${`grad-${this.id}-${i}`} gradientTransform="rotate(90)">
-          ${gradient.map(stop => svg`
+          ${gradient.map(
+    stop => svg`
             <stop stop-color=${stop.color} offset=${`${stop.offset}%`} />
-          `)}
+          `,
+  )}
         </linearGradient>`;
     });
     return svg`${items}`;
@@ -507,17 +525,19 @@ class MiniGraphCard extends LitElement {
     if (!this.config.show.extrema) return;
     return html`
       <div class="info flex">
-        ${this.abs.map(entry => html`
-          <div class="info__item">
-            <span class="info__item__type">${entry.type}</span>
-            <span class="info__item__value">
-              ${this.computeState(entry.state)} ${this.computeUom(0)}
-            </span>
-            <span class="info__item__time">
-              ${getTime(new Date(entry.last_changed), this.config.format, this._hass.language)}
-            </span>
-          </div>
-        `)}
+        ${this.abs.map(
+    entry => html`
+            <div class="info__item">
+              <span class="info__item__type">${entry.type}</span>
+              <span class="info__item__value">
+                ${this.computeState(entry.state)} ${this.computeUom(0)}
+              </span>
+              <span class="info__item__time">
+                ${getTime(new Date(entry.last_changed), this.config.format, this._hass.language)}
+              </span>
+            </div>
+          `,
+  )}
       </div>
     `;
   }
@@ -639,18 +659,14 @@ class MiniGraphCard extends LitElement {
     let start = initStart;
     let skipInitialState = false;
 
-    let history = storage[HISTORY_STORAGE] ? JSON.parse(storage[HISTORY_STORAGE]) : undefined;
-    if (
-      history
-      && history[entity.entity_id]
-      && history[entity.entity_id].hours_to_show === this.config.hours_to_show
-    ) {
-      stateHistory = history[entity.entity_id].data;
+    const history = await localForage.getItem(entity.entity_id);
+    if (history && history.hours_to_show === this.config.hours_to_show) {
+      stateHistory = history.data;
       stateHistory = stateHistory.filter(item => new Date(item.last_updated) > initStart);
       if (stateHistory.length > 0) {
         skipInitialState = true;
       }
-      const lastFetched = new Date(history[entity.entity_id].last_fetched);
+      const lastFetched = new Date(history.last_fetched);
       if (lastFetched > start) {
         start = new Date(lastFetched - 1);
       }
@@ -661,19 +677,17 @@ class MiniGraphCard extends LitElement {
       newStateHistory = newStateHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
       stateHistory = [...stateHistory, ...newStateHistory];
 
-      history = storage[HISTORY_STORAGE] ? JSON.parse(storage[HISTORY_STORAGE]) : {};
-      history[entity.entity_id] = {
-        hours_to_show: this.config.hours_to_show,
-        last_fetched: end,
-        data: stateHistory,
-      };
-      try {
-        storage[HISTORY_STORAGE] = JSON.stringify(history);
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.warn('mini-graph-card: Failed to cache, not enough space.');
-        storage.removeItem(HISTORY_STORAGE);
-      }
+      localForage
+        .setItem(entity.entity_id, {
+          hours_to_show: this.config.hours_to_show,
+          last_fetched: end,
+          data: stateHistory,
+        })
+        .catch((err) => {
+          // eslint-disable-next-line no-console
+          console.warn('mini-graph-card: Failed to cache, not enough space?');
+          localForage.clear();
+        });
     }
 
     if (stateHistory.length === 0) return;
