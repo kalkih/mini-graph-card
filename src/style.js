@@ -253,7 +253,9 @@ const style = css`
   .line[anim="false"] {
     animation: pop .25s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   }
-  .line--points[inactive] {
+  .line--points[inactive],
+  .line--rect[inactive],
+  .line--fill[inactive] {
     opacity: 0 !important;
     animation: none !important;
   }

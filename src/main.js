@@ -352,8 +352,8 @@ class MiniGraphCard extends LitElement {
           <stop stop-color=${color} offset='100%' stop-opacity='.15'/>
         </linearGradient>
       </defs>
-      <path
-        class='line--fill'
+      <path class='line--fill'
+        ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== i}
         type=${this.config.show.fill}
         .id=${i} anim=${this.config.animate} ?init=${this.length[i]}
         style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
@@ -440,7 +440,9 @@ class MiniGraphCard extends LitElement {
       ? `url(#grad-${this.id}-${i})`
       : this.computeColor(this.entity[i].state, i);
     return svg`
-      <rect id=${`rect-${this.id}-${i}`}
+      <rect class='line--rect'
+        ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== i}
+        id=${`rect-${this.id}-${i}`}
         fill=${fill} height="100%" width="100%"
         mask=${`url(#line-${this.id}-${i})`}
       />`;
