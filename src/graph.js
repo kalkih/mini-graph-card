@@ -1,4 +1,5 @@
 import { X, Y, V } from './const';
+import { interpolateColor } from './utils';
 
 export default class Graph {
   constructor(width, height, margin, hours = 24, points = 1) {
@@ -104,10 +105,20 @@ export default class Graph {
   computeGradient(thresholds) {
     const scale = this._max - this._min;
 
-    return thresholds.map(stop => ({
-      color: stop.color,
-      offset: (this._max - stop.value) * (100 / scale),
-    }));
+    return thresholds.map((stop, index, arr) => {
+      let color;
+      if (stop.value > this._max && arr[index + 1]) {
+        const factor = (this._max - arr[index + 1].value) / (stop.value - arr[index + 1].value);
+        color = interpolateColor(arr[index + 1].color, stop.color, factor);
+      } else if (stop.value < this._min && arr[index - 1]) {
+        const factor = (arr[index - 1].value - this._min) / (arr[index - 1].value - stop.value);
+        color = interpolateColor(arr[index - 1].color, stop.color, factor);
+      }
+      return {
+        color: color || stop.color,
+        offset: (this._max - stop.value) * (100 / scale),
+      };
+    });
   }
 
   getFill(path) {
