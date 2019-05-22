@@ -670,7 +670,7 @@ class MiniGraphCard extends LitElement {
         })
         .catch((err) => {
           // eslint-disable-next-line no-console
-          console.warn('mini-graph-card: Failed to cache, not enough space?');
+          console.warn('mini-graph-card: Failed to cache: ', err);
           localForage.clear();
         });
     }
