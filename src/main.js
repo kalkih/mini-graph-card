@@ -1,9 +1,9 @@
 import { LitElement, html, svg } from 'lit-element';
+import localForage from 'localforage/src/localforage';
 import Graph from './graph';
 import style from './style';
 import {
   URL_DOCS,
-  HISTORY_STORAGE,
   FONT_SIZE,
   FONT_SIZE_HEADER,
   MAX_BARS,
@@ -19,7 +19,12 @@ import {
   getMin, getMax, getTime, getMilli,
 } from './utils';
 
-const storage = window.localStorage || {};
+localForage.config({
+  name: 'mini-graph-card',
+  version: 1.0,
+  storeName: 'entity_history_cache',
+  description: 'Mini graph card uses caching for the entity history',
+});
 
 class MiniGraphCard extends LitElement {
   constructor() {
@@ -639,18 +644,14 @@ class MiniGraphCard extends LitElement {
     let start = initStart;
     let skipInitialState = false;
 
-    let history = storage[HISTORY_STORAGE] ? JSON.parse(storage[HISTORY_STORAGE]) : undefined;
-    if (
-      history
-      && history[entity.entity_id]
-      && history[entity.entity_id].hours_to_show === this.config.hours_to_show
-    ) {
-      stateHistory = history[entity.entity_id].data;
+    const history = await localForage.getItem(entity.entity_id);
+    if (history && history.hours_to_show === this.config.hours_to_show) {
+      stateHistory = history.data;
       stateHistory = stateHistory.filter(item => new Date(item.last_updated) > initStart);
       if (stateHistory.length > 0) {
         skipInitialState = true;
       }
-      const lastFetched = new Date(history[entity.entity_id].last_fetched);
+      const lastFetched = new Date(history.last_fetched);
       if (lastFetched > start) {
         start = new Date(lastFetched - 1);
       }
@@ -661,19 +662,17 @@ class MiniGraphCard extends LitElement {
       newStateHistory = newStateHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
       stateHistory = [...stateHistory, ...newStateHistory];
 
-      history = storage[HISTORY_STORAGE] ? JSON.parse(storage[HISTORY_STORAGE]) : {};
-      history[entity.entity_id] = {
-        hours_to_show: this.config.hours_to_show,
-        last_fetched: end,
-        data: stateHistory,
-      };
-      try {
-        storage[HISTORY_STORAGE] = JSON.stringify(history);
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.warn('mini-graph-card: Failed to cache, not enough space.');
-        storage.removeItem(HISTORY_STORAGE);
-      }
+      localForage
+        .setItem(entity.entity_id, {
+          hours_to_show: this.config.hours_to_show,
+          last_fetched: end,
+          data: stateHistory,
+        })
+        .catch((err) => {
+          // eslint-disable-next-line no-console
+          console.warn('mini-graph-card: Failed to cache: ', err);
+          localForage.clear();
+        });
     }
 
     if (stateHistory.length === 0) return;
