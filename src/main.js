@@ -16,7 +16,7 @@ import {
   V,
 } from './const';
 import {
-  getMin, getMax, getTime, getMilli,
+  getMin, getMax, getTime, getMilli, compress, uncompress
 } from './utils';
 
 localForage.config({
@@ -24,6 +24,17 @@ localForage.config({
   version: 1.0,
   storeName: 'entity_history_cache',
   description: 'Mini graph card uses caching for the entity history',
+});
+
+localForage.iterate(function(value, key, iterationNumber) {
+  value = uncompress(value);
+  const start = new Date();
+  start.setHours(start.getHours() - value.hours_to_show);
+  if (new Date(value.last_fetched) < start) {
+    localForage.removeItem(key);
+  }
+}).catch(function(err) {
+  console.log('Purging has errored:', err);
 });
 
 class MiniGraphCard extends LitElement {
@@ -600,7 +611,7 @@ class MiniGraphCard extends LitElement {
 
     const end = new Date();
     const start = new Date();
-    start.setMilliseconds(end.getMilliseconds() - getMilli(config.hours_to_show));
+    start.setHours(end.getHours() - config.hours_to_show);
 
     try {
       const promise = this.entity.map((entity, i) => this.updateEntity(entity, i, start, end));
@@ -638,16 +649,25 @@ class MiniGraphCard extends LitElement {
     }
   }
 
+  async getCache(key) {
+    const data = await localForage.getItem(key);
+    return data ? uncompress(data) : null;
+  }
+
+  async setCache(key, data) {
+    return localForage.setItem(key, compress(data));
+  }
+
   async updateEntity(entity, index, initStart, end) {
     if (!entity || !this.updateQueue.includes(entity.entity_id)) return;
     let stateHistory = [];
     let start = initStart;
     let skipInitialState = false;
 
-    const history = await localForage.getItem(entity.entity_id);
+    const history = await this.getCache(entity.entity_id);
     if (history && history.hours_to_show === this.config.hours_to_show) {
       stateHistory = history.data;
-      stateHistory = stateHistory.filter(item => new Date(item.last_updated) > initStart);
+      stateHistory = stateHistory.filter(item => new Date(item.last_changed) > initStart);
       if (stateHistory.length > 0) {
         skipInitialState = true;
       }
@@ -660,10 +680,11 @@ class MiniGraphCard extends LitElement {
     let newStateHistory = await this.fetchRecent(entity.entity_id, start, end, skipInitialState);
     if (newStateHistory[0] && newStateHistory[0].length > 0) {
       newStateHistory = newStateHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
+      newStateHistory = newStateHistory.map(item => {delete item.last_updated; delete item.entity_id; delete item.attributes; delete item.context; return item;});
       stateHistory = [...stateHistory, ...newStateHistory];
 
-      localForage
-        .setItem(entity.entity_id, {
+      this
+        .setCache(entity.entity_id, {
           hours_to_show: this.config.hours_to_show,
           last_fetched: end,
           data: stateHistory,

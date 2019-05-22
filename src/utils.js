@@ -1,4 +1,6 @@
 /* eslint-disable no-bitwise */
+import LZString from './lz-string';
+
 const getMin = (arr, val) => arr.reduce((min, p) => (
   Number(p[val]) < Number(min[val]) ? p : min
 ), arr[0]);
@@ -24,10 +26,16 @@ const interpolateColor = (a, b, factor) => {
   return `#${((1 << 24) + (rr << 16) + (rg << 8) + rb | 0).toString(16).slice(1)}`;
 };
 
+const compress = (data) => { return LZString.compress(JSON.stringify(data)); }
+
+const uncompress = (data) => { return typeof data === 'string' ? JSON.parse(LZString.decompress(data)) : data; }
+
 export {
   getMin,
   getMax,
   getTime,
   getMilli,
   interpolateColor,
+  compress,
+  uncompress
 };
