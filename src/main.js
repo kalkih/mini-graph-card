@@ -228,17 +228,12 @@ class MiniGraphCard extends LitElement {
 
   renderIcon() {
     const { icon, icon_adaptive_color } = this.config.show;
-    return icon
-      ? html`
-          <div
-            class="icon"
-            loc=${this.config.align_icon}
-            style=${icon_adaptive_color ? `color: ${this.color};` : ''}
-          >
-            <ha-icon .icon=${this.computeIcon(this.entity[0])}></ha-icon>
-          </div>
-        `
-      : '';
+    return icon ? html`
+      <div class="icon" loc=${this.config.align_icon}
+        style=${icon_adaptive_color ? `color: ${this.color};` : ''}>
+        <ha-icon .icon=${this.computeIcon(this.entity[0])}></ha-icon>
+      </div>
+    ` : '';
   }
 
   renderName() {
@@ -285,8 +280,7 @@ class MiniGraphCard extends LitElement {
       return html`
         <div
           class="state state--small"
-          style=${entity.state_adaptive_color ? `color: ${this.computeColor(state, id)};` : ''}
-        >
+          style=${entity.state_adaptive_color ? `color: ${this.computeColor(state, id)};` : ''}>
           ${entity.show_indicator ? this.renderIndicator(state, id) : ''}
           <span class="state__value ellipsis">
             ${this.computeState(state)}
@@ -310,33 +304,28 @@ class MiniGraphCard extends LitElement {
   }
 
   renderGraph() {
-    return this.config.show.graph
-      ? html`
-          <div class="graph">
-            <div class="graph__container">
-              ${this.renderLabels()}
-              <div class="graph__container__svg">
-                ${this.renderSvg()}
-              </div>
-            </div>
-            ${this.renderLegend()}
+    return this.config.show.graph ? html`
+      <div class="graph">
+        <div class="graph__container">
+          ${this.renderLabels()}
+          <div class="graph__container__svg">
+            ${this.renderSvg()}
           </div>
-        `
-      : '';
+        </div>
+        ${this.renderLegend()}
+      </div>` : '';
   }
 
   renderLegend() {
     if (this.config.entities.length <= 1 || !this.config.show.legend) return;
     return html`
       <div class="graph__legend">
-        ${this.entity.map(
-    (entity, i) => html`
-            <div class="graph__legend__item" @click=${e => this.handlePopup(e, entity)}>
-              ${this.renderIndicator(entity.state, i)}
-              <span class="ellipsis">${this.computeName(i)}</span>
-            </div>
-          `,
-  )}
+        ${this.entity.map((entity, i) => html`
+          <div class="graph__legend__item" @click=${e => this.handlePopup(e, entity)}>
+            ${this.renderIndicator(entity.state, i)}
+            <span class="ellipsis">${this.computeName(i)}</span>
+          </div>
+        `)}
       </div>
     `;
   }
@@ -353,7 +342,9 @@ class MiniGraphCard extends LitElement {
     if (!fill) return;
     const color = this.computeColor(this.entity[i].state, i);
     const fade = this.config.show.fill === 'fade';
-    const mask = fade ? `url(#fill-grad-${this.id}-${i})` : color;
+    const mask = fade
+      ? `url(#fill-grad-${this.id}-${i})`
+      : color;
     return svg`
       <defs>
         <linearGradient id=${`fill-grad-${this.id}-${i}`} x1="0%" y1="0%" x2="0%" y2="100%">
@@ -407,8 +398,7 @@ class MiniGraphCard extends LitElement {
         fill=${color}
         stroke=${color}
         stroke-width=${this.config.line_width / 2}>
-        ${points.map(
-    point => svg`
+        ${points.map(point => svg`
           <circle
             class='line--point'
             stroke=${this.gradient[i] ? this.computeColor(point[V], i) : 'inherit'}
@@ -417,8 +407,7 @@ class MiniGraphCard extends LitElement {
             @mouseover=${() => this.setTooltip(i, point[3], point[V])}
             @mouseout=${() => (this.tooltip = {})}
           />
-        `,
-  )}
+        `)}
       </g>`;
   }
 
@@ -428,11 +417,9 @@ class MiniGraphCard extends LitElement {
       if (!gradient) return;
       return svg`
         <linearGradient id=${`grad-${this.id}-${i}`} gradientTransform="rotate(90)">
-          ${gradient.map(
-    stop => svg`
+          ${gradient.map(stop => svg`
             <stop stop-color=${stop.color} offset=${`${stop.offset}%`} />
-          `,
-  )}
+          `)}
         </linearGradient>`;
     });
     return svg`${items}`;
@@ -525,19 +512,17 @@ class MiniGraphCard extends LitElement {
     if (!this.config.show.extrema) return;
     return html`
       <div class="info flex">
-        ${this.abs.map(
-    entry => html`
-            <div class="info__item">
-              <span class="info__item__type">${entry.type}</span>
-              <span class="info__item__value">
-                ${this.computeState(entry.state)} ${this.computeUom(0)}
-              </span>
-              <span class="info__item__time">
-                ${getTime(new Date(entry.last_changed), this.config.format, this._hass.language)}
-              </span>
-            </div>
-          `,
-  )}
+        ${this.abs.map(entry => html`
+          <div class="info__item">
+            <span class="info__item__type">${entry.type}</span>
+            <span class="info__item__value">
+              ${this.computeState(entry.state)} ${this.computeUom(0)}
+            </span>
+            <span class="info__item__time">
+              ${getTime(new Date(entry.last_changed), this.config.format, this._hass.language)}
+            </span>
+          </div>
+        `)}
       </div>
     `;
   }
