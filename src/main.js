@@ -16,7 +16,7 @@ import {
   V,
 } from './const';
 import {
-  getMin, getMax, getTime, getMilli, compress, uncompress,
+  getMin, getMax, getTime, getMilli, compress, decompress,
 } from './utils';
 
 localForage.config({
@@ -27,7 +27,7 @@ localForage.config({
 });
 
 localForage.iterate((data, key) => {
-  const value = uncompress(data);
+  const value = decompress(data);
   const start = new Date();
   start.setHours(start.getHours() - value.hours_to_show);
   if (new Date(value.last_fetched) < start) {
@@ -652,7 +652,7 @@ class MiniGraphCard extends LitElement {
 
   async getCache(key) {
     const data = await localForage.getItem(key);
-    return data ? uncompress(data) : null;
+    return data ? decompress(data) : null;
   }
 
   async setCache(key, data) {
