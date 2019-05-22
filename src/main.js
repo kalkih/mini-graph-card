@@ -16,7 +16,7 @@ import {
   V,
 } from './const';
 import {
-  getMin, getMax, getTime, getMilli, compress, uncompress
+  getMin, getMax, getTime, getMilli, compress, uncompress,
 } from './utils';
 
 localForage.config({
@@ -26,14 +26,15 @@ localForage.config({
   description: 'Mini graph card uses caching for the entity history',
 });
 
-localForage.iterate(function(value, key, iterationNumber) {
-  value = uncompress(value);
+localForage.iterate((data, key) => {
+  value = uncompress(data);
   const start = new Date();
   start.setHours(start.getHours() - value.hours_to_show);
   if (new Date(value.last_fetched) < start) {
     localForage.removeItem(key);
   }
-}).catch(function(err) {
+}).catch((err) => {
+  // eslint-disable-next-line no-console
   console.log('Purging has errored:', err);
 });
 
@@ -680,7 +681,10 @@ class MiniGraphCard extends LitElement {
     let newStateHistory = await this.fetchRecent(entity.entity_id, start, end, skipInitialState);
     if (newStateHistory[0] && newStateHistory[0].length > 0) {
       newStateHistory = newStateHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
-      newStateHistory = newStateHistory.map(item => {delete item.last_updated; delete item.entity_id; delete item.attributes; delete item.context; return item;});
+      newStateHistory = newStateHistory.map(item => ({
+        last_changed: item.last_changed,
+        state: item.state,
+      }));
       stateHistory = [...stateHistory, ...newStateHistory];
 
       this

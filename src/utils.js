@@ -26,9 +26,9 @@ const interpolateColor = (a, b, factor) => {
   return `#${((1 << 24) + (rr << 16) + (rg << 8) + rb | 0).toString(16).slice(1)}`;
 };
 
-const compress = (data) => { return LZString.compress(JSON.stringify(data)); }
+const compress = data => LZString.compress(JSON.stringify(data));
 
-const uncompress = (data) => { return typeof data === 'string' ? JSON.parse(LZString.decompress(data)) : data; }
+const uncompress = data => (typeof data === 'string' ? JSON.parse(LZString.decompress(data)) : data);
 
 export {
   getMin,
@@ -37,5 +37,5 @@ export {
   getMilli,
   interpolateColor,
   compress,
-  uncompress
+  uncompress,
 };
