@@ -1,5 +1,5 @@
 /* eslint-disable no-bitwise */
-import { compress as lzStringCompress, decompress as lzStringDeompress } from './lz-string';
+import { compress as lzStringCompress, decompress as lzStringDecompress } from './lz-string';
 
 const getMin = (arr, val) => arr.reduce((min, p) => (
   Number(p[val]) < Number(min[val]) ? p : min
@@ -28,7 +28,7 @@ const interpolateColor = (a, b, factor) => {
 
 const compress = data => lzStringCompress(JSON.stringify(data));
 
-const decompress = data => (typeof data === 'string' ? JSON.parse(lzStringDeompress(data)) : data);
+const decompress = data => (typeof data === 'string' ? JSON.parse(lzStringDecompress(data)) : data);
 
 export {
   getMin, getMax, getTime, getMilli, interpolateColor, compress, decompress,
