@@ -11,12 +11,10 @@ import {
   DEFAULT_COLORS,
   UPDATE_PROPS,
   DEFAULT_SHOW,
-  X,
-  Y,
-  V,
+  X, Y, V,
 } from './const';
 import {
-  getMin, getMax, getTime, getMilli,
+  getMin, getMax, getTime, getMilli, interpolateColor,
 } from './utils';
 
 localForage.config({
@@ -178,7 +176,7 @@ class MiniGraphCard extends LitElement {
   shouldUpdate(changedProps) {
     if (!this.entity[0]) return false;
     if (UPDATE_PROPS.some(prop => changedProps.has(prop))) {
-      this.color = this.computeColor(
+      this.color = this.intColor(
         this.tooltip.value || this.entity[0].state,
         this.tooltip.entity || 0,
       );
@@ -351,7 +349,7 @@ class MiniGraphCard extends LitElement {
 
   renderSvgFill(fill, i) {
     if (!fill) return;
-    const color = this.computeColor(this.entity[i].state, i);
+    const color = this.intColor(this.entity[i].state, i);
     const fade = this.config.show.fill === 'fade';
     const mask = fade
       ? `url(#fill-grad-${this.id}-${i})`
@@ -592,6 +590,31 @@ class MiniGraphCard extends LitElement {
       ...color_thresholds.find(ele => ele.value < state),
     };
     return this.config.entities[i].color || threshold.color;
+  }
+
+  intColor(inState, i) {
+    const { color_thresholds, line_color } = this.config;
+    const state = Number(inState) || 0;
+
+    let intColor;
+    if (color_thresholds.length > 0) {
+      if (this.config.show.graph === 'bar') {
+        const { color } = color_thresholds.find(ele => ele.value < state)
+          || color_thresholds.slice(-1)[0];
+        intColor = color;
+      } else {
+        intColor = color_thresholds[0].color;
+        const index = color_thresholds.findIndex(ele => ele.value < state);
+        const c1 = color_thresholds[index];
+        const c2 = color_thresholds[index - 1];
+        if (c2) {
+          const factor = (c2.value - inState) / (c2.value - c1.value);
+          intColor = interpolateColor(c2.color, c1.color, factor);
+        }
+      }
+    }
+
+    return this.config.entities[i].color || intColor || line_color[i] || line_color[0];
   }
 
   computeName(index) {
