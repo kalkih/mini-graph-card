@@ -301,8 +301,12 @@ class MiniGraphCard extends LitElement {
     if (this.tooltip.value === undefined) return;
     return html`
       <div class="state__time">
-        <span>${this.tooltip.time[0]}</span> -
-        <span>${this.tooltip.time[1]}</span>
+        ${this.tooltip.label ? html`
+          <span>${this.tooltip.label}</span>
+        ` : html`
+          <span>${this.tooltip.time[0]}</span> -
+          <span>${this.tooltip.time[1]}</span>
+        `}
       </div>
     `;
   }
@@ -325,7 +329,10 @@ class MiniGraphCard extends LitElement {
     return html`
       <div class="graph__legend">
         ${this.entity.map((entity, i) => html`
-          <div class="graph__legend__item" @click=${e => this.handlePopup(e, entity)}>
+          <div class="graph__legend__item"
+            @click=${e => this.handlePopup(e, entity)}
+            @mouseover=${() => this.setTooltip(i, -1, this.entity[i].state, 'Current')}
+            @mouseout=${() => (this.tooltip = {})}>
             ${this.renderIndicator(entity.state, i)}
             <span class="ellipsis">${this.computeName(i)}</span>
           </div>
@@ -491,7 +498,7 @@ class MiniGraphCard extends LitElement {
       </svg>`;
   }
 
-  setTooltip(entity, index, value) {
+  setTooltip(entity, index, value, label = null) {
     const { points_per_hour, hours_to_show, format } = this.config;
     const offset = hours_to_show < 1 && points_per_hour < 1
       ? points_per_hour * hours_to_show
@@ -511,6 +518,7 @@ class MiniGraphCard extends LitElement {
       entity,
       time: [start, end],
       index,
+      label,
     };
   }
 
