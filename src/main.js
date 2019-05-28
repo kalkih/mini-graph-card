@@ -124,7 +124,10 @@ class MiniGraphCard extends LitElement {
       conf.line_color = [config.line_color, ...DEFAULT_COLORS];
 
     conf.font_size = (config.font_size / 100) * FONT_SIZE || FONT_SIZE;
-    conf.color_thresholds = this.computeThresholds(conf.color_thresholds, conf.color_thresholds_transition)
+    conf.color_thresholds = this.computeThresholds(
+      conf.color_thresholds,
+      conf.color_thresholds_transition,
+    );
     const additional = conf.hours_to_show > 24 ? { day: 'numeric', weekday: 'short' } : {};
     conf.format = { hour12: !conf.hour24, ...additional };
 
@@ -564,13 +567,11 @@ class MiniGraphCard extends LitElement {
     if (type === 'smooth') {
       return stops;
     } else {
-      const rect = [].concat(...stops.map((stop, i) => {
-        return [stop, {
-          value: stop.value - 0.0001,
-          color: stops[i+1] ? stops[i+1].color : stop.color,
-        }]
-      }))
-      return rect
+      const rect = [].concat(...stops.map((stop, i) => ([stop, {
+        value: stop.value - 0.0001,
+        color: stops[i + 1] ? stops[i + 1].color : stop.color,
+      }])));
+      return rect;
     }
   }
 
