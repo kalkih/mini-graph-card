@@ -268,9 +268,7 @@ class MiniGraphCard extends LitElement {
             </span>
             ${this.renderStateTime()}
           </div>
-          <div class="states--secondary">
-            ${this.config.entities.map((ent, i) => this.renderState(ent, i))}
-          </div>
+          <div class="states--secondary">${this.config.entities.map((ent, i) => this.renderState(ent, i))}</div>
           ${this.config.align_icon === 'state' ? this.renderIcon() : ''}
         </div>
       `;
