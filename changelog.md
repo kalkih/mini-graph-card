@@ -1,3 +1,40 @@
+## v0.4.3
+
+### ADDED
+- Color threshold transition option, `color_thresholds_transition` (yeah...very long name) (#91)
+- Added hover effect to legend to highlight entity and display current entity state
+- Purging of old cached history (#96) - (@bramkragten)
+
+### CHANGED
+- Interpolate fill, name & icon color based on color thresholds
+- Redesign of line point hover (#99)
+- Moved to localForage for caching (#96) - (@bramkragten)
+
+### FIXED
+- Center state misalignment
+- Interpolate color for out of bound thresholds (#91)
+- Error when localStorage quota was exceeded (#95, #97)
+- Empty graph when color thresholds wasn't being used (#92)
+- Invisible graph lines when color thresholds where out of bounds (#91, #92)
+- Invalid rendering of color thresholds when lower bound wasn't at zero (#91, #92)
+
+## v0.4.3-beta2
+
+### CHANGED
+- Redesign of line point hover (#99)
+- Moved to localForage for caching (#96) - (@bramkragten)
+
+### FIXED
+- Interpolate color for out of bound thresholds (#91)
+- Error when localStorage quota was exceeded (#95, #97)
+
+## v0.4.3-beta
+
+### FIXED
+- Empty graph when color thresholds wasn't being used (#92)
+- Invisible graph lines when color thresholds where out of bounds (#91, #92)
+- Invalid rendering of color thresholds when lower bound wasn't at zero (#91, #92)
+
 ## v0.4.2
 
 ### FIXED

@@ -15,7 +15,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.4.2
+    - url: /local/mini-graph-card-bundle.js?v=0.4.3
       type: module
   ```
 
@@ -26,14 +26,14 @@ The card works with entities from within the **sensor** domain and displays the 
 2. Grab `mini-graph-card-bundle.js`
 
   ```
-  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.4.2/mini-graph-card-bundle.js
+  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.4.3/mini-graph-card-bundle.js
   ```
 
 3. Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`.
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.4.2
+    - url: /local/mini-graph-card-bundle.js?v=0.4.3
       type: module
   ```
 
@@ -60,7 +60,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.4.2
+    - url: /local/mini-graph-card-bundle.js?v=0.4.3
       type: module
   ```
 
@@ -72,7 +72,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
 #### Card options
 | Name | Type | Default | Since | Description |
-|------|:----:|:-------:|:-----:|-------------|
+|------|------|---------|-------|-------------|
 | type | string | **required** | v0.0.1 | `custom:mini-graph-card`.
 | entities | list | **required** | v0.2.0 | One or more sensor entities in a list, see [entities object](#entities-object) for additional entity options.
 | icon | string | optional | v0.0.1 | Set a custom icon from any of the available mdi icons.
@@ -89,6 +89,7 @@ The card works with entities from within the **sensor** domain and displays the 
 | line_width | number | 5 | v0.0.1 | Set the thickness of the line.
 | line_color | string/list | var(--accent-color) | v0.0.1 | Set a custom color for the graph line, provide a list of colors for multiple graph entries.
 | color_thresholds | list | optional | v0.2.3 | Set thresholds for dynamic graph colors, see [Line color object](#line-color-object).
+| color_thresholds_transition | string | `smooth` | v0.4.3 | Color threshold transition, `smooth` or `hard`.
 | decimals | integer | optional | v0.0.9 | Specify the exact number of decimals to show for states.
 | hour24 | boolean | false | v0.2.1 | Set to `true` to display times in 24-hour format.
 | font_size | number | 100 | v0.0.3 | Adjust the font size of the state, as percentage of the original size.
@@ -103,7 +104,7 @@ The card works with entities from within the **sensor** domain and displays the 
 Providing options are optional, entities can be listed directly, see example below.
 
 | Name | Type | Default | Description |
-|------|:----:|:-------:|:------------|
+|------|:----:|:-------:|-------------|
 | entity | string | **required** | Entity id of the sensor.
 | name | string | optional | Set a custom display name, defaults to entity's friendly_name.
 | color | string | optional | Set a custom color, overrides all other color options including thresholds.
@@ -124,8 +125,8 @@ entities:
 #### Available show options
 All options are optional.
 
-| Name | Default | parameter | Description |
-|:----:|:-------:|:---------:|:-----------:|
+| Name | Default | Parameter | Description |
+|------|:-------:|:---------:|-------------|
 | name | true | `true` / `false` | Display name
 | icon | true | `true` / `false` | Display icon
 | state | true | `true` / `false` | Display current state
@@ -142,9 +143,9 @@ All options are optional.
 See [dynamic line color](#dynamic-line-color) for example usage.
 
 | Name | Type | Default | Description |
-|------|:----:|:-------:|:------------|
-| value | number | **required** | The threshold at where the color should apply if state is above.
-| color | string | **required** | Color to apply to line graph, most formats supported (`hex`, `rgb`, `rgba` or just the name of the color etc.)
+|------|:----:|:-------:|-------------|
+| value | number | **required** | The threshold for the color stop.
+| color | string | **required** | Color in 6 digit hex format (e.g. #008080)
 
 ### Example usage
 
