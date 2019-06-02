@@ -19,6 +19,7 @@
   "author": "Karl Kihlström <mrkihlstrom@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "@kalkih/lz-string": "^1.4.5",
     "lit-element": "^2.1.0",
     "localforage": "^1.7.3"
   },
