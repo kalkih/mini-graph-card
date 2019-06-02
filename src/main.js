@@ -11,12 +11,15 @@ import {
   DEFAULT_COLORS,
   UPDATE_PROPS,
   DEFAULT_SHOW,
-  X,
-  Y,
-  V,
+  X, Y, V,
 } from './const';
 import {
-  getMin, getMax, getTime, getMilli, compress, decompress,
+  getMin,
+  getMax,
+  getTime,
+  getMilli,
+  interpolateColor,
+  compress, decompress,
 } from './utils';
 
 localForage.config({
@@ -122,6 +125,7 @@ class MiniGraphCard extends LitElement {
       points_per_hour: 0.5,
       line_color: [...DEFAULT_COLORS],
       color_thresholds: [],
+      color_thresholds_transition: 'smooth',
       line_width: 5,
       more_info: true,
       ...config,
@@ -135,7 +139,10 @@ class MiniGraphCard extends LitElement {
       conf.line_color = [config.line_color, ...DEFAULT_COLORS];
 
     conf.font_size = (config.font_size / 100) * FONT_SIZE || FONT_SIZE;
-    conf.color_thresholds.sort((a, b) => b.value - a.value);
+    conf.color_thresholds = this.computeThresholds(
+      conf.color_thresholds,
+      conf.color_thresholds_transition,
+    );
     const additional = conf.hours_to_show > 24 ? { day: 'numeric', weekday: 'short' } : {};
     conf.format = { hour12: !conf.hour24, ...additional };
 
@@ -186,7 +193,7 @@ class MiniGraphCard extends LitElement {
   shouldUpdate(changedProps) {
     if (!this.entity[0]) return false;
     if (UPDATE_PROPS.some(prop => changedProps.has(prop))) {
-      this.color = this.computeColor(
+      this.color = this.intColor(
         this.tooltip.value || this.entity[0].state,
         this.tooltip.entity || 0,
       );
@@ -278,9 +285,7 @@ class MiniGraphCard extends LitElement {
             </span>
             ${this.renderStateTime()}
           </div>
-          <div class="states--secondary">
-            ${this.config.entities.map((ent, i) => this.renderState(ent, i))}
-          </div>
+          <div class="states--secondary">${this.config.entities.map((ent, i) => this.renderState(ent, i))}</div>
           ${this.config.align_icon === 'state' ? this.renderIcon() : ''}
         </div>
       `;
@@ -309,8 +314,12 @@ class MiniGraphCard extends LitElement {
     if (this.tooltip.value === undefined) return;
     return html`
       <div class="state__time">
-        <span>${this.tooltip.time[0]}</span> -
-        <span>${this.tooltip.time[1]}</span>
+        ${this.tooltip.label ? html`
+          <span>${this.tooltip.label}</span>
+        ` : html`
+          <span>${this.tooltip.time[0]}</span> -
+          <span>${this.tooltip.time[1]}</span>
+        `}
       </div>
     `;
   }
@@ -333,7 +342,10 @@ class MiniGraphCard extends LitElement {
     return html`
       <div class="graph__legend">
         ${this.entity.map((entity, i) => html`
-          <div class="graph__legend__item" @click=${e => this.handlePopup(e, entity)}>
+          <div class="graph__legend__item"
+            @click=${e => this.handlePopup(e, entity)}
+            @mouseover=${() => this.setTooltip(i, -1, this.entity[i].state, 'Current')}
+            @mouseout=${() => (this.tooltip = {})}>
             ${this.renderIndicator(entity.state, i)}
             <span class="ellipsis">${this.computeName(i)}</span>
           </div>
@@ -352,7 +364,7 @@ class MiniGraphCard extends LitElement {
 
   renderSvgFill(fill, i) {
     if (!fill) return;
-    const color = this.computeColor(this.entity[i].state, i);
+    const color = this.intColor(this.entity[i].state, i);
     const fade = this.config.show.fill === 'fade';
     const mask = fade
       ? `url(#fill-grad-${this.id}-${i})`
@@ -364,8 +376,8 @@ class MiniGraphCard extends LitElement {
           <stop stop-color=${color} offset='100%' stop-opacity='.15'/>
         </linearGradient>
       </defs>
-      <path
-        class='line--fill'
+      <path class='line--fill'
+        ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== i}
         type=${this.config.show.fill}
         .id=${i} anim=${this.config.animate} ?init=${this.length[i]}
         style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
@@ -399,27 +411,36 @@ class MiniGraphCard extends LitElement {
     `;
   }
 
+  renderSvgPoint(point, i) {
+    const color = this.gradient[i] ? this.computeColor(point[V], i) : 'inherit';
+    return svg`
+      <circle
+        class='line--point'
+        ?inactive=${this.tooltip.index !== point[3]}
+        style=${`--mcg-hover: ${color};`}
+        stroke=${color}
+        fill=${color}
+        cx=${point[X]} cy=${point[Y]} r=${this.config.line_width}
+        @mouseover=${() => this.setTooltip(i, point[3], point[V])}
+        @mouseout=${() => (this.tooltip = {})}
+      />
+    `;
+  }
+
   renderSvgPoints(points, i) {
     if (!points) return;
     const color = this.computeColor(this.entity[i].state, i);
     return svg`
       <g class='line--points'
+        ?tooltip=${this.tooltip.entity === i}
+        ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== i}
         ?init=${this.length[i]}
         anim=${this.config.animate && this.config.show.points !== 'hover'}
         style="animation-delay: ${this.config.animate ? `${i * 0.5 + 0.5}s` : '0s'}"
         fill=${color}
         stroke=${color}
         stroke-width=${this.config.line_width / 2}>
-        ${points.map(point => svg`
-          <circle
-            class='line--point'
-            stroke=${this.gradient[i] ? this.computeColor(point[V], i) : 'inherit'}
-            fill=${this.gradient[i] ? this.computeColor(point[V], i) : 'inherit'}
-            cx=${point[X]} cy=${point[Y]} r=${this.config.line_width}
-            @mouseover=${() => this.setTooltip(i, point[3], point[V])}
-            @mouseout=${() => (this.tooltip = {})}
-          />
-        `)}
+        ${points.map(point => this.renderSvgPoint(point, i))}
       </g>`;
   }
 
@@ -443,7 +464,9 @@ class MiniGraphCard extends LitElement {
       ? `url(#grad-${this.id}-${i})`
       : this.computeColor(this.entity[i].state, i);
     return svg`
-      <rect id=${`rect-${this.id}-${i}`}
+      <rect class='line--rect'
+        ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== i}
+        id=${`rect-${this.id}-${i}`}
         fill=${fill} height="100%" width="100%"
         mask=${`url(#line-${this.id}-${i})`}
       />`;
@@ -488,7 +511,7 @@ class MiniGraphCard extends LitElement {
       </svg>`;
   }
 
-  setTooltip(entity, index, value) {
+  setTooltip(entity, index, value, label = null) {
     const { points_per_hour, hours_to_show, format } = this.config;
     const offset = hours_to_show < 1 && points_per_hour < 1
       ? points_per_hour * hours_to_show
@@ -507,6 +530,8 @@ class MiniGraphCard extends LitElement {
       id,
       entity,
       time: [start, end],
+      index,
+      label,
     };
   }
 
@@ -557,6 +582,20 @@ class MiniGraphCard extends LitElement {
     return e;
   }
 
+  computeThresholds(stops, type) {
+    stops.sort((a, b) => b.value - a.value);
+
+    if (type === 'smooth') {
+      return stops;
+    } else {
+      const rect = [].concat(...stops.map((stop, i) => ([stop, {
+        value: stop.value - 0.0001,
+        color: stops[i + 1] ? stops[i + 1].color : stop.color,
+      }])));
+      return rect;
+    }
+  }
+
   computeColor(inState, i) {
     const { color_thresholds, line_color } = this.config;
     const state = Number(inState) || 0;
@@ -566,6 +605,31 @@ class MiniGraphCard extends LitElement {
       ...color_thresholds.find(ele => ele.value < state),
     };
     return this.config.entities[i].color || threshold.color;
+  }
+
+  intColor(inState, i) {
+    const { color_thresholds, line_color } = this.config;
+    const state = Number(inState) || 0;
+
+    let intColor;
+    if (color_thresholds.length > 0) {
+      if (this.config.show.graph === 'bar') {
+        const { color } = color_thresholds.find(ele => ele.value < state)
+          || color_thresholds.slice(-1)[0];
+        intColor = color;
+      } else {
+        intColor = color_thresholds[0].color;
+        const index = color_thresholds.findIndex(ele => ele.value < state);
+        const c1 = color_thresholds[index];
+        const c2 = color_thresholds[index - 1];
+        if (c2) {
+          const factor = (c2.value - inState) / (c2.value - c1.value);
+          intColor = interpolateColor(c2.color, c1.color, factor);
+        }
+      }
+    }
+
+    return this.config.entities[i].color || intColor || line_color[i] || line_color[0];
   }
 
   computeName(index) {
