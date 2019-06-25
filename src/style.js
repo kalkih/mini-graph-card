@@ -267,7 +267,7 @@ const style = css`
   }
   .line--point {
     cursor: pointer;
-    fill: var(--paper-card-background-color, white);
+    fill: var(--primary-background-color, white);
     stroke-width: inherit;
   }
   .line--point:hover {
