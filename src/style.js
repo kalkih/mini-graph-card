@@ -82,6 +82,7 @@ const style = css`
     align-items: center;
     min-width: 0;
     opacity: .8;
+    letter-spacing: var(--mcg-title-letter-spacing, normal);
   }
   .name > span {
     font-size: 1.2em;
