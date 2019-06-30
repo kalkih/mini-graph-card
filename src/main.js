@@ -338,10 +338,10 @@ class MiniGraphCard extends LitElement {
   }
 
   renderLegend() {
-    if (this.config.entities.length <= 1 || !this.config.show.legend) return;
+    if (this.visibleEntities.length <= 1 || !this.config.show.legend) return;
     return html`
       <div class="graph__legend">
-        ${this.entity.map((entity, i) => html`
+        ${this.visibleEntities.map((entity, i) => html`
           <div class="graph__legend__item"
             @click=${e => this.handlePopup(e, entity)}
             @mouseover=${() => this.setTooltip(i, -1, this.entity[i].state, 'Current')}
@@ -607,6 +607,10 @@ class MiniGraphCard extends LitElement {
     return this.config.entities[i].color || threshold.color;
   }
 
+  get visibleEntities() {
+    return this.config.entities.filter(entity => entity.show_graph !== false);
+  }
+
   intColor(inState, i) {
     const { color_thresholds, line_color } = this.config;
     const state = Number(inState) || 0;
@@ -724,7 +728,10 @@ class MiniGraphCard extends LitElement {
   }
 
   async updateEntity(entity, index, initStart, end) {
-    if (!entity || !this.updateQueue.includes(entity.entity_id)) return;
+    if (!entity
+      || !this.updateQueue.includes(entity.entity_id)
+      || this.config.entities[index].show_graph === false
+    ) return;
     let stateHistory = [];
     let start = initStart;
     let skipInitialState = false;
