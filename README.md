@@ -111,7 +111,10 @@ Providing options are optional, entities can be listed directly, see example bel
 | unit | string | optional | Set a custom unit of measurement, overrides `unit` set in base config.
 | show_state | boolean | optional | Display the current state.
 | show_indicator | boolean | optional | Display a color indicator next to the state, (only when more than two states are visible).
+| show_line | boolean | optional | Set to false to turn off the line. Does not impact the fill.
+| show_points | boolean | optional | Set to false to turn off the points.
 | state_adaptive_color | boolean | optional | Make the color of the state adapt to the entity color.
+| y_axis | string | optional | If 'secondary', displays using the secondary y-axis on the right.
 
 ```yaml
 entities:
@@ -136,6 +139,7 @@ All options are optional.
 | legend | true | `true` / `false` | Display the graph legend (only shown when graph contains multiple entities)
 | extrema | false | `true` / `false` | Display max/min information
 | labels | hover | `true` / `false` / `hover` | Display Y-axis labels
+| labels_secondary | hover | `true` / `false` / `hover` | Display secondary Y-axis labels
 | name_adaptive_color | false | `true` / `false` | Make the name color adapt with the primary entity color
 | icon_adaptive_color | false | `true` / `false` | Make the icon color adapt with the primary entity color
 
@@ -201,7 +205,7 @@ Use the `points_per_hour` option to specify the accuracy/detail of the graph.
 - type: custom:mini-graph-card
   entities:
     - sensor.living_room_temp
-  name: LIVONG ROOM
+  name: LIVING ROOM
   hours_to_show: 168
   points_per_hour: 0.25
 ```

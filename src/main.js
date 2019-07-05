@@ -48,6 +48,7 @@ class MiniGraphCard extends LitElement {
       .toString(36)
       .substr(2, 9);
     this.bound = [0, 0];
+    this.boundSecondary = [0, 0];
     this.abs = [];
     this.length = [];
     this.entity = [];
@@ -98,6 +99,7 @@ class MiniGraphCard extends LitElement {
       shadow: [],
       length: Number,
       bound: [],
+      boundSecondary: [],
       abs: [],
       tooltip: {},
       updateQueue: [],
@@ -222,6 +224,7 @@ class MiniGraphCard extends LitElement {
         ?fill=${config.show.graph && config.show.fill}
         ?points=${config.show.points === 'hover'}
         ?labels=${config.show.labels === 'hover'}
+        ?labels-secondary=${config.show.labels_secondary === 'hover'}
         ?gradient=${config.color_thresholds.length > 0}
         ?more-info=${config.more_info}
         style="font-size: ${config.font_size}px;"
@@ -329,6 +332,7 @@ class MiniGraphCard extends LitElement {
       <div class="graph">
         <div class="graph__container">
           ${this.renderLabels()}
+          ${this.renderLabelsSecondary()}
           <div class="graph__container__svg">
             ${this.renderSvg()}
           </div>
@@ -545,6 +549,16 @@ class MiniGraphCard extends LitElement {
     `;
   }
 
+  renderLabelsSecondary() {
+    if (!this.config.show.labels_secondary) return;
+    return html`
+      <div class="graph__labels flex" style="right: 0">
+        <span class="label--max">${this.computeState(this.boundSecondary[1])}</span>
+        <span class="label--min">${this.computeState(this.boundSecondary[0])}</span>
+      </div>
+    `;
+  }
+
   renderInfo() {
     if (!this.config.show.extrema) return;
     return html`
@@ -691,25 +705,53 @@ class MiniGraphCard extends LitElement {
 
     this.updateQueue = [];
 
+    if (config.show.graph) {
+      this.entity.forEach((entity, i) => {
+        if (!entity || this.Graph[i].coords.length === 0) return;
+        this.Graph[i].y_axis = config.entities[i].y_axis === 'secondary' ? 1 : 0;
+      });
+    }
+
     this.bound = [
       config.lower_bound !== undefined
         ? config.lower_bound
-        : Math.min(...this.Graph.map(ele => ele.min)) || this.bound[0],
+        : Math.min(...this.Graph
+          .filter(ele => ele.y_axis === 0)
+          .map(ele => ele.min)) || this.bound[0],
       config.upper_bound !== undefined
         ? config.upper_bound
-        : Math.max(...this.Graph.map(ele => ele.max)) || this.bound[1],
+        : Math.max(...this.Graph
+          .filter(ele => ele.y_axis === 0)
+          .map(ele => ele.max)) || this.bound[1],
+    ];
+
+    this.boundSecondary = [
+      config.lower_bound_secondary !== undefined
+        ? config.lower_bound_secondary
+        : Math.min(...this.Graph
+          .filter(ele => ele.y_axis === 1)
+          .map(ele => ele.min)) || this.boundSecondary[0],
+      config.upper_boundSecondary !== undefined
+        ? config.upper_boundSecondary
+        : Math.max(...this.Graph
+          .filter(ele => ele.y_axis === 1)
+          .map(ele => ele.max)) || this.boundSecondary[1],
     ];
 
     if (config.show.graph) {
       this.entity.forEach((entity, i) => {
         if (!entity || this.Graph[i].coords.length === 0) return;
-        [this.Graph[i].min, this.Graph[i].max] = [this.bound[0], this.bound[1]];
+        const bound = this.Graph[i].y_axis === 0 ? this.bound : this.boundSecondary;
+        [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
         if (config.show.graph === 'bar') {
           this.bar[i] = this.Graph[i].getBars(i, config.entities.length);
         } else {
-          this.line[i] = this.Graph[i].getPath();
-          if (config.show.fill) this.fill[i] = this.Graph[i].getFill(this.line[i]);
-          if (config.show.points) this.points[i] = this.Graph[i].getPoints();
+          const line = this.Graph[i].getPath();
+          if (config.entities[i].show_line !== false) this.line[i] = line;
+          if (config.show.fill) this.fill[i] = this.Graph[i].getFill(line);
+          if (config.show.points && (config.entities[i].show_points !== false)) {
+            this.points[i] = this.Graph[i].getPoints();
+          }
           if (config.color_thresholds.length > 0 && !config.entities[i].color)
             this.gradient[i] = this.Graph[i].computeGradient(config.color_thresholds);
         }
