@@ -306,6 +306,10 @@ const style = css`
   .line[anim="true"][init] {
     animation: dash 1s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   }
+  .graph__labels.--secondary {
+    right: 0;
+    margin-right: 0px;
+  }
   .graph__labels {
     align-items: flex-start;
     flex-direction: column;

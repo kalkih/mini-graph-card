@@ -23,6 +23,7 @@ const DEFAULT_SHOW = {
   state: true,
   graph: 'line',
   labels: 'hover',
+  labelsSecondary: 'hover',
   extrema: false,
   legend: true,
   fill: true,

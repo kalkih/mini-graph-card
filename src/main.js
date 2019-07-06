@@ -342,10 +342,10 @@ class MiniGraphCard extends LitElement {
   }
 
   renderLegend() {
-    if (this.visibleEntities.length <= 1 || !this.config.show.legend) return;
+    if (this.visibleLegends.length <= 1 || !this.config.show.legend) return;
     return html`
       <div class="graph__legend">
-        ${this.visibleEntities.map((entity, i) => html`
+        ${this.visibleLegends.map((entity, i) => html`
           <div class="graph__legend__item"
             @click=${e => this.handlePopup(e, entity)}
             @mouseover=${() => this.setTooltip(i, -1, this.entity[i].state, 'Current')}
@@ -552,7 +552,7 @@ class MiniGraphCard extends LitElement {
   renderLabelsSecondary() {
     if (!this.config.show.labels_secondary) return;
     return html`
-      <div class="graph__labels flex" style="right: 0">
+      <div class="graph__labels --secondary flex">
         <span class="label--max">${this.computeState(this.boundSecondary[1])}</span>
         <span class="label--min">${this.computeState(this.boundSecondary[0])}</span>
       </div>
@@ -623,6 +623,19 @@ class MiniGraphCard extends LitElement {
 
   get visibleEntities() {
     return this.config.entities.filter(entity => entity.show_graph !== false);
+  }
+
+  get visibleLegends() {
+    return this.visibleEntities.filter(entity => entity.show_legend !== false);
+  }
+
+  get primaryYaxisSeries() {
+    return this.Graph.filter((ele, i) => this.config.entities[i].y_axis === undefined
+      || this.config.entities[i].y_axis === 'primary');
+  }
+
+  get secondaryYaxisSeries() {
+    return this.Graph.filter((ele, i) => this.config.entities[i].y_axis === 'secondary');
   }
 
   intColor(inState, i) {
@@ -715,33 +728,25 @@ class MiniGraphCard extends LitElement {
     this.bound = [
       config.lower_bound !== undefined
         ? config.lower_bound
-        : Math.min(...this.Graph
-          .filter(ele => ele.y_axis === 0)
-          .map(ele => ele.min)) || this.bound[0],
+        : Math.min(...this.primaryYaxisSeries.map(ele => ele.min)) || this.bound[0],
       config.upper_bound !== undefined
         ? config.upper_bound
-        : Math.max(...this.Graph
-          .filter(ele => ele.y_axis === 0)
-          .map(ele => ele.max)) || this.bound[1],
+        : Math.max(...this.primaryYaxisSeries.map(ele => ele.max)) || this.bound[1],
     ];
 
     this.boundSecondary = [
       config.lower_bound_secondary !== undefined
         ? config.lower_bound_secondary
-        : Math.min(...this.Graph
-          .filter(ele => ele.y_axis === 1)
-          .map(ele => ele.min)) || this.boundSecondary[0],
+        : Math.min(...this.secondaryYaxisSeries.map(ele => ele.min)) || this.boundSecondary[0],
       config.upper_boundSecondary !== undefined
         ? config.upper_boundSecondary
-        : Math.max(...this.Graph
-          .filter(ele => ele.y_axis === 1)
-          .map(ele => ele.max)) || this.boundSecondary[1],
+        : Math.max(...this.secondaryYaxisSeries.map(ele => ele.max)) || this.boundSecondary[1],
     ];
 
     if (config.show.graph) {
       this.entity.forEach((entity, i) => {
         if (!entity || this.Graph[i].coords.length === 0) return;
-        const bound = this.Graph[i].y_axis === 0 ? this.bound : this.boundSecondary;
+        const bound = config.entities[i].y_axis === 'secondary' ? this.boundSecondary : this.bound;
         [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
         if (config.show.graph === 'bar') {
           this.bar[i] = this.Graph[i].getBars(i, config.entities.length);
