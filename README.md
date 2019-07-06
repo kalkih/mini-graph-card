@@ -99,6 +99,8 @@ The card works with entities from within the **sensor** domain and displays the 
 | align_state | string | `left` | v0.2.0 | Set the alignment of the current state, `left`, `right` or `center`.
 | lower_bound | number | optional | v0.2.3 | Set a fixed lower bound for the graph Y-axis.
 | upper_bound | number | optional | v0.2.3 | Set a fixed upper bound for the graph Y-axis.
+| lower_bound_secondary | number | optional | v0.2.3 | Set a fixed lower bound for the graph secondary Y-axis.
+| upper_bound_secondary | number | optional | v0.2.3 | Set a fixed upper bound for the graph secondary Y-axis.
 
 #### Entities object
 Providing options are optional, entities can be listed directly, see example below.
@@ -113,6 +115,7 @@ Providing options are optional, entities can be listed directly, see example bel
 | show_indicator | boolean | optional | Display a color indicator next to the state, (only when more than two states are visible).
 | show_line | boolean | optional | Set to false to turn off the line. Does not impact the fill.
 | show_points | boolean | optional | Set to false to turn off the points.
+| show_legend | boolean | optional | Set to false to turn off the legend.
 | state_adaptive_color | boolean | optional | Make the color of the state adapt to the entity color.
 | y_axis | string | optional | If 'secondary', displays using the secondary y-axis on the right.
 
@@ -251,7 +254,7 @@ You can stack cards horizontally by using one or more `horizontal-stack(s)`.
 ```
 ![Horizontally stacked cards](https://user-images.githubusercontent.com/457678/52009171-926f2380-24d2-11e9-9dd4-28f010608858.png)
 
-#### dynamic line color
+#### Dynamic line color
 Have the graph change line color dynamically.
 
 ```yaml
@@ -269,6 +272,33 @@ Have the graph change line color dynamically.
       color: "#c0392b"
 ```
 ![Dynamic line color](https://user-images.githubusercontent.com/457678/52573150-cbd05900-2e19-11e9-9e01-740753169093.png)
+
+#### Alternate y-axis
+Have one or more series plot on a separate y-axis, which appears on the right side of the graph. This example also
+shows turning off the line, points and legend.
+
+```yaml
+- type: custom:mini-graph-card
+  entities:
+  - entity: sensor.verandah
+    name: Verandah
+  - entity: sensor.lounge
+    name: Lounge
+  - entity: sensor.kitchen
+    name: Kitchen
+  - color: gray
+    entity: input_number.nighttime
+    name: Night
+    show_indicator: false
+    show_state: false
+    show_line: false
+    show_points: false
+    show_legend: false
+    y_axis: secondary
+  show:
+    labels: true
+```
+![Alternate y-axis](images/nighttime-bands.png)
 
 
 ## Development
