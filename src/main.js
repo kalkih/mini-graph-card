@@ -542,7 +542,7 @@ class MiniGraphCard extends LitElement {
   renderLabels() {
     if (!this.config.show.labels) return;
     return html`
-      <div class="graph__labels flex">
+      <div class="graph__labels --primary flex">
         <span class="label--max">${this.computeState(this.bound[1])}</span>
         <span class="label--min">${this.computeState(this.bound[0])}</span>
       </div>
