@@ -298,7 +298,7 @@ shows turning off the line, points and legend.
   show:
     labels: true
 ```
-![Alternate y-axis](https://user-images.githubusercontent.com/457678/60756223-513bec00-9ffb-11e9-8753-1420af497e6d.png)
+![Alternate y-axis](https://user-images.githubusercontent.com/373079/60764115-63cf2780-a0c6-11e9-8b9a-97fc47161180.png)
 
 ## Development
 
