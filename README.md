@@ -298,7 +298,7 @@ shows turning off the line, points and legend.
   show:
     labels: true
 ```
-<img src="images/nighttime-bands.png" alt="Alternate y-axis" width="500"/>
+![Alternate y-axis](https://user-images.githubusercontent.com/457678/60756223-513bec00-9ffb-11e9-8753-1420af497e6d.png)
 
 ## Development
 
