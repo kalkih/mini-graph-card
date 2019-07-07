@@ -19,14 +19,20 @@ const style = css`
     padding-bottom: 0;
   }
   ha-card[points] .line--points,
-  ha-card[labels] .graph__labels {
+  ha-card[labels] .graph__labels.--primary {
+    opacity: 0;
+    transition: opacity .25s;
+    animation: none;
+  }
+  ha-card[labels-secondary] .graph__labels.--secondary {
     opacity: 0;
     transition: opacity .25s;
     animation: none;
   }
   ha-card[points]:hover .line--points,
-  ha-card:hover .graph__labels {
-    opacity: 1;
+  ha-card:hover .graph__labels.--primary,
+  ha-card:hover .graph__labels.--secondary {
+      opacity: 1;
   }
   ha-card[fill] {
     padding-bottom: 0;
@@ -305,6 +311,10 @@ const style = css`
   }
   .line[anim="true"][init] {
     animation: dash 1s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+  }
+  .graph__labels.--secondary {
+    right: 0;
+    margin-right: 0px;
   }
   .graph__labels {
     align-items: flex-start;

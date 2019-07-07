@@ -48,6 +48,7 @@ class MiniGraphCard extends LitElement {
       .toString(36)
       .substr(2, 9);
     this.bound = [0, 0];
+    this.boundSecondary = [0, 0];
     this.abs = [];
     this.length = [];
     this.entity = [];
@@ -98,6 +99,7 @@ class MiniGraphCard extends LitElement {
       shadow: [],
       length: Number,
       bound: [],
+      boundSecondary: [],
       abs: [],
       tooltip: {},
       updateQueue: [],
@@ -222,6 +224,7 @@ class MiniGraphCard extends LitElement {
         ?fill=${config.show.graph && config.show.fill}
         ?points=${config.show.points === 'hover'}
         ?labels=${config.show.labels === 'hover'}
+        ?labels-secondary=${config.show.labels_secondary === 'hover'}
         ?gradient=${config.color_thresholds.length > 0}
         ?more-info=${config.more_info}
         style="font-size: ${config.font_size}px;"
@@ -329,6 +332,7 @@ class MiniGraphCard extends LitElement {
       <div class="graph">
         <div class="graph__container">
           ${this.renderLabels()}
+          ${this.renderLabelsSecondary()}
           <div class="graph__container__svg">
             ${this.renderSvg()}
           </div>
@@ -338,10 +342,10 @@ class MiniGraphCard extends LitElement {
   }
 
   renderLegend() {
-    if (this.visibleEntities.length <= 1 || !this.config.show.legend) return;
+    if (this.visibleLegends.length <= 1 || !this.config.show.legend) return;
     return html`
       <div class="graph__legend">
-        ${this.visibleEntities.map((entity, i) => html`
+        ${this.visibleLegends.map((entity, i) => html`
           <div class="graph__legend__item"
             @click=${e => this.handlePopup(e, entity)}
             @mouseover=${() => this.setTooltip(i, -1, this.entity[i].state, 'Current')}
@@ -538,9 +542,19 @@ class MiniGraphCard extends LitElement {
   renderLabels() {
     if (!this.config.show.labels) return;
     return html`
-      <div class="graph__labels flex">
+      <div class="graph__labels --primary flex">
         <span class="label--max">${this.computeState(this.bound[1])}</span>
         <span class="label--min">${this.computeState(this.bound[0])}</span>
+      </div>
+    `;
+  }
+
+  renderLabelsSecondary() {
+    if (!this.config.show.labels_secondary) return;
+    return html`
+      <div class="graph__labels --secondary flex">
+        <span class="label--max">${this.computeState(this.boundSecondary[1])}</span>
+        <span class="label--min">${this.computeState(this.boundSecondary[0])}</span>
       </div>
     `;
   }
@@ -609,6 +623,19 @@ class MiniGraphCard extends LitElement {
 
   get visibleEntities() {
     return this.config.entities.filter(entity => entity.show_graph !== false);
+  }
+
+  get visibleLegends() {
+    return this.visibleEntities.filter(entity => entity.show_legend !== false);
+  }
+
+  get primaryYaxisSeries() {
+    return this.Graph.filter((ele, i) => this.config.entities[i].y_axis === undefined
+      || this.config.entities[i].y_axis === 'primary');
+  }
+
+  get secondaryYaxisSeries() {
+    return this.Graph.filter((ele, i) => this.config.entities[i].y_axis === 'secondary');
   }
 
   intColor(inState, i) {
@@ -691,25 +718,45 @@ class MiniGraphCard extends LitElement {
 
     this.updateQueue = [];
 
+    if (config.show.graph) {
+      this.entity.forEach((entity, i) => {
+        if (!entity || this.Graph[i].coords.length === 0) return;
+        this.Graph[i].y_axis = config.entities[i].y_axis === 'secondary' ? 1 : 0;
+      });
+    }
+
     this.bound = [
       config.lower_bound !== undefined
         ? config.lower_bound
-        : Math.min(...this.Graph.map(ele => ele.min)) || this.bound[0],
+        : Math.min(...this.primaryYaxisSeries.map(ele => ele.min)) || this.bound[0],
       config.upper_bound !== undefined
         ? config.upper_bound
-        : Math.max(...this.Graph.map(ele => ele.max)) || this.bound[1],
+        : Math.max(...this.primaryYaxisSeries.map(ele => ele.max)) || this.bound[1],
+    ];
+
+    this.boundSecondary = [
+      config.lower_bound_secondary !== undefined
+        ? config.lower_bound_secondary
+        : Math.min(...this.secondaryYaxisSeries.map(ele => ele.min)) || this.boundSecondary[0],
+      config.upper_bound_secondary !== undefined
+        ? config.upper_bound_secondary
+        : Math.max(...this.secondaryYaxisSeries.map(ele => ele.max)) || this.boundSecondary[1],
     ];
 
     if (config.show.graph) {
       this.entity.forEach((entity, i) => {
         if (!entity || this.Graph[i].coords.length === 0) return;
-        [this.Graph[i].min, this.Graph[i].max] = [this.bound[0], this.bound[1]];
+        const bound = config.entities[i].y_axis === 'secondary' ? this.boundSecondary : this.bound;
+        [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
         if (config.show.graph === 'bar') {
           this.bar[i] = this.Graph[i].getBars(i, config.entities.length);
         } else {
-          this.line[i] = this.Graph[i].getPath();
-          if (config.show.fill) this.fill[i] = this.Graph[i].getFill(this.line[i]);
-          if (config.show.points) this.points[i] = this.Graph[i].getPoints();
+          const line = this.Graph[i].getPath();
+          if (config.entities[i].show_line !== false) this.line[i] = line;
+          if (config.show.fill) this.fill[i] = this.Graph[i].getFill(line);
+          if (config.show.points && (config.entities[i].show_points !== false)) {
+            this.points[i] = this.Graph[i].getPoints();
+          }
           if (config.color_thresholds.length > 0 && !config.entities[i].color)
             this.gradient[i] = this.Graph[i].computeGradient(config.color_thresholds);
         }
