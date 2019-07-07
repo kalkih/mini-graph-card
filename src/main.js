@@ -738,8 +738,8 @@ class MiniGraphCard extends LitElement {
       config.lower_bound_secondary !== undefined
         ? config.lower_bound_secondary
         : Math.min(...this.secondaryYaxisSeries.map(ele => ele.min)) || this.boundSecondary[0],
-      config.upper_boundSecondary !== undefined
-        ? config.upper_boundSecondary
+      config.upper_bound_secondary !== undefined
+        ? config.upper_bound_secondary
         : Math.max(...this.secondaryYaxisSeries.map(ele => ele.max)) || this.boundSecondary[1],
     ];
 
