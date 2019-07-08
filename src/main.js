@@ -540,7 +540,7 @@ class MiniGraphCard extends LitElement {
   }
 
   renderLabels() {
-    if (!this.config.show.labels) return;
+    if (!this.config.show.labels || this.primaryYaxisSeries.length === 0) return;
     return html`
       <div class="graph__labels --primary flex">
         <span class="label--max">${this.computeState(this.bound[1])}</span>
@@ -550,7 +550,7 @@ class MiniGraphCard extends LitElement {
   }
 
   renderLabelsSecondary() {
-    if (!this.config.show.labels_secondary) return;
+    if (!this.config.show.labels_secondary || this.secondaryYaxisSeries.length === 0) return;
     return html`
       <div class="graph__labels --secondary flex">
         <span class="label--max">${this.computeState(this.boundSecondary[1])}</span>
@@ -753,7 +753,8 @@ class MiniGraphCard extends LitElement {
         } else {
           const line = this.Graph[i].getPath();
           if (config.entities[i].show_line !== false) this.line[i] = line;
-          if (config.show.fill) this.fill[i] = this.Graph[i].getFill(line);
+          if (config.show.fill
+            && config.entities[i].show_fill !== false) this.fill[i] = this.Graph[i].getFill(line);
           if (config.show.points && (config.entities[i].show_points !== false)) {
             this.points[i] = this.Graph[i].getPoints();
           }

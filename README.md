@@ -113,12 +113,16 @@ Providing options are optional, entities can be listed directly, see example bel
 | unit | string | optional | Set a custom unit of measurement, overrides `unit` set in base config.
 | show_state | boolean | optional | Display the current state.
 | show_indicator | boolean | optional | Display a color indicator next to the state, (only when more than two states are visible).
-| show_line | boolean | optional | Set to false to turn off the line. Does not impact the fill.
-| show_points | boolean | optional | Set to false to turn off the points.
+| show_line | boolean | optional | Set to false to turn off the line (see note below table).
+| show_points | boolean | optional | Set to false to turn off the points (see note below table).
+| show_fill | boolean | optional | Set to false to turn off the fill (see note below table).
 | show_legend | boolean | optional | Set to false to turn off the legend.
 | state_adaptive_color | boolean | optional | Make the color of the state adapt to the entity color.
 | y_axis | string | optional | If 'secondary', displays using the secondary y-axis on the right.
 
+Note:
+- If the line and points and fill are all set to false, nothing will be visible in the graph. However, the
+data will still contribute to the y-axis min/max and be shown in the current state and legend.
 ```yaml
 entities:
   - sensor.temperature
