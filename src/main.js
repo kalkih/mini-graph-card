@@ -718,13 +718,6 @@ class MiniGraphCard extends LitElement {
 
     this.updateQueue = [];
 
-    if (config.show.graph) {
-      this.entity.forEach((entity, i) => {
-        if (!entity || this.Graph[i].coords.length === 0) return;
-        this.Graph[i].y_axis = config.entities[i].y_axis === 'secondary' ? 1 : 0;
-      });
-    }
-
     this.bound = [
       config.lower_bound !== undefined
         ? config.lower_bound
