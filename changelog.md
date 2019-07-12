@@ -1,3 +1,20 @@
+## v0.5.0
+
+### ADDED
+- Compression of cached data (#98) - (@bramkragten)
+- Added 'mcg-title-letter-spacing' theme variable (#111)
+- Added `show_graph` option to entities, to show state but hide from graph (#82)
+- Added `show_fill` option to entities (@michaelblight)
+- Added `show_line` option to entities (#116) - (@michaelblight)
+- Added `show_points` option to entities (#116) - (@michaelblight)
+- Added `show_legend` option to entities (#116) - (@michaelblight)
+- Added support for a secondary y-axis (#116, #113) - (@michaelblight)
+
+### CHANGED
+- Optimized caching (#98) - (@bramkragten)
+- Line point fill is now based on theme variable `primary-background-color` instead of `paper-card-background-color`
+- Removed letter-spacing from title (#111)
+
 ## v0.4.3
 
 ### ADDED

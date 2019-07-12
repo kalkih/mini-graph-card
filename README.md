@@ -15,7 +15,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.4.3
+    - url: /local/mini-graph-card-bundle.js?v=0.5.0
       type: module
   ```
 
@@ -26,14 +26,14 @@ The card works with entities from within the **sensor** domain and displays the 
 2. Grab `mini-graph-card-bundle.js`
 
   ```
-  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.4.3/mini-graph-card-bundle.js
+  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.5.0/mini-graph-card-bundle.js
   ```
 
 3. Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`.
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.4.3
+    - url: /local/mini-graph-card-bundle.js?v=0.5.0
       type: module
   ```
 
@@ -60,7 +60,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.4.3
+    - url: /local/mini-graph-card-bundle.js?v=0.5.0
       type: module
   ```
 
@@ -99,8 +99,8 @@ The card works with entities from within the **sensor** domain and displays the 
 | align_state | string | `left` | v0.2.0 | Set the alignment of the current state, `left`, `right` or `center`.
 | lower_bound | number | optional | v0.2.3 | Set a fixed lower bound for the graph Y-axis.
 | upper_bound | number | optional | v0.2.3 | Set a fixed upper bound for the graph Y-axis.
-| lower_bound_secondary | number | optional | v0.2.3 | Set a fixed lower bound for the graph secondary Y-axis.
-| upper_bound_secondary | number | optional | v0.2.3 | Set a fixed upper bound for the graph secondary Y-axis.
+| lower_bound_secondary | number | optional | v0.5.0 | Set a fixed lower bound for the graph secondary Y-axis.
+| upper_bound_secondary | number | optional | v0.5.0 | Set a fixed upper bound for the graph secondary Y-axis.
 
 #### Entities object
 Providing options are optional, entities can be listed directly, see example below.
@@ -113,16 +113,17 @@ Providing options are optional, entities can be listed directly, see example bel
 | unit | string | optional | Set a custom unit of measurement, overrides `unit` set in base config.
 | show_state | boolean | optional | Display the current state.
 | show_indicator | boolean | optional | Display a color indicator next to the state, (only when more than two states are visible).
-| show_line | boolean | optional | Set to false to turn off the line (see note below table).
-| show_points | boolean | optional | Set to false to turn off the points (see note below table).
-| show_fill | boolean | optional | Set to false to turn off the fill (see note below table).
-| show_legend | boolean | optional | Set to false to turn off the legend.
+| show_line | boolean | optional | Set to false to hide the line (see note below table).
+| show_fill | boolean | optional | Set to false to hide the fill (see note below table).
+| show_points | boolean | optional | Set to false to hide the points (see note below table).
+| show_legend | boolean | optional | Set to false to turn hide from the legend.
 | state_adaptive_color | boolean | optional | Make the color of the state adapt to the entity color.
 | y_axis | string | optional | If 'secondary', displays using the secondary y-axis on the right.
 
 Note:
 - If the line and points and fill are all set to false, nothing will be visible in the graph. However, the
 data will still contribute to the y-axis min/max and be shown in the current state and legend.
+
 ```yaml
 entities:
   - sensor.temperature
@@ -284,25 +285,24 @@ shows turning off the line, points and legend.
 ```yaml
 - type: custom:mini-graph-card
   entities:
-  - entity: sensor.verandah
-    name: Verandah
-  - entity: sensor.lounge
-    name: Lounge
-  - entity: sensor.kitchen
-    name: Kitchen
-  - color: gray
-    entity: input_number.nighttime
-    name: Night
-    show_indicator: false
-    show_state: false
-    show_line: false
-    show_points: false
-    show_legend: false
-    y_axis: secondary
-  show:
-    labels: true
+    - entity: sensor.verandah
+      name: Verandah
+    - entity: sensor.lounge
+      name: Lounge
+    - entity: sensor.kitchen
+      name: Kitchen
+    - color: gray
+      entity: input_number.nighttime
+      name: Night
+      show_line: false
+      show_points: false
+      show_legend: false
+      y_axis: secondary
+    show:
+      labels: true
+      labels_secondary: true
 ```
-![Alternate y-axis](https://user-images.githubusercontent.com/373079/60764115-63cf2780-a0c6-11e9-8b9a-97fc47161180.png)
+<img src="images/nighttime-bands.png" alt="Alternate y-axis" width="500"/>
 
 ## Development
 
