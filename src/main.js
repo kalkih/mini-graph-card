@@ -742,7 +742,7 @@ class MiniGraphCard extends LitElement {
         const bound = config.entities[i].y_axis === 'secondary' ? this.boundSecondary : this.bound;
         [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
         if (config.show.graph === 'bar') {
-          this.bar[i] = this.Graph[i].getBars(i, config.entities.length);
+          this.bar[i] = this.Graph[i].getBars(i, this.visibleEntities.length);
         } else {
           const line = this.Graph[i].getPath();
           if (config.entities[i].show_line !== false) this.line[i] = line;
