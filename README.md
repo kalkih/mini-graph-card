@@ -302,7 +302,7 @@ shows turning off the line, points and legend.
       labels: true
       labels_secondary: true
 ```
-<img src="images/nighttime-bands.png" alt="Alternate y-axis" width="500"/>
+![Alternate y-axis](https://user-images.githubusercontent.com/373079/60764115-63cf2780-a0c6-11e9-8b9a-97fc47161180.png)
 
 ## Development
 

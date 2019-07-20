@@ -116,7 +116,7 @@ export default class Graph {
       }
       return {
         color: color || stop.color,
-        offset: (this._max - stop.value) * (100 / scale),
+        offset: scale <= 0 ? 0 : (this._max - stop.value) * (100 / scale),
       };
     });
   }
