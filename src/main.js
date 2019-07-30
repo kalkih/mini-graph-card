@@ -827,7 +827,12 @@ class MiniGraphCard extends LitElement {
       ];
     }
 
-    this.Graph[index].update(stateHistory);
+    if (this.config.entities[index].fixed_value === true) {
+      const last = stateHistory[stateHistory.length - 1];
+      this.Graph[index].update([last, last]);
+    } else {
+      this.Graph[index].update(stateHistory);
+    }
   }
 
   async fetchRecent(entityId, start, end, skipInitialState) {
