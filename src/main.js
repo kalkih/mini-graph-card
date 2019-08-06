@@ -30,7 +30,7 @@ localForage.config({
 });
 
 localForage.iterate((data, key) => {
-  const value = decompress(data);
+  const value = key.endsWith('-raw') ? data : decompress(data);
   const start = new Date();
   start.setHours(start.getHours() - value.hours_to_show);
   if (new Date(value.last_fetched) < start) {
@@ -71,6 +71,7 @@ class MiniGraphCard extends LitElement {
     this._hass = hass;
     let updated = false;
     this.config.entities.forEach((entity, index) => {
+      this.config.entities[index].index = index; // Required for filtered views
       const entityState = hass.states[entity.entity];
       if (entityState && this.entity[index] !== entityState) {
         this.entity[index] = entityState;
@@ -130,6 +131,7 @@ class MiniGraphCard extends LitElement {
       color_thresholds_transition: 'smooth',
       line_width: 5,
       more_info: true,
+      compress: true,
       ...config,
       show: { ...DEFAULT_SHOW, ...config.show },
     };
@@ -345,13 +347,13 @@ class MiniGraphCard extends LitElement {
     if (this.visibleLegends.length <= 1 || !this.config.show.legend) return;
     return html`
       <div class="graph__legend">
-        ${this.visibleLegends.map((entity, i) => html`
+        ${this.visibleLegends.map(entity => html`
           <div class="graph__legend__item"
             @click=${e => this.handlePopup(e, entity)}
-            @mouseover=${() => this.setTooltip(i, -1, this.entity[i].state, 'Current')}
+            @mouseover=${() => this.setTooltip(entity.index, -1, this.entity[entity.index].state, 'Current')}
             @mouseout=${() => (this.tooltip = {})}>
-            ${this.renderIndicator(entity.state, i)}
-            <span class="ellipsis">${this.computeName(i)}</span>
+            ${this.renderIndicator(entity.state, entity.index)}
+            <span class="ellipsis">${this.computeName(entity.index)}</span>
           </div>
         `)}
       </div>
@@ -625,17 +627,25 @@ class MiniGraphCard extends LitElement {
     return this.config.entities.filter(entity => entity.show_graph !== false);
   }
 
+  get primaryYaxisEntities() {
+    return this.visibleEntities.filter(entity => entity.y_axis === undefined
+      || entity.y_axis === 'primary');
+  }
+
+  get secondaryYaxisEntities() {
+    return this.visibleEntities.filter(entity => entity.y_axis === 'secondary');
+  }
+
   get visibleLegends() {
     return this.visibleEntities.filter(entity => entity.show_legend !== false);
   }
 
   get primaryYaxisSeries() {
-    return this.Graph.filter((ele, i) => this.config.entities[i].y_axis === undefined
-      || this.config.entities[i].y_axis === 'primary');
+    return this.primaryYaxisEntities.map(entity => this.Graph[entity.index]);
   }
 
   get secondaryYaxisSeries() {
-    return this.Graph.filter((ele, i) => this.config.entities[i].y_axis === 'secondary');
+    return this.secondaryYaxisEntities.map(entity => this.Graph[entity.index]);
   }
 
   intColor(inState, i) {
@@ -759,13 +769,15 @@ class MiniGraphCard extends LitElement {
     }
   }
 
-  async getCache(key) {
-    const data = await localForage.getItem(key);
-    return data ? decompress(data) : null;
+  async getCache(key, compressed) {
+    const data = await localForage.getItem(key + (compressed ? '' : '-raw'));
+    return data ? (compressed ? decompress(data) : data) : null;
   }
 
-  async setCache(key, data) {
-    return localForage.setItem(key, compress(data));
+  async setCache(key, data, compressed) {
+    return compressed
+      ? localForage.setItem(key, compress(data))
+      : localForage.setItem(`${key}-raw`, data);
   }
 
   async updateEntity(entity, index, initStart, end) {
@@ -777,7 +789,7 @@ class MiniGraphCard extends LitElement {
     let start = initStart;
     let skipInitialState = false;
 
-    const history = await this.getCache(entity.entity_id);
+    const history = await this.getCache(entity.entity_id, this.config.useCompress);
     if (history && history.hours_to_show === this.config.hours_to_show) {
       stateHistory = history.data;
       stateHistory = stateHistory.filter(item => new Date(item.last_changed) > initStart);
@@ -804,7 +816,7 @@ class MiniGraphCard extends LitElement {
           hours_to_show: this.config.hours_to_show,
           last_fetched: end,
           data: stateHistory,
-        })
+        }, this.config.useCompress)
         .catch((err) => {
           // eslint-disable-next-line no-console
           console.warn('mini-graph-card: Failed to cache: ', err);
