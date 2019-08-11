@@ -119,6 +119,7 @@ Providing options are optional, entities can be listed directly, see example bel
 | show_legend | boolean | optional | Set to false to turn hide from the legend.
 | state_adaptive_color | boolean | optional | Make the color of the state adapt to the entity color.
 | y_axis | string | optional | If 'secondary', displays using the secondary y-axis on the right.
+| fixed_value | boolean | optional | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 
 Note:
 - If the line and points and fill are all set to false, nothing will be visible in the graph. However, the
