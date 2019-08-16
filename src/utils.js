@@ -4,8 +4,8 @@ import { compress as lzStringCompress, decompress as lzStringDecompress } from '
 const getMin = (arr, val) => arr.reduce((min, p) => (
   Number(p[val]) < Number(min[val]) ? p : min
 ), arr[0]);
-const getAvg = (arr, val) => arr.reduce((avg, p) => (
-  avg + Number(p[val])
+const getAvg = (arr, val) => arr.reduce((sum, p) => (
+  sum + Number(p[val])
 ), 0) / arr.length;
 const getMax = (arr, val) => arr.reduce((max, p) => (
   Number(p[val]) > Number(max[val]) ? p : max
