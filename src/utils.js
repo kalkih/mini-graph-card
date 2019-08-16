@@ -4,6 +4,9 @@ import { compress as lzStringCompress, decompress as lzStringDecompress } from '
 const getMin = (arr, val) => arr.reduce((min, p) => (
   Number(p[val]) < Number(min[val]) ? p : min
 ), arr[0]);
+const getAvg = (arr, val) => arr.reduce((avg, p) => (
+  avg + Number(p[val])
+), 0) / arr.length;
 const getMax = (arr, val) => arr.reduce((max, p) => (
   Number(p[val]) > Number(max[val]) ? p : max
 ), arr[0]);
@@ -31,5 +34,5 @@ const compress = data => lzStringCompress(JSON.stringify(data));
 const decompress = data => (typeof data === 'string' ? JSON.parse(lzStringDecompress(data)) : data);
 
 export {
-  getMin, getMax, getTime, getMilli, interpolateColor, compress, decompress,
+  getMin, getAvg, getMax, getTime, getMilli, interpolateColor, compress, decompress,
 };

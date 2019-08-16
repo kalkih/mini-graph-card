@@ -364,12 +364,15 @@ const style = css`
   .info__item {
     display: flex;
     flex-flow: column;
-    align-items: flex-end;
-    text-align: right;
+    text-align: center;
   }
   .info__item:first-child {
     align-items: flex-start;
     text-align: left;
+  }
+  .info__item:last-child {
+    align-items: flex-end;
+    text-align: right;
   }
   .info__item__type {
     text-transform: capitalize;

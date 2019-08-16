@@ -15,6 +15,7 @@ import {
 } from './const';
 import {
   getMin,
+  getAvg,
   getMax,
   getTime,
   getMilli,
@@ -49,7 +50,9 @@ class MiniGraphCard extends LitElement {
       .substr(2, 9);
     this.bound = [0, 0];
     this.boundSecondary = [0, 0];
-    this.abs = [];
+    this.min = {};
+    this.avg = {};
+    this.max = {};
     this.length = [];
     this.entity = [];
     this.line = [];
@@ -562,17 +565,21 @@ class MiniGraphCard extends LitElement {
   }
 
   renderInfo() {
-    if (!this.config.show.extrema) return;
+    const info = [];
+    if (this.config.show.extrema) info.push(this.min);
+    if (this.config.show.average) info.push(this.avg);
+    if (this.config.show.extrema) info.push(this.max);
+    if (!info) return;
     return html`
       <div class="info flex">
-        ${this.abs.map(entry => html`
+        ${info.map(entry => html`
           <div class="info__item">
             <span class="info__item__type">${entry.type}</span>
             <span class="info__item__value">
               ${this.computeState(entry.state)} ${this.computeUom(0)}
             </span>
             <span class="info__item__time">
-              ${getTime(new Date(entry.last_changed), this.config.format, this._hass.language)}
+              ${entry.type !== 'avg' ? getTime(new Date(entry.last_changed), this.config.format, this._hass.language) : ''}
             </span>
           </div>
         `)}
@@ -827,16 +834,18 @@ class MiniGraphCard extends LitElement {
     if (stateHistory.length === 0) return;
 
     if (entity.entity_id === this.entity[0].entity_id) {
-      this.abs = [
-        {
-          type: 'min',
-          ...getMin(stateHistory, 'state'),
-        },
-        {
-          type: 'max',
-          ...getMax(stateHistory, 'state'),
-        },
-      ];
+      this.min = {
+        type: 'min',
+        ...getMin(stateHistory, 'state'),
+      };
+      this.avg = {
+        type: 'avg',
+        state: getAvg(stateHistory, 'state'),
+      };
+      this.max = {
+        type: 'max',
+        ...getMax(stateHistory, 'state'),
+      };
     }
 
     if (this.config.entities[index].fixed_value === true) {
