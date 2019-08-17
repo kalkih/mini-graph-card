@@ -146,6 +146,7 @@ All options are optional.
 | fill | true | `true` / `false` / `fade` | Display the line graph fill
 | points | hover | `true` / `false` / `hover` | Display graph data points
 | legend | true | `true` / `false` | Display the graph legend (only shown when graph contains multiple entities)
+| average | false | `true` / `false` | Display average information
 | extrema | false | `true` / `false` | Display max/min information
 | labels | hover | `true` / `false` / `hover` | Display Y-axis labels
 | labels_secondary | hover | `true` / `false` / `hover` | Display secondary Y-axis labels
