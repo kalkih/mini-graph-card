@@ -305,6 +305,7 @@ class MiniGraphCard extends LitElement {
       return html`
         <div
           class="state state--small"
+          @click=${e => this.handlePopup(e, this.entity[id])}
           style=${entity.state_adaptive_color ? `color: ${this.computeColor(state, id)};` : ''}>
           ${entity.show_indicator ? this.renderIndicator(state, id) : ''}
           <span class="state__value ellipsis">
