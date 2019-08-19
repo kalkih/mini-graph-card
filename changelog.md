@@ -1,3 +1,17 @@
+## v0.6.0
+
+### ADDED
+- Option `fixed_value` to graph only the current state of an entity (#128) - (@snarky-snark)
+- Average display option, similar to extrema (#135) - (@TheLastProject)
+- Ability to press entity state for more info popup (#136) - (@jbalague)
+
+### FIXED
+- Invalid bar width when hiding entities (bar graph) (#124) - (@caphm)
+- Fixed issue with color threshold when graph upper bound equaled graph lower bound (@michaelblight)
+- Fixed invalid graph bounds when graph includes hidden entities (#130) - (@michaelblight)
+- Pressing graph entries should now properly trigger the more-info popup
+- Broken image link in README
+
 ## v0.5.0
 
 ### ADDED
