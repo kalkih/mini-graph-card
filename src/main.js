@@ -590,20 +590,15 @@ class MiniGraphCard extends LitElement {
 
   handlePopup(e, entity) {
     e.stopPropagation();
-    if (this.config.more_info) this.fire('hass-more-info', { entityId: entity.entity_id });
+    if (this.config.more_info) {
+      this.fire('hass-more-info', { entityId: entity.entity_id });
+    }
   }
 
-  fire(type, inDetail, inOptions) {
-    const options = inOptions || {};
-    const detail = inDetail === null || inDetail === undefined ? {} : inDetail;
-    const e = new Event(type, {
-      bubbles: options.bubbles === undefined ? true : options.bubbles,
-      cancelable: Boolean(options.cancelable),
-      composed: options.composed === undefined ? true : options.composed,
-    });
-    e.detail = detail;
+  fire(type, inDetail) {
+    const e = new Event(type, { composed: true });
+    e.detail = inDetail;
     this.dispatchEvent(e);
-    return e;
   }
 
   computeThresholds(stops, type) {
