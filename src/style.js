@@ -356,6 +356,7 @@ const style = css`
   }
   .graph__legend__item svg {
     border-radius: 100%;
+    min-width: 10px;
   }
   .info {
     justify-content: space-between;
