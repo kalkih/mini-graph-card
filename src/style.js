@@ -266,8 +266,6 @@ const style = css`
     animation: none !important;
     transition: all .15s !important;
   }
-  .line--points[inactive] {
-  }
   .line--points[tooltip] .line--point[inactive] {
     opacity: 0;
   }
