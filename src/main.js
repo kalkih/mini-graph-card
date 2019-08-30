@@ -2,6 +2,8 @@ import { LitElement, html, svg } from 'lit-element';
 import localForage from 'localforage/src/localforage';
 import Graph from './graph';
 import style from './style';
+import handleClick from './handleClick';
+
 import {
   URL_DOCS,
   FONT_SIZE,
@@ -133,8 +135,10 @@ class MiniGraphCard extends LitElement {
       color_thresholds: [],
       color_thresholds_transition: 'smooth',
       line_width: 5,
-      more_info: true,
       compress: true,
+      tap_action: {
+        action: 'more-info',
+      },
       ...config,
       show: { ...DEFAULT_SHOW, ...config.show },
     };
@@ -231,7 +235,7 @@ class MiniGraphCard extends LitElement {
         ?labels=${config.show.labels === 'hover'}
         ?labels-secondary=${config.show.labels_secondary === 'hover'}
         ?gradient=${config.color_thresholds.length > 0}
-        ?more-info=${config.more_info}
+        ?hover=${config.tap_action.action !== 'none'}
         style="font-size: ${config.font_size}px;"
         @click=${e => this.handlePopup(e, this.entity[0])}
       >
@@ -590,15 +594,7 @@ class MiniGraphCard extends LitElement {
 
   handlePopup(e, entity) {
     e.stopPropagation();
-    if (this.config.more_info) {
-      this.fire('hass-more-info', { entityId: entity.entity_id });
-    }
-  }
-
-  fire(type, inDetail) {
-    const e = new Event(type, { composed: true });
-    e.detail = inDetail;
-    this.dispatchEvent(e);
+    handleClick(this, this._hass, this.config, this.config.tap_action, entity.entity_id);
   }
 
   computeThresholds(stops, type) {

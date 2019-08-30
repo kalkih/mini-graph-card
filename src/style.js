@@ -64,7 +64,7 @@ const style = css`
     padding-left: 0;
     padding-right: 0;
   }
-  ha-card[more-info] {
+  ha-card[hover] {
     cursor: pointer;
   }
   .flex {

@@ -78,7 +78,7 @@ The card works with entities from within the **sensor** domain and displays the 
 | icon | string | optional | v0.0.1 | Set a custom icon from any of the available mdi icons.
 | name | string | optional | v0.0.1 | Set a custom name which is displayed beside the icon.
 | unit | string | optional | v0.0.1 | Set a custom unit of measurement.
-| more_info | boolean | true | v0.0.1 | Set to `false` to disable the "more info" dialog popup when pressing on the card.
+| tap_action | [action object](#action-object-options) | optional | v0.7.0 | Action on click/tap.
 | group | boolean | false | v0.2.0 | Disable paddings and box-shadow, useful when nesting the card.
 | hours_to_show | integer | 24 | v0.0.2 | Specify how many hours of history the graph should present.
 | points_per_hour | number | 0.5 | v0.2.0 | Specify amount of data points the graph should display for each hour, *(basically the detail/accuracy/smoothing of the graph)*.
@@ -160,6 +160,14 @@ See [dynamic line color](#dynamic-line-color) for example usage.
 |------|:----:|:-------:|-------------|
 | value | number | **required** | The threshold for the color stop.
 | color | string | **required** | Color in 6 digit hex format (e.g. #008080)
+
+#### Action object options
+| Name | Type | Default | Options | Description |
+|------|------|---------|-------------|-------------|
+| action | string | `more-info` | `more-info`, `navigate`, `call-service`, `none` | Action to perform
+| service | string | none | Any service | Service to call (e.g. `media_player.toggle`) when `action` is defined as `call-service`
+| service_data | object | none | Any service data | Service data to include with the service call (e.g. `entity_id: media_player.office`) 
+| navigation_path | string | none | Any path | Path to navigate to (e.g. `/lovelace/0/`) when `action` is defined as `navigate`
 
 ### Example usage
 
