@@ -165,7 +165,7 @@ const style = css`
   .state {
     position: relative;
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     max-width: 100%;
     min-width: 0;
   }
@@ -200,6 +200,7 @@ const style = css`
     margin-right: .25rem;
   }
   .state__uom {
+    flex: 1;
     align-self: flex-end;
     display: inline-block;
     font-size: 1.4em;
