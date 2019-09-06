@@ -380,9 +380,9 @@ class MiniGraphCard extends LitElement {
     if (!fill) return;
     const color = this.intColor(this.entity[i].state, i);
     const fade = this.config.show.fill === 'fade';
-    const mask = fade
-      ? `url(#fill-grad-${this.id}-${i})`
-      : color;
+    const mask = this.gradient[i]
+      ? `url(#grad-${this.id}-${i})`
+      : fade ? `url(#fill-grad-${this.id}-${i})` : color;
     return svg`
       <defs>
         <linearGradient id=${`fill-grad-${this.id}-${i}`} x1="0%" y1="0%" x2="0%" y2="100%">
