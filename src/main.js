@@ -380,23 +380,27 @@ class MiniGraphCard extends LitElement {
     if (!fill) return;
     const color = this.intColor(this.entity[i].state, i);
     const fade = this.config.show.fill === 'fade';
-    const mask = this.gradient[i]
+    const fillColor = this.gradient[i]
       ? `url(#grad-${this.id}-${i})`
-      : fade ? `url(#fill-grad-${this.id}-${i})` : color;
+      : color;
     return svg`
       <defs>
         <linearGradient id=${`fill-grad-${this.id}-${i}`} x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop stop-color=${color} offset='0%' stop-opacity='1'/>
-          <stop stop-color=${color} offset='100%' stop-opacity='.15'/>
+          <stop stop-color='white' offset='0%' stop-opacity='1'/>
+          <stop stop-color='white' offset='100%' stop-opacity='.15'/>
         </linearGradient>
+        <mask id=${`fill-grad-mask-${this.id}-${i}`}>
+          <rect width="100%" height="100%" fill=${`url(#fill-grad-${this.id}-${i})`} />
+        </mask>
       </defs>
       <path class='line--fill'
         ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== i}
         type=${this.config.show.fill}
         .id=${i} anim=${this.config.animate} ?init=${this.length[i]}
         style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
-        fill=${mask}
-        stroke=${mask}
+        fill=${fillColor}
+        stroke=${fillColor}
+        mask=${fade ? `url(#fill-grad-mask-${this.id}-${i})` : ''}
         stroke-width=${this.config.line_width}
         d=${this.fill[i]}
       />`;
