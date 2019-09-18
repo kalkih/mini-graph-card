@@ -7,6 +7,9 @@ const ICONS = {
   illuminance: 'hass:brightness-5',
   temperature: 'hass:thermometer',
   battery: 'hass:battery',
+  pressure: 'hass:gauge',
+  power: 'hass:flash',
+  signal_strength: 'hass:wifi',
 };
 const DEFAULT_COLORS = [
   'var(--accent-color)',
