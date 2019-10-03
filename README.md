@@ -164,10 +164,11 @@ See [dynamic line color](#dynamic-line-color) for example usage.
 #### Action object options
 | Name | Type | Default | Options | Description |
 |------|------|---------|-------------|-------------|
-| action | string | `more-info` | `more-info`, `navigate`, `call-service`, `none` | Action to perform
+| action | string | `more-info` | `more-info`, `navigate`, `call-service`, `none`, `url` | Action to perform
 | service | string | none | Any service | Service to call (e.g. `media_player.toggle`) when `action` is defined as `call-service`
 | service_data | object | none | Any service data | Service data to include with the service call (e.g. `entity_id: media_player.office`) 
 | navigation_path | string | none | Any path | Path to navigate to (e.g. `/lovelace/0/`) when `action` is defined as `navigate`
+| url | string | none | Any URL | URL to navigate to when `action` is defined as `url`.
 
 ### Example usage
 

@@ -21,6 +21,11 @@ export default (node, hass, config, actionConfig, entityId) => {
       const [domain, service] = actionConfig.service.split('.', 2);
       const serviceData = { ...actionConfig.service_data };
       hass.callService(domain, service, serviceData);
+      break;
+    }
+    case 'url': {
+      if (!actionConfig.url) return;
+      window.location.href = actionConfig.url;
     }
   }
 };
