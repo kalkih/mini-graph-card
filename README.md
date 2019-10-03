@@ -11,7 +11,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
 1. Download and copy `mini-graph-card-bundle.js` from the [latest release](https://github.com/kalkih/mini-graph-card/releases/latest) into your `config/www` directory.
 
-2. Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml` or at the top of the *raw config editor UI*.
+2. Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml` or at the top of the *raw config editor UI*:
 
   ```yaml
   resources:
@@ -21,15 +21,15 @@ The card works with entities from within the **sensor** domain and displays the 
 
 ### CLI install
 
-1. Move into your `config/www` directory
+1. Move into your `config/www` directory.
 
-2. Grab `mini-graph-card-bundle.js`
+2. Grab `mini-graph-card-bundle.js`:
 
   ```
   $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.6.0/mini-graph-card-bundle.js
   ```
 
-3. Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`.
+3. Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`:
 
   ```yaml
   resources:
@@ -41,7 +41,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
 1. Make sure you've the [custom_updater](https://github.com/custom-components/custom_updater) component installed and working.
 
-2. Add a new reference under `card_urls` in your `custom_updater` configuration in `configuration.yaml`.
+2. Add a new reference under `card_urls` in your `custom_updater` configuration in `configuration.yaml`:
 
   ```yaml
   custom_updater:
@@ -56,7 +56,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
 2. Replace the local file with the latest one attached in the [latest release](https://github.com/kalkih/mini-graph-card/releases/latest).
 
-3. Add the new version number to the end of the cards reference url in your `ui-lovelace.yaml` like below.
+3. Add the new version number to the end of the cards reference url in your `ui-lovelace.yaml` like below:
 
   ```yaml
   resources:
@@ -72,58 +72,55 @@ The card works with entities from within the **sensor** domain and displays the 
 
 #### Card options
 | Name | Type | Default | Since | Description |
-|------|------|---------|-------|-------------|
-| type | string | **required** | v0.0.1 | `custom:mini-graph-card`.
-| entities | list | **required** | v0.2.0 | One or more sensor entities in a list, see [entities object](#entities-object) for additional entity options.
-| icon | string | optional | v0.0.1 | Set a custom icon from any of the available mdi icons.
-| name | string | optional | v0.0.1 | Set a custom name which is displayed beside the icon.
-| unit | string | optional | v0.0.1 | Set a custom unit of measurement.
-| tap_action | [action object](#action-object-options) | optional | v0.7.0 | Action on click/tap.
-| group | boolean | false | v0.2.0 | Disable paddings and box-shadow, useful when nesting the card.
-| hours_to_show | integer | 24 | v0.0.2 | Specify how many hours of history the graph should present.
-| points_per_hour | number | 0.5 | v0.2.0 | Specify amount of data points the graph should display for each hour, *(basically the detail/accuracy/smoothing of the graph)*.
-| update_interval | number | optional | v0.4.0 | Specify a custom update interval of the history data (in seconds), instead of on every state change.
-| show | list | optional | v0.2.0 | List of UI elements to display/hide, for available items see [available show options](#available-show-options).
-| animate | boolean | false | v0.2.0 | Add a reveal animation to the graph.
-| height | number | 150 | v0.0.1 | Set a custom height of the line graph.
-| line_width | number | 5 | v0.0.1 | Set the thickness of the line.
-| line_color | string/list | var(--accent-color) | v0.0.1 | Set a custom color for the graph line, provide a list of colors for multiple graph entries.
-| color_thresholds | list | optional | v0.2.3 | Set thresholds for dynamic graph colors, see [Line color object](#line-color-object).
+|------|:----:|:-------:|:-----:|-------------|
+| type ***(required)*** | string |  | v0.0.1 | `custom:mini-graph-card`.
+| entities ***(required)*** | list |  | v0.2.0 | One or more sensor entities in a list, see [entities object](#entities-object) for additional entity options.
+| icon | string |  | v0.0.1 | Set a custom icon from any of the available mdi icons.
+| name | string |  | v0.0.1 | Set a custom name which is displayed beside the icon.
+| unit | string |  | v0.0.1 | Set a custom unit of measurement.
+| tap_action | [action object](#action-object-options) |  | v0.7.0 | Action on click/tap.
+| group | boolean | `false` | v0.2.0 | Disable paddings and box-shadow, useful when nesting the card.
+| hours_to_show | integer | `24` | v0.0.2 | Specify how many hours of history the graph should present.
+| points_per_hour | number | `0.5` | v0.2.0 | Specify amount of data points the graph should display for each hour, *(basically the detail/accuracy/smoothing of the graph)*.
+| update_interval | number |  | v0.4.0 | Specify a custom update interval of the history data (in seconds), instead of on every state change.
+| show | list |  | v0.2.0 | List of UI elements to display/hide, for available items see [available show options](#available-show-options).
+| animate | boolean | `false` | v0.2.0 | Add a reveal animation to the graph.
+| height | number | `150` | v0.0.1 | Set a custom height of the line graph.
+| line_width | number | `5` | v0.0.1 | Set the thickness of the line.
+| line_color | string/list | `var(--accent-color)` | v0.0.1 | Set a custom color for the graph line, provide a list of colors for multiple graph entries.
+| color_thresholds | list |  | v0.2.3 | Set thresholds for dynamic graph colors, see [Line color object](#line-color-object).
 | color_thresholds_transition | string | `smooth` | v0.4.3 | Color threshold transition, `smooth` or `hard`.
-| decimals | integer | optional | v0.0.9 | Specify the exact number of decimals to show for states.
-| hour24 | boolean | false | v0.2.1 | Set to `true` to display times in 24-hour format.
-| font_size | number | 100 | v0.0.3 | Adjust the font size of the state, as percentage of the original size.
-| font_size_header | number | 14 | v0.3.1 | Adjust the font size of the header, size in pixels.
+| decimals | integer |  | v0.0.9 | Specify the exact number of decimals to show for states.
+| hour24 | boolean | `false` | v0.2.1 | Set to `true` to display times in 24-hour format.
+| font_size | number | `100` | v0.0.3 | Adjust the font size of the state, as percentage of the original size.
+| font_size_header | number | `14` | v0.3.1 | Adjust the font size of the header, size in pixels.
 | align_header | string | `default` | v0.2.0 | Set the alignment of the header, `left`, `right`, `center` or `default`.
 | align_icon | string | `right` | v0.2.0 | Set the alignment of the icon, `left`, `right` or `state`.
 | align_state | string | `left` | v0.2.0 | Set the alignment of the current state, `left`, `right` or `center`.
-| lower_bound | number | optional | v0.2.3 | Set a fixed lower bound for the graph Y-axis.
-| upper_bound | number | optional | v0.2.3 | Set a fixed upper bound for the graph Y-axis.
-| lower_bound_secondary | number | optional | v0.5.0 | Set a fixed lower bound for the graph secondary Y-axis.
-| upper_bound_secondary | number | optional | v0.5.0 | Set a fixed upper bound for the graph secondary Y-axis.
+| lower_bound | number |  | v0.2.3 | Set a fixed lower bound for the graph Y-axis.
+| upper_bound | number |  | v0.2.3 | Set a fixed upper bound for the graph Y-axis.
+| lower_bound_secondary | number |  | v0.5.0 | Set a fixed lower bound for the graph secondary Y-axis.
+| upper_bound_secondary | number |  | v0.5.0 | Set a fixed upper bound for the graph secondary Y-axis.
 
 #### Entities object
-Providing options are optional, entities can be listed directly, see example below.
+Entities may be listed directly (as per `sensor.temperature` in the following example), or defined using
+properties of the Entity object detailed in the following table (as per `sensor.pressure` in the following example):
 
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
-| entity | string | **required** | Entity id of the sensor.
-| name | string | optional | Set a custom display name, defaults to entity's friendly_name.
-| color | string | optional | Set a custom color, overrides all other color options including thresholds.
-| unit | string | optional | Set a custom unit of measurement, overrides `unit` set in base config.
-| show_state | boolean | optional | Display the current state.
-| show_indicator | boolean | optional | Display a color indicator next to the state, (only when more than two states are visible).
-| show_line | boolean | optional | Set to false to hide the line (see note below table).
-| show_fill | boolean | optional | Set to false to hide the fill (see note below table).
-| show_points | boolean | optional | Set to false to hide the points (see note below table).
-| show_legend | boolean | optional | Set to false to turn hide from the legend.
-| state_adaptive_color | boolean | optional | Make the color of the state adapt to the entity color.
-| y_axis | string | optional | If 'secondary', displays using the secondary y-axis on the right.
-| fixed_value | boolean | optional | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
-
-Note:
-- If the line and points and fill are all set to false, nothing will be visible in the graph. However, the
-data will still contribute to the y-axis min/max and be shown in the current state and legend.
+| entity ***(required)*** | string |  | Entity id of the sensor.
+| name | string |  | Set a custom display name, defaults to entity's friendly_name.
+| color | string |  | Set a custom color, overrides all other color options including thresholds.
+| unit | string |  | Set a custom unit of measurement, overrides `unit` set in base config.
+| show_state | boolean |  | Display the current state.
+| show_indicator | boolean |  | Display a color indicator next to the state, (only when more than two states are visible).
+| show_line | boolean |  | Set to false to hide the line (see note below table).
+| show_fill | boolean |  | Set to false to hide the fill (see note below table).
+| show_points | boolean |  | Set to false to hide the points (see note below table).
+| show_legend | boolean |  | Set to false to turn hide from the legend.
+| state_adaptive_color | boolean |  | Make the color of the state adapt to the entity color.
+| y_axis | string |  | If 'secondary', displays using the secondary y-axis on the right.
+| fixed_value | boolean |  | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 
 ```yaml
 entities:
@@ -135,39 +132,39 @@ entities:
 ```
 
 #### Available show options
-All options are optional.
+All properties are optional.
 
-| Name | Default | Parameter | Description |
-|------|:-------:|:---------:|-------------|
-| name | true | `true` / `false` | Display name
-| icon | true | `true` / `false` | Display icon
-| state | true | `true` / `false` | Display current state
-| graph | line | `line` / `bar` / `false` | Display option for the graph
-| fill | true | `true` / `false` / `fade` | Display the line graph fill
-| points | hover | `true` / `false` / `hover` | Display graph data points
-| legend | true | `true` / `false` | Display the graph legend (only shown when graph contains multiple entities)
-| average | false | `true` / `false` | Display average information
-| extrema | false | `true` / `false` | Display max/min information
-| labels | hover | `true` / `false` / `hover` | Display Y-axis labels
-| labels_secondary | hover | `true` / `false` / `hover` | Display secondary Y-axis labels
-| name_adaptive_color | false | `true` / `false` | Make the name color adapt with the primary entity color
-| icon_adaptive_color | false | `true` / `false` | Make the icon color adapt with the primary entity color
+| Name | Default | Options | Description |
+|------|:-------:|:-------:|-------------|
+| name | `true` | `true` / `false` | Display name.
+| icon | `true` | `true` / `false` | Display icon.
+| state | `true` | `true` / `false` | Display current state.
+| graph | `line` | `line` / `bar` / `false` | Display option for the graph.
+| fill | `true` | `true` / `false` / `fade` | Display the line graph fill.
+| points | `hover` | `true` / `false` / `hover` | Display graph data points.
+| legend | `true` | `true` / `false` | Display the graph legend (only shown when graph contains multiple entities).
+| average | `false` | `true` / `false` | Display average information.
+| extrema | `false` | `true` / `false` | Display max/min information.
+| labels | `hover` | `true` / `false` / `hover` | Display Y-axis labels.
+| labels_secondary | `hover` | `true` / `false` / `hover` | Display secondary Y-axis labels.
+| name_adaptive_color | `false` | `true` / `false` | Make the name color adapt with the primary entity color.
+| icon_adaptive_color | `false` | `true` / `false` | Make the icon color adapt with the primary entity color.
 
 #### Line color object
 See [dynamic line color](#dynamic-line-color) for example usage.
 
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
-| value | number | **required** | The threshold for the color stop.
-| color | string | **required** | Color in 6 digit hex format (e.g. #008080)
+| value ***(required)*** | number |  | The threshold for the color stop.
+| color ***(required)*** | string |  | Color in 6 digit hex format (e.g. `#008080`).
 
 #### Action object options
 | Name | Type | Default | Options | Description |
-|------|------|---------|-------------|-------------|
-| action | string | `more-info` | `more-info`, `navigate`, `call-service`, `none` | Action to perform
-| service | string | none | Any service | Service to call (e.g. `media_player.toggle`) when `action` is defined as `call-service`
-| service_data | object | none | Any service data | Service data to include with the service call (e.g. `entity_id: media_player.office`) 
-| navigation_path | string | none | Any path | Path to navigate to (e.g. `/lovelace/0/`) when `action` is defined as `navigate`
+|------|:----:|:-------:|:-----------:|-------------|
+| action | string | `more-info` | `more-info` / `navigate` / `call-service` / `none` | Action to perform.
+| service | string |  | Any service | Service to call (e.g. `media_player.toggle`) when `action` is defined as `call-service`.
+| service_data | object |  | Any service data | Service data to include with the service call (e.g. `entity_id: media_player.office`).
+| navigation_path | string |  | Any path | Path to navigate to (e.g. `/lovelace/0/`) when `action` is defined as `navigate`.
 
 ### Example usage
 
@@ -216,7 +213,7 @@ See [dynamic line color](#dynamic-line-color) for example usage.
 ![Bar chart card](https://user-images.githubusercontent.com/457678/52970286-985e7300-33b3-11e9-89bc-1278c4e2ecf2.png)
 
 #### Show data from the past week
-Use the `hours_to_show` option to specify how many hours of history the graph should represent.
+Use the `hours_to_show` option to specify how many hours of history the graph should represent.  
 Use the `points_per_hour` option to specify the accuracy/detail of the graph.
 
 ```yaml
@@ -316,13 +313,13 @@ shows turning off the line, points and legend.
 
 ## Development
 
-**Clone this repository into your `config/www` folder using git.**
+1. Clone this repository into your `config/www` folder using git:
 
 ```
 $ git clone https://github.com/kalkih/mini-graph-card.git
 ```
 
-**Add a reference to the card in your `ui-lovelace.yaml`.**
+2. Add a reference to the card in your `ui-lovelace.yaml`:
 
 ```yaml
 resources:
@@ -332,32 +329,32 @@ resources:
 
 ### Instructions
 
-*Requires `nodejs` & `npm`*
+*Requires `nodejs` & `npm`.*
 
-1. Move into the `mini-graph-card` repo, checkout the *dev* branch & install dependencies.
+1. Move into the `mini-graph-card` repo, checkout the *dev* branch & install dependencies:
 ```console
 $ cd mini-graph-card && git checkout dev && npm install
 ```
 
-2. Make changes to the source code
+2. Make changes to the source code.
 
-3. Build the source by running
+3. Build the source by running:
 ```console
 $ npm run build
 ```
 
-4. Refresh the browser to see changes
+4. Refresh the browser to see changes.
 
-    *Make sure cache is cleared or disabled*
+    *Make sure cache is cleared or disabled.*
 
-5. *(Optional)* Watch the source and automatically rebuild on save
+5. *(Optional)* Watch the source and automatically rebuild on save:
 ```console
 $ npm run watch
 ```
 
 *The new `mini-graph-card-bundle.js` will be build and ready inside `/dist`.*
 
-**If you plan to submit a PR, please base it on the `dev` branch**
+**If you plan to submit a PR, please base it on the `dev` branch.**
 
 ## Getting errors?
 Make sure you have `javascript_version: latest` in your `configuration.yaml` under `frontend:`.
