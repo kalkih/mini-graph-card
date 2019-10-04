@@ -165,6 +165,7 @@ See [dynamic line color](#dynamic-line-color) for example usage.
 | service | string |  | Any service | Service to call (e.g. `media_player.toggle`) when `action` is defined as `call-service`.
 | service_data | object |  | Any service data | Service data to include with the service call (e.g. `entity_id: media_player.office`).
 | navigation_path | string |  | Any path | Path to navigate to (e.g. `/lovelace/0/`) when `action` is defined as `navigate`.
+| url | string |  | Any URL | URL to open when `action` is defined as `url`.
 
 ### Example usage
 
