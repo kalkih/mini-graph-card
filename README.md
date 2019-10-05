@@ -37,18 +37,6 @@ The card works with entities from within the **sensor** domain and displays the 
       type: module
   ```
 
-### *(Optional)* Add to custom updater
-
-1. Make sure you've the [custom_updater](https://github.com/custom-components/custom_updater) component installed and working.
-
-2. Add a new reference under `card_urls` in your `custom_updater` configuration in `configuration.yaml`:
-
-  ```yaml
-  custom_updater:
-    card_urls:
-      - https://raw.githubusercontent.com/kalkih/mini-graph-card/master/tracker.json
-  ```
-
 ## Updating
 **If you have a version older than v0.0.8 installed, please delete the current files and follow the installation instructions again.**
 
