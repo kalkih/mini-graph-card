@@ -7,7 +7,11 @@ The card works with entities from within the **sensor** domain and displays the 
 
 ## Install
 
-### Simple install
+### HACS
+
+This card is available in [HACS](https://github.com/custom-components/hacs/issues) (Home Assistant Community Store).
+
+### Manual install
 
 1. Download and copy `mini-graph-card-bundle.js` from the [latest release](https://github.com/kalkih/mini-graph-card/releases/latest) into your `config/www` directory.
 
@@ -15,7 +19,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.6.0
+    - url: /local/mini-graph-card-bundle.js?v=0.7.0
       type: module
   ```
 
@@ -26,14 +30,14 @@ The card works with entities from within the **sensor** domain and displays the 
 2. Grab `mini-graph-card-bundle.js`:
 
   ```
-  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.6.0/mini-graph-card-bundle.js
+  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.7.0/mini-graph-card-bundle.js
   ```
 
 3. Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`:
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.6.0
+    - url: /local/mini-graph-card-bundle.js?v=0.7.0
       type: module
   ```
 
@@ -48,7 +52,7 @@ The card works with entities from within the **sensor** domain and displays the 
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.6.0
+    - url: /local/mini-graph-card-bundle.js?v=0.7.0
       type: module
   ```
 

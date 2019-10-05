@@ -1,3 +1,25 @@
+## v0.7.0
+
+### BREAKING CHANGE
+Dropped support for **custom_updater**, if you relied on **custom_updater**, consider switching to [**HACS**](https://github.com/custom-components/hacs).
+
+### ADDED
+- Custom tap/click action option `tap_action` (#94)
+- More default colors (#149) - (@SNoof85)
+- Default icons for more device classes (`pressure`, `power` & `signal_strength`) (#155)
+- Option `url` to available tap actions (#160) (#164)
+
+### CHANGED
+- Color threshold gradient is now also applied to graph fill (vertically) (#112) (#152)
+- Current state unit of measurement no longer wraps to the next line and is instead truncated with ellipsis if space is limited
+
+### FIXED
+- Not rendering extrema/average info container if not used, eliminates unwanted extra padding
+- Invalid legend entry color when color thresholds (#151)
+- Invalid graph fill color when color thresholds (#146)
+- Preserve aspect ratio of legend indicators (#142)
+- README layout and formatting (#162) - (@danstis)
+
 ## v0.6.0
 
 ### ADDED
