@@ -578,7 +578,7 @@ class MiniGraphCard extends LitElement {
     if (this.config.show.extrema) info.push(this.min);
     if (this.config.show.average) info.push(this.avg);
     if (this.config.show.extrema) info.push(this.max);
-    if (!info) return;
+    if (!info.length) return;
     return html`
       <div class="info flex">
         ${info.map(entry => html`
