@@ -205,7 +205,7 @@ class MiniGraphCard extends LitElement {
     if (!this.entity[0]) return false;
     if (UPDATE_PROPS.some(prop => changedProps.has(prop))) {
       this.color = this.intColor(
-        this.tooltip.value || this.entity[0].state,
+        this.tooltip.value !== undefined ? this.tooltip.value : this.entity[0].state,
         this.tooltip.entity || 0,
       );
       return true;
@@ -662,13 +662,16 @@ class MiniGraphCard extends LitElement {
           || color_thresholds.slice(-1)[0];
         intColor = color;
       } else {
-        intColor = color_thresholds[0].color;
         const index = color_thresholds.findIndex(ele => ele.value < state);
         const c1 = color_thresholds[index];
         const c2 = color_thresholds[index - 1];
         if (c2) {
           const factor = (c2.value - inState) / (c2.value - c1.value);
           intColor = interpolateColor(c2.color, c1.color, factor);
+        } else {
+          intColor = index
+            ? color_thresholds[color_thresholds.length - 1].color
+            : color_thresholds[0].color;
         }
       }
     }
