@@ -74,6 +74,8 @@ This card is available in [HACS](https://github.com/custom-components/hacs/issue
 | group | boolean | `false` | v0.2.0 | Disable paddings and box-shadow, useful when nesting the card.
 | hours_to_show | integer | `24` | v0.0.2 | Specify how many hours of history the graph should present.
 | points_per_hour | number | `0.5` | v0.2.0 | Specify amount of data points the graph should display for each hour, *(basically the detail/accuracy/smoothing of the graph)*.
+| aggregate_func | string | `avg` | v0.7.1 | Specify aggregate function used to calculate point on the graph, `avg`, `min`, `max`.
+| group_by | string | `interval` | v0.7.1 | Specify type of grouping for a point, dynamic `interval`, `date`.
 | update_interval | number |  | v0.4.0 | Specify a custom update interval of the history data (in seconds), instead of on every state change.
 | show | list |  | v0.2.0 | List of UI elements to display/hide, for available items see [available show options](#available-show-options).
 | animate | boolean | `false` | v0.2.0 | Add a reveal animation to the graph.
@@ -206,7 +208,7 @@ See [dynamic line color](#dynamic-line-color) for example usage.
 ![Bar chart card](https://user-images.githubusercontent.com/457678/52970286-985e7300-33b3-11e9-89bc-1278c4e2ecf2.png)
 
 #### Show data from the past week
-Use the `hours_to_show` option to specify how many hours of history the graph should represent.  
+Use the `hours_to_show` option to specify how many hours of history the graph should represent.
 Use the `points_per_hour` option to specify the accuracy/detail of the graph.
 
 ```yaml
@@ -298,11 +300,28 @@ shows turning off the line, points and legend.
       show_points: false
       show_legend: false
       y_axis: secondary
-    show:
-      labels: true
-      labels_secondary: true
+  show:
+    labels: true
+    labels_secondary: true
 ```
 ![Alternate y-axis](https://user-images.githubusercontent.com/373079/60764115-63cf2780-a0c6-11e9-8b9a-97fc47161180.png)
+
+#### Grouping by date
+You can group values by date, this way you can visualize for example daily energy consumption.
+
+```yaml
+- type: type: custom:mini-graph-card
+  entities:
+    - entity: sensor.energy_daily
+  name: Energy consumption
+  hours_to_show: 168
+  height: 150
+  aggregate_func: max
+  group_by: date
+  hour24: true
+  show:
+    graph: bar
+```
 
 ## Development
 

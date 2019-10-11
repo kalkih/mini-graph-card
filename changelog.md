@@ -1,3 +1,9 @@
+## v0.7.1
+
+### ADDED
+- Grouping by date (#78) - (@maxwroc)
+- Point calculation / aggregation functions (#78) - (@maxwroc)
+
 ## v0.7.0
 
 ### BREAKING CHANGE
