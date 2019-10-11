@@ -2,7 +2,7 @@ import { X, Y, V } from './const';
 import { interpolateColor } from './utils';
 
 export default class Graph {
-  constructor(width, height, margin, hours = 24, points = 1) {
+  constructor(width, height, margin, hours = 24, points = 1, aggregateFuncName = 'avg', groupBy = 'interval') {
     this.coords = [];
     this.width = width - margin[X] * 2;
     this.height = height - margin[Y] * 2;
@@ -11,6 +11,15 @@ export default class Graph {
     this._min = 0;
     this.points = points;
     this.hours = hours;
+
+    const aggregateFuncMap = {
+      'avg' : this._average,
+      'max' : this._maximum,
+      'min' : this._minimum
+    };
+
+    this.calculatePoint = aggregateFuncMap[aggregateFuncName] || this._average;
+    this.groupBy = groupBy == 'date' ? this._getGroupByDateFunc() : this._getGroupByIntervalFunc();
   }
 
   get max() { return this._max; }
@@ -22,21 +31,39 @@ export default class Graph {
   set min(min) { this._min = min; }
 
   update(history) {
-    const now = new Date().getTime();
-    const reduce = (res, item) => {
-      const age = now - new Date(item.last_changed).getTime();
-      const interval = (age / (1000 * 3600) * this.points) - this.hours * this.points;
-      const key = Math.floor(Math.abs(interval));
-      if (!res[key]) res[key] = [];
-      res[key].push(item);
-      return res;
-    };
-    const coords = history.reduce((res, item) => reduce(res, item), []);
-    coords.length = Math.ceil(this.hours * this.points);
+    const coords = history.reduce((res, item) => this.groupBy(res, item), []);
+
+    if (coords.length > Math.ceil(this.hours * this.points)) {
+      coords.shift();
+    }
 
     this.coords = this._calcPoints(coords);
     this.min = Math.min(...this.coords.map(item => Number(item[V])));
     this.max = Math.max(...this.coords.map(item => Number(item[V])));
+  }
+
+  _getGroupByIntervalFunc() {
+    const now = new Date().getTime();
+    return (result, item) => {
+      const age = now - new Date(item.last_changed).getTime();
+      const interval = (age / (1000 * 3600) * this.points) - this.hours * this.points;
+      const key = Math.floor(Math.abs(interval));
+      if (!result[key]) result[key] = [];
+      result[key].push(item);
+      return result;
+    }
+  }
+
+  _getGroupByDateFunc() {
+    const dateToKeyMap = {};
+    return (result, item) => {
+      let date = new Date(item.last_changed).toDateString();
+      if (dateToKeyMap[date] == undefined) dateToKeyMap[date] = result.length;
+      let key = dateToKeyMap[date];
+      if (!result[key]) result[key] = [];
+      result[key].push(item);
+      return result;
+    }
   }
 
   _calcPoints(history) {
@@ -45,11 +72,11 @@ export default class Graph {
     xRatio = Number.isFinite(xRatio) ? xRatio : this.width;
 
     const first = history.filter(Boolean)[0];
-    let last = [this._average(first), this._last(first)];
+    let last = [this.calculatePoint(first), this._last(first)];
     const getCoords = (item, i) => {
       const x = xRatio * i + this.margin[X];
       if (item)
-        last = [this._average(item), this._last(item)];
+        last = [this.calculatePoint(item), this._last(item)];
       return coords.push([x, 0, item ? last[0] : last[1]]);
     };
 
@@ -150,6 +177,14 @@ export default class Graph {
 
   _average(item) {
     return item.reduce((sum, entry) => (sum + parseFloat(entry.state)), 0) / item.length;
+  }
+
+  _maximum(item) {
+    return Math.max(...item.map(item => item.state));
+  }
+
+  _minimum(item) {
+    return Math.min(...item.map(item => item.state));
   }
 
   _last(item) {
