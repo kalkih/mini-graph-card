@@ -159,7 +159,7 @@ class MiniGraphCard extends LitElement {
     const additional = conf.hours_to_show > 24 ? { day: 'numeric', weekday: 'short' } : {};
     conf.format = { hour12: !conf.hour24, ...additional };
 
-    if (conf.group_by == 'date') {
+    if (conf.group_by === 'date') {
       // override points per hour to mach 1 point per day (24h)
       conf.points_per_hour = 1 / 24;
     }
@@ -175,7 +175,7 @@ class MiniGraphCard extends LitElement {
         );
       }
     }
-    
+
     if (!this.Graph) {
       this.Graph = conf.entities.map(
         entity => new Graph(
@@ -540,7 +540,12 @@ class MiniGraphCard extends LitElement {
   }
 
   setTooltip(entity, index, value, label = null) {
-    const { points_per_hour, hours_to_show, format, group_by } = this.config;
+    const {
+      points_per_hour,
+      hours_to_show,
+      format,
+      group_by,
+    } = this.config;
     const offset = hours_to_show < 1 && points_per_hour < 1
       ? points_per_hour * hours_to_show
       : 1 / points_per_hour;
@@ -549,7 +554,7 @@ class MiniGraphCard extends LitElement {
 
     const now = new Date();
 
-    if (group_by == 'date') {
+    if (group_by === 'date') {
       // move end time to the next day at midnight
       now.setDate(now.getDate() + 1);
       now.setHours(0, 0);

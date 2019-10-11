@@ -4,9 +4,9 @@ import { interpolateColor } from './utils';
 export default class Graph {
   constructor(width, height, margin, hours = 24, points = 1, aggregateFuncName = 'avg', groupBy = 'interval') {
     const aggregateFuncMap = {
-      'avg' : this._average,
-      'max' : this._maximum,
-      'min' : this._minimum
+      avg: this._average,
+      max: this._maximum,
+      min: this._minimum,
     };
 
     this.coords = [];
@@ -30,7 +30,7 @@ export default class Graph {
   set min(min) { this._min = min; }
 
   update(history) {
-    const groupByFunc = this._groupBy == 'date' ? this._getGroupByDateFunc() : this._getGroupByIntervalFunc();
+    const groupByFunc = this._groupBy === 'date' ? this._getGroupByDateFunc() : this._getGroupByIntervalFunc();
     const coords = history.reduce((res, item) => groupByFunc(res, item), []);
 
 
@@ -38,8 +38,7 @@ export default class Graph {
     if (coords.length > requiredNumOfPoints) {
       // if there is too much data we reduce it
       coords.splice(0, coords.length - requiredNumOfPoints);
-    }
-    else {
+    } else {
       // extend length to match the required number of points
       coords.length = requiredNumOfPoints;
     }
@@ -51,26 +50,26 @@ export default class Graph {
 
   _getGroupByIntervalFunc() {
     const now = new Date().getTime();
-    return (result, item) => {
+    return (res, item) => {
       const age = now - new Date(item.last_changed).getTime();
       const interval = (age / (1000 * 3600) * this.points) - this.hours * this.points;
       const key = Math.floor(Math.abs(interval));
-      if (!result[key]) result[key] = [];
-      result[key].push(item);
-      return result;
-    }
+      if (!res[key]) res[key] = [];
+      res[key].push(item);
+      return res;
+    };
   }
 
   _getGroupByDateFunc() {
     const dateToKeyMap = {};
-    return (result, item) => {
-      let date = new Date(item.last_changed).toDateString();
-      if (dateToKeyMap[date] == undefined) dateToKeyMap[date] = result.length;
-      let key = dateToKeyMap[date];
-      if (!result[key]) result[key] = [];
-      result[key].push(item);
-      return result;
-    }
+    return (res, item) => {
+      const date = new Date(item.last_changed).toDateString();
+      if (dateToKeyMap[date] === undefined) dateToKeyMap[date] = res.length;
+      const key = dateToKeyMap[date];
+      if (!res[key]) res[key] = [];
+      res[key].push(item);
+      return res;
+    };
   }
 
   _calcPoints(history) {
@@ -182,19 +181,19 @@ export default class Graph {
     return [Zx, Zy];
   }
 
-  _average(item) {
-    return item.reduce((sum, entry) => (sum + parseFloat(entry.state)), 0) / item.length;
+  _average(items) {
+    return items.reduce((sum, entry) => (sum + parseFloat(entry.state)), 0) / items.length;
   }
 
-  _maximum(item) {
-    return Math.max(...item.map(item => item.state));
+  _maximum(items) {
+    return Math.max(...items.map(item => item.state));
   }
 
-  _minimum(item) {
-    return Math.min(...item.map(item => item.state));
+  _minimum(items) {
+    return Math.min(...items.map(item => item.state));
   }
 
-  _last(item) {
-    return parseFloat(item[item.length - 1].state) || 0;
+  _last(items) {
+    return parseFloat(items[items.length - 1].state) || 0;
   }
 }
