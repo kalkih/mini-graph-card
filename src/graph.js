@@ -35,15 +35,13 @@ export default class Graph {
 
 
     const requiredNumOfPoints = Math.ceil(this.hours * this.points);
-    console.log(coords.length, requiredNumOfPoints);
     if (coords.length > requiredNumOfPoints) {
-      console.log("shift");
       // if there is too much data we reduce it
       coords.splice(0, coords.length - requiredNumOfPoints);
     }
     else {
-      // make sure graph goes to the end
-      coords.length = Math.ceil(this.hours * this.points);
+      // extend length to match the required number of points
+      coords.length = requiredNumOfPoints;
     }
 
     this.coords = this._calcPoints(coords);

@@ -549,13 +549,15 @@ class MiniGraphCard extends LitElement {
     const now = new Date();
 
     if (group_by == 'date') {
+      // move end time to the next day at midnight
       now.setDate(now.getDate() + 1);
       now.setHours(0, 0);
     }
 
-    now.setMilliseconds(now.getMilliseconds() - getMilli(offset * id));
+    const oneMinInHours = 1 / 60;
+    now.setMilliseconds(now.getMilliseconds() - getMilli(offset * id + oneMinInHours));
     const end = getTime(now, { hour12: !this.config.hour24 }, this._hass.language);
-    now.setMilliseconds(now.getMilliseconds() - getMilli(offset));
+    now.setMilliseconds(now.getMilliseconds() - getMilli(offset - oneMinInHours));
     const start = getTime(now, format, this._hass.language);
 
     this.tooltip = {
