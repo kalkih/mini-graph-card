@@ -321,6 +321,7 @@ You can group values by date, this way you can visualize for example daily energ
   show:
     graph: bar
 ```
+![mini_energy_daily](https://user-images.githubusercontent.com/8268674/66688605-3ffc1e80-ec7f-11e9-872e-935870a542f3.png)
 
 #### Data aggregation functions
 You can decide how values are agreggated for points on graph. Example how to display min, max, avg temerature per day
@@ -344,6 +345,8 @@ from last week.
   hours_to_show: 168
   group_by: date
 ```
+
+![mini_temperature_aggregate_daily](https://user-images.githubusercontent.com/8268674/66688610-44c0d280-ec7f-11e9-86c2-a728da239dab.png)
 
 ## Development
 
