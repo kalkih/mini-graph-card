@@ -131,7 +131,7 @@ class MiniGraphCard extends LitElement {
       height: 100,
       hours_to_show: 24,
       points_per_hour: 0.5,
-      point_calc: 'avg',
+      aggregate_func: 'avg',
       group_by: 'interval',
       line_color: [...DEFAULT_COLORS],
       color_thresholds: [],
@@ -158,6 +158,11 @@ class MiniGraphCard extends LitElement {
     );
     const additional = conf.hours_to_show > 24 ? { day: 'numeric', weekday: 'short' } : {};
     conf.format = { hour12: !conf.hour24, ...additional };
+
+    if (conf.group_by == 'date') {
+      // override points per hour to mach 1 point per day (24h)
+      conf.points_per_hour = 1 / 24;
+    }
 
     if (conf.show.graph === 'bar') {
       const entities = conf.entities.length;
