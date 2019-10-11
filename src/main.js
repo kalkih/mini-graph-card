@@ -175,15 +175,16 @@ class MiniGraphCard extends LitElement {
         );
       }
     }
+    
     if (!this.Graph) {
       this.Graph = conf.entities.map(
-        () => new Graph(
+        entity => new Graph(
           500,
           conf.height,
           [conf.show.fill ? 0 : conf.line_width, conf.line_width],
           conf.hours_to_show,
           conf.points_per_hour,
-          conf.aggregate_func,
+          entity.aggregate_func || conf.aggregate_func,
           conf.group_by,
         ),
       );

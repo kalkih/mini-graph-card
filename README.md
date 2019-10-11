@@ -106,6 +106,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | name | string |  | Set a custom display name, defaults to entity's friendly_name.
 | color | string |  | Set a custom color, overrides all other color options including thresholds.
 | unit | string |  | Set a custom unit of measurement, overrides `unit` set in base config.
+| aggregate_func | string |  | Override for aggregate function used to calculate point on the graph, `avg`, `min`, `max`.
 | show_state | boolean |  | Display the current state.
 | show_indicator | boolean |  | Display a color indicator next to the state, (only when more than two states are visible).
 | show_line | boolean |  | Set to false to hide the line (see note below table).
@@ -315,12 +316,33 @@ You can group values by date, this way you can visualize for example daily energ
     - entity: sensor.energy_daily
   name: Energy consumption
   hours_to_show: 168
-  height: 150
   aggregate_func: max
   group_by: date
-  hour24: true
   show:
     graph: bar
+```
+
+#### Data aggregation functions
+You can decide how values are agreggated for points on graph. Example how to display min, max, avg temerature per day
+from last week.
+
+```yaml
+- type: custom:mini-graph-card
+  entities:
+    - entity: sensor.outside_temp
+      aggregate_func: max
+      name: Max
+      color: #e74c3c
+    - entity: sensor.outside_temp
+      aggregate_func: min
+      name: Min
+    - entity: sensor.outside_temp
+      aggregate_func: avg
+      name: Avg
+      color: green
+  name: Temp outside daily (last week)
+  hours_to_show: 168
+  group_by: date
 ```
 
 ## Development
