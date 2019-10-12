@@ -131,6 +131,8 @@ class MiniGraphCard extends LitElement {
       height: 100,
       hours_to_show: 24,
       points_per_hour: 0.5,
+      aggregate_func: 'avg',
+      group_by: 'interval',
       line_color: [...DEFAULT_COLORS],
       color_thresholds: [],
       color_thresholds_transition: 'smooth',
@@ -157,6 +159,11 @@ class MiniGraphCard extends LitElement {
     const additional = conf.hours_to_show > 24 ? { day: 'numeric', weekday: 'short' } : {};
     conf.format = { hour12: !conf.hour24, ...additional };
 
+    if (conf.group_by === 'date') {
+      // override points per hour to mach 1 point per day (24h)
+      conf.points_per_hour = 1 / 24;
+    }
+
     if (conf.show.graph === 'bar') {
       const entities = conf.entities.length;
       if (conf.hours_to_show * conf.points_per_hour * entities > MAX_BARS) {
@@ -168,14 +175,17 @@ class MiniGraphCard extends LitElement {
         );
       }
     }
+
     if (!this.Graph) {
       this.Graph = conf.entities.map(
-        () => new Graph(
+        entity => new Graph(
           500,
           conf.height,
           [conf.show.fill ? 0 : conf.line_width, conf.line_width],
           conf.hours_to_show,
           conf.points_per_hour,
+          entity.aggregate_func || conf.aggregate_func,
+          conf.group_by,
         ),
       );
     }
@@ -530,7 +540,12 @@ class MiniGraphCard extends LitElement {
   }
 
   setTooltip(entity, index, value, label = null) {
-    const { points_per_hour, hours_to_show, format } = this.config;
+    const {
+      points_per_hour,
+      hours_to_show,
+      format,
+      group_by,
+    } = this.config;
     const offset = hours_to_show < 1 && points_per_hour < 1
       ? points_per_hour * hours_to_show
       : 1 / points_per_hour;
@@ -538,9 +553,17 @@ class MiniGraphCard extends LitElement {
     const id = Math.abs(index + 1 - Math.ceil(hours_to_show * points_per_hour));
 
     const now = new Date();
-    now.setMilliseconds(now.getMilliseconds() - getMilli(offset * id));
+
+    if (group_by === 'date') {
+      // move end time to the next day at midnight
+      now.setDate(now.getDate() + 1);
+      now.setHours(0, 0);
+    }
+
+    const oneMinInHours = 1 / 60;
+    now.setMilliseconds(now.getMilliseconds() - getMilli(offset * id + oneMinInHours));
     const end = getTime(now, { hour12: !this.config.hour24 }, this._hass.language);
-    now.setMilliseconds(now.getMilliseconds() - getMilli(offset));
+    now.setMilliseconds(now.getMilliseconds() - getMilli(offset - oneMinInHours));
     const start = getTime(now, format, this._hass.language);
 
     this.tooltip = {
