@@ -16,7 +16,8 @@ export default class Graph {
     this._max = 0;
     this._min = 0;
     this.points = points;
-    this.hours = hours;
+    this.hours = hours
+    console.log(aggregateFuncName);
     this._calculatePoint = aggregateFuncMap[aggregateFuncName] || this._average;
     this._groupBy = groupBy;
   }
@@ -33,7 +34,7 @@ export default class Graph {
     const groupByFunc = this._groupBy === 'date' ? this._getGroupByDateFunc() : this._getGroupByIntervalFunc();
     const coords = history.reduce((res, item) => groupByFunc(res, item), []);
 
-
+    console.log(coords);
     const requiredNumOfPoints = Math.ceil(this.hours * this.points);
     if (coords.length > requiredNumOfPoints) {
       // if there is too much data we reduce it
@@ -114,11 +115,13 @@ export default class Graph {
       last = next;
       return [Z[X], Z[Y], sum, i + 1];
     });
+    console.log(coords2);
     return coords2;
   }
 
   getPath() {
     const coords = this._calcY(this.coords);
+    console.log(coords);
     let next; let Z;
     let path = '';
     let last = coords[0];

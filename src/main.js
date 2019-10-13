@@ -138,6 +138,7 @@ class MiniGraphCard extends LitElement {
       color_thresholds_transition: 'smooth',
       line_width: 5,
       compress: true,
+      state_map: null,
       tap_action: {
         action: 'more-info',
       },
@@ -186,6 +187,7 @@ class MiniGraphCard extends LitElement {
           conf.points_per_hour,
           entity.aggregate_func || conf.aggregate_func,
           conf.group_by,
+          entity.state_map || conf.state_map,
         ),
       );
     }
@@ -810,6 +812,7 @@ class MiniGraphCard extends LitElement {
   }
 
   async updateEntity(entity, index, initStart, end) {
+    console.log("updateEntity");
     if (!entity
       || !this.updateQueue.includes(entity.entity_id)
       || this.config.entities[index].show_graph === false
@@ -817,6 +820,7 @@ class MiniGraphCard extends LitElement {
     let stateHistory = [];
     let start = initStart;
     let skipInitialState = false;
+    console.log("updateEntity 1");
 
     const history = await this.getCache(entity.entity_id, this.config.useCompress);
     if (history && history.hours_to_show === this.config.hours_to_show) {
@@ -831,8 +835,16 @@ class MiniGraphCard extends LitElement {
       }
     }
 
+    console.log("updateEntity2");
     let newStateHistory = await this.fetchRecent(entity.entity_id, start, end, skipInitialState);
+    console.log("updateEntity3");
     if (newStateHistory[0] && newStateHistory[0].length > 0) {
+      // check if we should convert states to numeric values
+      console.log(this.config.state_map);
+      if (this.config.state_map && this.config.state_map.length > 0) {
+        newStateHistory[0].forEach(item => this._convertState(item));
+      }
+
       newStateHistory = newStateHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
       newStateHistory = newStateHistory.map(item => ({
         last_changed: item.last_changed,
@@ -885,6 +897,20 @@ class MiniGraphCard extends LitElement {
     if (end) url += `&end_time=${end.toISOString()}`;
     if (skipInitialState) url += '&skip_initial_state';
     return this._hass.callApi('GET', url);
+  }
+
+
+  _convertState(item) {
+    const resultValue = this.config.state_map.indexOf(item.state);
+    console.log(item.state, resultValue);
+    if (resultValue === -1) {
+      console.warn(`mini-graph-card: entity state cannot be converted: ${item.state}`);
+      return;
+    }
+
+    item.state = resultValue;
+
+    return;
   }
 
   getCardSize() {
