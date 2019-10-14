@@ -8,8 +8,6 @@ export default class Graph {
       max: this._maximum,
       min: this._minimum,
     };
-    
-    console.log("last_changed", smoothing);
 
     this.coords = [];
     this.width = width - margin[X] * 2;
@@ -18,7 +16,7 @@ export default class Graph {
     this._max = 0;
     this._min = 0;
     this.points = points;
-    this.hours = hours
+    this.hours = hours;
     this._calculatePoint = aggregateFuncMap[aggregateFuncName] || this._average;
     this._groupBy = groupBy;
     this._smoothing = smoothing;

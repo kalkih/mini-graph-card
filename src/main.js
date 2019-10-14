@@ -737,9 +737,10 @@ class MiniGraphCard extends LitElement {
 
   computeState(inState) {
     if (this.config.state_map.length > 0) {
-      const stateMap = Number.isInteger(inState) ?
-                        this.config.state_map[inState] :
-                        this.config.state_map.find(state => state.value === inState);
+      const stateMap = Number.isInteger(inState)
+        ? this.config.state_map[inState]
+        : this.config.state_map.find(state => state.value === inState);
+
       if (stateMap) {
         return stateMap.label;
       }
@@ -842,17 +843,16 @@ class MiniGraphCard extends LitElement {
     if (history && history.hours_to_show === this.config.hours_to_show) {
       stateHistory = history.data;
 
-      let currDataStartIndex = stateHistory.findIndex(item => new Date(item.last_changed) > initStart);
-      if (currDataStartIndex !== -1) {
-
-        if (currDataStartIndex > 0) {
+      let currDataIndex = stateHistory.findIndex(item => new Date(item.last_changed) > initStart);
+      if (currDataIndex !== -1) {
+        if (currDataIndex > 0) {
           // include previous item
-          currDataStartIndex--;
+          currDataIndex -= 1;
           // but change it's last changed time
-          stateHistory[currDataStartIndex].last_changed = initStart;
+          stateHistory[currDataIndex].last_changed = initStart;
         }
 
-        stateHistory = stateHistory.slice(currDataStartIndex, stateHistory.length);
+        stateHistory = stateHistory.slice(currDataIndex, stateHistory.length);
         // skip initial state when fetching recent/not-cached data
         skipInitialState = true;
       }
@@ -925,16 +925,13 @@ class MiniGraphCard extends LitElement {
   }
 
 
-  _convertState(item) {
-    const resultIndex = this.config.state_map.findIndex(stateData => stateData.value === item.state);
+  _convertState(res) {
+    const resultIndex = this.config.state_map.findIndex(s => s.value === res.state);
     if (resultIndex === -1) {
-      console.warn(`mini-graph-card: entity state cannot be converted: ${item.state}`);
       return;
     }
 
-    item.state = resultIndex;
-
-    return;
+    res.state = resultIndex;
   }
 
   getCardSize() {
