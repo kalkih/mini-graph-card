@@ -109,7 +109,7 @@ export default class Graph {
     coords.shift();
     const coords2 = coords.map((point, i) => {
       next = point;
-      Z = this.smoothing ? this._midPoint(last[X], last[Y], next[X], next[Y]) : next;
+      Z = this._smoothing ? this._midPoint(last[X], last[Y], next[X], next[Y]) : next;
       const sum = (next[V] + last[V]) / 2;
       last = next;
       return [Z[X], Z[Y], sum, i + 1];
@@ -126,7 +126,7 @@ export default class Graph {
 
     coords.forEach((point) => {
       next = point;
-      Z = this.smoothing ? this._midPoint(last[X], last[Y], next[X], next[Y]) : next;
+      Z = this._smoothing ? this._midPoint(last[X], last[Y], next[X], next[Y]) : next;
       path += ` ${Z[X]},${Z[Y]}`;
       path += ` Q ${next[X]},${next[Y]}`;
       last = next;
