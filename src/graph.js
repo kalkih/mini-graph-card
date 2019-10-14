@@ -2,12 +2,14 @@ import { X, Y, V } from './const';
 import { interpolateColor } from './utils';
 
 export default class Graph {
-  constructor(width, height, margin, hours = 24, points = 1, aggregateFuncName = 'avg', groupBy = 'interval') {
+  constructor(width, height, margin, hours = 24, points = 1, aggregateFuncName = 'avg', groupBy = 'interval', smoothing = true) {
     const aggregateFuncMap = {
       avg: this._average,
       max: this._maximum,
       min: this._minimum,
     };
+    
+    console.log("last_changed", smoothing);
 
     this.coords = [];
     this.width = width - margin[X] * 2;
@@ -17,9 +19,9 @@ export default class Graph {
     this._min = 0;
     this.points = points;
     this.hours = hours
-    console.log(aggregateFuncName);
     this._calculatePoint = aggregateFuncMap[aggregateFuncName] || this._average;
     this._groupBy = groupBy;
+    this._smoothing = smoothing;
   }
 
   get max() { return this._max; }
@@ -34,7 +36,6 @@ export default class Graph {
     const groupByFunc = this._groupBy === 'date' ? this._getGroupByDateFunc() : this._getGroupByIntervalFunc();
     const coords = history.reduce((res, item) => groupByFunc(res, item), []);
 
-    console.log(coords);
     const requiredNumOfPoints = Math.ceil(this.hours * this.points);
     if (coords.length > requiredNumOfPoints) {
       // if there is too much data we reduce it
@@ -110,18 +111,16 @@ export default class Graph {
     coords.shift();
     const coords2 = coords.map((point, i) => {
       next = point;
-      Z = this._midPoint(last[X], last[Y], next[X], next[Y]);
+      Z = this.smoothing ? this._midPoint(last[X], last[Y], next[X], next[Y]) : next;
       const sum = (next[V] + last[V]) / 2;
       last = next;
       return [Z[X], Z[Y], sum, i + 1];
     });
-    console.log(coords2);
     return coords2;
   }
 
   getPath() {
     const coords = this._calcY(this.coords);
-    console.log(coords);
     let next; let Z;
     let path = '';
     let last = coords[0];
@@ -129,7 +128,7 @@ export default class Graph {
 
     coords.forEach((point) => {
       next = point;
-      Z = this._midPoint(last[X], last[Y], next[X], next[Y]);
+      Z = this.smoothing ? this._midPoint(last[X], last[Y], next[X], next[Y]) : next;
       path += ` ${Z[X]},${Z[Y]}`;
       path += ` Q ${next[X]},${next[Y]}`;
       last = next;

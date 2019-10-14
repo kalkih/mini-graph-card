@@ -138,7 +138,8 @@ class MiniGraphCard extends LitElement {
       color_thresholds_transition: 'smooth',
       line_width: 5,
       compress: true,
-      state_map: null,
+      smoothing: true,
+      state_map: [],
       tap_action: {
         action: 'more-info',
       },
@@ -149,6 +150,14 @@ class MiniGraphCard extends LitElement {
     conf.entities.forEach((entity, i) => {
       if (typeof entity === 'string') conf.entities[i] = { entity };
     });
+
+    conf.state_map.forEach((state, i) => {
+      // convert string values to objects
+      if (typeof state === 'string') conf.state_map[i] = { value: state, label: state };
+      // make sure label is set
+      conf.state_map[i].label = conf.state_map[i].label || conf.state_map[i].value;
+    });
+
     if (typeof config.line_color === 'string')
       conf.line_color = [config.line_color, ...DEFAULT_COLORS];
 
@@ -187,7 +196,7 @@ class MiniGraphCard extends LitElement {
           conf.points_per_hour,
           entity.aggregate_func || conf.aggregate_func,
           conf.group_by,
-          entity.state_map || conf.state_map,
+          entity.smoothing || conf.smoothing,
         ),
       );
     }
@@ -727,6 +736,15 @@ class MiniGraphCard extends LitElement {
   }
 
   computeState(inState) {
+    if (this.config.state_map.length > 0) {
+      const stateMap = Number.isInteger(inState) ?
+                        this.config.state_map[inState] :
+                        this.config.state_map.find(state => state.value === inState);
+      if (stateMap) {
+        return stateMap.label;
+      }
+    }
+
     const state = Number(inState);
     const dec = this.config.decimals;
     if (dec === undefined || Number.isNaN(dec) || Number.isNaN(state))
@@ -812,7 +830,6 @@ class MiniGraphCard extends LitElement {
   }
 
   async updateEntity(entity, index, initStart, end) {
-    console.log("updateEntity");
     if (!entity
       || !this.updateQueue.includes(entity.entity_id)
       || this.config.entities[index].show_graph === false
@@ -820,28 +837,36 @@ class MiniGraphCard extends LitElement {
     let stateHistory = [];
     let start = initStart;
     let skipInitialState = false;
-    console.log("updateEntity 1");
 
     const history = await this.getCache(entity.entity_id, this.config.useCompress);
     if (history && history.hours_to_show === this.config.hours_to_show) {
       stateHistory = history.data;
-      stateHistory = stateHistory.filter(item => new Date(item.last_changed) > initStart);
-      if (stateHistory.length > 0) {
+
+      let currDataStartIndex = stateHistory.findIndex(item => new Date(item.last_changed) > initStart);
+      if (currDataStartIndex !== -1) {
+
+        if (currDataStartIndex > 0) {
+          // include previous item
+          currDataStartIndex--;
+          // but change it's last changed time
+          stateHistory[currDataStartIndex].last_changed = initStart;
+        }
+
+        stateHistory = stateHistory.slice(currDataStartIndex, stateHistory.length);
+        // skip initial state when fetching recent/not-cached data
         skipInitialState = true;
       }
+
       const lastFetched = new Date(history.last_fetched);
       if (lastFetched > start) {
         start = new Date(lastFetched - 1);
       }
     }
 
-    console.log("updateEntity2");
     let newStateHistory = await this.fetchRecent(entity.entity_id, start, end, skipInitialState);
-    console.log("updateEntity3");
     if (newStateHistory[0] && newStateHistory[0].length > 0) {
       // check if we should convert states to numeric values
-      console.log(this.config.state_map);
-      if (this.config.state_map && this.config.state_map.length > 0) {
+      if (this.config.state_map.length > 0) {
         newStateHistory[0].forEach(item => this._convertState(item));
       }
 
@@ -901,14 +926,13 @@ class MiniGraphCard extends LitElement {
 
 
   _convertState(item) {
-    const resultValue = this.config.state_map.indexOf(item.state);
-    console.log(item.state, resultValue);
-    if (resultValue === -1) {
+    const resultIndex = this.config.state_map.findIndex(stateData => stateData.value === item.state);
+    if (resultIndex === -1) {
       console.warn(`mini-graph-card: entity state cannot be converted: ${item.state}`);
       return;
     }
 
-    item.state = resultValue;
+    item.state = resultIndex;
 
     return;
   }
