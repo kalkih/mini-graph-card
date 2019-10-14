@@ -10,6 +10,11 @@ const ICONS = {
   pressure: 'hass:gauge',
   power: 'hass:flash',
   signal_strength: 'hass:wifi',
+  motion: 'hass:walk',
+  door: 'hass:door-closed',
+  window: 'hass:window-closed',
+  presence: 'hass:account',
+  light: 'hass:lightbulb',
 };
 const DEFAULT_COLORS = [
   'var(--accent-color)',
