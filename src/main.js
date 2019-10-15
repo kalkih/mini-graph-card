@@ -743,6 +743,9 @@ class MiniGraphCard extends LitElement {
 
       if (stateMap) {
         return stateMap.label;
+      } else {
+        // eslint-disable-next-line no-console
+        console.warn(`mini-graph-card: value [${inState}] not found in state_map`);
       }
     }
 
