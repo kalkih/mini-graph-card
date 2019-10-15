@@ -110,7 +110,7 @@ export default class Graph {
     const coords2 = coords.map((point, i) => {
       next = point;
       Z = this._smoothing ? this._midPoint(last[X], last[Y], next[X], next[Y]) : next;
-      const sum = (next[V] + last[V]) / 2;
+      const sum = this._smoothing ? (next[V] + last[V]) / 2 : next[V];
       last = next;
       return [Z[X], Z[Y], sum, i + 1];
     });
