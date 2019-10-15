@@ -6,6 +6,9 @@
 - Smoothing setting - (@maxwroc)
 - Rendering non-numeric sensor states e.g. binary sensors (#63) - (@maxwroc)
 
+### FIXED
+- Rendering initial cached state - (@maxwroc)
+
 ## v0.7.0
 
 ### BREAKING CHANGE
