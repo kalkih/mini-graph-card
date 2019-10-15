@@ -23,6 +23,7 @@ import {
   getMilli,
   interpolateColor,
   compress, decompress,
+  getFirstDefinedItem,
 } from './utils';
 
 localForage.config({
@@ -196,7 +197,11 @@ class MiniGraphCard extends LitElement {
           conf.points_per_hour,
           entity.aggregate_func || conf.aggregate_func,
           conf.group_by,
-          entity.smoothing || conf.smoothing,
+          getFirstDefinedItem(
+            entity.smoothing,
+            config.smoothing,
+            !entity.entity.startsWith('binary_sensor.'), // turn off for binary sensor by default
+          ),
         ),
       );
     }

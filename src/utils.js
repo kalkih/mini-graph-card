@@ -33,6 +33,9 @@ const compress = data => lzStringCompress(JSON.stringify(data));
 
 const decompress = data => (typeof data === 'string' ? JSON.parse(lzStringDecompress(data)) : data);
 
+const getFirstDefinedItem = (...collection) => collection.find(item => typeof item !== 'undefined');
+
 export {
   getMin, getAvg, getMax, getTime, getMilli, interpolateColor, compress, decompress,
+  getFirstDefinedItem,
 };
