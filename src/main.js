@@ -855,6 +855,9 @@ class MiniGraphCard extends LitElement {
         stateHistory = stateHistory.slice(currDataIndex, stateHistory.length);
         // skip initial state when fetching recent/not-cached data
         skipInitialState = true;
+      } else {
+        // there were no states which could be used in current graph so clearing
+        stateHistory = [];
       }
 
       const lastFetched = new Date(history.last_fetched);
