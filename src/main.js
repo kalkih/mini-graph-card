@@ -23,6 +23,7 @@ import {
   getMilli,
   interpolateColor,
   compress, decompress,
+  getFirstDefinedItem,
 } from './utils';
 
 localForage.config({
@@ -138,6 +139,8 @@ class MiniGraphCard extends LitElement {
       color_thresholds_transition: 'smooth',
       line_width: 5,
       compress: true,
+      smoothing: true,
+      state_map: [],
       tap_action: {
         action: 'more-info',
       },
@@ -148,6 +151,14 @@ class MiniGraphCard extends LitElement {
     conf.entities.forEach((entity, i) => {
       if (typeof entity === 'string') conf.entities[i] = { entity };
     });
+
+    conf.state_map.forEach((state, i) => {
+      // convert string values to objects
+      if (typeof state === 'string') conf.state_map[i] = { value: state, label: state };
+      // make sure label is set
+      conf.state_map[i].label = conf.state_map[i].label || conf.state_map[i].value;
+    });
+
     if (typeof config.line_color === 'string')
       conf.line_color = [config.line_color, ...DEFAULT_COLORS];
 
@@ -186,6 +197,11 @@ class MiniGraphCard extends LitElement {
           conf.points_per_hour,
           entity.aggregate_func || conf.aggregate_func,
           conf.group_by,
+          getFirstDefinedItem(
+            entity.smoothing,
+            config.smoothing,
+            !entity.entity.startsWith('binary_sensor.'), // turn off for binary sensor by default
+          ),
         ),
       );
     }
@@ -725,6 +741,19 @@ class MiniGraphCard extends LitElement {
   }
 
   computeState(inState) {
+    if (this.config.state_map.length > 0) {
+      const stateMap = Number.isInteger(inState)
+        ? this.config.state_map[inState]
+        : this.config.state_map.find(state => state.value === inState);
+
+      if (stateMap) {
+        return stateMap.label;
+      } else {
+        // eslint-disable-next-line no-console
+        console.warn(`mini-graph-card: value [${inState}] not found in state_map`);
+      }
+    }
+
     const state = Number(inState);
     const dec = this.config.decimals;
     if (dec === undefined || Number.isNaN(dec) || Number.isNaN(state))
@@ -821,10 +850,24 @@ class MiniGraphCard extends LitElement {
     const history = await this.getCache(entity.entity_id, this.config.useCompress);
     if (history && history.hours_to_show === this.config.hours_to_show) {
       stateHistory = history.data;
-      stateHistory = stateHistory.filter(item => new Date(item.last_changed) > initStart);
-      if (stateHistory.length > 0) {
+
+      let currDataIndex = stateHistory.findIndex(item => new Date(item.last_changed) > initStart);
+      if (currDataIndex !== -1) {
+        if (currDataIndex > 0) {
+          // include previous item
+          currDataIndex -= 1;
+          // but change it's last changed time
+          stateHistory[currDataIndex].last_changed = initStart;
+        }
+
+        stateHistory = stateHistory.slice(currDataIndex, stateHistory.length);
+        // skip initial state when fetching recent/not-cached data
         skipInitialState = true;
+      } else {
+        // there were no states which could be used in current graph so clearing
+        stateHistory = [];
       }
+
       const lastFetched = new Date(history.last_fetched);
       if (lastFetched > start) {
         start = new Date(lastFetched - 1);
@@ -833,6 +876,11 @@ class MiniGraphCard extends LitElement {
 
     let newStateHistory = await this.fetchRecent(entity.entity_id, start, end, skipInitialState);
     if (newStateHistory[0] && newStateHistory[0].length > 0) {
+      // check if we should convert states to numeric values
+      if (this.config.state_map.length > 0) {
+        newStateHistory[0].forEach(item => this._convertState(item));
+      }
+
       newStateHistory = newStateHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
       newStateHistory = newStateHistory.map(item => ({
         last_changed: item.last_changed,
@@ -885,6 +933,16 @@ class MiniGraphCard extends LitElement {
     if (end) url += `&end_time=${end.toISOString()}`;
     if (skipInitialState) url += '&skip_initial_state';
     return this._hass.callApi('GET', url);
+  }
+
+
+  _convertState(res) {
+    const resultIndex = this.config.state_map.findIndex(s => s.value === res.state);
+    if (resultIndex === -1) {
+      return;
+    }
+
+    res.state = resultIndex;
   }
 
   getCardSize() {

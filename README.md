@@ -95,6 +95,8 @@ This card is available in [HACS](https://github.com/custom-components/hacs/issue
 | upper_bound | number |  | v0.2.3 | Set a fixed upper bound for the graph Y-axis.
 | lower_bound_secondary | number |  | v0.5.0 | Set a fixed lower bound for the graph secondary Y-axis.
 | upper_bound_secondary | number |  | v0.5.0 | Set a fixed upper bound for the graph secondary Y-axis.
+| smoothing | boolean | `true` | v0.7.1 | Whether to make graph line smooth.
+| state_map | [state map object](#state-map-object) |  | v0.7.1 | List of entity states to convert (order matters as position becomes a value on the graph).
 
 #### Entities object
 Entities may be listed directly (as per `sensor.temperature` in the following example), or defined using
@@ -116,6 +118,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | state_adaptive_color | boolean |  | Make the color of the state adapt to the entity color.
 | y_axis | string |  | If 'secondary', displays using the secondary y-axis on the right.
 | fixed_value | boolean |  | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
+| smoothing | boolean |  | Override for a flag indicating whether to make graph line smooth.
 
 ```yaml
 entities:
@@ -161,6 +164,12 @@ See [dynamic line color](#dynamic-line-color) for example usage.
 | service_data | object |  | Any service data | Service data to include with the service call (e.g. `entity_id: media_player.office`).
 | navigation_path | string |  | Any path | Path to navigate to (e.g. `/lovelace/0/`) when `action` is defined as `navigate`.
 | url | string |  | Any URL | URL to open when `action` is defined as `url`.
+
+#### State map object
+| Name | Type | Default | Description |
+|------|:----:|:-------:|-------------|
+| value ***(required)*** | string |  | Value to convert.
+| label | string | same as value | String to show as label (if the value is not precise).
 
 ### Example usage
 
@@ -347,6 +356,37 @@ from last week.
 ```
 
 ![mini_temperature_aggregate_daily](https://user-images.githubusercontent.com/8268674/66688610-44c0d280-ec7f-11e9-86c2-a728da239dab.png)
+
+#### Non-numeric sensor states
+You can render non-numeric states by providing state_map config. For example this way you can show data comming from binary sensors.
+
+```yaml
+- type: custom:mini-graph-card
+  entities:
+    - entity: binary_sensor.living_room_motion
+      name: Living room
+    - entity: binary_sensor.corridor_motion
+      name: Corridor
+    - entity: binary_sensor.master_bed_motion
+      name: Master bed.
+      color: green
+    - entity: binary_sensor.bedroom_motion
+      name: Bedroom
+  name: Motion last hour
+  hours_to_show: 1
+  points_per_hour: 60
+  update_interval: 30
+  aggregate_func: max
+  line_width: 2
+  smoothing: false
+  state_map:
+    - value: "off"
+      label: Clear
+    - value: "on"
+      label: Detected
+```
+
+![mini_binary_sensor](https://user-images.githubusercontent.com/8268674/66825779-e1ff5d80-ef42-11e9-89eb-673d2ada8d34.png)
 
 ## Development
 

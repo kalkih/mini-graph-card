@@ -3,6 +3,11 @@
 ### ADDED
 - Grouping by date (#78) - (@maxwroc)
 - Point calculation / aggregation functions (#78) - (@maxwroc)
+- Smoothing setting - (@maxwroc)
+- Rendering non-numeric sensor states e.g. binary sensors (#63) - (@maxwroc)
+
+### FIXED
+- Rendering initial cached state (#117) - (@maxwroc)
 
 ## v0.7.0
 

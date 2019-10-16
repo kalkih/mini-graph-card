@@ -2,7 +2,7 @@ import { X, Y, V } from './const';
 import { interpolateColor } from './utils';
 
 export default class Graph {
-  constructor(width, height, margin, hours = 24, points = 1, aggregateFuncName = 'avg', groupBy = 'interval') {
+  constructor(width, height, margin, hours = 24, points = 1, aggregateFuncName = 'avg', groupBy = 'interval', smoothing = true) {
     const aggregateFuncMap = {
       avg: this._average,
       max: this._maximum,
@@ -19,6 +19,7 @@ export default class Graph {
     this.hours = hours;
     this._calculatePoint = aggregateFuncMap[aggregateFuncName] || this._average;
     this._groupBy = groupBy;
+    this._smoothing = smoothing;
   }
 
   get max() { return this._max; }
@@ -32,7 +33,6 @@ export default class Graph {
   update(history) {
     const groupByFunc = this._groupBy === 'date' ? this._getGroupByDateFunc() : this._getGroupByIntervalFunc();
     const coords = history.reduce((res, item) => groupByFunc(res, item), []);
-
 
     const requiredNumOfPoints = Math.ceil(this.hours * this.points);
     if (coords.length > requiredNumOfPoints) {
@@ -109,8 +109,8 @@ export default class Graph {
     coords.shift();
     const coords2 = coords.map((point, i) => {
       next = point;
-      Z = this._midPoint(last[X], last[Y], next[X], next[Y]);
-      const sum = (next[V] + last[V]) / 2;
+      Z = this._smoothing ? this._midPoint(last[X], last[Y], next[X], next[Y]) : next;
+      const sum = this._smoothing ? (next[V] + last[V]) / 2 : next[V];
       last = next;
       return [Z[X], Z[Y], sum, i + 1];
     });
@@ -126,7 +126,7 @@ export default class Graph {
 
     coords.forEach((point) => {
       next = point;
-      Z = this._midPoint(last[X], last[Y], next[X], next[Y]);
+      Z = this._smoothing ? this._midPoint(last[X], last[Y], next[X], next[Y]) : next;
       path += ` ${Z[X]},${Z[Y]}`;
       path += ` Q ${next[X]},${next[Y]}`;
       last = next;
