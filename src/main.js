@@ -170,9 +170,11 @@ class MiniGraphCard extends LitElement {
     const additional = conf.hours_to_show > 24 ? { day: 'numeric', weekday: 'short' } : {};
     conf.format = { hour12: !conf.hour24, ...additional };
 
+    // override points per hour to mach group_by function
     if (conf.group_by === 'date') {
-      // override points per hour to mach 1 point per day (24h)
       conf.points_per_hour = 1 / 24;
+    } else if (conf.group_by === 'hour') {
+      conf.points_per_hour = 1;
     }
 
     if (conf.show.graph === 'bar') {
@@ -574,6 +576,9 @@ class MiniGraphCard extends LitElement {
       // move end time to the next day at midnight
       now.setDate(now.getDate() + 1);
       now.setHours(0, 0);
+    } else if (group_by === 'hour') {
+      now.setHours(now.getHours() + 1);
+      now.setMinutes(0, 0);
     }
 
     const oneMinInHours = 1 / 60;

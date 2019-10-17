@@ -8,6 +8,11 @@ export default class Graph {
       max: this._maximum,
       min: this._minimum,
     };
+    const groupByFuncMap = {
+      interval: this._getGroupByIntervalFunc(),
+      date: this._getGroupByDateFunc(),
+      hour: this._getGroupByHourFunc(),
+    };
 
     this.coords = [];
     this.width = width - margin[X] * 2;
@@ -17,8 +22,8 @@ export default class Graph {
     this._min = 0;
     this.points = points;
     this.hours = hours;
-    this._calculatePoint = aggregateFuncMap[aggregateFuncName] || this._average;
-    this._groupBy = groupBy;
+    this._calcPoint = aggregateFuncMap[aggregateFuncName] || this._average;
+    this._reducer = groupByFuncMap[groupBy] || this._getGroupByIntervalFunc;
     this._smoothing = smoothing;
   }
 
@@ -31,8 +36,7 @@ export default class Graph {
   set min(min) { this._min = min; }
 
   update(history) {
-    const groupByFunc = this._groupBy === 'date' ? this._getGroupByDateFunc() : this._getGroupByIntervalFunc();
-    const coords = history.reduce((res, item) => groupByFunc(res, item), []);
+    const coords = history.reduce((res, item) => this._reducer(res, item), []);
 
     const requiredNumOfPoints = Math.ceil(this.hours * this.points);
     if (coords.length > requiredNumOfPoints) {
@@ -72,17 +76,31 @@ export default class Graph {
     };
   }
 
+  _getGroupByHourFunc() {
+    const now = new Date();
+    now.setHours(now.getHours() + 1);
+    now.setMinutes(0, 0, 0);
+    return (res, item) => {
+      const age = now - new Date(item.last_changed).getTime();
+      const interval = (age / (1000 * 3600)) - this.hours;
+      const key = Math.floor(Math.abs(interval));
+      if (!res[key]) res[key] = [];
+      res[key].push(item);
+      return res;
+    };
+  }
+
   _calcPoints(history) {
     const coords = [];
     let xRatio = this.width / (this.hours * this.points - 1);
     xRatio = Number.isFinite(xRatio) ? xRatio : this.width;
 
     const first = history.filter(Boolean)[0];
-    let last = [this._calculatePoint(first), this._last(first)];
+    let last = [this._calcPoint(first), this._last(first)];
     const getCoords = (item, i) => {
       const x = xRatio * i + this.margin[X];
       if (item)
-        last = [this._calculatePoint(item), this._last(item)];
+        last = [this._calcPoint(item), this._last(item)];
       return coords.push([x, 0, item ? last[0] : last[1]]);
     };
 
