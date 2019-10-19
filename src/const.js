@@ -48,6 +48,7 @@ const DEFAULT_SHOW = {
 const X = 0;
 const Y = 1;
 const V = 2;
+const ONE_HOUR = 1000 * 3600;
 
 export {
   URL_DOCS,
@@ -61,4 +62,5 @@ export {
   X,
   Y,
   V,
+  ONE_HOUR,
 };

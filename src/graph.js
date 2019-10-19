@@ -1,5 +1,8 @@
-import { X, Y, V } from './const';
 import { interpolateColor } from './utils';
+import {
+  X, Y, V,
+  ONE_HOUR,
+} from './const';
 
 export default class Graph {
   constructor(width, height, margin, hours = 24, points = 1, aggregateFuncName = 'avg', groupBy = 'interval', smoothing = true) {
@@ -58,7 +61,7 @@ export default class Graph {
   _getGroupByIntervalFunc() {
     return (res, item) => {
       const age = this._endTime - new Date(item.last_changed).getTime();
-      const interval = (age / (1000 * 3600) * this.points) - this.hours * this.points;
+      const interval = (age / ONE_HOUR * this.points) - this.hours * this.points;
       const key = Math.floor(Math.abs(interval));
       if (!res[key]) res[key] = [];
       res[key].push(item);
