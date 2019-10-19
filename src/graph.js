@@ -1,5 +1,8 @@
-import { X, Y, V } from './const';
 import { interpolateColor } from './utils';
+import {
+  X, Y, V,
+  ONE_HOUR,
+} from './const';
 
 export default class Graph {
   constructor(width, height, margin, hours = 24, points = 1, aggregateFuncName = 'avg', groupBy = 'interval', smoothing = true) {
@@ -7,6 +10,11 @@ export default class Graph {
       avg: this._average,
       max: this._maximum,
       min: this._minimum,
+    };
+    const groupByFuncMap = {
+      interval: this._getGroupByIntervalFunc(),
+      hour: this._getGroupByIntervalFunc(),
+      date: this._getGroupByDateFunc(),
     };
 
     this.coords = [];
@@ -17,9 +25,11 @@ export default class Graph {
     this._min = 0;
     this.points = points;
     this.hours = hours;
-    this._calculatePoint = aggregateFuncMap[aggregateFuncName] || this._average;
-    this._groupBy = groupBy;
+    this._calcPoint = aggregateFuncMap[aggregateFuncName] || this._average;
+    this._reducer = groupByFuncMap[groupBy] || this._getGroupByIntervalFunc;
     this._smoothing = smoothing;
+    this._groupBy = groupBy;
+    this._endTime = 0;
   }
 
   get max() { return this._max; }
@@ -31,9 +41,9 @@ export default class Graph {
   set min(min) { this._min = min; }
 
   update(history) {
-    const groupByFunc = this._groupBy === 'date' ? this._getGroupByDateFunc() : this._getGroupByIntervalFunc();
-    const coords = history.reduce((res, item) => groupByFunc(res, item), []);
+    this._updateEndTime();
 
+    const coords = history.reduce((res, item) => this._reducer(res, item), []);
     const requiredNumOfPoints = Math.ceil(this.hours * this.points);
     if (coords.length > requiredNumOfPoints) {
       // if there is too much data we reduce it
@@ -49,10 +59,9 @@ export default class Graph {
   }
 
   _getGroupByIntervalFunc() {
-    const now = new Date().getTime();
     return (res, item) => {
-      const age = now - new Date(item.last_changed).getTime();
-      const interval = (age / (1000 * 3600) * this.points) - this.hours * this.points;
+      const age = this._endTime - new Date(item.last_changed).getTime();
+      const interval = (age / ONE_HOUR * this.points) - this.hours * this.points;
       const key = Math.floor(Math.abs(interval));
       if (!res[key]) res[key] = [];
       res[key].push(item);
@@ -78,11 +87,11 @@ export default class Graph {
     xRatio = Number.isFinite(xRatio) ? xRatio : this.width;
 
     const first = history.filter(Boolean)[0];
-    let last = [this._calculatePoint(first), this._last(first)];
+    let last = [this._calcPoint(first), this._last(first)];
     const getCoords = (item, i) => {
       const x = xRatio * i + this.margin[X];
       if (item)
-        last = [this._calculatePoint(item), this._last(item)];
+        last = [this._calcPoint(item), this._last(item)];
       return coords.push([x, 0, item ? last[0] : last[1]]);
     };
 
@@ -195,5 +204,13 @@ export default class Graph {
 
   _last(items) {
     return parseFloat(items[items.length - 1].state) || 0;
+  }
+
+  _updateEndTime() {
+    this._endTime = new Date();
+    if (this._groupBy === 'hour') {
+      this._endTime.setHours(this._endTime.getHours() + 1);
+      this._endTime.setMinutes(0, 0, 0);
+    }
   }
 }

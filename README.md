@@ -74,8 +74,8 @@ This card is available in [HACS](https://github.com/custom-components/hacs/issue
 | group | boolean | `false` | v0.2.0 | Disable paddings and box-shadow, useful when nesting the card.
 | hours_to_show | integer | `24` | v0.0.2 | Specify how many hours of history the graph should present.
 | points_per_hour | number | `0.5` | v0.2.0 | Specify amount of data points the graph should display for each hour, *(basically the detail/accuracy/smoothing of the graph)*.
-| aggregate_func | string | `avg` | v0.7.1 | Specify aggregate function used to calculate point on the graph, `avg`, `min`, `max`.
-| group_by | string | `interval` | v0.7.1 | Specify type of grouping for a point, dynamic `interval`, `date`.
+| aggregate_func | string | `avg` | v0.7.1 | Specify aggregate function used to calculate point/bar in the graph, `avg`, `min`, `max`.
+| group_by | string | `interval` | v0.7.1 | Specify type of grouping of data, dynamic `interval`, `date` or `hour`.
 | update_interval | number |  | v0.4.0 | Specify a custom update interval of the history data (in seconds), instead of on every state change.
 | show | list |  | v0.2.0 | List of UI elements to display/hide, for available items see [available show options](#available-show-options).
 | animate | boolean | `false` | v0.2.0 | Add a reveal animation to the graph.
