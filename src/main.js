@@ -555,10 +555,10 @@ class MiniGraphCard extends LitElement {
           <defs>
             ${this.renderSvgGradient(this.gradient)}
           </defs>
-          ${this.line.map((line, i) => this.renderSvgLine(line, i))}
           ${this.fill.map((fill, i) => this.renderSvgFill(fill, i))}
-          ${this.line.map((line, i) => this.renderSvgLineRect(line, i))}
           ${this.line.map((fill, i) => this.renderSvgFillRect(fill, i))}
+          ${this.line.map((line, i) => this.renderSvgLine(line, i))}
+          ${this.line.map((line, i) => this.renderSvgLineRect(line, i))}
           ${this.bar.map((bars, i) => this.renderSvgBars(bars, i))}
         </g>
         ${this.points.map((points, i) => this.renderSvgPoints(points, i))}
