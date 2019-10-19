@@ -10,8 +10,8 @@ export default class Graph {
     };
     const groupByFuncMap = {
       interval: this._getGroupByIntervalFunc(),
+      hour: this._getGroupByIntervalFunc(),
       date: this._getGroupByDateFunc(),
-      hour: this._getGroupByHourFunc(),
     };
 
     this.coords = [];
@@ -25,6 +25,8 @@ export default class Graph {
     this._calcPoint = aggregateFuncMap[aggregateFuncName] || this._average;
     this._reducer = groupByFuncMap[groupBy] || this._getGroupByIntervalFunc;
     this._smoothing = smoothing;
+    this._groupBy = groupBy;
+    this._endTime = 0;
   }
 
   get max() { return this._max; }
@@ -36,8 +38,9 @@ export default class Graph {
   set min(min) { this._min = min; }
 
   update(history) {
-    const coords = history.reduce((res, item) => this._reducer(res, item), []);
+    this._updateEndTime();
 
+    const coords = history.reduce((res, item) => this._reducer(res, item), []);
     const requiredNumOfPoints = Math.ceil(this.hours * this.points);
     if (coords.length > requiredNumOfPoints) {
       // if there is too much data we reduce it
@@ -53,9 +56,8 @@ export default class Graph {
   }
 
   _getGroupByIntervalFunc() {
-    const now = new Date().getTime();
     return (res, item) => {
-      const age = now - new Date(item.last_changed).getTime();
+      const age = this._endTime - new Date(item.last_changed).getTime();
       const interval = (age / (1000 * 3600) * this.points) - this.hours * this.points;
       const key = Math.floor(Math.abs(interval));
       if (!res[key]) res[key] = [];
@@ -70,20 +72,6 @@ export default class Graph {
       const date = new Date(item.last_changed).toDateString();
       if (dateToKeyMap[date] === undefined) dateToKeyMap[date] = res.length;
       const key = dateToKeyMap[date];
-      if (!res[key]) res[key] = [];
-      res[key].push(item);
-      return res;
-    };
-  }
-
-  _getGroupByHourFunc() {
-    const now = new Date();
-    now.setHours(now.getHours() + 1);
-    now.setMinutes(0, 0, 0);
-    return (res, item) => {
-      const age = now - new Date(item.last_changed).getTime();
-      const interval = (age / (1000 * 3600)) - this.hours;
-      const key = Math.floor(Math.abs(interval));
       if (!res[key]) res[key] = [];
       res[key].push(item);
       return res;
@@ -213,5 +201,13 @@ export default class Graph {
 
   _last(items) {
     return parseFloat(items[items.length - 1].state) || 0;
+  }
+
+  _updateEndTime() {
+    this._endTime = new Date();
+    if (this._groupBy === 'hour') {
+      this._endTime.setHours(this._endTime.getHours() + 1);
+      this._endTime.setMinutes(0, 0, 0);
+    }
   }
 }
