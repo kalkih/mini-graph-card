@@ -250,10 +250,10 @@ const style = css`
     stroke-linecap: round;
     stroke-linejoin: round;
   }
-  .line--fill[anim="false"] {
+  .fill[anim="false"] {
     animation: reveal .25s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   }
-  .line--fill[anim="false"][type="fade"] {
+  .fill[anim="false"][type="fade"] {
     animation: reveal-2 .25s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   }
   .line--points[anim="false"],
@@ -262,7 +262,7 @@ const style = css`
   }
   .line--points[inactive],
   .line--rect[inactive],
-  .line--fill[inactive] {
+  .fill--rect[inactive] {
     opacity: 0 !important;
     animation: none !important;
     transition: all .15s !important;
@@ -296,16 +296,16 @@ const style = css`
   }
   path,
   .line--points,
-  .line--fill {
+  .fill {
     opacity: 0;
   }
   .line--points[anim="true"][init] {
     animation: pop .5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   }
-  .line--fill[anim="true"][init] {
+  .fill[anim="true"][init] {
     animation: reveal .5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   }
-  .line--fill[anim="true"][init][type="fade"] {
+  .fill[anim="true"][init][type="fade"] {
     animation: reveal-2 .5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   }
   .line[anim="true"][init] {
