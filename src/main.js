@@ -416,14 +416,12 @@ class MiniGraphCard extends LitElement {
         </mask>
       </defs>
       <mask id=${`fill-${this.id}-${i}`}>
-        <path class='line--fill'
+        <path class='fill'
           type=${this.config.show.fill}
           .id=${i} anim=${this.config.animate} ?init=${this.length[i]}
           style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
           fill='white'
-          stroke='white'
           mask=${fade ? `url(#fill-grad-mask-${this.id}-${i})` : ''}
-          stroke-width=${this.config.line_width}
           d=${this.fill[i]}
         />
       </mask>`;
@@ -515,10 +513,9 @@ class MiniGraphCard extends LitElement {
 
   renderSvgFillRect(fill, i) {
     if (!fill) return;
-    const color = this.intColor(this.entity[i].state, i);
     const svgFill = this.gradient[i]
       ? `url(#grad-${this.id}-${i})`
-      : color;
+      : this.intColor(this.entity[i].state, i);
     return svg`
       <rect class='fill--rect'
         ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== i}
