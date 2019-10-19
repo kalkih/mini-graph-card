@@ -404,11 +404,7 @@ class MiniGraphCard extends LitElement {
 
   renderSvgFill(fill, i) {
     if (!fill) return;
-    const color = this.intColor(this.entity[i].state, i);
     const fade = this.config.show.fill === 'fade';
-    const fillColor = this.gradient[i]
-      ? `url(#grad-${this.id}-${i})`
-      : color;
     return svg`
       <defs>
         <linearGradient id=${`fill-grad-${this.id}-${i}`} x1="0%" y1="0%" x2="0%" y2="100%">
@@ -419,17 +415,18 @@ class MiniGraphCard extends LitElement {
           <rect width="100%" height="100%" fill=${`url(#fill-grad-${this.id}-${i})`} />
         </mask>
       </defs>
-      <path class='line--fill'
-        ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== i}
-        type=${this.config.show.fill}
-        .id=${i} anim=${this.config.animate} ?init=${this.length[i]}
-        style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
-        fill=${fillColor}
-        stroke=${fillColor}
-        mask=${fade ? `url(#fill-grad-mask-${this.id}-${i})` : ''}
-        stroke-width=${this.config.line_width}
-        d=${this.fill[i]}
-      />`;
+      <mask id=${`fill-${this.id}-${i}`}>
+        <path class='line--fill'
+          type=${this.config.show.fill}
+          .id=${i} anim=${this.config.animate} ?init=${this.length[i]}
+          style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
+          fill='white'
+          stroke='white'
+          mask=${fade ? `url(#fill-grad-mask-${this.id}-${i})` : ''}
+          stroke-width=${this.config.line_width}
+          d=${this.fill[i]}
+        />
+      </mask>`;
   }
 
   renderSvgLine(line, i) {
@@ -502,7 +499,7 @@ class MiniGraphCard extends LitElement {
     return svg`${items}`;
   }
 
-  renderSvgRect(line, i) {
+  renderSvgLineRect(line, i) {
     if (!line) return;
     const fill = this.gradient[i]
       ? `url(#grad-${this.id}-${i})`
@@ -513,6 +510,21 @@ class MiniGraphCard extends LitElement {
         id=${`rect-${this.id}-${i}`}
         fill=${fill} height="100%" width="100%"
         mask=${`url(#line-${this.id}-${i})`}
+      />`;
+  }
+
+  renderSvgFillRect(fill, i) {
+    if (!fill) return;
+    const color = this.intColor(this.entity[i].state, i);
+    const svgFill = this.gradient[i]
+      ? `url(#grad-${this.id}-${i})`
+      : color;
+    return svg`
+      <rect class='fill--rect'
+        ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== i}
+        id=${`fill-rect-${this.id}-${i}`}
+        fill=${svgFill} height="100%" width="100%"
+        mask=${`url(#fill-${this.id}-${i})`}
       />`;
   }
 
@@ -548,7 +560,8 @@ class MiniGraphCard extends LitElement {
           </defs>
           ${this.line.map((line, i) => this.renderSvgLine(line, i))}
           ${this.fill.map((fill, i) => this.renderSvgFill(fill, i))}
-          ${this.line.map((line, i) => this.renderSvgRect(line, i))}
+          ${this.line.map((line, i) => this.renderSvgLineRect(line, i))}
+          ${this.line.map((fill, i) => this.renderSvgFillRect(fill, i))}
           ${this.bar.map((bars, i) => this.renderSvgBars(bars, i))}
         </g>
         ${this.points.map((points, i) => this.renderSvgPoints(points, i))}
