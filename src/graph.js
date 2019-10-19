@@ -11,7 +11,7 @@ export default class Graph {
 
     this.coords = [];
     this.width = width - margin[X] * 2;
-    this.height = height - margin[Y] * 2;
+    this.height = height - margin[Y] * 4;
     this.margin = margin;
     this._max = 0;
     this._min = 0;
@@ -97,7 +97,7 @@ export default class Graph {
     const yRatio = ((this.max - this.min) / this.height) || 1;
     return coords.map(coord => [
       coord[X],
-      this.height - ((coord[V] - this.min) / yRatio) + this.margin[Y] * 1,
+      this.height - ((coord[V] - this.min) / yRatio) + this.margin[Y] * 2,
       coord[V],
     ]);
   }
@@ -155,7 +155,7 @@ export default class Graph {
   }
 
   getFill(path) {
-    const height = this.height + this.margin[Y] * 2;
+    const height = this.height + this.margin[Y] * 4;
     let fill = path;
     fill += ` L ${this.width - this.margin[X] * 2}, ${height}`;
     fill += ` L ${this.coords[0][X]}, ${height} z`;
@@ -168,8 +168,8 @@ export default class Graph {
     const xRatio = ((this.width - margin) / Math.ceil(this.hours * this.points)) / total;
     return coords.map((coord, i) => ({
       x: (xRatio * i * total) + (xRatio * position) + margin,
-      y: coord[Y],
-      height: this.height - coord[Y] + this.margin[Y] * 3,
+      y: coord[Y] - this.margin[Y] * 2,
+      height: this.height - coord[Y] + this.margin[Y] * 6,
       width: xRatio - margin,
       value: coord[V],
     }));

@@ -245,6 +245,7 @@ const style = css`
   }
   svg {
     overflow: hidden;
+    display: block;
   }
   path {
     stroke-linecap: round;
