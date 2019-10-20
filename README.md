@@ -19,7 +19,7 @@ This card is available in [HACS](https://github.com/custom-components/hacs/issue
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.7.0
+    - url: /local/mini-graph-card-bundle.js?v=0.8.0
       type: module
   ```
 
@@ -30,14 +30,14 @@ This card is available in [HACS](https://github.com/custom-components/hacs/issue
 2. Grab `mini-graph-card-bundle.js`:
 
   ```
-  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.7.0/mini-graph-card-bundle.js
+  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.8.0/mini-graph-card-bundle.js
   ```
 
 3. Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`:
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.7.0
+    - url: /local/mini-graph-card-bundle.js?v=0.8.0
       type: module
   ```
 
@@ -52,7 +52,7 @@ This card is available in [HACS](https://github.com/custom-components/hacs/issue
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.7.0
+    - url: /local/mini-graph-card-bundle.js?v=0.8.0
       type: module
   ```
 
@@ -74,8 +74,8 @@ This card is available in [HACS](https://github.com/custom-components/hacs/issue
 | group | boolean | `false` | v0.2.0 | Disable paddings and box-shadow, useful when nesting the card.
 | hours_to_show | integer | `24` | v0.0.2 | Specify how many hours of history the graph should present.
 | points_per_hour | number | `0.5` | v0.2.0 | Specify amount of data points the graph should display for each hour, *(basically the detail/accuracy/smoothing of the graph)*.
-| aggregate_func | string | `avg` | v0.7.1 | Specify aggregate function used to calculate point/bar in the graph, `avg`, `min`, `max`.
-| group_by | string | `interval` | v0.7.1 | Specify type of grouping of data, dynamic `interval`, `date` or `hour`.
+| aggregate_func | string | `avg` | v0.8.0 | Specify aggregate function used to calculate point/bar in the graph, `avg`, `min`, `max`.
+| group_by | string | `interval` | v0.8.0 | Specify type of grouping of data, dynamic `interval`, `date` or `hour`.
 | update_interval | number |  | v0.4.0 | Specify a custom update interval of the history data (in seconds), instead of on every state change.
 | show | list |  | v0.2.0 | List of UI elements to display/hide, for available items see [available show options](#available-show-options).
 | animate | boolean | `false` | v0.2.0 | Add a reveal animation to the graph.
@@ -95,8 +95,8 @@ This card is available in [HACS](https://github.com/custom-components/hacs/issue
 | upper_bound | number |  | v0.2.3 | Set a fixed upper bound for the graph Y-axis.
 | lower_bound_secondary | number |  | v0.5.0 | Set a fixed lower bound for the graph secondary Y-axis.
 | upper_bound_secondary | number |  | v0.5.0 | Set a fixed upper bound for the graph secondary Y-axis.
-| smoothing | boolean | `true` | v0.7.1 | Whether to make graph line smooth.
-| state_map | [state map object](#state-map-object) |  | v0.7.1 | List of entity states to convert (order matters as position becomes a value on the graph).
+| smoothing | boolean | `true` | v0.8.0 | Whether to make graph line smooth.
+| state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert (order matters as position becomes a value on the graph).
 
 #### Entities object
 Entities may be listed directly (as per `sensor.temperature` in the following example), or defined using

@@ -1,14 +1,18 @@
-## v0.7.1
+## v0.8.0
 
 ### ADDED
-- Grouping by date (#78) - (@maxwroc)
-- Grouping by hour
-- Point calculation / aggregation functions (#78) - (@maxwroc)
-- Smoothing setting - (@maxwroc)
-- Rendering non-numeric sensor states e.g. binary sensors (#63) - (@maxwroc)
+- Grouping by date (#78) (#165)- (@maxwroc)
+- Grouping by hour (#172)
+- Point calculation / aggregation functions (max, min, avg) (#78) (#165) - (@maxwroc)
+- Smoothing setting (#170) - (@maxwroc)
+- Rendering non-numeric sensor states e.g. binary sensors (#63) (#170) - (@maxwroc)
 
 ### FIXED
-- Rendering initial cached state (#117) - (@maxwroc)
+- Rendering initial cached state (#117) (#170) - (@maxwroc)
+- Color threshold line with custom bounds (#166) (#174)
+- Clipping of graph points at Y-axis extrema
+- Graph margins & jumpy/jerky movements in certain browsers
+- Threshold color when state is below minimum provided threshold stop
 
 ## v0.7.0
 
