@@ -20,12 +20,12 @@
   "license": "MIT",
   "dependencies": {
     "@kalkih/lz-string": "^1.4.5",
-    "lit-element": "^2.1.0",
+    "lit-element": "^2.2.1",
     "localforage": "^1.7.3"
   },
   "devDependencies": {
-    "@babel/cli": "^7.2.3",
-    "@babel/core": "^7.3.3",
+    "@babel/cli": "^7.6.4",
+    "@babel/core": "^7.6.4",
     "@babel/plugin-proposal-class-properties": "^7.3.3",
     "@babel/plugin-proposal-decorators": "^7.3.0",
     "@babel/plugin-proposal-object-rest-spread": "^7.3.4",
