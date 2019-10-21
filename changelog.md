@@ -1,3 +1,9 @@
+## v0.8.1
+
+### FIXED
+- Reduced minimum bar height (#178)
+- Parse commas in state (#177)
+
 ## v0.8.0
 
 ### ADDED
