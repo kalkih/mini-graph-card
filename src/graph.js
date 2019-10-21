@@ -177,8 +177,8 @@ export default class Graph {
     const xRatio = ((this.width - margin) / Math.ceil(this.hours * this.points)) / total;
     return coords.map((coord, i) => ({
       x: (xRatio * i * total) + (xRatio * position) + margin,
-      y: coord[Y] - this.margin[Y] * 2,
-      height: this.height - coord[Y] + this.margin[Y] * 6,
+      y: coord[Y],
+      height: this.height - coord[Y] + this.margin[Y] * 4,
       width: xRatio - margin,
       value: coord[V],
     }));
