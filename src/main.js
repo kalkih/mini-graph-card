@@ -778,7 +778,12 @@ class MiniGraphCard extends LitElement {
       }
     }
 
-    const state = Number(inState);
+    let state;
+    if (typeof inState === 'string') {
+      state = parseFloat(inState.replace(/,/g, '.'));
+    } else {
+      state = Number(inState);
+    }
     const dec = this.config.decimals;
     if (dec === undefined || Number.isNaN(dec) || Number.isNaN(state))
       return Math.round(state * 100) / 100;
