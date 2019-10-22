@@ -87,15 +87,14 @@ const style = css`
   .name {
     align-items: center;
     min-width: 0;
-    opacity: .8;
     letter-spacing: var(--mcg-title-letter-spacing, normal);
   }
   .name > span {
     font-size: 1.2em;
-    font-weight: 400;
+    font-weight: var(--mcg-title-font-weight, 500);
     max-height: 1.4em;
     min-height: 1.4em;
-    opacity: .75;
+    opacity: .65;
   }
   .icon {
     color: var(--paper-item-icon-color, #44739e);

@@ -171,6 +171,15 @@ See [dynamic line color](#dynamic-line-color) for example usage.
 | value ***(required)*** | string |  | Value to convert.
 | label | string | same as value | String to show as label (if the value is not precise).
 
+
+### Theme variables
+The following theme variables can be set in your HA theme to customize the appearence of the card.
+
+| name | Default | Description |
+|------|:-------:|-------------|
+| mcg-title-letter-spacing |  | Letter spacing of the card title (`name` option).
+| mcg-title-font-weight | 500 | Font weight of the card title.
+
 ### Example usage
 
 #### Single entity card
