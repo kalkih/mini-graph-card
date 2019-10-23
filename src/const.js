@@ -31,7 +31,7 @@ const DEFAULT_COLORS = [
   '#2980b9',
   '#8e44ad',
 ];
-const UPDATE_PROPS = ['entity', 'line', 'length', 'fill', 'points', 'tooltip', 'abs'];
+const UPDATE_PROPS = ['entity', 'line', 'length', 'fill', 'points', 'tooltip', 'abs', 'config'];
 const DEFAULT_SHOW = {
   name: true,
   icon: true,
