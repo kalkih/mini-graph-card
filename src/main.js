@@ -881,7 +881,7 @@ class MiniGraphCard extends LitElement {
     let start = initStart;
     let skipInitialState = false;
 
-    const history = null; // await this.getCache(entity.entity_id, this.config.useCompress);
+    const history = await this.getCache(entity.entity_id, this.config.useCompress);
     if (history && history.hours_to_show === this.config.hours_to_show) {
       stateHistory = history.data;
 
