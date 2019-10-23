@@ -98,7 +98,6 @@ export default class Graph {
     for (let i = 0; i < history.length; i += 1)
       getCoords(history[i], i);
 
-    if (coords.length === 1) coords[1] = [this.width + this.margin[X], 0, coords[0][V]];
     return coords;
   }
 
@@ -112,7 +111,11 @@ export default class Graph {
   }
 
   getPoints() {
-    const coords = this._calcY(this.coords);
+    let { coords } = this;
+    if (coords.length === 1) {
+      coords[1] = [this.width + this.margin[X], 0, coords[0][V]];
+    }
+    coords = this._calcY(this.coords);
     let next; let Z;
     let last = coords[0];
     coords.shift();
@@ -127,7 +130,11 @@ export default class Graph {
   }
 
   getPath() {
-    const coords = this._calcY(this.coords);
+    let { coords } = this;
+    if (coords.length === 1) {
+      coords[1] = [this.width + this.margin[X], 0, coords[0][V]];
+    }
+    coords = this._calcY(this.coords);
     let next; let Z;
     let path = '';
     let last = coords[0];
