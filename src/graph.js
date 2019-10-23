@@ -50,11 +50,6 @@ export default class Graph {
       coords.splice(0, coords.length - requiredNumOfPoints);
     } else {
       // extend length to match the required number of points
-      if (this._groupBy === 'date') {
-        while (coords.length < requiredNumOfPoints) {
-          coords.unshift(undefined);
-        }
-      }
       coords.length = requiredNumOfPoints;
     }
 
@@ -75,13 +70,14 @@ export default class Graph {
   }
 
   _getGroupByDateFunc() {
-    const dateToKeyMap = {};
     return (res, item) => {
-      const date = new Date(item.last_changed).toDateString();
-      if (dateToKeyMap[date] === undefined) dateToKeyMap[date] = res.length;
-      const key = dateToKeyMap[date];
-      if (!res[key]) res[key] = [];
-      res[key].push(item);
+      const age = this._endTime - new Date(item.last_changed).getTime();
+      const interval = (age / (ONE_HOUR * 24) - this.hours / 24);
+      const key = Math.floor(Math.abs(interval));
+      if (interval < 0) {
+        if (!res[key]) res[key] = [];
+        res[key].push(item);
+      }
       return res;
     };
   }
@@ -213,9 +209,17 @@ export default class Graph {
 
   _updateEndTime() {
     this._endTime = new Date();
-    if (this._groupBy === 'hour') {
-      this._endTime.setHours(this._endTime.getHours() + 1);
-      this._endTime.setMinutes(0, 0, 0);
+    switch (this._groupBy) {
+      case 'date':
+        this._endTime.setDate(this._endTime.getDate() + 1);
+        this._endTime.setHours(0, 0);
+        break;
+      case 'hour':
+        this._endTime.setHours(this._endTime.getHours() + 1);
+        this._endTime.setMinutes(0, 0, 0);
+        break;
+      default:
+        break;
     }
   }
 }
