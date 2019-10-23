@@ -51,6 +51,11 @@ export default class Graph {
     } else {
       // extend length to match the required number of points
       coords.length = requiredNumOfPoints;
+      if (this._groupBy === 'date') {
+        while (coords.length < requiredNumOfPoints) {
+          coords.unshift(undefined);
+        }
+      }
     }
 
     this.coords = this._calcPoints(coords);
