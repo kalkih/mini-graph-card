@@ -50,12 +50,12 @@ export default class Graph {
       coords.splice(0, coords.length - requiredNumOfPoints);
     } else {
       // extend length to match the required number of points
-      coords.length = requiredNumOfPoints;
       if (this._groupBy === 'date') {
         while (coords.length < requiredNumOfPoints) {
           coords.unshift(undefined);
         }
       }
+      coords.length = requiredNumOfPoints;
     }
 
     this.coords = this._calcPoints(coords);
