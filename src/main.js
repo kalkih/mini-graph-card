@@ -24,6 +24,7 @@ import {
   interpolateColor,
   compress, decompress,
   getFirstDefinedItem,
+  compareArray,
 } from './utils';
 
 localForage.config({
@@ -51,6 +52,7 @@ class MiniGraphCard extends LitElement {
     this.id = Math.random()
       .toString(36)
       .substr(2, 9);
+    this.config = {};
     this.bound = [0, 0];
     this.boundSecondary = [0, 0];
     this.min = {};
@@ -194,7 +196,12 @@ class MiniGraphCard extends LitElement {
       }
     }
 
-    if (!this.Graph) {
+    const entitiesChanged = !compareArray(this.config.entities || [], conf.entities);
+
+    this.config = conf;
+
+    if (!this.Graph || entitiesChanged) {
+      if (this._hass) this.hass = this._hass;
       this.Graph = conf.entities.map(
         entity => new Graph(
           500,
@@ -212,8 +219,6 @@ class MiniGraphCard extends LitElement {
         ),
       );
     }
-
-    this.config = conf;
   }
 
   connectedCallback() {
