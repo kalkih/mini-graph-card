@@ -52,10 +52,8 @@ export default class Graph {
     const age = this._endTime - new Date(item.last_changed).getTime();
     const interval = (age / ONE_HOUR * this.points) - this.hours * this.points;
     const key = Math.floor(Math.abs(interval));
-    if (interval < 0) {
-      if (!res[key]) res[key] = [];
-      res[key].push(item);
-    }
+    if (!res[key]) res[key] = [];
+    res[key].push(item);
     return res;
   }
 
