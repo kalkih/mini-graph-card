@@ -140,6 +140,7 @@ class MiniGraphCard extends LitElement {
       color_thresholds: [],
       color_thresholds_transition: 'smooth',
       line_width: 5,
+      locales: null,
       compress: true,
       smoothing: true,
       state_map: [],
@@ -551,11 +552,20 @@ class MiniGraphCard extends LitElement {
         <rect class='bar' x=${bar.x} y=${bar.y}
           height=${bar.height} width=${bar.width} fill=${color}
           @mouseover=${() => this.setTooltip(index, i, bar.value)}
-          @mouseout=${() => (this.tooltip = {})}>
+          @mouseout=${() => (this.tooltip = {})}
+          @click=${e => this.handleBarClick(e, index)}>
           ${animation}
         </rect>`;
     });
     return svg`<g class='bars' ?anim=${this.config.animate}>${items}</g>`;
+  }
+
+  handleBarClick(e, index) {
+    if (this.config.tap_action !== 'none') {
+      const id = this.entity[index].entity_id;
+      e.stopPropagation();
+      handleClick(this, this._hass, this.config, this.config.tap_action, id);
+    }
   }
 
   renderSvg() {
@@ -777,10 +787,19 @@ class MiniGraphCard extends LitElement {
     }
     const dec = this.config.decimals;
     if (dec === undefined || Number.isNaN(dec) || Number.isNaN(state))
-      return Math.round(state * 100) / 100;
+      return this.formatStateValue(Math.round(state * 100) / 100, 0);
 
     const x = 10 ** dec;
-    return (Math.round(state * x) / x).toFixed(dec);
+    return this.formatStateValue((Math.round(state * x) / x).toFixed(dec), dec);
+  }
+
+  formatStateValue(v, dec) {
+    const _locales = this.config.locales;
+    if (_locales === null || _locales === undefined) {
+      return v;
+    } else {
+      return parseFloat(v, 10).toLocaleString(_locales, { maximumFractionDigits: Number(dec) });
+    }
   }
 
   updateOnInterval() {
@@ -988,3 +1007,4 @@ class MiniGraphCard extends LitElement {
 }
 
 customElements.define('mini-graph-card', MiniGraphCard);
+console.info('%c  MINI-GRAPH-CARD  \n%c Version 0.8.3 DEV ', 'color: white; font-weight: bold; background: #1565C0', 'color: white; font-weight: bold; background: #FF5722'); // eslint-disable-line no-console
