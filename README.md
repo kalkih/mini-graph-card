@@ -99,8 +99,8 @@ This card is available in [HACS](https://github.com/custom-components/hacs/issue
 | state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert (order matters as position becomes a value on the graph).
 
 #### Entities object
-Entities may be listed directly (as per `sensor.temperature` in the following example), or defined using
-properties of the Entity object detailed in the following table (as per `sensor.pressure` in the following example):
+Entities may be listed directly (as per `sensor.temperature` in the example below), or defined using
+properties of the Entity object detailed in the following table (as per `sensor.pressure` in the example below).
 
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
@@ -111,9 +111,10 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | aggregate_func | string |  | Override for aggregate function used to calculate point on the graph, `avg`, `min`, `max`.
 | show_state | boolean |  | Display the current state.
 | show_indicator | boolean |  | Display a color indicator next to the state, (only when more than two states are visible).
-| show_line | boolean |  | Set to false to hide the line (see note below table).
-| show_fill | boolean |  | Set to false to hide the fill (see note below table).
-| show_points | boolean |  | Set to false to hide the points (see note below table).
+| show_graph | boolean |  | Set to false to completely hide the entity in the graph.
+| show_line | boolean |  | Set to false to hide the line.
+| show_fill | boolean |  | Set to false to hide the fill).
+| show_points | boolean |  | Set to false to hide the points.
 | show_legend | boolean |  | Set to false to turn hide from the legend.
 | state_adaptive_color | boolean |  | Make the color of the state adapt to the entity color.
 | y_axis | string |  | If 'secondary', displays using the secondary y-axis on the right.
