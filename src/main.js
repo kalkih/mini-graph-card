@@ -582,7 +582,6 @@ class MiniGraphCard extends LitElement {
       points_per_hour,
       hours_to_show,
       format,
-      group_by,
     } = this.config;
     const offset = hours_to_show < 1 && points_per_hour < 1
       ? points_per_hour * hours_to_show
@@ -590,20 +589,7 @@ class MiniGraphCard extends LitElement {
 
     const id = Math.abs(index + 1 - Math.ceil(hours_to_show * points_per_hour));
 
-    const now = new Date();
-
-    switch (group_by) {
-      case 'date':
-        now.setDate(now.getDate() + 1);
-        now.setHours(0, 0);
-        break;
-      case 'hour':
-        now.setHours(now.getHours() + 1);
-        now.setMinutes(0, 0);
-        break;
-      default:
-        break;
-    }
+    const now = this.getEndDate();
 
     const oneMinInHours = 1 / 60;
     now.setMilliseconds(now.getMilliseconds() - getMilli(offset * id + oneMinInHours));
@@ -807,7 +793,7 @@ class MiniGraphCard extends LitElement {
   async updateData({ config } = this) {
     this.updating = true;
 
-    const end = new Date();
+    const end = this.getEndDate();
     const start = new Date();
     start.setHours(end.getHours() - config.hours_to_show);
 
@@ -977,6 +963,23 @@ class MiniGraphCard extends LitElement {
     }
 
     res.state = resultIndex;
+  }
+
+  getEndDate() {
+    const date = new Date();
+    switch (this.config.group_by) {
+      case 'date':
+        date.setDate(date.getDate() + 1);
+        date.setHours(0, 0);
+        break;
+      case 'hour':
+        date.setHours(date.getHours() + 1);
+        date.setMinutes(0, 0);
+        break;
+      default:
+        break;
+    }
+    return date;
   }
 
   getCardSize() {

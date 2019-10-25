@@ -11,11 +11,6 @@ export default class Graph {
       max: this._maximum,
       min: this._minimum,
     };
-    const groupByFuncMap = {
-      interval: this._getGroupByIntervalFunc(),
-      hour: this._getGroupByIntervalFunc(),
-      date: this._getGroupByDateFunc(),
-    };
 
     this.coords = [];
     this.width = width - margin[X] * 2;
@@ -26,7 +21,6 @@ export default class Graph {
     this.points = points;
     this.hours = hours;
     this._calcPoint = aggregateFuncMap[aggregateFuncName] || this._average;
-    this._reducer = groupByFuncMap[groupBy] || this._getGroupByIntervalFunc;
     this._smoothing = smoothing;
     this._groupBy = groupBy;
     this._endTime = 0;
@@ -44,41 +38,23 @@ export default class Graph {
     this._updateEndTime();
 
     const coords = history.reduce((res, item) => this._reducer(res, item), []);
+
+    // extend length to fill missing history
     const requiredNumOfPoints = Math.ceil(this.hours * this.points);
-    if (coords.length > requiredNumOfPoints) {
-      // if there is too much data we reduce it
-      coords.splice(0, coords.length - requiredNumOfPoints);
-    } else {
-      // extend length to match the required number of points
-      coords.length = requiredNumOfPoints;
-    }
+    coords.length = requiredNumOfPoints;
 
     this.coords = this._calcPoints(coords);
     this.min = Math.min(...this.coords.map(item => Number(item[V])));
     this.max = Math.max(...this.coords.map(item => Number(item[V])));
   }
 
-  _getGroupByIntervalFunc() {
-    return (res, item) => {
-      const age = this._endTime - new Date(item.last_changed).getTime();
-      const interval = (age / ONE_HOUR * this.points) - this.hours * this.points;
-      const key = Math.floor(Math.abs(interval));
-      if (!res[key]) res[key] = [];
-      res[key].push(item);
-      return res;
-    };
-  }
-
-  _getGroupByDateFunc() {
-    const dateToKeyMap = {};
-    return (res, item) => {
-      const date = new Date(item.last_changed).toDateString();
-      if (dateToKeyMap[date] === undefined) dateToKeyMap[date] = res.length;
-      const key = dateToKeyMap[date];
-      if (!res[key]) res[key] = [];
-      res[key].push(item);
-      return res;
-    };
+  _reducer(res, item) {
+    const age = this._endTime - new Date(item.last_changed).getTime();
+    const interval = (age / ONE_HOUR * this.points) - this.hours * this.points;
+    const key = Math.floor(Math.abs(interval));
+    if (!res[key]) res[key] = [];
+    res[key].push(item);
+    return res;
   }
 
   _calcPoints(history) {
@@ -215,9 +191,17 @@ export default class Graph {
 
   _updateEndTime() {
     this._endTime = new Date();
-    if (this._groupBy === 'hour') {
-      this._endTime.setHours(this._endTime.getHours() + 1);
-      this._endTime.setMinutes(0, 0, 0);
+    switch (this._groupBy) {
+      case 'date':
+        this._endTime.setDate(this._endTime.getDate() + 1);
+        this._endTime.setHours(0, 0);
+        break;
+      case 'hour':
+        this._endTime.setHours(this._endTime.getHours() + 1);
+        this._endTime.setMinutes(0, 0, 0);
+        break;
+      default:
+        break;
     }
   }
 }
