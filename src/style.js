@@ -196,6 +196,7 @@ const style = css`
     display: inline-block;
     font-size: 2.4em;
     margin-right: .25rem;
+    line-height: 1.2em;
   }
   .state__uom {
     flex: 1;
