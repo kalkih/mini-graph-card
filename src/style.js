@@ -219,6 +219,7 @@ const style = css`
     opacity: .75;
     position: absolute;
     white-space: nowrap;
+    animation: fade .15s cubic-bezier(0.215, 0.61, 0.355, 1);
   }
   .states[loc="right"] .state__time {
     left: initial;
@@ -386,6 +387,9 @@ const style = css`
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+  @keyframes fade {
+    0% { opacity: 0; }
   }
   @keyframes reveal {
     0% { opacity: 0; }
