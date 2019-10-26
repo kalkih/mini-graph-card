@@ -195,7 +195,6 @@ const style = css`
   .state__value {
     display: inline-block;
     font-size: 2.4em;
-    line-height: 1em;
     margin-right: .25rem;
   }
   .state__uom {
@@ -204,7 +203,7 @@ const style = css`
     display: inline-block;
     font-size: 1.4em;
     font-weight: 400;
-    line-height: 1.2em;
+    line-height: 1.6em;
     margin-top: .1em;
     opacity: .6;
     vertical-align: bottom;
