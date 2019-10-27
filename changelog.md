@@ -1,3 +1,18 @@
+## v0.8.2
+
+### ADDED
+- Support for config updates after initial render (e.g. card editor & lovelace-auto-entities) #184 (#185)
+- Theme variable for title font weight
+- Theme variable for title font letter-spacing
+- Entity option `show_graph` to docs
+- Small tooltip time reveal animation
+
+### FIXED
+- Invalid rendering when group by date missed data for complete date(s) #183 (#187)
+- Rendering of additional bars in one bar graphs (#186)
+- Increased default font weight of title to `500` from `400`
+- Non-numeric states cut off at the bottom
+
 ## v0.8.1
 
 ### FIXED
