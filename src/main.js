@@ -417,6 +417,7 @@ class MiniGraphCard extends LitElement {
   renderSvgFill(fill, i) {
     if (!fill) return;
     const fade = this.config.show.fill === 'fade';
+    const init = this.length[i] || this.config.entities[i].show_line === false;
     return svg`
       <defs>
         <linearGradient id=${`fill-grad-${this.id}-${i}`} x1="0%" y1="0%" x2="0%" y2="100%">
@@ -430,7 +431,7 @@ class MiniGraphCard extends LitElement {
       <mask id=${`fill-${this.id}-${i}`}>
         <path class='fill'
           type=${this.config.show.fill}
-          .id=${i} anim=${this.config.animate} ?init=${this.length[i]}
+          .id=${i} anim=${this.config.animate} ?init=${init}
           style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
           fill='white'
           mask=${fade ? `url(#fill-grad-mask-${this.id}-${i})` : ''}
