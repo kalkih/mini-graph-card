@@ -169,8 +169,11 @@ class MiniGraphCard extends LitElement {
       conf.color_thresholds,
       conf.color_thresholds_transition,
     );
-    const additional = conf.hours_to_show > 24 ? { day: 'numeric', weekday: 'short' } : {};
-    conf.format = { hour12: !conf.hour24, ...additional };
+    conf.format = {
+      hour12: !conf.hour24,
+      ...(conf.hours_to_show > 24 && { day: 'numeric', weekday: 'short' }),
+      ...(conf.group_by !== 'date' && { hour: 'numeric', minute: 'numeric' }),
+    };
 
     // override points per hour to mach group_by function
     switch (conf.group_by) {
@@ -362,14 +365,15 @@ class MiniGraphCard extends LitElement {
   }
 
   renderStateTime() {
-    if (this.tooltip.value === undefined) return;
+    const { value, label, time } = this.tooltip;
+    if (value === undefined) return;
     return html`
       <div class="state__time">
-        ${this.tooltip.label ? html`
-          <span>${this.tooltip.label}</span>
+        ${label ? html`
+          <span>${label}</span>
         ` : html`
-          <span>${this.tooltip.time[0]}</span> -
-          <span>${this.tooltip.time[1]}</span>
+          <span>${time[0]}</span>
+          <span>${time[1] ? `- ${time[1]}` : ''}</span>
         `}
       </div>
     `;
@@ -583,6 +587,7 @@ class MiniGraphCard extends LitElement {
       points_per_hour,
       hours_to_show,
       format,
+      group_by,
     } = this.config;
     const offset = hours_to_show < 1 && points_per_hour < 1
       ? points_per_hour * hours_to_show
@@ -594,7 +599,9 @@ class MiniGraphCard extends LitElement {
 
     const oneMinInHours = 1 / 60;
     now.setMilliseconds(now.getMilliseconds() - getMilli(offset * id + oneMinInHours));
-    const end = getTime(now, { hour12: !this.config.hour24 }, this._hass.language);
+    const end = group_by !== 'date'
+      ? getTime(now, { ...format, day: undefined, weekday: undefined }, this._hass.language)
+      : '';
     now.setMilliseconds(now.getMilliseconds() - getMilli(offset - oneMinInHours));
     const start = getTime(now, format, this._hass.language);
 
@@ -795,8 +802,8 @@ class MiniGraphCard extends LitElement {
     this.updating = true;
 
     const end = this.getEndDate();
-    const start = new Date();
-    start.setHours(end.getHours() - config.hours_to_show);
+    const start = end;
+    start.setHours(start.getHours() - config.hours_to_show);
 
     try {
       const promise = this.entity.map((entity, i) => this.updateEntity(entity, i, start, end));
@@ -836,7 +843,7 @@ class MiniGraphCard extends LitElement {
           const line = this.Graph[i].getPath();
           if (config.entities[i].show_line !== false) this.line[i] = line;
           if (config.show.fill
-            && config.entities[i].show_fill !== false) this.fill[i] = this.Graph[i].getFill(line);
+            || config.entities[i].show_fill !== false) this.fill[i] = this.Graph[i].getFill(line);
           if (config.show.points && (config.entities[i].show_points !== false)) {
             this.points[i] = this.Graph[i].getPoints();
           }
