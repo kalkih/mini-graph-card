@@ -275,7 +275,7 @@ class MiniGraphCard extends LitElement {
         ?gradient=${config.color_thresholds.length > 0}
         ?hover=${config.tap_action.action !== 'none'}
         style="font-size: ${config.font_size}px;"
-        @click=${e => this.handlePopup(e, this.entity[0])}
+        @click=${e => this.handlePopup(e, config.tap_action.entity || this.entity[0])}
       >
         ${this.renderHeader()} ${this.renderStates()} ${this.renderGraph()} ${this.renderInfo()}
       </ha-card>
@@ -653,7 +653,7 @@ class MiniGraphCard extends LitElement {
 
   handlePopup(e, entity) {
     e.stopPropagation();
-    handleClick(this, this._hass, this.config, this.config.tap_action, entity.entity_id);
+    handleClick(this, this._hass, this.config, this.config.tap_action, entity.entity_id || entity);
   }
 
   computeThresholds(stops, type) {
