@@ -161,6 +161,7 @@ See [dynamic line color](#dynamic-line-color) for example usage.
 | Name | Type | Default | Options | Description |
 |------|:----:|:-------:|:-----------:|-------------|
 | action | string | `more-info` | `more-info` / `navigate` / `call-service`  / `url` / `none` | Action to perform.
+| entity | string |  | Any entity id | Override default entity of `more-info`, when  `action` is defined as `more-info`.
 | service | string |  | Any service | Service to call (e.g. `media_player.toggle`) when `action` is defined as `call-service`.
 | service_data | object |  | Any service data | Service data to include with the service call (e.g. `entity_id: media_player.office`).
 | navigation_path | string |  | Any path | Path to navigate to (e.g. `/lovelace/0/`) when `action` is defined as `navigate`.
