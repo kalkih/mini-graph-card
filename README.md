@@ -331,7 +331,7 @@ shows turning off the line, points and legend.
 You can group values by date, this way you can visualize for example daily energy consumption.
 
 ```yaml
-- type: type: custom:mini-graph-card
+- type: custom:mini-graph-card
   entities:
     - entity: sensor.energy_daily
   name: Energy consumption
