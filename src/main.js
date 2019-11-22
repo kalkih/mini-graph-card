@@ -143,6 +143,7 @@ class MiniGraphCard extends LitElement {
       compress: true,
       smoothing: true,
       state_map: [],
+      cache: true,
       tap_action: {
         action: 'more-info',
       },
@@ -868,7 +869,9 @@ class MiniGraphCard extends LitElement {
     let start = initStart;
     let skipInitialState = false;
 
-    const history = await this.getCache(entity.entity_id, this.config.useCompress);
+    const history = this.config.cache
+      ? await this.getCache(entity.entity_id, this.config.useCompress)
+      : undefined;
     if (history && history.hours_to_show === this.config.hours_to_show) {
       stateHistory = history.data;
 
@@ -909,17 +912,19 @@ class MiniGraphCard extends LitElement {
       }));
       stateHistory = [...stateHistory, ...newStateHistory];
 
-      this
-        .setCache(entity.entity_id, {
-          hours_to_show: this.config.hours_to_show,
-          last_fetched: end,
-          data: stateHistory,
-        }, this.config.useCompress)
-        .catch((err) => {
-          // eslint-disable-next-line no-console
-          console.warn('mini-graph-card: Failed to cache: ', err);
-          localForage.clear();
-        });
+      if (this.config.cache) {
+        this
+          .setCache(entity.entity_id, {
+            hours_to_show: this.config.hours_to_show,
+            last_fetched: end,
+            data: stateHistory,
+          }, this.config.useCompress)
+          .catch((err) => {
+            // eslint-disable-next-line no-console
+            console.warn('mini-graph-card: Failed to cache: ', err);
+            localForage.clear();
+          });
+      }
     }
 
     if (stateHistory.length === 0) return;
