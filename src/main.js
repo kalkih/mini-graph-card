@@ -808,23 +808,13 @@ class MiniGraphCard extends LitElement {
 
     this.updateQueue = [];
 
-    this.bound = [
-      config.lower_bound !== undefined
-        ? config.lower_bound
-        : Math.min(...this.primaryYaxisSeries.map(ele => ele.min)) || this.bound[0],
-      config.upper_bound !== undefined
-        ? config.upper_bound
-        : Math.max(...this.primaryYaxisSeries.map(ele => ele.max)) || this.bound[1],
-    ];
+    if (config.show.graph) {
+      this.entity.forEach((entity, i) => {
+        if (entity) this.Graph[i].update();
+      });
+    }
 
-    this.boundSecondary = [
-      config.lower_bound_secondary !== undefined
-        ? config.lower_bound_secondary
-        : Math.min(...this.secondaryYaxisSeries.map(ele => ele.min)) || this.boundSecondary[0],
-      config.upper_bound_secondary !== undefined
-        ? config.upper_bound_secondary
-        : Math.max(...this.secondaryYaxisSeries.map(ele => ele.max)) || this.boundSecondary[1],
-    ];
+    this.updateBounds();
 
     if (config.show.graph) {
       this.entity.forEach((entity, i) => {
@@ -847,6 +837,26 @@ class MiniGraphCard extends LitElement {
       });
       this.line = [...this.line];
     }
+  }
+
+  updateBounds({ config } = this) {
+    this.bound = [
+      config.lower_bound !== undefined
+        ? config.lower_bound
+        : Math.min(...this.primaryYaxisSeries.map(ele => ele.min)) || this.bound[0],
+      config.upper_bound !== undefined
+        ? config.upper_bound
+        : Math.max(...this.primaryYaxisSeries.map(ele => ele.max)) || this.bound[1],
+    ];
+
+    this.boundSecondary = [
+      config.lower_bound_secondary !== undefined
+        ? config.lower_bound_secondary
+        : Math.min(...this.secondaryYaxisSeries.map(ele => ele.min)) || this.boundSecondary[0],
+      config.upper_bound_secondary !== undefined
+        ? config.upper_bound_secondary
+        : Math.max(...this.secondaryYaxisSeries.map(ele => ele.max)) || this.boundSecondary[1],
+    ];
   }
 
   async getCache(key, compressed) {
@@ -946,9 +956,9 @@ class MiniGraphCard extends LitElement {
 
     if (this.config.entities[index].fixed_value === true) {
       const last = stateHistory[stateHistory.length - 1];
-      this.Graph[index].update([last, last]);
+      this.Graph[index].history = [last, last];
     } else {
-      this.Graph[index].update(stateHistory);
+      this.Graph[index].history = stateHistory;
     }
   }
 
