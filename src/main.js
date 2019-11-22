@@ -796,8 +796,8 @@ class MiniGraphCard extends LitElement {
     this.updating = true;
 
     const end = this.getEndDate();
-    const start = new Date();
-    start.setHours(end.getHours() - config.hours_to_show);
+    const start = new Date(end);
+    start.setHours(start.getHours() - config.hours_to_show);
 
     try {
       const promise = this.entity.map((entity, i) => this.updateEntity(entity, i, start, end));
@@ -916,7 +916,7 @@ class MiniGraphCard extends LitElement {
         this
           .setCache(entity.entity_id, {
             hours_to_show: this.config.hours_to_show,
-            last_fetched: end,
+            last_fetched: new Date(),
             data: stateHistory,
           }, this.config.useCompress)
           .catch((err) => {
@@ -976,7 +976,7 @@ class MiniGraphCard extends LitElement {
     switch (this.config.group_by) {
       case 'date':
         date.setDate(date.getDate() + 1);
-        date.setHours(0, 0);
+        date.setHours(0, 0, 0);
         break;
       case 'hour':
         date.setHours(date.getHours() + 1);
