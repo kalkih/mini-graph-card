@@ -827,12 +827,14 @@ class MiniGraphCard extends LitElement {
     ];
 
     if (config.show.graph) {
+      let graphPos = 0;
       this.entity.forEach((entity, i) => {
         if (!entity || this.Graph[i].coords.length === 0) return;
         const bound = config.entities[i].y_axis === 'secondary' ? this.boundSecondary : this.bound;
         [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
         if (config.show.graph === 'bar') {
-          this.bar[i] = this.Graph[i].getBars(i, this.visibleEntities.length);
+          this.bar[i] = this.Graph[i].getBars(graphPos, this.visibleEntities.length);
+          graphPos += 1;
         } else {
           const line = this.Graph[i].getPath();
           if (config.entities[i].show_line !== false) this.line[i] = line;
