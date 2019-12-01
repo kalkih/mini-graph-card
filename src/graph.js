@@ -12,6 +12,7 @@ export default class Graph {
       min: this._minimum,
     };
 
+    this._history = undefined;
     this.coords = [];
     this.width = width - margin[X] * 2;
     this.height = height - margin[Y] * 4;
@@ -34,10 +35,16 @@ export default class Graph {
 
   set min(min) { this._min = min; }
 
-  update(history) {
+  set history(data) { this._history = data; }
+
+  update(history = undefined) {
+    if (history) {
+      this._history = history;
+    }
+    if (!this._history) return;
     this._updateEndTime();
 
-    const coords = history.reduce((res, item) => this._reducer(res, item), []);
+    const coords = this._history.reduce((res, item) => this._reducer(res, item), []);
 
     // extend length to fill missing history
     const requiredNumOfPoints = Math.ceil(this.hours * this.points);
