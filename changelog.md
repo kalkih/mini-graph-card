@@ -1,3 +1,17 @@
+## v0.9.0-beta
+
+### ADDED
+- Option to enable/disable caching (#212)
+- Option to override default more-info entity (#202)
+- Missing option parameter `url` to tap action docs
+
+### FIXED
+- Graphs not updating in time resulting in inconsistent x/y axis relation #194 #200 (#214)
+- Graphs not updating in sync resulting in inconsistent x/y axis relation #194 #200 (#214)
+- Missing and invalid/malformed graph data caused by caching #193 (#213)
+- Fixed invalid rendering of bars when hiding certain entities
+- Fill not showing when line is hidden & animate option is enabled
+
 ## v0.8.2
 
 ### ADDED
