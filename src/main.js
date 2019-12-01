@@ -14,6 +14,7 @@ import {
   UPDATE_PROPS,
   DEFAULT_SHOW,
   X, Y, V,
+  ONE_HOUR,
 } from './const';
 import {
   getMin,
@@ -803,10 +804,9 @@ class MiniGraphCard extends LitElement {
       const promise = this.entity.map((entity, i) => this.updateEntity(entity, i, start, end));
       await Promise.all(promise);
     } finally {
-      this.updating = false;
+      this.updateQueue = [];
     }
 
-    this.updateQueue = [];
 
     if (config.show.graph) {
       this.entity.forEach((entity, i) => {
@@ -837,6 +837,8 @@ class MiniGraphCard extends LitElement {
       });
       this.line = [...this.line];
     }
+    this.updating = false;
+    this.setNextUpdate();
   }
 
   updateBounds({ config } = this) {
@@ -996,6 +998,16 @@ class MiniGraphCard extends LitElement {
         break;
     }
     return date;
+  }
+
+  setNextUpdate() {
+    if (!this.config.update_interval) {
+      const interval = 1 / this.config.points_per_hour;
+      clearInterval(this.interval);
+      this.interval = setInterval(() => {
+        if (!this.updating) this.updateData();
+      }, interval * ONE_HOUR);
+    }
   }
 
   getCardSize() {
