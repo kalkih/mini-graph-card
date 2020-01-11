@@ -82,6 +82,7 @@ class MiniGraphCard extends LitElement {
     this.config.entities.forEach((entity, index) => {
       this.config.entities[index].index = index; // Required for filtered views
       const entityState = hass.states[entity.entity];
+      this.config.entities[index].enabeled = !!entityState;
       if (entityState && this.entity[index] !== entityState) {
         this.entity[index] = entityState;
         this.updateQueue.push(entityState.entity_id);
@@ -242,12 +243,11 @@ class MiniGraphCard extends LitElement {
   }
 
   shouldUpdate(changedProps) {
-    if (!this.entity[0]) return false;
+    const [firstVisible] = this.visibleEntities;
+    let { value } = this.tooltip;
+    value = value !== undefined ? value : this.entity[firstVisible.index].state;
     if (UPDATE_PROPS.some(prop => changedProps.has(prop))) {
-      this.color = this.intColor(
-        this.tooltip.value !== undefined ? this.tooltip.value : this.entity[0].state,
-        this.tooltip.entity || 0,
-      );
+      this.color = this.intColor(value, this.tooltip.entity || firstVisible.index);
       return true;
     }
   }
@@ -266,6 +266,7 @@ class MiniGraphCard extends LitElement {
   }
 
   render({ config } = this) {
+    const [firstVisible] = this.visibleEntities;
     return html`
       <ha-card
         class="flex"
@@ -277,7 +278,7 @@ class MiniGraphCard extends LitElement {
         ?gradient=${config.color_thresholds.length > 0}
         ?hover=${config.tap_action.action !== 'none'}
         style="font-size: ${config.font_size}px;"
-        @click=${e => this.handlePopup(e, config.tap_action.entity || this.entity[0])}
+        @click=${e => this.handlePopup(e, config.tap_action.entity || this.entity[firstVisible.index])}
       >
         ${this.renderHeader()} ${this.renderStates()} ${this.renderGraph()} ${this.renderInfo()}
       </ha-card>
@@ -299,10 +300,11 @@ class MiniGraphCard extends LitElement {
 
   renderIcon() {
     const { icon, icon_adaptive_color } = this.config.show;
+    const [firstVisible] = this.visibleEntities;
     return icon ? html`
       <div class="icon" loc=${this.config.align_icon}
         style=${icon_adaptive_color ? `color: ${this.color};` : ''}>
-        <ha-icon .icon=${this.computeIcon(this.entity[0])}></ha-icon>
+        <ha-icon .icon=${this.computeIcon(this.entity[firstVisible.index])}></ha-icon>
       </div>
     ` : '';
   }
@@ -323,8 +325,9 @@ class MiniGraphCard extends LitElement {
 
   renderStates() {
     const { entity, value } = this.tooltip;
-    const state = value !== undefined ? value : this.entity[0].state;
-    const color = this.config.entities[0].state_adaptive_color ? `color: ${this.color};` : '';
+    const [firstVisible] = this.visibleEntities;
+    const state = value !== undefined ? value : this.entity[firstVisible.index].state;
+    const color = firstVisible.state_adaptive_color ? `color: ${this.color};` : '';
     if (this.config.show.state)
       return html`
         <div class="states flex" loc=${this.config.align_state}>
@@ -333,7 +336,7 @@ class MiniGraphCard extends LitElement {
               ${this.computeState(state)}
             </span>
             <span class="state__uom ellipsis" style=${color}>
-              ${this.computeUom(entity || 0)}
+              ${this.computeUom(entity || firstVisible.index)}
             </span>
             ${this.renderStateTime()}
           </div>
@@ -631,6 +634,7 @@ class MiniGraphCard extends LitElement {
   }
 
   renderInfo() {
+    const [firstVisible] = this.visibleEntities;
     const info = [];
     if (this.config.show.extrema) info.push(this.min);
     if (this.config.show.average) info.push(this.avg);
@@ -642,7 +646,7 @@ class MiniGraphCard extends LitElement {
           <div class="info__item">
             <span class="info__item__type">${entry.type}</span>
             <span class="info__item__value">
-              ${this.computeState(entry.state)} ${this.computeUom(0)}
+              ${this.computeState(entry.state)} ${this.computeUom(firstVisible.index)}
             </span>
             <span class="info__item__time">
               ${entry.type !== 'avg' ? getTime(new Date(entry.last_changed), this.config.format, this._hass.language) : ''}
@@ -684,7 +688,7 @@ class MiniGraphCard extends LitElement {
   }
 
   get visibleEntities() {
-    return this.config.entities.filter(entity => entity.show_graph !== false);
+    return this.config.entities.filter(entity => entity.enabeled && entity.show_graph !== false);
   }
 
   get primaryYaxisEntities() {
@@ -844,22 +848,24 @@ class MiniGraphCard extends LitElement {
   }
 
   updateBounds({ config } = this) {
+    const [lower_bound, upper_bound] = this.bound;
     this.bound = [
       config.lower_bound !== undefined
         ? config.lower_bound
-        : Math.min(...this.primaryYaxisSeries.map(ele => ele.min)) || this.bound[0],
+        : Math.min(...this.primaryYaxisSeries.map(ele => ele.min)) || lower_bound,
       config.upper_bound !== undefined
         ? config.upper_bound
-        : Math.max(...this.primaryYaxisSeries.map(ele => ele.max)) || this.bound[1],
+        : Math.max(...this.primaryYaxisSeries.map(ele => ele.max)) || upper_bound,
     ];
+    const [secondary_lower_bound, secondary_upper_bound] = this.boundSecondary;
 
     this.boundSecondary = [
       config.lower_bound_secondary !== undefined
         ? config.lower_bound_secondary
-        : Math.min(...this.secondaryYaxisSeries.map(ele => ele.min)) || this.boundSecondary[0],
+        : Math.min(...this.secondaryYaxisSeries.map(ele => ele.min)) || secondary_lower_bound,
       config.upper_bound_secondary !== undefined
         ? config.upper_bound_secondary
-        : Math.max(...this.secondaryYaxisSeries.map(ele => ele.max)) || this.boundSecondary[1],
+        : Math.max(...this.secondaryYaxisSeries.map(ele => ele.max)) || secondary_upper_bound,
     ];
   }
 
@@ -942,8 +948,9 @@ class MiniGraphCard extends LitElement {
     }
 
     if (stateHistory.length === 0) return;
+    const [firstVisible] = this.visibleEntities;
 
-    if (entity.entity_id === this.entity[0].entity_id) {
+    if (entity.entity_id === firstVisible.entity_id) {
       this.min = {
         type: 'min',
         ...getMin(stateHistory, 'state'),
