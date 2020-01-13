@@ -1,9 +1,14 @@
 {
   "presets": [
-    ["@babel/preset-env", {
-      "modules": "commonjs",
-      "targets": "> 2.5%, not dead",
-    }],
+    [
+      "@babel/preset-env",
+      {
+        "modules": false,
+        "targets": {
+          "esmodules": true
+        }
+      }
+    ],
     ["minify"],
   ],
   "comments": false,
