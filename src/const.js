@@ -45,6 +45,11 @@ const DEFAULT_SHOW = {
   points: 'hover',
 };
 
+const SKIP_STATES = [
+  'unavailable',
+  'unknown',
+];
+
 const X = 0;
 const Y = 1;
 const V = 2;
@@ -59,6 +64,7 @@ export {
   DEFAULT_COLORS,
   UPDATE_PROPS,
   DEFAULT_SHOW,
+  SKIP_STATES,
   X,
   Y,
   V,

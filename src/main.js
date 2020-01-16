@@ -13,6 +13,7 @@ import {
   DEFAULT_COLORS,
   UPDATE_PROPS,
   DEFAULT_SHOW,
+  SKIP_STATES,
   X, Y, V,
   ONE_HOUR,
 } from './const';
@@ -763,6 +764,7 @@ class MiniGraphCard extends LitElement {
   }
 
   computeState(inState) {
+    if (SKIP_STATES.includes(inState)) return inState;
     if (this.config.state_map.length > 0) {
       const stateMap = Number.isInteger(inState)
         ? this.config.state_map[inState]
