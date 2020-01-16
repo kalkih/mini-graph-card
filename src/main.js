@@ -755,6 +755,8 @@ class MiniGraphCard extends LitElement {
   }
 
   computeUom(index) {
+    const state = this.tooltip.value || this.entity[index].state;
+    if (SKIP_STATES.includes(state)) return;
     return (
       this.config.entities[index].unit
       || this.config.unit
