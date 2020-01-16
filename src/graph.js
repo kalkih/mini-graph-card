@@ -10,6 +10,8 @@ export default class Graph {
       avg: this._average,
       max: this._maximum,
       min: this._minimum,
+      first: this._first,
+      last: this._last,
     };
 
     this._history = undefined;
@@ -70,11 +72,11 @@ export default class Graph {
     xRatio = Number.isFinite(xRatio) ? xRatio : this.width;
 
     const first = history.filter(Boolean)[0];
-    let last = [this._calcPoint(first), this._last(first)];
+    let last = [this._calcPoint(first), this._lastValue(first)];
     const getCoords = (item, i) => {
       const x = xRatio * i + this.margin[X];
       if (item)
-        last = [this._calcPoint(item), this._last(item)];
+        last = [this._calcPoint(item), this._lastValue(item)];
       return coords.push([x, 0, item ? last[0] : last[1]]);
     };
 
@@ -192,7 +194,15 @@ export default class Graph {
     return Math.min(...items.map(item => item.state));
   }
 
+  _first(items) {
+    return parseFloat(items[0].state);
+  }
+
   _last(items) {
+    return parseFloat(items[items.length - 1].state);
+  }
+
+  _lastValue(items) {
     return parseFloat(items[items.length - 1].state) || 0;
   }
 
