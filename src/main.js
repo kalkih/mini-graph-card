@@ -701,11 +701,15 @@ class MiniGraphCard extends LitElement {
   }
 
   get primaryYaxisSeries() {
-    return this.primaryYaxisEntities.map(entity => this.Graph[entity.index]);
+    return this.primaryYaxisEntities
+      .map(entity => this.Graph[entity.index])
+      .filter(graph => graph._min !== undefined && graph._max !== undefined);
   }
 
   get secondaryYaxisSeries() {
-    return this.secondaryYaxisEntities.map(entity => this.Graph[entity.index]);
+    return this.secondaryYaxisEntities
+      .map(entity => this.Graph[entity.index])
+      .filter(graph => graph._min !== undefined && graph._max !== undefined);
   }
 
   intColor(inState, i) {

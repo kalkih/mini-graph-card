@@ -17,8 +17,8 @@ export default class Graph {
     this.width = width - margin[X] * 2;
     this.height = height - margin[Y] * 4;
     this.margin = margin;
-    this._max = 0;
-    this._min = 0;
+    this._max = undefined;
+    this._min = undefined;
     this.points = points;
     this.hours = hours;
     this._calcPoint = aggregateFuncMap[aggregateFuncName] || this._average;
