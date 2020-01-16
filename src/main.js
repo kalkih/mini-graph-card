@@ -141,6 +141,7 @@ class MiniGraphCard extends LitElement {
       color_thresholds: [],
       color_thresholds_transition: 'smooth',
       line_width: 5,
+      bar_spacing: 4,
       compress: true,
       smoothing: true,
       state_map: [],
@@ -823,7 +824,8 @@ class MiniGraphCard extends LitElement {
         const bound = config.entities[i].y_axis === 'secondary' ? this.boundSecondary : this.bound;
         [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
         if (config.show.graph === 'bar') {
-          this.bar[i] = this.Graph[i].getBars(graphPos, this.visibleEntities.length);
+          const numVisible = this.visibleEntities.length;
+          this.bar[i] = this.Graph[i].getBars(graphPos, numVisible, config.bar_spacing);
           graphPos += 1;
         } else {
           const line = this.Graph[i].getPath();
