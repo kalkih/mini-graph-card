@@ -399,8 +399,8 @@ class MiniGraphCard extends LitElement {
         ${this.visibleLegends.map(entity => html`
           <div class="graph__legend__item"
             @click=${e => this.handlePopup(e, this.entity[entity.index])}
-            @mouseover=${() => this.setTooltip(entity.index, -1, this.entity[entity.index].state, 'Current')}
-            @mouseout=${() => (this.tooltip = {})}>
+            @mouseenter=${() => this.setTooltip(entity.index, -1, this.entity[entity.index].state, 'Current')}
+            @mouseleave=${() => (this.tooltip = {})}>
             ${this.renderIndicator(this.entity[entity.index].state, entity.index)}
             <span class="ellipsis">${this.computeName(entity.index)}</span>
           </div>
