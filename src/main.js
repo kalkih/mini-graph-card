@@ -60,6 +60,7 @@ class MiniGraphCard extends LitElement {
     this.entity = [];
     this.line = [];
     this.bar = [];
+    this.abs = [];
     this.fill = [];
     this.points = [];
     this.gradient = [];
@@ -629,7 +630,6 @@ class MiniGraphCard extends LitElement {
   }
 
   renderInfo() {
-    if (!this.abs.length) return;
     return html`
       <div class="info flex">
         ${this.abs.map(entry => html`
