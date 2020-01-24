@@ -70,6 +70,7 @@ class MiniGraphCard extends LitElement {
     this.updateQueue = [];
     this.updating = false;
     this.stateChanged = false;
+    this.initial = true;
   }
 
   static get styles() {
@@ -79,21 +80,26 @@ class MiniGraphCard extends LitElement {
   set hass(hass) {
     this._hass = hass;
     let updated = false;
+    const queue = [];
     this.config.entities.forEach((entity, index) => {
       this.config.entities[index].index = index; // Required for filtered views
       const entityState = hass.states[entity.entity];
       if (entityState && this.entity[index] !== entityState) {
         this.entity[index] = entityState;
-        this.updateQueue.push(entityState.entity_id);
+        queue.push(entityState.entity_id);
         updated = true;
       }
     });
     if (updated) {
+      this.stateChanged = true;
       this.entity = [...this.entity];
       if (!this.config.update_interval && !this.updating) {
-        this.updateData();
+        setTimeout(() => {
+          this.updateQueue = queue;
+          this.updateData();
+        }, this.initial ? 0 : 1000);
       } else {
-        this.stateChanged = true;
+        this.updateQueue = queue;
       }
     }
   }
@@ -251,6 +257,10 @@ class MiniGraphCard extends LitElement {
       );
       return true;
     }
+  }
+
+  firstUpdated() {
+    this.initial = false;
   }
 
   updated(changedProperties) {
