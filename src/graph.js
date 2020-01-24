@@ -48,6 +48,9 @@ export default class Graph {
 
     const coords = this._history.reduce((res, item) => this._reducer(res, item), []);
 
+    // drop potential out of bound entry's except one
+    if (coords[0] && coords[0].length) coords[0] = [coords[0][coords[0].length - 1]];
+
     // extend length to fill missing history
     const requiredNumOfPoints = Math.ceil(this.hours * this.points);
     coords.length = requiredNumOfPoints;
