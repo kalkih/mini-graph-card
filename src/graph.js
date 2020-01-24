@@ -60,7 +60,7 @@ export default class Graph {
   _reducer(res, item) {
     const age = this._endTime - new Date(item.last_changed).getTime();
     const interval = (age / ONE_HOUR * this.points) - this.hours * this.points;
-    const key = Math.floor(Math.abs(interval));
+    const key = interval < 0 ? Math.floor(Math.abs(interval)) : 0;
     if (!res[key]) res[key] = [];
     res[key].push(item);
     return res;
