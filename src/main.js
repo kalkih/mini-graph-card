@@ -68,6 +68,7 @@ class MiniGraphCard extends LitElement {
     this.updateQueue = [];
     this.updating = false;
     this.stateChanged = false;
+    this.initial = true;
   }
 
   static get styles() {
@@ -77,21 +78,26 @@ class MiniGraphCard extends LitElement {
   set hass(hass) {
     this._hass = hass;
     let updated = false;
+    const queue = [];
     this.config.entities.forEach((entity, index) => {
       this.config.entities[index].index = index; // Required for filtered views
       const entityState = hass.states[entity.entity];
       if (entityState && this.entity[index] !== entityState) {
         this.entity[index] = entityState;
-        this.updateQueue.push(entityState.entity_id);
+        queue.push(entityState.entity_id);
         updated = true;
       }
     });
     if (updated) {
+      this.stateChanged = true;
       this.entity = [...this.entity];
       if (!this.config.update_interval && !this.updating) {
-        this.updateData();
+        setTimeout(() => {
+          this.updateQueue = [...queue, ...this.updateQueue];
+          this.updateData();
+        }, this.initial ? 0 : 1000);
       } else {
-        this.stateChanged = true;
+        this.updateQueue = [...queue, ...this.updateQueue];
       }
     }
   }
@@ -249,6 +255,10 @@ class MiniGraphCard extends LitElement {
       );
       return true;
     }
+  }
+
+  firstUpdated() {
+    this.initial = false;
   }
 
   updated(changedProperties) {
@@ -797,8 +807,9 @@ class MiniGraphCard extends LitElement {
     try {
       const promise = this.entity.map((entity, i) => this.updateEntity(entity, i, start, end));
       await Promise.all(promise);
-    } finally {
-      this.updateQueue = [];
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('mini-graph-card: ', err);
     }
 
 
@@ -874,6 +885,8 @@ class MiniGraphCard extends LitElement {
       || !this.updateQueue.includes(entity.entity_id)
       || this.config.entities[index].show_graph === false
     ) return;
+    this.updateQueue = this.updateQueue.filter(entry => entry !== entity.entity_id);
+
     let stateHistory = [];
     let start = initStart;
     let skipInitialState = false;
