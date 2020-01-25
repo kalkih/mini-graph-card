@@ -38,8 +38,13 @@ const getFirstDefinedItem = (...collection) => collection.find(item => typeof it
 // eslint-disable-next-line max-len
 const compareArray = (a, b) => a.length === b.length && a.every((value, index) => value === b[index]);
 
+const log = (message) => {
+  // eslint-disable-next-line no-console
+  console.warn('mini-graph-card: ', message);
+};
+
 export {
-  getMin, getAvg, getMax, getTime, getMilli, interpolateColor, compress, decompress,
+  getMin, getAvg, getMax, getTime, getMilli, interpolateColor, compress, decompress, log,
   getFirstDefinedItem,
   compareArray,
 };

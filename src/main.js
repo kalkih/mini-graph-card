@@ -17,15 +17,13 @@ import {
   ONE_HOUR,
 } from './const';
 import {
-  getMin,
-  getAvg,
-  getMax,
-  getTime,
-  getMilli,
+  getMin, getAvg, getMax,
+  getTime, getMilli,
   interpolateColor,
   compress, decompress,
   getFirstDefinedItem,
   compareArray,
+  log,
 } from './utils';
 
 localForage.config({
@@ -195,7 +193,7 @@ class MiniGraphCard extends LitElement {
       const entities = conf.entities.length;
       if (conf.hours_to_show * conf.points_per_hour * entities > MAX_BARS) {
         conf.points_per_hour = MAX_BARS / (conf.hours_to_show * entities);
-        this.log(`Not enough space, adjusting points_per_hour to ${conf.points_per_hour}`);
+        log(`Not enough space, adjusting points_per_hour to ${conf.points_per_hour}`);
       }
     }
 
@@ -767,7 +765,7 @@ class MiniGraphCard extends LitElement {
       if (stateMap) {
         return stateMap.label;
       } else {
-        this.log(`value [${inState}] not found in state_map`);
+        log(`value [${inState}] not found in state_map`);
       }
     }
 
@@ -803,7 +801,7 @@ class MiniGraphCard extends LitElement {
       const promise = this.entity.map((entity, i) => this.updateEntity(entity, i, start, end));
       await Promise.all(promise);
     } catch (err) {
-      this.log(err);
+      log(err);
     }
 
 
@@ -937,7 +935,7 @@ class MiniGraphCard extends LitElement {
           }, this.config.useCompress)
           .catch((err) => {
             // eslint-disable-next-line no-console
-            this.log(err);
+            log(err);
             localForage.clear();
           });
       }
@@ -1015,11 +1013,6 @@ class MiniGraphCard extends LitElement {
         if (!this.updating) this.updateData();
       }, interval * ONE_HOUR);
     }
-  }
-
-  log(message) {
-    // eslint-disable-next-line no-console
-    console.warn('mini-graph-card: ', message);
   }
 
   getCardSize() {
