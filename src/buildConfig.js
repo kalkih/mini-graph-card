@@ -6,6 +6,7 @@ import {
   MAX_BARS,
   DEFAULT_COLORS,
   DEFAULT_SHOW,
+  DEFAULT_STATE_MAP,
 } from './const';
 
 const computeThresholds = (stops, type) => {
@@ -49,25 +50,24 @@ export default (config) => {
     bar_spacing: 4,
     compress: true,
     smoothing: true,
-    state_map: [],
     cache: true,
     tap_action: {
       action: 'more-info',
     },
     ...config,
     show: { ...DEFAULT_SHOW, ...config.show },
+    state_map: { ...DEFAULT_STATE_MAP, ...config.state_map },
   };
 
   conf.entities.forEach((entity, i) => {
     if (typeof entity === 'string') conf.entities[i] = { entity };
   });
 
-  conf.state_map.forEach((state, i) => {
-    // convert string values to objects
-    if (typeof state === 'string') conf.state_map[i] = { value: state, label: state };
-    // make sure label is set
-    conf.state_map[i].label = conf.state_map[i].label || conf.state_map[i].value;
-  });
+  conf.state_map.map = conf.state_map.map.map(entry => (
+    typeof entry === 'string'
+      ? { value: entry, label: entry }
+      : { label: entry.value, ...entry }
+  ));
 
   if (typeof config.line_color === 'string')
     conf.line_color = [config.line_color, ...DEFAULT_COLORS];

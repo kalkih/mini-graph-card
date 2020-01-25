@@ -233,7 +233,7 @@ class MiniGraphCard extends LitElement {
         <div class="states flex" loc=${this.config.align_state}>
           <div class="state">
             <span class="state__value ellipsis" style=${color}>
-              ${this.computeState(state)}
+              ${this.computeState(state, this.getAxis(entity || 0))}
             </span>
             <span class="state__uom ellipsis" style=${color}>
               ${this.computeUom(entity || 0)}
@@ -256,7 +256,7 @@ class MiniGraphCard extends LitElement {
           style=${entity.state_adaptive_color ? `color: ${this.computeColor(state, id)};` : ''}>
           ${entity.show_indicator ? this.renderIndicator(state, id) : ''}
           <span class="state__value ellipsis">
-            ${this.computeState(state)}
+            ${this.computeState(state, this.getAxis(id))}
           </span>
           <span class="state__uom ellipsis">
             ${this.computeUom(id)}
@@ -517,8 +517,8 @@ class MiniGraphCard extends LitElement {
     if (!this.config.show.labels || this.primaryYaxisSeries.length === 0) return;
     return html`
       <div class="graph__labels --primary flex">
-        <span class="label--max">${this.computeState(this.bound[1])}</span>
-        <span class="label--min">${this.computeState(this.bound[0])}</span>
+        <span class="label--max">${this.computeState(this.bound[1], 'primary')}</span>
+        <span class="label--min">${this.computeState(this.bound[0], 'primary')}</span>
       </div>
     `;
   }
@@ -527,8 +527,8 @@ class MiniGraphCard extends LitElement {
     if (!this.config.show.labels_secondary || this.secondaryYaxisSeries.length === 0) return;
     return html`
       <div class="graph__labels --secondary flex">
-        <span class="label--max">${this.computeState(this.boundSecondary[1])}</span>
-        <span class="label--min">${this.computeState(this.boundSecondary[0])}</span>
+        <span class="label--max">${this.computeState(this.boundSecondary[1], 'secondary')}</span>
+        <span class="label--min">${this.computeState(this.boundSecondary[0], 'secondary')}</span>
       </div>
     `;
   }
@@ -540,7 +540,7 @@ class MiniGraphCard extends LitElement {
           <div class="info__item">
             <span class="info__item__type">${entry.type}</span>
             <span class="info__item__value">
-              ${this.computeState(entry.state)} ${this.computeUom(0)}
+              ${this.computeState(entry.state, this.getAxis(0))} ${this.computeUom(0)}
             </span>
             <span class="info__item__time">
               ${entry.type !== 'avg' ? getTime(new Date(entry.last_changed), this.config.format, this._hass.language) : ''}
@@ -590,6 +590,14 @@ class MiniGraphCard extends LitElement {
 
   get secondaryYaxisSeries() {
     return this.secondaryYaxisEntities.map(entity => this.Graph[entity.index]);
+  }
+
+  isStateAxis(axis) {
+    return this.config.state_map.map.length > 0 && this.config.state_map.axis === axis;
+  }
+
+  getAxis(entityId) {
+    return this.config.entities[entityId].y_axis || 'primary';
   }
 
   intColor(inState, i) {
@@ -642,17 +650,15 @@ class MiniGraphCard extends LitElement {
     );
   }
 
-  computeState(inState) {
-    if (this.config.state_map.length > 0) {
+  computeState(inState, axis = 'primary') {
+    if (this.isStateAxis(axis)) {
+      const { map } = this.config.state_map;
       const stateMap = Number.isInteger(inState)
-        ? this.config.state_map[inState]
-        : this.config.state_map.find(state => state.value === inState);
+        ? map[inState]
+        : map.find(state => state.value === inState);
 
-      if (stateMap) {
-        return stateMap.label;
-      } else {
-        log(`value [${inState}] not found in state_map`);
-      }
+      if (stateMap) return stateMap.label;
+      log(`value [${inState}] not found in state_map`);
     }
 
     let state;
@@ -728,23 +734,27 @@ class MiniGraphCard extends LitElement {
   }
 
   updateBounds({ config } = this) {
-    this.bound = [
-      config.lower_bound !== undefined
-        ? config.lower_bound
-        : Math.min(...this.primaryYaxisSeries.map(ele => ele.min)) || this.bound[0],
-      config.upper_bound !== undefined
-        ? config.upper_bound
-        : Math.max(...this.primaryYaxisSeries.map(ele => ele.max)) || this.bound[1],
-    ];
+    this.bound = this.isStateAxis('primary')
+      ? [0, this.config.state_map.map.length - 1]
+      : [
+        config.lower_bound !== undefined
+          ? config.lower_bound
+          : Math.min(...this.primaryYaxisSeries.map(ele => ele.min)) || this.bound[0],
+        config.upper_bound !== undefined
+          ? config.upper_bound
+          : Math.max(...this.primaryYaxisSeries.map(ele => ele.max)) || this.bound[1],
+      ];
 
-    this.boundSecondary = [
-      config.lower_bound_secondary !== undefined
-        ? config.lower_bound_secondary
-        : Math.min(...this.secondaryYaxisSeries.map(ele => ele.min)) || this.boundSecondary[0],
-      config.upper_bound_secondary !== undefined
-        ? config.upper_bound_secondary
-        : Math.max(...this.secondaryYaxisSeries.map(ele => ele.max)) || this.boundSecondary[1],
-    ];
+    this.boundSecondary = this.isStateAxis('secondary')
+      ? [0, this.config.state_map.map.length - 1]
+      : [
+        config.lower_bound_secondary !== undefined
+          ? config.lower_bound_secondary
+          : Math.min(...this.secondaryYaxisSeries.map(ele => ele.min)) || this.boundSecondary[0],
+        config.upper_bound_secondary !== undefined
+          ? config.upper_bound_secondary
+          : Math.max(...this.secondaryYaxisSeries.map(ele => ele.max)) || this.boundSecondary[1],
+      ];
   }
 
   async getCache(key, compressed) {
@@ -801,7 +811,7 @@ class MiniGraphCard extends LitElement {
     let newStateHistory = await this.fetchRecent(entity.entity_id, start, end, skipInitialState);
     if (newStateHistory[0] && newStateHistory[0].length > 0) {
       // check if we should convert states to numeric values
-      if (this.config.state_map.length > 0) {
+      if (this.isStateAxis(this.getAxis(index))) {
         newStateHistory[0].forEach(item => this._convertState(item));
       }
 
@@ -868,7 +878,7 @@ class MiniGraphCard extends LitElement {
   }
 
   _convertState(res) {
-    const resultIndex = this.config.state_map.findIndex(s => s.value === res.state);
+    const resultIndex = this.config.state_map.map.findIndex(s => s.value === res.state);
     if (resultIndex === -1) {
       return;
     }

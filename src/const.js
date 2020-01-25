@@ -44,6 +44,10 @@ const DEFAULT_SHOW = {
   fill: true,
   points: 'hover',
 };
+const DEFAULT_STATE_MAP = {
+  axis: 'primary',
+  map: [],
+};
 
 const X = 0;
 const Y = 1;
@@ -59,6 +63,7 @@ export {
   DEFAULT_COLORS,
   UPDATE_PROPS,
   DEFAULT_SHOW,
+  DEFAULT_STATE_MAP,
   X,
   Y,
   V,
