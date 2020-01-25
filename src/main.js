@@ -56,13 +56,11 @@ class MiniGraphCard extends LitElement {
     this.config = {};
     this.bound = [0, 0];
     this.boundSecondary = [0, 0];
-    this.min = {};
-    this.avg = {};
-    this.max = {};
     this.length = [];
     this.entity = [];
     this.line = [];
     this.bar = [];
+    this.abs = [];
     this.fill = [];
     this.points = [];
     this.gradient = [];
@@ -632,14 +630,9 @@ class MiniGraphCard extends LitElement {
   }
 
   renderInfo() {
-    const info = [];
-    if (this.config.show.extrema) info.push(this.min);
-    if (this.config.show.average) info.push(this.avg);
-    if (this.config.show.extrema) info.push(this.max);
-    if (!info.length) return;
     return html`
       <div class="info flex">
-        ${info.map(entry => html`
+        ${this.abs.map(entry => html`
           <div class="info__item">
             <span class="info__item__type">${entry.type}</span>
             <span class="info__item__value">
@@ -946,18 +939,21 @@ class MiniGraphCard extends LitElement {
     if (stateHistory.length === 0) return;
 
     if (entity.entity_id === this.entity[0].entity_id) {
-      this.min = {
-        type: 'min',
-        ...getMin(stateHistory, 'state'),
-      };
-      this.avg = {
-        type: 'avg',
-        state: getAvg(stateHistory, 'state'),
-      };
-      this.max = {
-        type: 'max',
-        ...getMax(stateHistory, 'state'),
-      };
+      const { extrema, average } = this.config.show;
+      this.abs = [
+        ...(extrema ? [{
+          type: 'min',
+          ...getMin(stateHistory, 'state'),
+        }] : []),
+        ...(average ? [{
+          type: 'avg',
+          state: getAvg(stateHistory, 'state'),
+        }] : []),
+        ...(extrema ? [{
+          type: 'max',
+          ...getMax(stateHistory, 'state'),
+        }] : []),
+      ];
     }
 
     if (this.config.entities[index].fixed_value === true) {
