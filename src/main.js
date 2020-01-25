@@ -3,49 +3,24 @@ import localForage from 'localforage/src/localforage';
 import Graph from './graph';
 import style from './style';
 import handleClick from './handleClick';
+import buildConfig from './buildConfig';
+import './initialize';
 
 import {
-  URL_DOCS,
-  FONT_SIZE,
-  FONT_SIZE_HEADER,
-  MAX_BARS,
   ICONS,
-  DEFAULT_COLORS,
   UPDATE_PROPS,
-  DEFAULT_SHOW,
   X, Y, V,
   ONE_HOUR,
 } from './const';
 import {
-  getMin,
-  getAvg,
-  getMax,
-  getTime,
-  getMilli,
+  getMin, getAvg, getMax,
+  getTime, getMilli,
   interpolateColor,
   compress, decompress,
   getFirstDefinedItem,
   compareArray,
+  log,
 } from './utils';
-
-localForage.config({
-  name: 'mini-graph-card',
-  version: 1.0,
-  storeName: 'entity_history_cache',
-  description: 'Mini graph card uses caching for the entity history',
-});
-
-localForage.iterate((data, key) => {
-  const value = key.endsWith('-raw') ? data : decompress(data);
-  const start = new Date();
-  start.setHours(start.getHours() - value.hours_to_show);
-  if (new Date(value.last_fetched) < start) {
-    localForage.removeItem(key);
-  }
-}).catch((err) => {
-  // eslint-disable-next-line no-console
-  console.log('Purging has errored:', err);
-});
 
 class MiniGraphCard extends LitElement {
   constructor() {
@@ -122,101 +97,24 @@ class MiniGraphCard extends LitElement {
   }
 
   setConfig(config) {
-    if (config.entity)
-      throw new Error(`The "entity" option was removed, please use "entities".\n See ${URL_DOCS}`);
-    if (!Array.isArray(config.entities))
-      throw new Error(`Please provide the "entities" option as a list.\n See ${URL_DOCS}`);
-    if (config.line_color_above || config.line_color_below)
-      throw new Error(
-        `"line_color_above/line_color_below" was removed, please use "color_thresholds".\n See ${URL_DOCS}`,
-      );
+    const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
 
-    const conf = {
-      animate: false,
-      hour24: false,
-      font_size: FONT_SIZE,
-      font_size_header: FONT_SIZE_HEADER,
-      height: 100,
-      hours_to_show: 24,
-      points_per_hour: 0.5,
-      aggregate_func: 'avg',
-      group_by: 'interval',
-      line_color: [...DEFAULT_COLORS],
-      color_thresholds: [],
-      color_thresholds_transition: 'smooth',
-      line_width: 5,
-      bar_spacing: 4,
-      compress: true,
-      smoothing: true,
-      state_map: [],
-      cache: true,
-      tap_action: {
-        action: 'more-info',
-      },
-      ...config,
-      show: { ...DEFAULT_SHOW, ...config.show },
-    };
-
-    conf.entities.forEach((entity, i) => {
-      if (typeof entity === 'string') conf.entities[i] = { entity };
-    });
-
-    conf.state_map.forEach((state, i) => {
-      // convert string values to objects
-      if (typeof state === 'string') conf.state_map[i] = { value: state, label: state };
-      // make sure label is set
-      conf.state_map[i].label = conf.state_map[i].label || conf.state_map[i].value;
-    });
-
-    if (typeof config.line_color === 'string')
-      conf.line_color = [config.line_color, ...DEFAULT_COLORS];
-
-    conf.font_size = (config.font_size / 100) * FONT_SIZE || FONT_SIZE;
-    conf.color_thresholds = this.computeThresholds(
-      conf.color_thresholds,
-      conf.color_thresholds_transition,
-    );
-    const additional = conf.hours_to_show > 24 ? { day: 'numeric', weekday: 'short' } : {};
-    conf.format = { hour12: !conf.hour24, ...additional };
-
-    // override points per hour to mach group_by function
-    switch (conf.group_by) {
-      case 'date':
-        conf.points_per_hour = 1 / 24;
-        break;
-      case 'hour':
-        conf.points_per_hour = 1;
-        break;
-      default:
-        break;
-    }
-
-    if (conf.show.graph === 'bar') {
-      const entities = conf.entities.length;
-      if (conf.hours_to_show * conf.points_per_hour * entities > MAX_BARS) {
-        conf.points_per_hour = MAX_BARS / (conf.hours_to_show * entities);
-        this.log(`Not enough space, adjusting points_per_hour to ${conf.points_per_hour}`);
-      }
-    }
-
-    const entitiesChanged = !compareArray(this.config.entities || [], conf.entities);
-
-    this.config = conf;
+    this.config = buildConfig(config, this.config);
 
     if (!this.Graph || entitiesChanged) {
       if (this._hass) this.hass = this._hass;
-      this.Graph = conf.entities.map(
+      this.Graph = this.config.entities.map(
         entity => new Graph(
           500,
-          conf.height,
-          [conf.show.fill ? 0 : conf.line_width, conf.line_width],
-          conf.hours_to_show,
-          conf.points_per_hour,
-          entity.aggregate_func || conf.aggregate_func,
-          conf.group_by,
+          this.config.height,
+          [this.config.show.fill ? 0 : this.config.line_width, this.config.line_width],
+          this.config.hours_to_show,
+          this.config.points_per_hour,
+          entity.aggregate_func || this.config.aggregate_func,
+          this.config.group_by,
           getFirstDefinedItem(
             entity.smoothing,
-            config.smoothing,
+            this.config.smoothing,
             !entity.entity.startsWith('binary_sensor.'), // turn off for binary sensor by default
           ),
         ),
@@ -658,20 +556,6 @@ class MiniGraphCard extends LitElement {
     handleClick(this, this._hass, this.config, this.config.tap_action, entity.entity_id || entity);
   }
 
-  computeThresholds(stops, type) {
-    stops.sort((a, b) => b.value - a.value);
-
-    if (type === 'smooth') {
-      return stops;
-    } else {
-      const rect = [].concat(...stops.map((stop, i) => ([stop, {
-        value: stop.value - 0.0001,
-        color: stops[i + 1] ? stops[i + 1].color : stop.color,
-      }])));
-      return rect;
-    }
-  }
-
   computeColor(inState, i) {
     const { color_thresholds, line_color } = this.config;
     const state = Number(inState) || 0;
@@ -767,7 +651,7 @@ class MiniGraphCard extends LitElement {
       if (stateMap) {
         return stateMap.label;
       } else {
-        this.log(`value [${inState}] not found in state_map`);
+        log(`value [${inState}] not found in state_map`);
       }
     }
 
@@ -803,7 +687,7 @@ class MiniGraphCard extends LitElement {
       const promise = this.entity.map((entity, i) => this.updateEntity(entity, i, start, end));
       await Promise.all(promise);
     } catch (err) {
-      this.log(err);
+      log(err);
     }
 
 
@@ -936,8 +820,7 @@ class MiniGraphCard extends LitElement {
             data: stateHistory,
           }, this.config.useCompress)
           .catch((err) => {
-            // eslint-disable-next-line no-console
-            this.log(err);
+            log(err);
             localForage.clear();
           });
       }
@@ -946,21 +829,7 @@ class MiniGraphCard extends LitElement {
     if (stateHistory.length === 0) return;
 
     if (entity.entity_id === this.entity[0].entity_id) {
-      const { extrema, average } = this.config.show;
-      this.abs = [
-        ...(extrema ? [{
-          type: 'min',
-          ...getMin(stateHistory, 'state'),
-        }] : []),
-        ...(average ? [{
-          type: 'avg',
-          state: getAvg(stateHistory, 'state'),
-        }] : []),
-        ...(extrema ? [{
-          type: 'max',
-          ...getMax(stateHistory, 'state'),
-        }] : []),
-      ];
+      this.updateExtrema();
     }
 
     if (this.config.entities[index].fixed_value === true) {
@@ -980,6 +849,23 @@ class MiniGraphCard extends LitElement {
     return this._hass.callApi('GET', url);
   }
 
+  updateExtrema(history) {
+    const { extrema, average } = this.config.show;
+    this.abs = [
+      ...(extrema ? [{
+        type: 'min',
+        ...getMin(history, 'state'),
+      }] : []),
+      ...(average ? [{
+        type: 'avg',
+        state: getAvg(history, 'state'),
+      }] : []),
+      ...(extrema ? [{
+        type: 'max',
+        ...getMax(history, 'state'),
+      }] : []),
+    ];
+  }
 
   _convertState(res) {
     const resultIndex = this.config.state_map.findIndex(s => s.value === res.state);
@@ -1015,11 +901,6 @@ class MiniGraphCard extends LitElement {
         if (!this.updating) this.updateData();
       }, interval * ONE_HOUR);
     }
-  }
-
-  log(message) {
-    // eslint-disable-next-line no-console
-    console.warn('mini-graph-card: ', message);
   }
 
   getCardSize() {
