@@ -195,11 +195,7 @@ class MiniGraphCard extends LitElement {
       const entities = conf.entities.length;
       if (conf.hours_to_show * conf.points_per_hour * entities > MAX_BARS) {
         conf.points_per_hour = MAX_BARS / (conf.hours_to_show * entities);
-        // eslint-disable-next-line no-console
-        console.warn(
-          'mini-graph-card: Not enough space, adjusting points_per_hour to ',
-          conf.points_per_hour,
-        );
+        this.log(`Not enough space, adjusting points_per_hour to ${conf.points_per_hour}`);
       }
     }
 
@@ -771,8 +767,7 @@ class MiniGraphCard extends LitElement {
       if (stateMap) {
         return stateMap.label;
       } else {
-        // eslint-disable-next-line no-console
-        console.warn(`mini-graph-card: value [${inState}] not found in state_map`);
+        this.log(`value [${inState}] not found in state_map`);
       }
     }
 
@@ -808,8 +803,7 @@ class MiniGraphCard extends LitElement {
       const promise = this.entity.map((entity, i) => this.updateEntity(entity, i, start, end));
       await Promise.all(promise);
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.warn('mini-graph-card: ', err);
+      this.log(err);
     }
 
 
@@ -943,7 +937,7 @@ class MiniGraphCard extends LitElement {
           }, this.config.useCompress)
           .catch((err) => {
             // eslint-disable-next-line no-console
-            console.warn('mini-graph-card: Failed to cache: ', err);
+            this.log(err);
             localForage.clear();
           });
       }
@@ -1021,6 +1015,11 @@ class MiniGraphCard extends LitElement {
         if (!this.updating) this.updateData();
       }, interval * ONE_HOUR);
     }
+  }
+
+  log(message) {
+    // eslint-disable-next-line no-console
+    console.warn('mini-graph-card: ', message);
   }
 
   getCardSize() {
