@@ -3,6 +3,7 @@ import localForage from 'localforage/src/localforage';
 import Graph from './graph';
 import style from './style';
 import handleClick from './handleClick';
+import './initialize';
 
 import {
   URL_DOCS,
@@ -25,25 +26,6 @@ import {
   compareArray,
   log,
 } from './utils';
-
-localForage.config({
-  name: 'mini-graph-card',
-  version: 1.0,
-  storeName: 'entity_history_cache',
-  description: 'Mini graph card uses caching for the entity history',
-});
-
-localForage.iterate((data, key) => {
-  const value = key.endsWith('-raw') ? data : decompress(data);
-  const start = new Date();
-  start.setHours(start.getHours() - value.hours_to_show);
-  if (new Date(value.last_fetched) < start) {
-    localForage.removeItem(key);
-  }
-}).catch((err) => {
-  // eslint-disable-next-line no-console
-  console.log('Purging has errored:', err);
-});
 
 class MiniGraphCard extends LitElement {
   constructor() {
