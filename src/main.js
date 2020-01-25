@@ -802,7 +802,7 @@ class MiniGraphCard extends LitElement {
 
     const end = this.getEndDate();
     const start = new Date(end);
-    start.setHours(start.getHours() - config.hours_to_show);
+    start.setMilliseconds(start.getMilliseconds() - getMilli(config.hours_to_show));
 
     try {
       const promise = this.entity.map((entity, i) => this.updateEntity(entity, i, start, end));
