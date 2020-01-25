@@ -19,3 +19,9 @@ localForage.iterate((data, key) => {
 }).catch((err) => {
   console.warn('Purging has errored: ', err);
 });
+
+console.info(
+  '%c MINI-GRAPH-CARD %c 0.9.0-beta ',
+  'color: white; background: coral; font-weight: 700;',
+  'color: coral; background: white; font-weight: 700;',
+);
