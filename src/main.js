@@ -820,7 +820,6 @@ class MiniGraphCard extends LitElement {
             data: stateHistory,
           }, this.config.useCompress)
           .catch((err) => {
-            // eslint-disable-next-line no-console
             log(err);
             localForage.clear();
           });
@@ -830,21 +829,7 @@ class MiniGraphCard extends LitElement {
     if (stateHistory.length === 0) return;
 
     if (entity.entity_id === this.entity[0].entity_id) {
-      const { extrema, average } = this.config.show;
-      this.abs = [
-        ...(extrema ? [{
-          type: 'min',
-          ...getMin(stateHistory, 'state'),
-        }] : []),
-        ...(average ? [{
-          type: 'avg',
-          state: getAvg(stateHistory, 'state'),
-        }] : []),
-        ...(extrema ? [{
-          type: 'max',
-          ...getMax(stateHistory, 'state'),
-        }] : []),
-      ];
+      this.updateExtrema();
     }
 
     if (this.config.entities[index].fixed_value === true) {
@@ -864,6 +849,23 @@ class MiniGraphCard extends LitElement {
     return this._hass.callApi('GET', url);
   }
 
+  updateExtrema(history) {
+    const { extrema, average } = this.config.show;
+    this.abs = [
+      ...(extrema ? [{
+        type: 'min',
+        ...getMin(history, 'state'),
+      }] : []),
+      ...(average ? [{
+        type: 'avg',
+        state: getAvg(history, 'state'),
+      }] : []),
+      ...(extrema ? [{
+        type: 'max',
+        ...getMax(history, 'state'),
+      }] : []),
+    ];
+  }
 
   _convertState(res) {
     const resultIndex = this.config.state_map.findIndex(s => s.value === res.state);
