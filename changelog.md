@@ -1,3 +1,9 @@
+## v0.9.1
+
+### FIXED
+- Fixed broken extrema
+
+
 ## v0.9.0
 
 ### ADDED

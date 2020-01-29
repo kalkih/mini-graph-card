@@ -21,7 +21,7 @@ localForage.iterate((data, key) => {
 });
 
 console.info(
-  '%c MINI-GRAPH-CARD %c 0.9.0 ',
+  '%c MINI-GRAPH-CARD %c 0.9.1 ',
   'color: white; background: coral; font-weight: 700;',
   'color: coral; background: white; font-weight: 700;',
 );
