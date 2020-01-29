@@ -19,7 +19,7 @@ This card is available in [HACS](https://github.com/custom-components/hacs/issue
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.8.2
+    - url: /local/mini-graph-card-bundle.js?v=0.9.0
       type: module
   ```
 
@@ -30,14 +30,14 @@ This card is available in [HACS](https://github.com/custom-components/hacs/issue
 2. Grab `mini-graph-card-bundle.js`:
 
   ```
-  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.8.2/mini-graph-card-bundle.js
+  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.9.0/mini-graph-card-bundle.js
   ```
 
 3. Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`:
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.8.2
+    - url: /local/mini-graph-card-bundle.js?v=0.9.0
       type: module
   ```
 
@@ -52,7 +52,7 @@ This card is available in [HACS](https://github.com/custom-components/hacs/issue
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.8.2
+    - url: /local/mini-graph-card-bundle.js?v=0.9.0
       type: module
   ```
 
@@ -81,7 +81,7 @@ This card is available in [HACS](https://github.com/custom-components/hacs/issue
 | show | list |  | v0.2.0 | List of UI elements to display/hide, for available items see [available show options](#available-show-options).
 | animate | boolean | `false` | v0.2.0 | Add a reveal animation to the graph.
 | height | number | `150` | v0.0.1 | Set a custom height of the line graph.
-| bar_spacing | number | `4` | tbd | Set the spacing between bars in bar graph.
+| bar_spacing | number | `4` | v0.9.0 | Set the spacing between bars in bar graph.
 | line_width | number | `5` | v0.0.1 | Set the thickness of the line.
 | line_color | string/list | `var(--accent-color)` | v0.0.1 | Set a custom color for the graph line, provide a list of colors for multiple graph entries.
 | color_thresholds | list |  | v0.2.3 | Set thresholds for dynamic graph colors, see [Line color object](#line-color-object).
