@@ -1,3 +1,12 @@
+## v0.9.2
+
+### ADDED
+- Added sum aggregate function #257
+
+### FIXED
+- Fixed graph not rendering if the same entity is used multiple times in a config #263
+
+
 ## v0.9.1
 
 ### FIXED
