@@ -12,6 +12,7 @@ export default class Graph {
       min: this._minimum,
       first: this._first,
       last: this._last,
+      sum: this._sum,
     };
 
     this._history = undefined;
@@ -202,6 +203,10 @@ export default class Graph {
 
   _last(items) {
     return parseFloat(items[items.length - 1].state);
+  }
+
+  _sum(items) {
+    return items.reduce((sum, entry) => sum + parseFloat(entry.state), 0);
   }
 
   _lastValue(items) {
