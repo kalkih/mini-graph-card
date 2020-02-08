@@ -59,7 +59,7 @@ class MiniGraphCard extends LitElement {
       const entityState = hass.states[entity.entity];
       if (entityState && this.entity[index] !== entityState) {
         this.entity[index] = entityState;
-        queue.push(entityState.entity_id);
+        queue.push(`${entityState.entity_id}-${index}`);
         updated = true;
       }
     });
@@ -760,10 +760,10 @@ class MiniGraphCard extends LitElement {
 
   async updateEntity(entity, index, initStart, end) {
     if (!entity
-      || !this.updateQueue.includes(entity.entity_id)
+      || !this.updateQueue.includes(`${entity.entity_id}-${index}`)
       || this.config.entities[index].show_graph === false
     ) return;
-    this.updateQueue = this.updateQueue.filter(entry => entry !== entity.entity_id);
+    this.updateQueue = this.updateQueue.filter(entry => entry !== `${entity.entity_id}-${index}`);
 
     let stateHistory = [];
     let start = initStart;
