@@ -1,3 +1,9 @@
+## v0.9.3
+
+### FIXED
+- HA 0.106.x compatibility #274 (#276)
+
+
 ## v0.9.2
 
 ### ADDED
