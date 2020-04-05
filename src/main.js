@@ -534,7 +534,7 @@ class MiniGraphCard extends LitElement {
   }
 
   renderInfo() {
-    return html`
+    return this.abs.length > 0 ? html`
       <div class="info flex">
         ${this.abs.map(entry => html`
           <div class="info__item">
@@ -548,7 +548,7 @@ class MiniGraphCard extends LitElement {
           </div>
         `)}
       </div>
-    `;
+    ` : html``;
   }
 
   handlePopup(e, entity) {
