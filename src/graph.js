@@ -13,6 +13,7 @@ export default class Graph {
       first: this._first,
       last: this._last,
       sum: this._sum,
+      delta: this._delta,
     };
 
     this._history = undefined;
@@ -57,8 +58,8 @@ export default class Graph {
     coords.length = requiredNumOfPoints;
 
     this.coords = this._calcPoints(coords);
-    this.min = Math.min(...this.coords.map(item => Number(item[V])));
-    this.max = Math.max(...this.coords.map(item => Number(item[V])));
+    this.min = Math.min(...this._calcPoints(coords).map(item => Number(item[V])));
+    this.max = Math.max(...this._calcPoints(coords).map(item => Number(item[V])));
   }
 
   _reducer(res, item) {
@@ -209,8 +210,16 @@ export default class Graph {
     return items.reduce((sum, entry) => sum + parseFloat(entry.state), 0);
   }
 
+  _delta(items) {
+    return this._maximum(items) - this._minimum(items);
+  }
+
   _lastValue(items) {
-    return parseFloat(items[items.length - 1].state) || 0;
+    if (this._calcPoint(items) === this._delta(items)) {
+      return 0;
+    } else {
+      return parseFloat(items[items.length - 1].state) || 0;
+    }
   }
 
   _updateEndTime() {
