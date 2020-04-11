@@ -25,6 +25,7 @@ export default class Graph {
     this._min = 0;
     this.points = points;
     this.hours = hours;
+    this.aggregateFuncName = aggregateFuncName;
     this._calcPoint = aggregateFuncMap[aggregateFuncName] || this._average;
     this._smoothing = smoothing;
     this._groupBy = groupBy;
@@ -215,7 +216,7 @@ export default class Graph {
   }
 
   _lastValue(items) {
-    if (this._calcPoint(items) === this._delta(items)) {
+    if (this.aggregateFuncName === 'delta') {
       return 0;
     } else {
       return parseFloat(items[items.length - 1].state) || 0;
