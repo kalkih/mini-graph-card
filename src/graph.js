@@ -13,6 +13,7 @@ export default class Graph {
       first: this._first,
       last: this._last,
       sum: this._sum,
+      delta: this._delta,
     };
 
     this._history = undefined;
@@ -24,6 +25,7 @@ export default class Graph {
     this._min = 0;
     this.points = points;
     this.hours = hours;
+    this.aggregateFuncName = aggregateFuncName;
     this._calcPoint = aggregateFuncMap[aggregateFuncName] || this._average;
     this._smoothing = smoothing;
     this._groupBy = groupBy;
@@ -47,18 +49,20 @@ export default class Graph {
     if (!this._history) return;
     this._updateEndTime();
 
-    const coords = this._history.reduce((res, item) => this._reducer(res, item), []);
+    const histGroups = this._history.reduce((res, item) => this._reducer(res, item), []);
 
     // drop potential out of bound entry's except one
-    if (coords[0] && coords[0].length) coords[0] = [coords[0][coords[0].length - 1]];
+    if (histGroups[0] && histGroups[0].length) {
+      histGroups[0] = [histGroups[0][histGroups[0].length - 1]];
+    }
 
     // extend length to fill missing history
     const requiredNumOfPoints = Math.ceil(this.hours * this.points);
-    coords.length = requiredNumOfPoints;
+    histGroups.length = requiredNumOfPoints;
 
-    this.coords = this._calcPoints(coords);
-    this.min = Math.min(...this.coords.map(item => Number(item[V])));
-    this.max = Math.max(...this.coords.map(item => Number(item[V])));
+    this.histGroups = this._calcPoints(histGroups);
+    this.min = Math.min(...this.histGroups.map(item => Number(item[V])));
+    this.max = Math.max(...this.histGroups.map(item => Number(item[V])));
   }
 
   _reducer(res, item) {
@@ -209,13 +213,25 @@ export default class Graph {
     return items.reduce((sum, entry) => sum + parseFloat(entry.state), 0);
   }
 
+  _delta(items) {
+    return this._maximum(items) - this._minimum(items);
+  }
+
   _lastValue(items) {
-    return parseFloat(items[items.length - 1].state) || 0;
+    if (this.aggregateFuncName === 'delta') {
+      return 0;
+    } else {
+      return parseFloat(items[items.length - 1].state) || 0;
+    }
   }
 
   _updateEndTime() {
     this._endTime = new Date();
     switch (this._groupBy) {
+      case 'month':
+        this._endTime.setMonth(this._endTime.getMonth() + 1);
+        this._endTime.setDate(1);
+        break;
       case 'date':
         this._endTime.setDate(this._endTime.getDate() + 1);
         this._endTime.setHours(0, 0, 0, 0);
