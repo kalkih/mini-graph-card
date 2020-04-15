@@ -727,23 +727,27 @@ class MiniGraphCard extends LitElement {
     this.setNextUpdate();
   }
 
+  getBoudary(type, configVal, series, defaultVal) {
+    if (configVal === undefined) {
+      // dynamic boundary depending on values
+      return Math[type](...series.map(ele => ele[type])) || defaultVal;
+    }
+    if (configVal[0] !== '~') {
+      // fixed boundary
+      return configVal;
+    }
+    // soft boundary (respecting out of range values)
+    return Math[type](Number(configVal.substr(1)), ...series.map(ele => ele[type]));
+  }
+
   updateBounds({ config } = this) {
     this.bound = [
-      config.lower_bound !== undefined
-        ? config.lower_bound
-        : Math.min(...this.primaryYaxisSeries.map(ele => ele.min)) || this.bound[0],
-      config.upper_bound !== undefined
-        ? config.upper_bound
-        : Math.max(...this.primaryYaxisSeries.map(ele => ele.max)) || this.bound[1],
+      this.getBoudary('min', config.lower_bound, this.primaryYaxisSeries, this.bound[0]),
+      this.getBoudary('max', config.upper_bound, this.primaryYaxisSeries, this.bound[1]),
     ];
-
     this.boundSecondary = [
-      config.lower_bound_secondary !== undefined
-        ? config.lower_bound_secondary
-        : Math.min(...this.secondaryYaxisSeries.map(ele => ele.min)) || this.boundSecondary[0],
-      config.upper_bound_secondary !== undefined
-        ? config.upper_bound_secondary
-        : Math.max(...this.secondaryYaxisSeries.map(ele => ele.max)) || this.boundSecondary[1],
+      this.getBoudary('min', config.lower_bound_secondary, this.secondaryYaxisSeries, this.boundSecondary[0]),
+      this.getBoudary('max', config.upper_bound_secondary, this.secondaryYaxisSeries, this.boundSecondary[1]),
     ];
   }
 
