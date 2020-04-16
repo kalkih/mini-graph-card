@@ -60,9 +60,9 @@ export default class Graph {
     const requiredNumOfPoints = Math.ceil(this.hours * this.points);
     histGroups.length = requiredNumOfPoints;
 
-    this.histGroups = this._calcPoints(histGroups);
-    this.min = Math.min(...this.histGroups.map(item => Number(item[V])));
-    this.max = Math.max(...this.histGroups.map(item => Number(item[V])));
+    this.coords = this._calcPoints(histGroups);
+    this.min = Math.min(...this.coords.map(item => Number(item[V])));
+    this.max = Math.max(...this.coords.map(item => Number(item[V])));
   }
 
   _reducer(res, item) {

@@ -74,7 +74,7 @@ This card is available in [HACS](https://github.com/custom-components/hacs/issue
 | group | boolean | `false` | v0.2.0 | Disable paddings and box-shadow, useful when nesting the card.
 | hours_to_show | integer | `24` | v0.0.2 | Specify how many hours of history the graph should present.
 | points_per_hour | number | `0.5` | v0.2.0 | Specify amount of data points the graph should display for each hour, *(basically the detail/accuracy/smoothing of the graph)*.
-| aggregate_func | string | `avg` | v0.8.0 | Specify aggregate function used to calculate point/bar in the graph, `avg`, `min`, `max`, `first`, `last`, `sum`.
+| aggregate_func | string | `avg` | v0.8.0 | Specify [aggregate function](#aggregate-functions) used to calculate point/bar in the graph.
 | group_by | string | `interval` | v0.8.0 | Specify type of grouping of data, dynamic `interval`, `date` or `hour`.
 | update_interval | number |  | v0.4.0 | Specify a custom update interval of the history data (in seconds), instead of on every state change.
 | cache | boolean | `true` | v0.9.0 | Enable/disable local caching of history data.
@@ -175,11 +175,24 @@ See [dynamic line color](#dynamic-line-color) for example usage.
 | value ***(required)*** | string |  | Value to convert.
 | label | string | same as value | String to show as label (if the value is not precise).
 
+### Aggregate functions
+Recorded values are grouped in time buckets which are determined by `group_by`, `points_per_hour` configuration.
+These buckets are converted later to single point/bar on the graph. Aggregate function defines the methods of that conversion.
+
+| Name | Since | Description |
+|------|:-------:|-------------|
+| `avg` | v0.8.0 | Average
+| `min` | v0.8.0 | Minimum - lowest value
+| `max` | v0.8.0 | Maximum - largest value
+| `first` | v0.9.0 |
+| `last` | v0.9.0 |
+| `sum` | v0.9.2 |
+| `delta` | v0.9.4 | Calculates difference between max and min value
 
 ### Theme variables
 The following theme variables can be set in your HA theme to customize the appearence of the card.
 
-| name | Default | Description |
+| Name | Default | Description |
 |------|:-------:|-------------|
 | mcg-title-letter-spacing |  | Letter spacing of the card title (`name` option).
 | mcg-title-font-weight | 500 | Font weight of the card title.
