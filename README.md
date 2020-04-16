@@ -179,15 +179,15 @@ See [dynamic line color](#dynamic-line-color) for example usage.
 Recorded values are grouped in time buckets which are determined by `group_by`, `points_per_hour` configuration.
 These buckets are converted later to single point/bar on the graph. Aggregate function defines the methods of that conversion.
 
-| Type | Name | Since | Description |
-|------|:-------|:-------:|-------------|
-| `avg` | Average | v0.8.0 |
-| `min` | Minimum | v0.8.0 |
-| `max` | Maximum | v0.8.0 |
-| `first` | First | v0.9.0 |
-| `last` | Last | v0.9.0 |
-| `sum` | Sum | v0.9.2 |
-| `delta` | Delta | v0.9.4 | Calculates difference between first and last value
+| Name | Since | Description |
+|------|:-------:|-------------|
+| `avg` | v0.8.0 | Average
+| `min` | v0.8.0 | Minimum - lowest value
+| `max` | v0.8.0 | Maximum - largest value
+| `first` | v0.9.0 |
+| `last` | v0.9.0 |
+| `sum` | v0.9.2 |
+| `delta` | v0.9.4 | Calculates difference between first and last value
 
 ### Theme variables
 The following theme variables can be set in your HA theme to customize the appearence of the card.
