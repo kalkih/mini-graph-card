@@ -115,7 +115,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | show_indicator | boolean |  | Display a color indicator next to the state, (only when more than two states are visible).
 | show_graph | boolean |  | Set to false to completely hide the entity in the graph.
 | show_line | boolean |  | Set to false to hide the line.
-| show_fill | boolean |  | Set to false to hide the fill).
+| show_fill | boolean |  | Set to false to hide the fill.
 | show_points | boolean |  | Set to false to hide the points.
 | show_legend | boolean |  | Set to false to turn hide from the legend.
 | state_adaptive_color | boolean |  | Make the color of the state adapt to the entity color.
