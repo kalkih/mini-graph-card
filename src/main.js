@@ -92,6 +92,7 @@ class MiniGraphCard extends LitElement {
       abs: [],
       tooltip: {},
       updateQueue: [],
+      timeframe: [],
       color: String,
     };
   }
@@ -182,7 +183,7 @@ class MiniGraphCard extends LitElement {
         style="font-size: ${config.font_size}px;"
         @click=${e => this.handlePopup(e, config.tap_action.entity || this.entity[0])}
       >
-        ${this.renderHeader()} ${this.renderStates()} ${this.renderGraph()} ${this.renderInfo()}
+        ${this.renderHeader()} ${this.renderStates()} ${this.renderGraph()} ${this.renderInfo()} ${this.renderAxisLabels()}
       </ha-card>
     `;
   }
@@ -317,6 +318,35 @@ class MiniGraphCard extends LitElement {
         <rect width='10' height='10' fill=${this.intColor(state, index)} />
       </svg>
     `;
+  }
+
+  renderAxisLabels() {
+    const { labels } = this;
+    return svg`
+      <div class="axis-labels">
+        ${labels.map(time => svg`
+          <span class="ellipsis">${getTime(time, this.config.format, this._hass.language)}</span>
+        `)}
+      </div>
+    `;
+  }
+
+
+  get labels() {
+    const timeframe = this.timeframe[1] - this.timeframe[0];
+    const MAX_LABELS = 10;
+    const offset = this.config.show.graph === 'bar' ? 1 : 2;
+    const points = this.config.hours_to_show * this.config.points_per_hour - offset;
+
+    const labels = [];
+    const interval = timeframe / points || MAX_LABELS;
+    let current = new Date(this.timeframe[0]);
+    labels.push(current);
+    for (let index = 0; index < points; index += 1) {
+      current = new Date(current.getTime() + interval);
+      labels.push(current);
+    }
+    return labels;
   }
 
   renderSvgFill(fill, i) {
@@ -499,7 +529,7 @@ class MiniGraphCard extends LitElement {
 
     const oneMinInHours = 1 / 60;
     now.setMilliseconds(now.getMilliseconds() - getMilli(offset * id + oneMinInHours));
-    const end = getTime(now, { hour12: !this.config.hour24 }, this._hass.language);
+    const end = getTime(now, { ...format, hour12: !this.config.hour24 }, this._hass.language);
     now.setMilliseconds(now.getMilliseconds() - getMilli(offset - oneMinInHours));
     const start = getTime(now, format, this._hass.language);
 
@@ -682,6 +712,7 @@ class MiniGraphCard extends LitElement {
     const end = this.getEndDate();
     const start = new Date(end);
     start.setMilliseconds(start.getMilliseconds() - getMilli(config.hours_to_show));
+    this.timeframe = [start, end];
 
     try {
       const promise = this.entity.map((entity, i) => this.updateEntity(entity, i, start, end));

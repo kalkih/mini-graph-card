@@ -77,7 +77,12 @@ export default (config) => {
     conf.color_thresholds,
     conf.color_thresholds_transition,
   );
-  const additional = conf.hours_to_show > 24 ? { day: 'numeric', weekday: 'short' } : {};
+  const additional = conf.hours_to_show > 24 ? {
+    day: 'numeric',
+    weekday: 'short',
+    hour: undefined,
+    minute: undefined,
+  } : {};
   conf.format = { hour12: !conf.hour24, ...additional };
 
   // override points per hour to mach group_by function

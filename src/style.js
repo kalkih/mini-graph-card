@@ -389,6 +389,18 @@ const style = css`
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  .axis-labels {
+    display: flex;
+    flex-flow: row;
+    overflow: hidden;
+    flex-wrap: none;
+    justify-content: space-around;
+    padding: 0;
+    order: 10;
+  }
+  .axis-labels > span {
+    font-size: .8em;
+  }
   @keyframes fade {
     0% { opacity: 0; }
   }
