@@ -9,7 +9,8 @@ The card works with entities from within the **sensor** domain and displays the 
 
 ### HACS
 
-This card is available in [HACS](https://github.com/custom-components/hacs/issues) (Home Assistant Community Store).
+This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community Store).  
+HACS is a 3rd party Community Store, NOT the one you can already find under "Supervisor" in Home Assistant! You can find more info about it with the link above.
 
 ### Manual install
 
