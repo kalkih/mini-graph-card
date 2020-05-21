@@ -1,4 +1,5 @@
 import { LitElement, html, svg } from 'lit-element';
+import { styleMap } from 'lit-html/directives/style-map';
 import localForage from 'localforage/src/localforage';
 import Graph from './graph';
 import style from './style';
@@ -169,21 +170,32 @@ class MiniGraphCard extends LitElement {
   }
 
   render({ config } = this) {
+    const aspectRatio = {};
+    if (config.aspect_ratio) {
+      aspectRatio['--aspect-ratio'] = config.aspect_ratio;
+    } else {
+      aspectRatio.display = 'inline';
+    }
+
     return html`
-      <ha-card
-        class="flex"
-        ?group=${config.group}
-        ?fill=${config.show.graph && config.show.fill}
-        ?points=${config.show.points === 'hover'}
-        ?labels=${config.show.labels === 'hover'}
-        ?labels-secondary=${config.show.labels_secondary === 'hover'}
-        ?gradient=${config.color_thresholds.length > 0}
-        ?hover=${config.tap_action.action !== 'none'}
-        style="font-size: ${config.font_size}px;"
-        @click=${e => this.handlePopup(e, config.tap_action.entity || this.entity[0])}
-      >
-        ${this.renderHeader()} ${this.renderStates()} ${this.renderGraph()} ${this.renderInfo()}
-      </ha-card>
+      <div 
+        id="aspect-ratio"
+        style="${styleMap(aspectRatio)}">
+        <ha-card
+          class="flex"
+          ?group=${config.group}
+          ?fill=${config.show.graph && config.show.fill}
+          ?points=${config.show.points === 'hover'}
+          ?labels=${config.show.labels === 'hover'}
+          ?labels-secondary=${config.show.labels_secondary === 'hover'}
+          ?gradient=${config.color_thresholds.length > 0}
+          ?hover=${config.tap_action.action !== 'none'}
+          style="font-size: ${config.font_size}px;"
+          @click=${e => this.handlePopup(e, config.tap_action.entity || this.entity[0])}
+        >
+          ${this.renderHeader()} ${this.renderStates()} ${this.renderGraph()} ${this.renderInfo()}
+        </ha-card>
+      </div>
     `;
   }
 
