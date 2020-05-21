@@ -56,7 +56,7 @@ class MiniGraphCard extends LitElement {
     const queue = [];
     this.config.entities.forEach((entity, index) => {
       this.config.entities[index].index = index; // Required for filtered views
-      const entityState = hass.states[entity.entity];
+      const entityState = hass && hass.states[entity.entity] || undefined;
       if (entityState && this.entity[index] !== entityState) {
         this.entity[index] = entityState;
         queue.push(`${entityState.entity_id}-${index}`);
