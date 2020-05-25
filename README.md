@@ -100,6 +100,7 @@ HACS is a 3rd party Community Store, NOT the one you can already find under "Sup
 | upper_bound_secondary | number *or* string |  | v0.5.0 | Set a fixed upper bound for the graph secondary Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
 | smoothing | boolean | `true` | v0.8.0 | Whether to make graph line smooth.
 | state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert (order matters as position becomes a value on the graph).
+| value_factor | number | 0 | vX.X.X | Scale value by order of magnitude (e.g. convert Watts to kilo Watts), use negative value to scale down. 
 
 #### Entities object
 Entities may be listed directly (as per `sensor.temperature` in the example below), or defined using
