@@ -21,7 +21,6 @@
   "dependencies": {
     "@kalkih/lz-string": "^1.4.5",
     "lit-element": "^2.2.1",
-    "lit-html": "^1.2.1",
     "localforage": "^1.7.3"
   },
   "devDependencies": {

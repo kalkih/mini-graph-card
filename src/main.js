@@ -1,5 +1,4 @@
 import { LitElement, html, svg } from 'lit-element';
-import { styleMap } from 'lit-html/directives/style-map';
 import localForage from 'localforage/src/localforage';
 import Graph from './graph';
 import style from './style';
@@ -170,17 +169,14 @@ class MiniGraphCard extends LitElement {
   }
 
   render({ config } = this) {
-    const aspectRatio = {};
-    if (config.aspect_ratio) {
-      aspectRatio['--aspect-ratio'] = config.aspect_ratio;
-    } else {
-      aspectRatio.display = 'inline';
-    }
+    const aspectRatio = config.aspect_ratio
+      ? `--aspect-ratio: ${config.aspect_ratio}`
+      : 'display: inline;';
 
     return html`
       <div 
         id="aspect-ratio"
-        style="${styleMap(aspectRatio)}">
+        style="${aspectRatio}">
         <ha-card
           class="flex"
           ?group=${config.group}
