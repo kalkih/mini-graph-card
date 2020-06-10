@@ -174,9 +174,7 @@ class MiniGraphCard extends LitElement {
       : 'display: inline;';
 
     return html`
-      <div 
-        id="aspect-ratio"
-        style="${aspectRatio}">
+      <div style="${aspectRatio}">
         <ha-card
           class="flex"
           ?group=${config.group}
