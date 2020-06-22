@@ -218,7 +218,7 @@ export default class Graph {
     switch (this._groupBy) {
       case 'date':
         this._endTime.setDate(this._endTime.getDate() + 1);
-        this._endTime.setHours(0, 0);
+        this._endTime.setHours(0, 0, 0, 0);
         break;
       case 'hour':
         this._endTime.setHours(this._endTime.getHours() + 1);
