@@ -1,3 +1,18 @@
+## v0.9.4
+
+### ✨ NEW 
+- Added soft bound support for lower & upper bounds #114 (#330) @Silencer2K
+- Added delta option in aggregate_func (#329) @PierreB49
+- Added `value_factor` option, to scale value shown in state label (#362) @dzikimarian
+- Faster history & decreased data usage #373 (#392)
+
+### 🔨 FIXED  
+- Fixed incorrect value for the first point #289 (#327) @maxwroc
+- Reduce white space when extrema isn't enabled #320 (#325)
+- Check for undefined hass before accessing it (#359)
+- Readme typos & improvements (#340) (#356) @EpicLPer @mikalauskas
+
+
 ## v0.9.3
 
 ### FIXED

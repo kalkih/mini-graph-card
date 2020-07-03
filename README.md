@@ -1,16 +1,16 @@
 # Lovelace Mini Graph Card
 A minimalistic and customizable graph card for [Home Assistant](https://github.com/home-assistant/home-assistant) Lovelace UI.
 
-The card works with entities from within the **sensor** domain and displays the sensors current state as well as a line graph representation of the history.
+The card works with entities from within the **sensor** & **binary_sensor** domain and displays the sensors current state as well as a line graph representation of the history.
 
 ![Preview](https://user-images.githubusercontent.com/457678/52977264-edf34980-33cc-11e9-903b-cee43b307ed8.png)
 
 ## Install
 
-### HACS
+### HACS (recommended)
 
 This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community Store).  
-HACS is a 3rd party Community Store, NOT the one you can already find under "Supervisor" in Home Assistant! You can find more info about it with the link above.
+<small>*HACS is a third party community store and is not included in Home Assistant out of the box.*</small>
 
 ### Manual install
 
@@ -20,7 +20,7 @@ HACS is a 3rd party Community Store, NOT the one you can already find under "Sup
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.9.3
+    - url: /local/mini-graph-card-bundle.js?v=0.9.4
       type: module
   ```
 
@@ -31,14 +31,14 @@ HACS is a 3rd party Community Store, NOT the one you can already find under "Sup
 2. Grab `mini-graph-card-bundle.js`:
 
   ```
-  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.9.3/mini-graph-card-bundle.js
+  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.9.4/mini-graph-card-bundle.js
   ```
 
 3. Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`:
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.9.3
+    - url: /local/mini-graph-card-bundle.js?v=0.9.4
       type: module
   ```
 
@@ -53,7 +53,7 @@ HACS is a 3rd party Community Store, NOT the one you can already find under "Sup
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.9.3
+    - url: /local/mini-graph-card-bundle.js?v=0.9.4
       type: module
   ```
 
