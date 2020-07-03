@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import localForage from 'localforage/src/localforage';
 import { decompress } from './utils';
+import { version } from '../package.json';
 
 localForage.config({
   name: 'mini-graph-card',
@@ -21,7 +22,7 @@ localForage.iterate((data, key) => {
 });
 
 console.info(
-  '%c MINI-GRAPH-CARD %c 0.9.3 ',
+  `%c MINI-GRAPH-CARD %c ${version} `,
   'color: white; background: coral; font-weight: 700;',
   'color: coral; background: white; font-weight: 700;',
 );
