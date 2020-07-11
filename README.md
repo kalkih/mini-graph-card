@@ -202,14 +202,19 @@ The following theme variables can be set in your HA theme to customize the appea
 ### Example usage
 
 #### Single entity card
+
+![Single entity card](https://user-images.githubusercontent.com/457678/52009150-884d2500-24d2-11e9-9f2b-2981210d3897.png)
+
 ```yaml
 - type: custom:mini-graph-card
   entities:
    - sensor.illumination
 ```
-![Single entity card](https://user-images.githubusercontent.com/457678/52009150-884d2500-24d2-11e9-9f2b-2981210d3897.png)
 
 #### Alternative style
+
+![Alternative style](https://user-images.githubusercontent.com/457678/52009161-8daa6f80-24d2-11e9-8678-47658a181615.png)
+
 ```yaml
 - type: custom:mini-graph-card
   entities:
@@ -219,9 +224,11 @@ The following theme variables can be set in your HA theme to customize the appea
   show:
     fill: false
 ```
-![Alternative style](https://user-images.githubusercontent.com/457678/52009161-8daa6f80-24d2-11e9-8678-47658a181615.png)
 
 #### Multiple entities card
+
+![Multiple entities card](https://user-images.githubusercontent.com/457678/52009165-900cc980-24d2-11e9-8cc6-c77de58465b5.png)
+
 ```yaml
 - type: custom:mini-graph-card
   name: SERVER
@@ -232,9 +239,11 @@ The following theme variables can be set in your HA theme to customize the appea
     - sensor.server_sent
     - sensor.server_received
 ```
-![Multiple entities card](https://user-images.githubusercontent.com/457678/52009165-900cc980-24d2-11e9-8cc6-c77de58465b5.png)
 
 #### Bar chart card
+
+![Bar chart card](https://user-images.githubusercontent.com/457678/52970286-985e7300-33b3-11e9-89bc-1278c4e2ecf2.png)
+
 ```yaml
 - type: custom:mini-graph-card
   entities:
@@ -243,9 +252,10 @@ The following theme variables can be set in your HA theme to customize the appea
   show:
     graph: bar
 ```
-![Bar chart card](https://user-images.githubusercontent.com/457678/52970286-985e7300-33b3-11e9-89bc-1278c4e2ecf2.png)
 
 #### Show data from the past week
+![Show data from the past week](https://user-images.githubusercontent.com/457678/52009167-913df680-24d2-11e9-8732-52fc65e3f0d8.png)
+
 Use the `hours_to_show` option to specify how many hours of history the graph should represent.
 Use the `points_per_hour` option to specify the accuracy/detail of the graph.
 
@@ -257,7 +267,6 @@ Use the `points_per_hour` option to specify the accuracy/detail of the graph.
   hours_to_show: 168
   points_per_hour: 0.25
 ```
-![Show data from the past week](https://user-images.githubusercontent.com/457678/52009167-913df680-24d2-11e9-8732-52fc65e3f0d8.png)
 
 #### Graph only card
 Use the `show` option to show/hide UI elements.
@@ -274,6 +283,8 @@ Use the `show` option to show/hide UI elements.
 
 #### Horizontally stacked cards
 You can stack cards horizontally by using one or more `horizontal-stack(s)`.
+
+![Horizontally stacked cards](https://user-images.githubusercontent.com/457678/52009171-926f2380-24d2-11e9-9dd4-28f010608858.png)
 
 ```yaml
 - type: horizontal-stack
@@ -297,10 +308,11 @@ You can stack cards horizontally by using one or more `horizontal-stack(s)`.
       line_width: 8
       font_size: 75
 ```
-![Horizontally stacked cards](https://user-images.githubusercontent.com/457678/52009171-926f2380-24d2-11e9-9dd4-28f010608858.png)
 
 #### Dynamic line color
 Have the graph change line color dynamically.
+
+![Dynamic line color](https://user-images.githubusercontent.com/457678/52573150-cbd05900-2e19-11e9-9e01-740753169093.png)
 
 ```yaml
 - type: custom:mini-graph-card
@@ -316,11 +328,12 @@ Have the graph change line color dynamically.
     - value: 21.5
       color: "#c0392b"
 ```
-![Dynamic line color](https://user-images.githubusercontent.com/457678/52573150-cbd05900-2e19-11e9-9e01-740753169093.png)
 
 #### Alternate y-axis
 Have one or more series plot on a separate y-axis, which appears on the right side of the graph. This example also
 shows turning off the line, points and legend.
+
+![Alternate y-axis](https://user-images.githubusercontent.com/373079/60764115-63cf2780-a0c6-11e9-8b9a-97fc47161180.png)
 
 ```yaml
 - type: custom:mini-graph-card
@@ -342,9 +355,12 @@ shows turning off the line, points and legend.
     labels: true
     labels_secondary: true
 ```
-![Alternate y-axis](https://user-images.githubusercontent.com/373079/60764115-63cf2780-a0c6-11e9-8b9a-97fc47161180.png)
+
 
 #### Grouping by date
+
+![mini_energy_daily](https://user-images.githubusercontent.com/8268674/66688605-3ffc1e80-ec7f-11e9-872e-935870a542f3.png)
+
 You can group values by date, this way you can visualize for example daily energy consumption.
 
 ```yaml
@@ -358,11 +374,12 @@ You can group values by date, this way you can visualize for example daily energ
   show:
     graph: bar
 ```
-![mini_energy_daily](https://user-images.githubusercontent.com/8268674/66688605-3ffc1e80-ec7f-11e9-872e-935870a542f3.png)
 
 #### Data aggregation functions
 You can decide how values are agreggated for points on graph. Example how to display min, max, avg temerature per day
 from last week.
+
+![mini_temperature_aggregate_daily](https://user-images.githubusercontent.com/8268674/66688610-44c0d280-ec7f-11e9-86c2-a728da239dab.png)
 
 ```yaml
 - type: custom:mini-graph-card
@@ -383,9 +400,10 @@ from last week.
   group_by: date
 ```
 
-![mini_temperature_aggregate_daily](https://user-images.githubusercontent.com/8268674/66688610-44c0d280-ec7f-11e9-86c2-a728da239dab.png)
-
 #### Non-numeric sensor states
+
+![mini_binary_sensor](https://user-images.githubusercontent.com/8268674/66825779-e1ff5d80-ef42-11e9-89eb-673d2ada8d34.png)
+
 You can render non-numeric states by providing state_map config. For example this way you can show data comming from binary sensors.
 
 ```yaml
@@ -414,7 +432,6 @@ You can render non-numeric states by providing state_map config. For example thi
       label: Detected
 ```
 
-![mini_binary_sensor](https://user-images.githubusercontent.com/8268674/66825779-e1ff5d80-ef42-11e9-89eb-673d2ada8d34.png)
 
 ## Development
 
