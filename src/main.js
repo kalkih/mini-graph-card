@@ -730,6 +730,10 @@ class MiniGraphCard extends LitElement {
   }
 
   getBoundary(type, configVal, series, defaultVal) {
+    if (!(type in Math)) {
+      throw new Error(`The type "${type}" is not present on the Math object`);
+    }
+
     if (configVal === undefined) {
       // dynamic boundary depending on values
       return Math[type](...series.map(ele => ele[type])) || defaultVal;
@@ -747,10 +751,39 @@ class MiniGraphCard extends LitElement {
       this.getBoundary('min', config.lower_bound, this.primaryYaxisSeries, this.bound[0]),
       this.getBoundary('max', config.upper_bound, this.primaryYaxisSeries, this.bound[1]),
     ];
+
+    if (config.min_bound_range) {
+      const minBoundRange = parseFloat(config.min_bound_range);
+      const currentRange = Math.abs(this.bound[0] - this.bound[1]);
+      const diff = minBoundRange - currentRange;
+
+      // Doesn't matter if minBoundRange is NaN because this will be false if so
+      if (diff > 0) {
+        this.bound = [
+          this.bound[0] - diff / 2,
+          this.bound[1] + diff / 2,
+        ];
+      }
+    }
+
     this.boundSecondary = [
       this.getBoundary('min', config.lower_bound_secondary, this.secondaryYaxisSeries, this.boundSecondary[0]),
       this.getBoundary('max', config.upper_bound_secondary, this.secondaryYaxisSeries, this.boundSecondary[1]),
     ];
+
+    if (config.min_bound_range_secondary) {
+      const minBoundRange = parseFloat(config.min_bound_range_secondary);
+      const currentRange = Math.abs(this.boundSecondary[0] - this.boundSecondary[1]);
+      const diff = minBoundRange - currentRange;
+
+      // Doesn't matter if minBoundRange is NaN because this will be false if so
+      if (diff > 0) {
+        this.boundSecondary = [
+          this.boundSecondary[0] - diff / 2,
+          this.boundSecondary[1] + diff / 2,
+        ];
+      }
+    }
   }
 
   async getCache(key, compressed) {
