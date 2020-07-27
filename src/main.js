@@ -729,7 +729,7 @@ class MiniGraphCard extends LitElement {
     this.setNextUpdate();
   }
 
-  getBoudary(type, configVal, series, defaultVal) {
+  getBoundary(type, configVal, series, defaultVal) {
     if (configVal === undefined) {
       // dynamic boundary depending on values
       return Math[type](...series.map(ele => ele[type])) || defaultVal;
@@ -744,12 +744,12 @@ class MiniGraphCard extends LitElement {
 
   updateBounds({ config } = this) {
     this.bound = [
-      this.getBoudary('min', config.lower_bound, this.primaryYaxisSeries, this.bound[0]),
-      this.getBoudary('max', config.upper_bound, this.primaryYaxisSeries, this.bound[1]),
+      this.getBoundary('min', config.lower_bound, this.primaryYaxisSeries, this.bound[0]),
+      this.getBoundary('max', config.upper_bound, this.primaryYaxisSeries, this.bound[1]),
     ];
     this.boundSecondary = [
-      this.getBoudary('min', config.lower_bound_secondary, this.secondaryYaxisSeries, this.boundSecondary[0]),
-      this.getBoudary('max', config.upper_bound_secondary, this.secondaryYaxisSeries, this.boundSecondary[1]),
+      this.getBoundary('min', config.lower_bound_secondary, this.secondaryYaxisSeries, this.boundSecondary[0]),
+      this.getBoundary('max', config.upper_bound_secondary, this.secondaryYaxisSeries, this.boundSecondary[1]),
     ];
   }
 
