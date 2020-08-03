@@ -16,13 +16,8 @@ This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community St
 
 1. Download and copy `mini-graph-card-bundle.js` from the [latest release](https://github.com/kalkih/mini-graph-card/releases/latest) into your `config/www` directory.
 
-2. Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml` or at the top of the *raw config editor UI*:
+2. Add the resource reference as decribed below.
 
-  ```yaml
-  resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.9.4
-      type: module
-  ```
 
 ### CLI install
 
@@ -34,13 +29,24 @@ This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community St
   $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.9.4/mini-graph-card-bundle.js
   ```
 
-3. Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`:
+3. Add the resource reference as decribed below.
+
+### Add resource reference
+
+If you configure Lovelace via YAML, add a reference to `mini-graph-card-bundle.js` inside your `configuration.yaml`:
 
   ```yaml
   resources:
     - url: /local/mini-graph-card-bundle.js?v=0.9.4
       type: module
   ```
+
+Else, if you prefer the graphical editor, use the menu to add the resource:
+
+1. Make sure, advanced mode is enabled in your user profile (click on your user name to get there)
+2. Navigate to Configuration -> Lovelace Dashboards -> Resources Tab. Hit orange (+) icon
+3. Enter URL `/local/mini-graph-card-bundle.js` and select type "JavaScript Module".
+4. Restart Home Assistant.
 
 ## Updating
 **If you have a version older than v0.0.8 installed, please delete the current files and follow the installation instructions again.**
