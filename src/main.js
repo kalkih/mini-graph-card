@@ -729,10 +729,14 @@ class MiniGraphCard extends LitElement {
     this.setNextUpdate();
   }
 
-  getBoudary(type, configVal, series, defaultVal) {
+  getBoundary(type, series, configVal, fallback) {
+    if (!(type in Math)) {
+      throw new Error(`The type "${type}" is not present on the Math object`);
+    }
+
     if (configVal === undefined) {
       // dynamic boundary depending on values
-      return Math[type](...series.map(ele => ele[type])) || defaultVal;
+      return Math[type](...series.map(ele => ele[type])) || fallback;
     }
     if (configVal[0] !== '~') {
       // fixed boundary
@@ -742,15 +746,44 @@ class MiniGraphCard extends LitElement {
     return Math[type](Number(configVal.substr(1)), ...series.map(ele => ele[type]));
   }
 
+  getBoundaries(series, min, max, fallback, minRange) {
+    let boundary = [
+      this.getBoundary('min', series, min, fallback[0], minRange),
+      this.getBoundary('max', series, max, fallback[1], minRange),
+    ];
+
+    if (minRange) {
+      const currentRange = Math.abs(boundary[0] - boundary[1]);
+      const diff = parseFloat(minRange) - currentRange;
+
+      // Doesn't matter if minBoundRange is NaN because this will be false if so
+      if (diff > 0) {
+        boundary = [
+          boundary[0] - diff / 2,
+          boundary[1] + diff / 2,
+        ];
+      }
+    }
+
+    return boundary;
+  }
+
   updateBounds({ config } = this) {
-    this.bound = [
-      this.getBoudary('min', config.lower_bound, this.primaryYaxisSeries, this.bound[0]),
-      this.getBoudary('max', config.upper_bound, this.primaryYaxisSeries, this.bound[1]),
-    ];
-    this.boundSecondary = [
-      this.getBoudary('min', config.lower_bound_secondary, this.secondaryYaxisSeries, this.boundSecondary[0]),
-      this.getBoudary('max', config.upper_bound_secondary, this.secondaryYaxisSeries, this.boundSecondary[1]),
-    ];
+    this.bound = this.getBoundaries(
+      this.primaryYaxisSeries,
+      config.lower_bound,
+      config.upper_bound,
+      this.bound,
+      config.min_bound_range,
+    );
+
+    this.boundSecondary = this.getBoundaries(
+      this.secondaryYaxisSeries,
+      config.lower_bound_secondary,
+      config.upper_bound_secondary,
+      this.boundSecondary,
+      config.min_bound_range_secondary,
+    );
   }
 
   async getCache(key, compressed) {
