@@ -179,7 +179,7 @@ class MiniGraphCard extends LitElement {
         ?labels-secondary=${config.show.labels_secondary === 'hover'}
         ?gradient=${config.color_thresholds.length > 0}
         ?hover=${config.tap_action.action !== 'none'}
-        style="font-size: ${config.font_size}px;"
+        style="font-size:${config.font_size}px;"
         @click=${e => this.handlePopup(e, config.tap_action.entity || this.entity[0])}
       >
         ${this.renderHeader()} ${this.renderStates()} ${this.renderGraph()} ${this.renderInfo()}
@@ -193,7 +193,7 @@ class MiniGraphCard extends LitElement {
     } = this.config;
     return show.name || (show.icon && align_icon !== 'state')
       ? html`
-          <div class="header flex" loc=${align_header} style="font-size: ${font_size_header}px;">
+          <div class="header flex" loc=${align_header} style="font-size:${font_size_header}px;">
             ${this.renderName()} ${align_icon !== 'state' ? this.renderIcon() : ''}
           </div>
         `
@@ -204,7 +204,7 @@ class MiniGraphCard extends LitElement {
     const { icon, icon_adaptive_color } = this.config.show;
     return icon ? html`
       <div class="icon" loc=${this.config.align_icon}
-        style=${icon_adaptive_color ? `color: ${this.color};` : ''}>
+        style=${icon_adaptive_color ? `color:${this.color};` : ''}>
         <ha-icon .icon=${this.computeIcon(this.entity[0])}></ha-icon>
       </div>
     ` : '';
@@ -215,7 +215,7 @@ class MiniGraphCard extends LitElement {
     const name = this.tooltip.entity !== undefined
       ? this.computeName(this.tooltip.entity)
       : this.config.name || this.computeName(0);
-    const color = this.config.show.name_adaptive_color ? `opacity: 1; color: ${this.color};` : '';
+    const color = this.config.show.name_adaptive_color ? `opacity:1; color:${this.color};` : '';
 
     return html`
       <div class="name flex">
@@ -227,7 +227,7 @@ class MiniGraphCard extends LitElement {
   renderStates() {
     const { entity, value } = this.tooltip;
     const state = value !== undefined ? value : this.entity[0].state;
-    const color = this.config.entities[0].state_adaptive_color ? `color: ${this.color};` : '';
+    const color = this.config.entities[0].state_adaptive_color ? `color:${this.color};` : '';
     if (this.config.show.state)
       return html`
         <div class="states flex" loc=${this.config.align_state}>
@@ -253,7 +253,7 @@ class MiniGraphCard extends LitElement {
         <div
           class="state state--small"
           @click=${e => this.handlePopup(e, this.entity[id])}
-          style=${entity.state_adaptive_color ? `color: ${this.computeColor(state, id)};` : ''}>
+          style=${entity.state_adaptive_color ? `color:${this.computeColor(state, id)};` : ''}>
           ${entity.show_indicator ? this.renderIndicator(state, id) : ''}
           <span class="state__value ellipsis">
             ${this.computeState(state)}
@@ -326,8 +326,8 @@ class MiniGraphCard extends LitElement {
     return svg`
       <defs>
         <linearGradient id=${`fill-grad-${this.id}-${i}`} x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop stop-color='white' offset='0%' stop-opacity='1'/>
-          <stop stop-color='white' offset='100%' stop-opacity='.15'/>
+          <stop stop-color='#fff' offset='0%' stop-opacity='1'/>
+          <stop stop-color='#fff' offset='100%' stop-opacity='.15'/>
         </linearGradient>
         <mask id=${`fill-grad-mask-${this.id}-${i}`}>
           <rect width="100%" height="100%" fill=${`url(#fill-grad-${this.id}-${i})`} />
@@ -338,7 +338,7 @@ class MiniGraphCard extends LitElement {
           type=${this.config.show.fill}
           .id=${i} anim=${this.config.animate} ?init=${init}
           style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
-          fill='white'
+          fill='#fff'
           mask=${fade ? `url(#fill-grad-mask-${this.id}-${i})` : ''}
           d=${this.fill[i]}
         />
@@ -356,7 +356,7 @@ class MiniGraphCard extends LitElement {
         style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
         fill='none'
         stroke-dasharray=${this.length[i] || 'none'} stroke-dashoffset=${this.length[i] || 'none'}
-        stroke=${'white'}
+        stroke=#fff
         stroke-width=${this.config.line_width}
         d=${this.line[i]}
       />`;

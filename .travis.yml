@@ -6,3 +6,4 @@ script:
   - npm run lint
   - npm run rollup
   - npm run babel
+  - npm run terser

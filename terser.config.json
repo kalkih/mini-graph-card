@@ -1,0 +1,17 @@
+{
+  "compress": {
+    "arguments": true,
+    "booleans_as_integers": true,
+    "keep_fargs": false,
+    "module": true,
+    "passes": 3,
+    "unsafe_arrows": true,
+    "unsafe_math": true,
+    "unsafe_undefined": true,
+    "unsafe_proto": true,
+    "unsafe_Function": true,
+    "unsafe_comps": true,
+    "hoist_funs": true,
+    "ecma": 6
+  }
+}

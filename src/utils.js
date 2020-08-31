@@ -40,7 +40,7 @@ const compareArray = (a, b) => a.length === b.length && a.every((value, index) =
 
 const log = (message) => {
   // eslint-disable-next-line no-console
-  console.warn('mini-graph-card: ', message);
+  console.warn('mini-graph-card:', message);
 };
 
 export {

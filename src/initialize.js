@@ -18,11 +18,11 @@ localForage.iterate((data, key) => {
     localForage.removeItem(key);
   }
 }).catch((err) => {
-  console.warn('Purging has errored: ', err);
+  console.warn('Purging has errored:', err);
 });
 
 console.info(
-  `%c MINI-GRAPH-CARD %c ${version} `,
-  'color: white; background: coral; font-weight: 700;',
-  'color: coral; background: white; font-weight: 700;',
+  `%c MINI-GRAPH-CARD %c ${version}`,
+  'color:#fff;background:coral;font-weight:700;',
+  'color:coral;background:#fff;font-weight:700;',
 );
