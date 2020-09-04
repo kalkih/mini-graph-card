@@ -21,8 +21,7 @@
   "dependencies": {
     "@kalkih/lz-string": "^1.4.5",
     "lit-element": "^2.2.1",
-    "localforage": "^1.7.3",
-    "rollup-plugin-minify-html-literals": "^1.2.5"
+    "localforage": "^1.7.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.4",
@@ -40,6 +39,7 @@
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.17.2",
     "rollup": "^0.66.6",
+    "rollup-plugin-minify-html-literals": "^1.2.5",
     "rollup-plugin-node-resolve": "^3.4.0",
     "terser": "^5.2.1"
   },

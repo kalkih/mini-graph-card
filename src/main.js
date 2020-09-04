@@ -356,7 +356,7 @@ class MiniGraphCard extends LitElement {
         style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
         fill='none'
         stroke-dasharray=${this.length[i] || 'none'} stroke-dashoffset=${this.length[i] || 'none'}
-        stroke=#fff
+        stroke='#fff'
         stroke-width=${this.config.line_width}
         d=${this.line[i]}
       />`;
