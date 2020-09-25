@@ -125,7 +125,9 @@ class MiniGraphCard extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     if (this.config.update_interval) {
-      this.updateOnInterval();
+      window.requestAnimationFrame(() => {
+        this.updateOnInterval();
+      });
       this.interval = setInterval(
         () => this.updateOnInterval(),
         this.config.update_interval * 1000,
