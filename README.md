@@ -26,10 +26,10 @@ This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community St
 2. Grab `mini-graph-card-bundle.js`:
 
   ```
-  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.9.4/mini-graph-card-bundle.js
+  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.9.4/mini-graph-card-bundle.js
   ```
 
-3. Add the resource reference as decribed below.
+3. Add the resource reference as described below.
 
 ### Add resource reference
 
@@ -41,9 +41,9 @@ If you configure Lovelace via YAML, add a reference to `mini-graph-card-bundle.j
       type: module
   ```
 
-Else, if you prefer the graphical editor, use the menu to add the resource:
+Else, if you prefer the visual editor, use the menu to add the resource:
 
-1. Make sure, advanced mode is enabled in your user profile (click on your user name to get there)
+1. Make sure, Advanced Mode is enabled in your user profile (click on your user name to get there)
 2. Navigate to Configuration -> Lovelace Dashboards -> Resources Tab. Hit orange (+) icon
 3. Enter URL `/local/mini-graph-card-bundle.js` and select type "JavaScript Module".
 4. Restart Home Assistant.
@@ -440,6 +440,82 @@ You can render non-numeric states by providing state_map config. For example thi
       label: Detected
 ```
 
+#### Group multiple cards
+Group multiple cards with `config-template-card` and add styles with `card-mod`.
+
+<img src="https://user-images.githubusercontent.com/19761269/94990324-d0bac100-0598-11eb-88e2-0e7b24f0013f.png" width="430" >
+
+```yaml
+cards:
+  - decimals: 0
+    entities:
+      - color: '#04E700'
+        entity: sensor.eth0_in
+      - color: '#FFCC00'
+        entity: sensor.eth0_out
+    font_size_header: 12.5
+    hours_to_show: 1
+    icon: 'mdi:ethernet'
+    line_width: 2.5
+    name: Network
+    points_per_hour: 70
+    show:
+      fill: false
+      icon_adaptive_color: true
+      labels: true
+      legend: false
+      points: false
+      state: false
+    style: |
+      ha-card > div:nth-child(-n+2) {
+        padding: 0 14px 0 14px !important
+      }
+      ha-card > .info {
+        padding: 0 14px 0px 14px !important
+      }
+    type: 'custom:mini-graph-card'
+  - cards:
+      - entities:
+          - color: '#04E700'
+            entity: sensor.eth0_in_total
+            name: Traffic In
+        font_size: 78
+        font_size_header: 12.5
+        show:
+          graph: false
+          icon_adaptive_color: true
+          name_adaptive_color: true
+        style: |
+          ha-card > div:nth-child(-n+2) {
+            padding: 0 14px 0 14px !important
+          }
+          ha-card > .info {
+            padding: 0 14px 0px 14px !important
+          }
+        type: 'custom:mini-graph-card'
+      - align_icon: left
+        align_state: right
+        entities:
+          - color: '#FFCC00'
+            entity: sensor.eth0_out_total
+            name: Traffic Out
+        font_size: 78
+        font_size_header: 12.5
+        show:
+          icon_adaptive_color: true
+          name_adaptive_color: true
+          graph: false
+        style: |
+          ha-card > div:nth-child(-n+2) {
+            padding: 0 14px 0 14px !important
+          }
+          ha-card > .info {
+            padding: 0 14px 0px 14px !important
+          }
+        type: 'custom:mini-graph-card'
+    type: horizontal-stack
+type: 'custom:vertical-stack-in-card'
+```
 
 ## Development
 
