@@ -10,28 +10,19 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
 ### HACS (recommended)
 
 This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community Store).  
-<small>*HACS is a third party community store and is not included in Home Assistant out of the box.*</small>
+<small>*HACS is a third-party community store and is not included in Home Assistant out of the box.*</small>
 
 ### Manual install
 
 1. Download and copy `mini-graph-card-bundle.js` from the [latest release](https://github.com/kalkih/mini-graph-card/releases/latest) into your `config/www` directory.
 
-2. Add the resource reference as decribed below.
-
-
-### CLI install
-
-1. Move into your `config/www` directory.
-
-2. Grab `mini-graph-card-bundle.js`:
+Grab `mini-graph-card-bundle.js`:
 
   ```
   $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.9.4/mini-graph-card-bundle.js
   ```
 
-3. Add the resource reference as described below.
-
-### Add resource reference
+2. Add the resource reference:
 
 If you configure Lovelace via YAML, add a reference to `mini-graph-card-bundle.js` inside your `configuration.yaml`:
 
@@ -41,21 +32,22 @@ If you configure Lovelace via YAML, add a reference to `mini-graph-card-bundle.j
       type: module
   ```
 
-Else, if you prefer the visual editor, use the menu to add the resource:
+If you're using the visual editor:
 
-1. Make sure, Advanced Mode is enabled in your user profile (click on your user name to get there)
+1. Make sure Advanced Mode is enabled in your user profile (click on your user name to get there)
 2. Navigate to Configuration -> Lovelace Dashboards -> Resources Tab. Hit orange (+) icon
 3. Enter URL `/local/mini-graph-card-bundle.js` and select type "JavaScript Module".
 4. Restart Home Assistant.
 
 ## Updating
-**If you have a version older than v0.0.8 installed, please delete the current files and follow the installation instructions again.**
 
-1. Find your `mini-graph-card-bundle.js` file in `config/www` or wherever you ended up storing it.
+**If you have a version older than v0.0.8 installed, please delete the current file and follow the install instructions again.**
+
+1. Find your `mini-graph-card-bundle.js` file in `config/www` or wherever you stored it.
 
 2. Replace the local file with the latest one attached in the [latest release](https://github.com/kalkih/mini-graph-card/releases/latest).
 
-3. Add the new version number to the end of the cards reference url in your `ui-lovelace.yaml` like below:
+3. Add the new version number to the end of the card's reference URL in your `ui-lovelace.yaml`:
 
   ```yaml
   resources:
@@ -63,7 +55,7 @@ Else, if you prefer the visual editor, use the menu to add the resource:
       type: module
   ```
 
-*You may need to empty the browsers cache if you have problems loading the updated card.*
+*You may need to clear your browser's cache if you have problems loading the updated card.*
 
 ## Using the card
 
@@ -79,7 +71,7 @@ Else, if you prefer the visual editor, use the menu to add the resource:
 | unit | string |  | v0.0.1 | Set a custom unit of measurement.
 | tap_action | [action object](#action-object-options) |  | v0.7.0 | Action on click/tap.
 | group | boolean | `false` | v0.2.0 | Disable paddings and box-shadow, useful when nesting the card.
-| hours_to_show | integer | `24` | v0.0.2 | Specify how many hours of history the graph should present.
+| hours_to_show | integer | `24` | v0.0.2 | Specify how many hours of history the graph should show.
 | points_per_hour | number | `0.5` | v0.2.0 | Specify amount of data points the graph should display for each hour, *(basically the detail/accuracy/smoothing of the graph)*.
 | aggregate_func | string | `avg` | v0.8.0 | Specify [aggregate function](#aggregate-functions) used to calculate point/bar in the graph.
 | group_by | string | `interval` | v0.8.0 | Specify type of grouping of data, dynamic `interval`, `date` or `hour`.
@@ -167,7 +159,7 @@ See [dynamic line color](#dynamic-line-color) for example usage.
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
 | value ***(required)*** | number |  | The threshold for the color stop.
-| color ***(required)*** | string |  | Color in 6 digit hex format (e.g. `#008080`).
+| color ***(required)*** | string |  | Color in 6-digit hex format (e.g. `#008080`).
 
 #### Action object options
 | Name | Type | Default | Options | Description |
@@ -211,7 +203,7 @@ The following theme variables can be set in your HA theme to customize the appea
 
 #### Single entity card
 
-![Single entity card](https://user-images.githubusercontent.com/457678/52009150-884d2500-24d2-11e9-9f2b-2981210d3897.png)
+<img src="https://user-images.githubusercontent.com/457678/52009150-884d2500-24d2-11e9-9f2b-2981210d3897.png" width="400">
 
 ```yaml
 - type: custom:mini-graph-card
@@ -221,7 +213,7 @@ The following theme variables can be set in your HA theme to customize the appea
 
 #### Alternative style
 
-![Alternative style](https://user-images.githubusercontent.com/457678/52009161-8daa6f80-24d2-11e9-8678-47658a181615.png)
+<img src="https://user-images.githubusercontent.com/457678/52009161-8daa6f80-24d2-11e9-8678-47658a181615.png" width="400">
 
 ```yaml
 - type: custom:mini-graph-card
@@ -235,7 +227,7 @@ The following theme variables can be set in your HA theme to customize the appea
 
 #### Multiple entities card
 
-![Multiple entities card](https://user-images.githubusercontent.com/457678/52009165-900cc980-24d2-11e9-8cc6-c77de58465b5.png)
+<img src="https://user-images.githubusercontent.com/457678/52009165-900cc980-24d2-11e9-8cc6-c77de58465b5.png" width="400">
 
 ```yaml
 - type: custom:mini-graph-card
@@ -250,7 +242,7 @@ The following theme variables can be set in your HA theme to customize the appea
 
 #### Bar chart card
 
-![Bar chart card](https://user-images.githubusercontent.com/457678/52970286-985e7300-33b3-11e9-89bc-1278c4e2ecf2.png)
+<img src="https://user-images.githubusercontent.com/457678/52970286-985e7300-33b3-11e9-89bc-1278c4e2ecf2.png" width="400">
 
 ```yaml
 - type: custom:mini-graph-card
@@ -262,7 +254,8 @@ The following theme variables can be set in your HA theme to customize the appea
 ```
 
 #### Show data from the past week
-![Show data from the past week](https://user-images.githubusercontent.com/457678/52009167-913df680-24d2-11e9-8732-52fc65e3f0d8.png)
+
+<img src="https://user-images.githubusercontent.com/457678/52009167-913df680-24d2-11e9-8732-52fc65e3f0d8.png" width="400">
 
 Use the `hours_to_show` option to specify how many hours of history the graph should represent.
 Use the `points_per_hour` option to specify the accuracy/detail of the graph.
@@ -292,7 +285,8 @@ Use the `show` option to show/hide UI elements.
 #### Horizontally stacked cards
 You can stack cards horizontally by using one or more `horizontal-stack(s)`.
 
-![Horizontally stacked cards](https://user-images.githubusercontent.com/457678/52009171-926f2380-24d2-11e9-9dd4-28f010608858.png)
+<img src="
+https://user-images.githubusercontent.com/457678/52009171-926f2380-24d2-11e9-9dd4-28f010608858.png" width="400">
 
 ```yaml
 - type: horizontal-stack
@@ -320,7 +314,8 @@ You can stack cards horizontally by using one or more `horizontal-stack(s)`.
 #### Dynamic line color
 Have the graph change line color dynamically.
 
-![Dynamic line color](https://user-images.githubusercontent.com/457678/52573150-cbd05900-2e19-11e9-9e01-740753169093.png)
+<img src="
+https://user-images.githubusercontent.com/457678/52573150-cbd05900-2e19-11e9-9e01-740753169093.png" width="400">
 
 ```yaml
 - type: custom:mini-graph-card
@@ -341,7 +336,8 @@ Have the graph change line color dynamically.
 Have one or more series plot on a separate y-axis, which appears on the right side of the graph. This example also
 shows turning off the line, points and legend.
 
-![Alternate y-axis](https://user-images.githubusercontent.com/373079/60764115-63cf2780-a0c6-11e9-8b9a-97fc47161180.png)
+<img src="
+https://user-images.githubusercontent.com/373079/60764115-63cf2780-a0c6-11e9-8b9a-97fc47161180.png" width="400">
 
 ```yaml
 - type: custom:mini-graph-card
@@ -367,7 +363,8 @@ shows turning off the line, points and legend.
 
 #### Grouping by date
 
-![mini_energy_daily](https://user-images.githubusercontent.com/8268674/66688605-3ffc1e80-ec7f-11e9-872e-935870a542f3.png)
+<img src="
+https://user-images.githubusercontent.com/8268674/66688605-3ffc1e80-ec7f-11e9-872e-935870a542f3.png" width="400">
 
 You can group values by date, this way you can visualize for example daily energy consumption.
 
@@ -387,7 +384,8 @@ You can group values by date, this way you can visualize for example daily energ
 You can decide how values are agreggated for points on graph. Example how to display min, max, avg temerature per day
 from last week.
 
-![mini_temperature_aggregate_daily](https://user-images.githubusercontent.com/8268674/66688610-44c0d280-ec7f-11e9-86c2-a728da239dab.png)
+<img src="
+https://user-images.githubusercontent.com/8268674/66688610-44c0d280-ec7f-11e9-86c2-a728da239dab.png" width="400">
 
 ```yaml
 - type: custom:mini-graph-card
@@ -410,7 +408,8 @@ from last week.
 
 #### Non-numeric sensor states
 
-![mini_binary_sensor](https://user-images.githubusercontent.com/8268674/66825779-e1ff5d80-ef42-11e9-89eb-673d2ada8d34.png)
+<img src="
+https://user-images.githubusercontent.com/8268674/66825779-e1ff5d80-ef42-11e9-89eb-673d2ada8d34.png" width="400">
 
 You can render non-numeric states by providing state_map config. For example this way you can show data comming from binary sensors.
 
@@ -443,89 +442,89 @@ You can render non-numeric states by providing state_map config. For example thi
 #### Group multiple cards
 Group multiple cards with `config-template-card` and add styles with `card-mod`.
 
-<img src="https://user-images.githubusercontent.com/19761269/94990324-d0bac100-0598-11eb-88e2-0e7b24f0013f.png" width="430" >
+<img src="https://user-images.githubusercontent.com/19761269/94990324-d0bac100-0598-11eb-88e2-0e7b24f0013f.png" width="400" >
 
 ```yaml
-cards:
-  - decimals: 0
-    entities:
-      - color: '#04E700'
-        entity: sensor.eth0_in
-      - color: '#FFCC00'
-        entity: sensor.eth0_out
-    font_size_header: 12.5
-    hours_to_show: 1
-    icon: 'mdi:ethernet'
-    line_width: 2.5
-    name: Network
-    points_per_hour: 70
-    show:
-      fill: false
-      icon_adaptive_color: true
-      labels: true
-      legend: false
-      points: false
-      state: false
-    style: |
-      ha-card > div:nth-child(-n+2) {
-        padding: 0 14px 0 14px !important
-      }
-      ha-card > .info {
-        padding: 0 14px 0px 14px !important
-      }
-    type: 'custom:mini-graph-card'
-  - cards:
-      - entities:
-          - color: '#04E700'
-            entity: sensor.eth0_in_total
-            name: Traffic In
-        font_size: 78
-        font_size_header: 12.5
-        show:
-          graph: false
-          icon_adaptive_color: true
-          name_adaptive_color: true
-        style: |
-          ha-card > div:nth-child(-n+2) {
-            padding: 0 14px 0 14px !important
-          }
-          ha-card > .info {
-            padding: 0 14px 0px 14px !important
-          }
-        type: 'custom:mini-graph-card'
-      - align_icon: left
-        align_state: right
-        entities:
-          - color: '#FFCC00'
-            entity: sensor.eth0_out_total
-            name: Traffic Out
-        font_size: 78
-        font_size_header: 12.5
-        show:
-          icon_adaptive_color: true
-          name_adaptive_color: true
-          graph: false
-        style: |
-          ha-card > div:nth-child(-n+2) {
-            padding: 0 14px 0 14px !important
-          }
-          ha-card > .info {
-            padding: 0 14px 0px 14px !important
-          }
-        type: 'custom:mini-graph-card'
-    type: horizontal-stack
-type: 'custom:vertical-stack-in-card'
+- cards:
+    - decimals: 0
+      entities:
+        - color: '#04E700'
+          entity: sensor.eth0_in
+        - color: '#FFCC00'
+          entity: sensor.eth0_out
+      font_size_header: 12.5
+      hours_to_show: 1
+      icon: 'mdi:ethernet'
+      line_width: 2.5
+      name: Network
+      points_per_hour: 70
+      show:
+        fill: false
+        icon_adaptive_color: true
+        labels: true
+        legend: false
+        points: false
+        state: false
+      style: |
+        ha-card > div:nth-child(-n+2) {
+          padding: 0 14px 0 14px !important
+        }
+        ha-card > .info {
+          padding: 0 14px 0px 14px !important
+        }
+      type: 'custom:mini-graph-card'
+    - cards:
+        - entities:
+            - color: '#04E700'
+              entity: sensor.eth0_in_total
+              name: Traffic In
+          font_size: 78
+          font_size_header: 12.5
+          show:
+            graph: false
+            icon_adaptive_color: true
+            name_adaptive_color: true
+          style: |
+            ha-card > div:nth-child(-n+2) {
+              padding: 0 14px 0 14px !important
+            }
+            ha-card > .info {
+              padding: 0 14px 0px 14px !important
+            }
+          type: 'custom:mini-graph-card'
+        - align_icon: left
+          align_state: right
+          entities:
+            - color: '#FFCC00'
+              entity: sensor.eth0_out_total
+              name: Traffic Out
+          font_size: 78
+          font_size_header: 12.5
+          show:
+            icon_adaptive_color: true
+            name_adaptive_color: true
+            graph: false
+          style: |
+            ha-card > div:nth-child(-n+2) {
+              padding: 0 14px 0 14px !important
+            }
+            ha-card > .info {
+              padding: 0 14px 0px 14px !important
+            }
+          type: 'custom:mini-graph-card'
+      type: horizontal-stack
+  type: 'custom:vertical-stack-in-card'
 ```
 
 ## Development
 
 1. Clone this repository into your `config/www` folder using git:
 
-```
+```bash
 $ git clone https://github.com/kalkih/mini-graph-card.git
 ```
 
-2. Add a reference to the card in your `ui-lovelace.yaml`:
+1. Add a reference to the card in your `ui-lovelace.yaml`:
 
 ```yaml
 resources:
@@ -538,7 +537,7 @@ resources:
 *Requires `nodejs` & `npm`.*
 
 1. Move into the `mini-graph-card` repo, checkout the *dev* branch & install dependencies:
-```console
+```bash
 $ cd mini-graph-card && git checkout dev && npm install
 ```
 
@@ -558,18 +557,14 @@ $ npm run build
 $ npm run watch
 ```
 
-*The new `mini-graph-card-bundle.js` will be build and ready inside `/dist`.*
+*The new `mini-graph-card-bundle.js` will build and be ready inside `/dist`.*
 
 **If you plan to submit a PR, please base it on the `dev` branch.**
 
 ## Getting errors?
-Make sure you have `javascript_version: latest` in your `configuration.yaml` under `frontend:`.
-
-Make sure you have the latest versions of `mini-graph-card.js` & `mini-graph-lib.js`.
-
-If you have issues after updating the card, try clearing your browser cache.
-
-If you have issues displaying the card in older browsers, try changing `type: module` to `type: js` at the card reference in `ui-lovelace.yaml`.
+- Make sure you have the latest versions of `mini-graph-card.js` & `mini-graph-lib.js`.
+- If you have issues after updating the card, try clearing your browser cache.
+- If you have issues displaying the card in older browsers, try changing `type: module` to `type: js` at the card reference in `ui-lovelace.yaml`.
 
 ## License
 This project is under the MIT license.
