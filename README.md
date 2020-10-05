@@ -1,7 +1,7 @@
 # Lovelace Mini Graph Card
 A minimalistic and customizable graph card for [Home Assistant](https://github.com/home-assistant/home-assistant) Lovelace UI.
 
-The card works with entities from within the **sensor** & **binary_sensor** domain and displays the sensors current state as well as a line graph representation of the history.
+The card works with entities from within the **sensor** & **binary_sensor** domains and displays sensors' current state as well as a line graph representation of their history.
 
 ![Preview](https://user-images.githubusercontent.com/457678/52977264-edf34980-33cc-11e9-903b-cee43b307ed8.png)
 
