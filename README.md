@@ -285,8 +285,7 @@ Use the `show` option to show/hide UI elements.
 #### Horizontally stacked cards
 You can stack cards horizontally by using one or more `horizontal-stack(s)`.
 
-<img src="
-https://user-images.githubusercontent.com/457678/52009171-926f2380-24d2-11e9-9dd4-28f010608858.png" width="400">
+<img src="https://user-images.githubusercontent.com/457678/52009171-926f2380-24d2-11e9-9dd4-28f010608858.png" width="400">
 
 ```yaml
 - type: horizontal-stack
@@ -314,8 +313,7 @@ https://user-images.githubusercontent.com/457678/52009171-926f2380-24d2-11e9-9dd
 #### Dynamic line color
 Have the graph change line color dynamically.
 
-<img src="
-https://user-images.githubusercontent.com/457678/52573150-cbd05900-2e19-11e9-9e01-740753169093.png" width="400">
+<img src="https://user-images.githubusercontent.com/457678/52573150-cbd05900-2e19-11e9-9e01-740753169093.png" width="400">
 
 ```yaml
 - type: custom:mini-graph-card
@@ -336,8 +334,7 @@ https://user-images.githubusercontent.com/457678/52573150-cbd05900-2e19-11e9-9e0
 Have one or more series plot on a separate y-axis, which appears on the right side of the graph. This example also
 shows turning off the line, points and legend.
 
-<img src="
-https://user-images.githubusercontent.com/373079/60764115-63cf2780-a0c6-11e9-8b9a-97fc47161180.png" width="400">
+<img src="https://user-images.githubusercontent.com/373079/60764115-63cf2780-a0c6-11e9-8b9a-97fc47161180.png" width="400">
 
 ```yaml
 - type: custom:mini-graph-card
@@ -363,8 +360,7 @@ https://user-images.githubusercontent.com/373079/60764115-63cf2780-a0c6-11e9-8b9
 
 #### Grouping by date
 
-<img src="
-https://user-images.githubusercontent.com/8268674/66688605-3ffc1e80-ec7f-11e9-872e-935870a542f3.png" width="400">
+<img src="https://user-images.githubusercontent.com/8268674/66688605-3ffc1e80-ec7f-11e9-872e-935870a542f3.png" width="400">
 
 You can group values by date, this way you can visualize for example daily energy consumption.
 
@@ -384,8 +380,7 @@ You can group values by date, this way you can visualize for example daily energ
 You can decide how values are agreggated for points on graph. Example how to display min, max, avg temerature per day
 from last week.
 
-<img src="
-https://user-images.githubusercontent.com/8268674/66688610-44c0d280-ec7f-11e9-86c2-a728da239dab.png" width="400">
+<img src="https://user-images.githubusercontent.com/8268674/66688610-44c0d280-ec7f-11e9-86c2-a728da239dab.png" width="400">
 
 ```yaml
 - type: custom:mini-graph-card
@@ -408,8 +403,7 @@ https://user-images.githubusercontent.com/8268674/66688610-44c0d280-ec7f-11e9-86
 
 #### Non-numeric sensor states
 
-<img src="
-https://user-images.githubusercontent.com/8268674/66825779-e1ff5d80-ef42-11e9-89eb-673d2ada8d34.png" width="400">
+<img src="https://user-images.githubusercontent.com/8268674/66825779-e1ff5d80-ef42-11e9-89eb-673d2ada8d34.png" width="400">
 
 You can render non-numeric states by providing state_map config. For example this way you can show data comming from binary sensors.
 
