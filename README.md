@@ -10,11 +10,20 @@ The card works with entities from the **sensor** and **binary_sensor** domains a
 ### HACS (recommended)
 
 This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community Store).  
-<small>*HACS is a third-party community store and is not included in Home Assistant out of the box.*</small>
+
+1. Open HACS and navigate to Frontend,
+2. Hit the add button and select `mini-graph-card` from the list.
+   - If it doesn't appear, type `mini-graph`...
+3. Click <kbd>Install this repository in HACS</kbd>, and hit <kbd>Install</kbd>,
+4. Click <kbd>Reload</kbd> when HACS prompts you to do so, otherwise refresh your browser.
+
+<small>*HACS is a third-party community store and isn't included with Home Assistant.*</small>
 
 ### Manual install
 
-1. Download and copy `mini-graph-card-bundle.js` from the [latest release](https://github.com/kalkih/mini-graph-card/releases/latest) into your `config/www` directory. For more info, [see this guide](https://github.com/thomasloven/hass-config/wiki/Lovelace-Plugins).
+1. Download and copy `mini-graph-card-bundle.js` from the [latest release](https://github.com/kalkih/mini-graph-card/releases/latest) into your `config/www` directory. 
+
+For more info, [see this guide](https://github.com/thomasloven/hass-config/wiki/Lovelace-Plugins).
 
 Grab `mini-graph-card-bundle.js`:
 
@@ -24,6 +33,13 @@ Grab `mini-graph-card-bundle.js`:
 
 2. Add the resource reference:
 
+- If you're using the visual editor (which you probably are):
+
+  1. First make sure `Advanced Mode` is enabled in your user profile (click on your user name to get there)
+  2. Navigate to <kbd>Configuration</kbd> -> <kbd>Lovelace Dashboards</kbd> -> <kbd>Resources</kbd>,
+  3. Hit the add button, type `/local/mini-graph-card-bundle.js` and hit <kbd>Create</kbd>, 
+  4. Refresh your browser.
+  
 - If you configure Lovelace via YAML, add the following to your `configuration.yaml`:
 
   ```yaml
@@ -31,13 +47,6 @@ Grab `mini-graph-card-bundle.js`:
     - url: /local/mini-graph-card-bundle.js?v=0.9.4
       type: module
   ```
-
-- If you're using the visual editor:
-
-  1. Make sure `Advanced Mode` is enabled in your user profile (click on your user name to get there)
-  2. Navigate to <kbd>Configuration</kbd> -> <kbd>Lovelace Dashboards</kbd> -> <kbd>Resources</kbd>. 
-  3. Hit the add button and type `/local/mini-graph-card-bundle.js` and select "JavaScript Module".
-  4. Hit <kbd>Save</kbd> and refresh your browser or restart Home Assistant.
 
 ## Updating
 
