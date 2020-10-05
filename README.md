@@ -516,7 +516,7 @@ Group multiple cards with `config-template-card` and add styles with `card-mod`.
 $ git clone https://github.com/kalkih/mini-graph-card.git
 ```
 
-1. Add a reference to the card in your `ui-lovelace.yaml`:
+2. Add a reference to the card in your `ui-lovelace.yaml`:
 
 ```yaml
 resources:
@@ -526,7 +526,7 @@ resources:
 
 ### Instructions
 
-*Requires `nodejs` & `npm`.*
+*Requires `nodejs` & `npm` to be installed.*
 
 1. Move into the `mini-graph-card` repo, checkout the *dev* branch & install dependencies:
 ```bash
