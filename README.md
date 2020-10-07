@@ -101,6 +101,8 @@ This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community St
 | smoothing | boolean | `true` | v0.8.0 | Whether to make graph line smooth.
 | state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert (order matters as position becomes a value on the graph).
 | value_factor | number | 0 | v0.9.4 | Scale value by order of magnitude (e.g. convert Watts to kilo Watts), use negative value to scale down.
+| logarithmic | boolean | `false` | TBD | Use a Logarithmic scale for the graph
+
 
 #### Entities object
 Entities may be listed directly (as per `sensor.temperature` in the example below), or defined using
