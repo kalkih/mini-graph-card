@@ -122,7 +122,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | name | string |  | Set a custom display name, defaults to entity's friendly_name.
 | color | string |  | Set a custom color, overrides all other color options including thresholds.
 | unit | string |  | Set a custom unit of measurement, overrides `unit` set in base config.
-| aggregate_func | string |  | Override for aggregate function used to calculate point on the graph, `avg`, `min`, `max`, `first`, `last`, `sum`.
+| aggregate_func | string |  | Override for aggregate function used to calculate point on the graph, `avg`, `median`, `min`, `max`, `first`, `last`, `sum`.
 | show_state | boolean |  | Display the current state.
 | show_indicator | boolean |  | Display a color indicator next to the state, (only when more than two states are visible).
 | show_graph | boolean |  | Set to false to completely hide the entity in the graph.
@@ -194,6 +194,7 @@ These buckets are converted later to single point/bar on the graph. Aggregate fu
 | Name | Since | Description |
 |------|:-------:|-------------|
 | `avg` | v0.8.0 | Average
+| `median` | NEXT_VERSION | Median
 | `min` | v0.8.0 | Minimum - lowest value
 | `max` | v0.8.0 | Maximum - largest value
 | `first` | v0.9.0 |
