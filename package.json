@@ -20,8 +20,10 @@
   "license": "MIT",
   "dependencies": {
     "@kalkih/lz-string": "^1.4.5",
-    "lit-element": "^2.2.1",
-    "localforage": "^1.7.3"
+    "cjs": "0.0.11",
+    "lit-element": "^2.4.0",
+    "localforage": "^1.9.0",
+    "lz-string": "^1.4.4"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.4",
@@ -33,11 +35,12 @@
     "@babel/plugin-transform-template-literals": "^7.2.0",
     "@babel/preset-env": "^7.3.1",
     "@rollup/plugin-json": "^4.1.0",
+    "babel-cli": "^6.26.0",
     "babel-plugin-iife-wrap": "^1.1.0",
     "babel-preset-minify": "^0.5.0",
-    "eslint": "^5.3.0",
-    "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.17.2",
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.2.0",
+    "eslint-plugin-import": "^2.22.1",
     "rollup": "^0.66.6",
     "rollup-plugin-node-resolve": "^3.4.0"
   },
