@@ -1,4 +1,4 @@
-#Dev repro to enable the card to handle attributes from an entity.
+# Dev repro to enable the card to handle attributes from an entity.
 
 # Lovelace Mini Graph Card
 A minimalistic and customizable graph card for [Home Assistant](https://github.com/home-assistant/home-assistant) Lovelace UI.
