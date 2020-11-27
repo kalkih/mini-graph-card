@@ -1,4 +1,6 @@
 # Dev repro to enable the card to handle attributes from an entity.
+<img src="https://user-images.githubusercontent.com/2522498/100449631-8cd5cb00-30b4-11eb-9c36-1470c9b87c80.png" width="250" height="400" />
+<img src="https://user-images.githubusercontent.com/2522498/100449687-a1b25e80-30b4-11eb-9850-92031adbed0b.png" width="250" height="250" />
 
 # Lovelace Mini Graph Card
 A minimalistic and customizable graph card for [Home Assistant](https://github.com/home-assistant/home-assistant) Lovelace UI.
