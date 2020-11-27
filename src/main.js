@@ -96,6 +96,18 @@ class MiniGraphCard extends LitElement {
     };
   }
 
+  getEntityValue(entity, i) {
+    if (this.config.entities[i].attribute) {
+      if (entity.attributes && entity.attributes[this.config.entities[i].attribute] !== undefined) {
+        return entity.attributes[this.config.entities[i].attribute];
+      } else {
+        return Number.NaN;
+      }
+    } else {
+      return entity.state;
+    }
+  }
+
   setConfig(config) {
     const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
 
@@ -144,7 +156,8 @@ class MiniGraphCard extends LitElement {
     if (!this.entity[0]) return false;
     if (UPDATE_PROPS.some(prop => changedProps.has(prop))) {
       this.color = this.intColor(
-        this.tooltip.value !== undefined ? this.tooltip.value : this.entity[0].state,
+        // eslint-disable-next-line max-len
+        this.tooltip.value !== undefined ? this.tooltip.value : this.getEntityValue(this.entity[0], 0),
         this.tooltip.entity || 0,
       );
       return true;
@@ -226,7 +239,7 @@ class MiniGraphCard extends LitElement {
 
   renderStates() {
     const { entity, value } = this.tooltip;
-    const state = value !== undefined ? value : this.entity[0].state;
+    const state = value !== undefined ? value : this.getEntityValue(this.entity[0], 0);
     const color = this.config.entities[0].state_adaptive_color ? `color: ${this.color};` : '';
     if (this.config.show.state)
       return html`
@@ -301,9 +314,9 @@ class MiniGraphCard extends LitElement {
         ${this.visibleLegends.map(entity => html`
           <div class="graph__legend__item"
             @click=${e => this.handlePopup(e, this.entity[entity.index])}
-            @mouseenter=${() => this.setTooltip(entity.index, -1, this.entity[entity.index].state, 'Current')}
+            @mouseenter=${() => this.setTooltip(entity.index, -1, this.getEntityValue(this.entity[entity.index], entity.index), 'Current')}
             @mouseleave=${() => (this.tooltip = {})}>
-            ${this.renderIndicator(this.entity[entity.index].state, entity.index)}
+            ${this.renderIndicator(this.getEntityValue(this.entity[entity.index], entity.index), entity.index)}
             <span class="ellipsis">${this.computeName(entity.index)}</span>
           </div>
         `)}
@@ -386,7 +399,7 @@ class MiniGraphCard extends LitElement {
 
   renderSvgPoints(points, i) {
     if (!points) return;
-    const color = this.computeColor(this.entity[i].state, i);
+    const color = this.computeColor(this.getEntityValue(this.entity[i], i), i);
     return svg`
       <g class='line--points'
         ?tooltip=${this.tooltip.entity === i}
@@ -419,7 +432,7 @@ class MiniGraphCard extends LitElement {
     if (!line) return;
     const fill = this.gradient[i]
       ? `url(#grad-${this.id}-${i})`
-      : this.computeColor(this.entity[i].state, i);
+      : this.computeColor(this.getEntityValue(this.entity[i], i), i);
     return svg`
       <rect class='line--rect'
         ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== i}
@@ -433,7 +446,7 @@ class MiniGraphCard extends LitElement {
     if (!fill) return;
     const svgFill = this.gradient[i]
       ? `url(#grad-${this.id}-${i})`
-      : this.intColor(this.entity[i].state, i);
+      : this.intColor(this.getEntityValue(this.entity[i], i), i);
     return svg`
       <rect class='fill--rect'
         ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== i}
@@ -753,15 +766,21 @@ class MiniGraphCard extends LitElement {
     ];
   }
 
-  async getCache(key, compressed) {
-    const data = await localForage.getItem(key + (compressed ? '' : '-raw'));
+  async getCache(key, compressed, attribute) {
+    let newKey = key;
+    if (attribute)
+      newKey = `${newKey}-${attribute}`;
+    const data = await localForage.getItem(newKey + (compressed ? '' : '-raw'));
     return data ? (compressed ? decompress(data) : data) : null;
   }
 
-  async setCache(key, data, compressed) {
+  async setCache(key, data, compressed, attribute) {
+    let newKey = key;
+    if (attribute)
+      newKey = `${newKey}-${attribute}`;
     return compressed
-      ? localForage.setItem(key, compress(data))
-      : localForage.setItem(`${key}-raw`, data);
+      ? localForage.setItem(newKey, compress(data))
+      : localForage.setItem(`${newKey}-raw`, data);
   }
 
   async updateEntity(entity, index, initStart, end) {
@@ -776,7 +795,8 @@ class MiniGraphCard extends LitElement {
     let skipInitialState = false;
 
     const history = this.config.cache
-      ? await this.getCache(entity.entity_id, this.config.useCompress)
+      // eslint-disable-next-line max-len
+      ? await this.getCache(entity.entity_id, this.config.useCompress, this.config.entities[index].attribute)
       : undefined;
     if (history && history.hours_to_show === this.config.hours_to_show) {
       stateHistory = history.data;
@@ -792,7 +812,9 @@ class MiniGraphCard extends LitElement {
 
         stateHistory = stateHistory.slice(currDataIndex, stateHistory.length);
         // skip initial state when fetching recent/not-cached data
-        skipInitialState = true;
+        // if state is used a data source
+        if (!this.config.entities[index].attribute)
+          skipInitialState = true;
       } else {
         // there were no states which could be used in current graph so clearing
         stateHistory = [];
@@ -804,17 +826,38 @@ class MiniGraphCard extends LitElement {
       }
     }
 
-    let newStateHistory = await this.fetchRecent(entity.entity_id, start, end, skipInitialState);
+    // load all changes if attribute is used as data source
+    // if attribute is used as data source, then significantChangesOnly must be 0
+    const significantChangesOnly = !this.config.entities[index].attribute;
+    // eslint-disable-next-line max-len
+    let newStateHistory = await this.fetchRecent(entity.entity_id, start, end, skipInitialState, significantChangesOnly);
     if (newStateHistory[0] && newStateHistory[0].length > 0) {
       // check if we should convert states to numeric values
       if (this.config.state_map.length > 0) {
         newStateHistory[0].forEach(item => this._convertState(item));
       }
 
-      newStateHistory = newStateHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
+      if (this.config.entities[index].attribute) {
+        newStateHistory = newStateHistory[0].filter((item) => {
+          // eslint-disable-next-line max-len
+          if (item.attributes && item.attributes[this.config.entities[index].attribute] !== undefined) {
+            // eslint-disable-next-line max-len
+            return !Number.isNaN(parseFloat(item.attributes[this.config.entities[index].attribute]));
+          } else {
+            // could be reached, if database contains an entity in undefined state or
+            // the configured attributes doenst exists in an old database element
+            return false;
+          }
+        });
+      } else {
+        // eslint-disable-next-line max-len
+        newStateHistory = newStateHistory[0].filter(item => !Number.isNaN(parseFloat(this.getEntityValue(item, index))));
+      }
+
       newStateHistory = newStateHistory.map(item => ({
-        last_changed: item.last_changed,
-        state: item.state,
+        // eslint-disable-next-line max-len
+        last_changed: (this.config.entities[index].attribute) ? item.last_updated : item.last_changed,
+        state: this.getEntityValue(item, index),
       }));
       stateHistory = [...stateHistory, ...newStateHistory];
 
@@ -824,7 +867,7 @@ class MiniGraphCard extends LitElement {
             hours_to_show: this.config.hours_to_show,
             last_fetched: new Date(),
             data: stateHistory,
-          }, this.config.useCompress)
+          }, this.config.useCompress, this.config.entities[index].attribute)
           .catch((err) => {
             log(err);
             localForage.clear();
@@ -846,13 +889,16 @@ class MiniGraphCard extends LitElement {
     }
   }
 
-  async fetchRecent(entityId, start, end, skipInitialState) {
+  async fetchRecent(entityId, start, end, skipInitialState, significantChangesOnly) {
     let url = 'history/period';
     if (start) url += `/${start.toISOString()}`;
     url += `?filter_entity_id=${entityId}`;
     if (end) url += `&end_time=${end.toISOString()}`;
     if (skipInitialState) url += '&skip_initial_state';
-    url += '&minimal_response';
+    if (significantChangesOnly)
+      url += '&significant_changes_only=1&minimal_response';
+    else
+      url += '&significant_changes_only=0';
     return this._hass.callApi('GET', url);
   }
 
