@@ -838,9 +838,15 @@ class MiniGraphCard extends LitElement {
       }
 
       if (this.config.entities[index].attribute) {
-        newStateHistory = newStateHistory[0].filter((item) => {
+        newStateHistory = newStateHistory[0].filter((item, i, self) => {
           // eslint-disable-next-line max-len
           if (item.attributes && item.attributes[this.config.entities[index].attribute] !== undefined) {
+            // check if the attribute value changed compared to the predecessor
+            // if the value hasnt changed, ignore the value
+            // eslint-disable-next-line max-len
+            if (i > 0 && self[i - 1].attributes[this.config.entities[index].attribute] === self[i].attributes[this.config.entities[index].attribute]) {
+              return false;
+            }
             // eslint-disable-next-line max-len
             return !Number.isNaN(parseFloat(item.attributes[this.config.entities[index].attribute]));
           } else {
@@ -859,6 +865,14 @@ class MiniGraphCard extends LitElement {
         last_changed: (this.config.entities[index].attribute) ? item.last_updated : item.last_changed,
         state: this.getEntityValue(item, index),
       }));
+
+      // check if first element in newStateHistory differs from last element in stateHistory
+      // if the element has the same value, it is dropped before merging the arrays
+      if (this.config.entities[index].attribute && (stateHistory.length > 0)) {
+        if (stateHistory[stateHistory.length - 1].state === newStateHistory[0].state) {
+          newStateHistory.shift();
+        }
+      }
       stateHistory = [...stateHistory, ...newStateHistory];
 
       if (this.config.cache) {
