@@ -67,9 +67,9 @@ class MiniGraphCard extends LitElement {
       this.stateChanged = true;
       this.entity = [...this.entity];
       if (!this.config.update_interval && !this.updating) {
-        setTimeout(() => {
+        setTimeout(async () => {
           this.updateQueue = [...queue, ...this.updateQueue];
-          this.updateData();
+          await this.updateData();
         }, this.initial ? 0 : 1000);
       } else {
         this.updateQueue = [...queue, ...this.updateQueue];
@@ -93,6 +93,8 @@ class MiniGraphCard extends LitElement {
       tooltip: {},
       updateQueue: [],
       color: String,
+      fetchRecentUpdate: [],
+      fetchRecentCache: [],
     };
   }
 
@@ -693,18 +695,27 @@ class MiniGraphCard extends LitElement {
 
   async updateData({ config } = this) {
     this.updating = true;
-
+    this.fetchRecentUpdate = new Map();
+    this.fetchRecentCache = new Map();
     const end = this.getEndDate();
     const start = new Date(end);
     start.setMilliseconds(start.getMilliseconds() - getMilli(config.hours_to_show));
 
     try {
-      const promise = this.entity.map((entity, i) => this.updateEntity(entity, i, start, end));
+      // eslint-disable-next-line max-len
+      const promise = this.entity.map((entity, i) => this.updateEntityFirstPart(entity, i, start, end));
       await Promise.all(promise);
     } catch (err) {
       log(err);
     }
 
+    try {
+      // eslint-disable-next-line max-len
+      const promise = this.entity.map((entity, i) => this.updateEntitySecondPart(entity, i, start));
+      await Promise.all(promise);
+    } catch (err) {
+      log(err);
+    }
 
     if (config.show.graph) {
       this.entity.forEach((entity, i) => {
@@ -783,14 +794,16 @@ class MiniGraphCard extends LitElement {
       : localForage.setItem(`${newKey}-raw`, data);
   }
 
-  async updateEntity(entity, index, initStart, end) {
+  async updateEntityFirstPart(entity, index, initStart, end) {
     if (!entity
       || !this.updateQueue.includes(`${entity.entity_id}-${index}`)
       || this.config.entities[index].show_graph === false
     ) return;
-    this.updateQueue = this.updateQueue.filter(entry => entry !== `${entity.entity_id}-${index}`);
+    if (this.fetchRecentUpdate.has(`${entity.entity_id}`)) {
+      return;
+    }
+    this.fetchRecentUpdate.set(`${entity.entity_id}`, true);
 
-    let stateHistory = [];
     let start = initStart;
     let skipInitialState = false;
 
@@ -799,25 +812,12 @@ class MiniGraphCard extends LitElement {
       ? await this.getCache(entity.entity_id, this.config.useCompress, this.config.entities[index].attribute)
       : undefined;
     if (history && history.hours_to_show === this.config.hours_to_show) {
-      stateHistory = history.data;
-
-      let currDataIndex = stateHistory.findIndex(item => new Date(item.last_changed) > initStart);
+      const currDataIndex = history.data.findIndex(item => new Date(item.last_changed) > initStart);
       if (currDataIndex !== -1) {
-        if (currDataIndex > 0) {
-          // include previous item
-          currDataIndex -= 1;
-          // but change it's last changed time
-          stateHistory[currDataIndex].last_changed = initStart;
-        }
-
-        stateHistory = stateHistory.slice(currDataIndex, stateHistory.length);
         // skip initial state when fetching recent/not-cached data
         // if state is used a data source
         if (!this.config.entities[index].attribute)
           skipInitialState = true;
-      } else {
-        // there were no states which could be used in current graph so clearing
-        stateHistory = [];
       }
 
       const lastFetched = new Date(history.last_fetched);
@@ -830,50 +830,87 @@ class MiniGraphCard extends LitElement {
     // if attribute is used as data source, then significantChangesOnly must be 0
     const significantChangesOnly = !this.config.entities[index].attribute;
     // eslint-disable-next-line max-len
-    let newStateHistory = await this.fetchRecent(entity.entity_id, start, end, skipInitialState, significantChangesOnly);
-    if (newStateHistory[0] && newStateHistory[0].length > 0) {
-      // check if we should convert states to numeric values
-      if (this.config.state_map.length > 0) {
-        newStateHistory[0].forEach(item => this._convertState(item));
-      }
+    const recentData = await this.fetchRecent(entity.entity_id, start, end, skipInitialState, significantChangesOnly);
+    this.fetchRecentCache.set(`${entity.entity_id}`, recentData);
+  }
 
-      if (this.config.entities[index].attribute) {
-        newStateHistory = newStateHistory[0].filter((item, i, self) => {
-          // eslint-disable-next-line max-len
-          if (item.attributes && item.attributes[this.config.entities[index].attribute] !== undefined) {
-            // check if the attribute value changed compared to the predecessor
-            // if the value hasnt changed, ignore the value
-            // eslint-disable-next-line max-len
-            if (i > 0 && self[i - 1].attributes[this.config.entities[index].attribute] === self[i].attributes[this.config.entities[index].attribute]) {
-              return false;
-            }
-            // eslint-disable-next-line max-len
-            return !Number.isNaN(parseFloat(item.attributes[this.config.entities[index].attribute]));
-          } else {
-            // could be reached, if database contains an entity in undefined state or
-            // the configured attributes doenst exists in an old database element
-            return false;
+  async updateEntitySecondPart(entity, index, initStart) {
+    if (!entity
+      || !this.updateQueue.includes(`${entity.entity_id}-${index}`)
+      || this.config.entities[index].show_graph === false
+    ) return;
+    this.updateQueue = this.updateQueue.filter(entry => entry !== `${entity.entity_id}-${index}`);
+    let stateHistory = [];
+    if (this.fetchRecentCache.has(`${entity.entity_id}`)) {
+      const history = this.config.cache
+        // eslint-disable-next-line max-len
+        ? await this.getCache(entity.entity_id, this.config.useCompress, this.config.entities[index].attribute)
+        : undefined;
+      if (history && history.hours_to_show === this.config.hours_to_show) {
+        stateHistory = history.data;
+        let currDataIndex = stateHistory.findIndex(item => new Date(item.last_changed) > initStart);
+        if (currDataIndex !== -1) {
+          if (currDataIndex > 0) {
+            // include previous item
+            currDataIndex -= 1;
+            // but change it's last changed time
+            stateHistory[currDataIndex].last_changed = initStart;
           }
-        });
-      } else {
-        // eslint-disable-next-line max-len
-        newStateHistory = newStateHistory[0].filter(item => !Number.isNaN(parseFloat(this.getEntityValue(item, index))));
-      }
 
-      newStateHistory = newStateHistory.map(item => ({
-        // eslint-disable-next-line max-len
-        last_changed: (this.config.entities[index].attribute) ? item.last_updated : item.last_changed,
-        state: this.getEntityValue(item, index),
-      }));
-
-      // check if first element in newStateHistory differs from last element in stateHistory
-      // if the element has the same value, it is dropped before merging the arrays
-      if (this.config.entities[index].attribute && (stateHistory.length > 0)) {
-        if (stateHistory[stateHistory.length - 1].state === newStateHistory[0].state) {
-          newStateHistory.shift();
+          stateHistory = stateHistory.slice(currDataIndex, stateHistory.length);
+        } else {
+          // there were no states which could be used in current graph so clearing
+          stateHistory = [];
         }
       }
-      stateHistory = [...stateHistory, ...newStateHistory];
+
+      let newStateHistory = this.fetchRecentCache.get(`${entity.entity_id}`);
+      if (newStateHistory[0] && newStateHistory[0].length > 0) {
+        // check if we should convert states to numeric values
+        if (this.config.state_map.length > 0) {
+          newStateHistory[0].forEach(item => this._convertState(item));
+        }
+
+        if (this.config.entities[index].attribute) {
+          newStateHistory = newStateHistory[0].filter((item, i, self) => {
+            // eslint-disable-next-line max-len
+            if (item.attributes && item.attributes[this.config.entities[index].attribute] !== undefined) {
+              // check if the attribute value changed compared to the predecessor
+              // if the value hasnt changed, ignore the value
+              // eslint-disable-next-line max-len
+              if (i > 0 && self[i - 1].attributes[this.config.entities[index].attribute] === self[i].attributes[this.config.entities[index].attribute]) {
+                return false;
+              }
+              // eslint-disable-next-line max-len
+              return !Number.isNaN(parseFloat(item.attributes[this.config.entities[index].attribute]));
+            } else {
+              // could be reached, if database contains an entity in undefined state or
+              // the configured attributes doenst exists in an old database element
+              return false;
+            }
+          });
+        } else {
+          // eslint-disable-next-line max-len
+          newStateHistory = newStateHistory[0].filter(item => !Number.isNaN(parseFloat(this.getEntityValue(item, index))));
+        }
+
+        newStateHistory = newStateHistory.map(item => ({
+          // eslint-disable-next-line max-len
+          last_changed: (this.config.entities[index].attribute) ? item.last_updated : item.last_changed,
+          state: this.getEntityValue(item, index),
+        }));
+
+        // check if first element in newStateHistory differs from last element in stateHistory
+        // if the element has the same value, it is dropped before merging the arrays
+        if (this.config.entities[index].attribute && (stateHistory.length > 0)) {
+          if (stateHistory[stateHistory.length - 1].state === newStateHistory[0].state) {
+            newStateHistory.shift();
+          }
+        }
+        stateHistory = [...stateHistory, ...newStateHistory];
+      } else {
+        console.log(`ERROR: fetchRecentCache key not found: ${entity.entity_id}`);
+      }
 
       if (this.config.cache) {
         this
@@ -964,8 +1001,10 @@ class MiniGraphCard extends LitElement {
     if (!this.config.update_interval) {
       const interval = 1 / this.config.points_per_hour;
       clearInterval(this.interval);
-      this.interval = setInterval(() => {
-        if (!this.updating) this.updateData();
+      this.interval = setInterval(async () => {
+        if (!this.updating) {
+          await this.updateData();
+        }
       }, interval * ONE_HOUR);
     }
   }
