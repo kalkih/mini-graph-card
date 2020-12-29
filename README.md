@@ -202,7 +202,7 @@ These buckets are converted later to single point/bar on the graph. Aggregate fu
 | `delta` | v0.9.4 | Calculates difference between max and min value
 
 ### Theme variables
-The following theme variables can be set in your HA theme to customize the appearence of the card.
+The following theme variables can be set in your HA theme to customize the appearance of the card.
 
 | Name | Default | Description |
 |------|:-------:|-------------|
@@ -386,7 +386,7 @@ You can group values by date, this way you can visualize for example daily energ
 ```
 
 #### Data aggregation functions
-You can decide how values are agreggated for points on graph. Example how to display min, max, avg temerature per day
+You can decide how values are aggregated for points on graph. Example how to display min, max, avg temperature per day
 from last week.
 
 ![mini_temperature_aggregate_daily](https://user-images.githubusercontent.com/8268674/66688610-44c0d280-ec7f-11e9-86c2-a728da239dab.png)
@@ -414,7 +414,7 @@ from last week.
 
 ![mini_binary_sensor](https://user-images.githubusercontent.com/8268674/66825779-e1ff5d80-ef42-11e9-89eb-673d2ada8d34.png)
 
-You can render non-numeric states by providing state_map config. For example this way you can show data comming from binary sensors.
+You can render non-numeric states by providing state_map config. For example this way you can show data coming from binary sensors.
 
 ```yaml
 - type: custom:mini-graph-card
