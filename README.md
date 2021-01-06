@@ -26,7 +26,7 @@ This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community St
 2. Grab `mini-graph-card-bundle.js`:
 
   ```
-  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.9.4/mini-graph-card-bundle.js
+  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.10.0/mini-graph-card-bundle.js
   ```
 
 3. Add the resource reference as decribed below.
@@ -37,7 +37,7 @@ If you configure Lovelace via YAML, add a reference to `mini-graph-card-bundle.j
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.9.4
+    - url: /local/mini-graph-card-bundle.js?v=0.10.0
       type: module
   ```
 
@@ -59,7 +59,7 @@ Else, if you prefer the graphical editor, use the menu to add the resource:
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.9.4
+    - url: /local/mini-graph-card-bundle.js?v=0.10.0
       type: module
   ```
 
@@ -109,7 +109,7 @@ Else, if you prefer the graphical editor, use the menu to add the resource:
 | smoothing | boolean | `true` | v0.8.0 | Whether to make graph line smooth.
 | state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert (order matters as position becomes a value on the graph).
 | value_factor | number | 0 | v0.9.4 | Scale value by order of magnitude (e.g. convert Watts to kilo Watts), use negative value to scale down.
-| logarithmic | boolean | `false` | TBD | Use a Logarithmic scale for the graph
+| logarithmic | boolean | `false` | v0.10.0 | Use a Logarithmic scale for the graph
 
 
 #### Entities object

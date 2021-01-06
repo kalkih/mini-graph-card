@@ -1,3 +1,18 @@
+## v0.10.0
+
+### ✨ NEW
+- Added logarithmic scale option (#468) @Hypfer
+- Make card appear in lovelace card picker #493 (#492) @dcs8
+- Display card documentation in HACS @cgoette
+
+### 🔨 FIXED
+- Fix initial graph load when using 'update_interval' option #465 (#452) @PronkMedia
+
+### 📝 DOCUMENTATION
+- Refine & improve manual installation instructions (#416) @theFork
+- Reorganize examples (#397) @agneevX
+- Spelling fixes in docs (#497) @scop
+
 ## v0.9.4
 
 ### ✨ NEW 
