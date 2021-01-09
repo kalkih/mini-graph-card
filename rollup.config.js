@@ -1,6 +1,8 @@
 import resolve from 'rollup-plugin-node-resolve';
 import json from '@rollup/plugin-json';
 
+import minifyHTML from 'rollup-plugin-minify-html-literals';
+
 export default {
   input: 'src/main.js',
   output: {
@@ -14,5 +16,6 @@ export default {
       preferConst: true,
     }),
     resolve(),
+    minifyHTML(),
   ],
 };

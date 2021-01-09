@@ -273,7 +273,7 @@ const style = css`
   }
   .line--point {
     cursor: pointer;
-    fill: var(--primary-background-color, white);
+    fill: var(--primary-background-color, #fff);
     stroke-width: inherit;
   }
   .line--point:hover {
@@ -293,7 +293,7 @@ const style = css`
     cursor: pointer;
   }
   ha-card[gradient] .line--point:hover {
-    fill: var(--primary-text-color, white);
+    fill: var(--primary-text-color, #fff);
   }
   path,
   .line--points,
@@ -331,7 +331,7 @@ const style = css`
   }
   .graph__labels > span {
     cursor: pointer;
-    background: var(--primary-background-color, white);
+    background: var(--primary-background-color, #fff);
     border-radius: 1em;
     padding: .2em .6em;
     box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.24);
