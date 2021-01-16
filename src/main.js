@@ -115,9 +115,12 @@ class MiniGraphCard extends LitElement {
           getFirstDefinedItem(
             entity.smoothing,
             this.config.smoothing,
-            !entity.entity.startsWith('binary_sensor.'), // turn off for binary sensor by default
+            !entity.entity.startsWith('binary_sensor.'), // Turn off for binary sensor by default
           ),
           this.config.logarithmic,
+          this.config.start_days_ago,
+          this.config.start_on_hour,
+          this.config.hours_to_show,
         ),
       );
     }
@@ -201,6 +204,75 @@ class MiniGraphCard extends LitElement {
           </div>
         `
       : '';
+  }
+
+  renderFooter() {
+    const {
+      show,
+    } = this.config;
+    const starttime = new Date();
+    const endtime = starttime;
+    // const cellwidth = (1 / this.config.hours_to_show) * 100;
+    // let footerhtml = '';
+    let show1224 = null;
+    // let ampm = null;
+    let hoursfordisplay = null;
+    let i = 0;
+    const ittime = new Date(starttime.setHours(starttime.getHours() + 1));
+
+    starttime.setDate(starttime.getDate() - this.config.start_date);
+    starttime.setHours(starttime.getHours() - this.config.start_hour);
+
+    if (show.time_bar) {
+      if (this.config.hours_to_show === null) {
+        throw new Error();
+      }
+      if (show1224 === null) {
+        show1224 = 24;
+      }
+
+      do {
+        if (show1224 === 24) {
+          hoursfordisplay = ittime.getHours();
+          if (hoursfordisplay.toString().length === 1) {
+            hoursfordisplay = `0${hoursfordisplay}`;
+          }
+          // ampm = '';
+        } else if (ittime.getHours() > 12) {
+          hoursfordisplay = ittime.getHours() - 12;
+          if (hoursfordisplay === 0) {
+            hoursfordisplay = 12;
+          }
+          // ampm = ' PM';
+        } else if (ittime.getHours() >= 12) {
+          hoursfordisplay = ittime.getHours();
+          if (hoursfordisplay === 0) {
+            hoursfordisplay = 12;
+          }
+          // ampm = ' AM';
+        }
+        /*
+        footerhtml += `<div style="text-align: center; width: ${cellwidth}%;
+          height: 100%; display: inline-block;">${ittime.getMonth()}/${ittime.getDate()}
+          <div style="display: inline-block; clear: both;"></div>${hoursfordisplay}:
+          ${ittime.getMinutes()}${ampm}</div>`;
+        */
+        i += 1;
+      }
+      while (i < this.config.hours_to_show);
+      endtime.setHours(starttime.getHours() + this.config.hours_to_show);
+      /*
+      return html`
+        <div class="flex footer" style="padding:4px;font-weight;bold;height:40px;">`
+        + html`<div style="text-align: center; width: ${cellwidth}%;
+          height: 100%; display: inline-block;">${ittime.getMonth()}/${ittime.getDate()}
+          ${ittime.getHours()}:${ittime.getMinutes()}${ampm}</div>
+          <div style="display: inline-block; clear: both;"></div>`
+        + html`</div>`;
+      */
+      return html`<div class="flex footer"><strong>${starttime.toISOString()}</strong> to <strong>${endtime.toISOString()}</strong></div>`;
+    }
+    return '';
   }
 
   renderIcon() {
@@ -682,11 +754,36 @@ class MiniGraphCard extends LitElement {
   }
 
   async updateData({ config } = this) {
+    let end = this.getEndDate();
+    const start = new Date(end);
+    const checkdate = new Date(start);
+    this.start_on_hour = config.start_on_hour;
+    this.start_days_ago = config.start_days_ago;
+    this.hours_to_show = config.hours_to_show;
     this.updating = true;
 
-    const end = this.getEndDate();
-    const start = new Date(end);
-    start.setMilliseconds(start.getMilliseconds() - getMilli(config.hours_to_show));
+    if (this.start_days_ago && this.start_on_hour) {
+      this.start_days_ago = parseInt(this.start_days_ago, 10) > 0
+        ? 0 : parseInt(this.start_days_ago, 10);
+      this.start_on_hour = parseInt(this.start_on_hour, 10);
+      if (this.start_on_hour > 23 || this.start_on_hour < 0) {
+        this.start_on_hour = 0;
+      }
+
+      start.setDate(start.getDate() + this.start_days_ago);
+      start.setHours(this.start_on_hour, 0, 0, 0);
+
+      checkdate.setMilliseconds(checkdate.getMilliseconds() + getMilli(this.hours_to_show));
+
+      if ((new Date()) >= checkdate) {
+        end = checkdate;
+      }
+    } else {
+      start.setMilliseconds(start.getMilliseconds() - getMilli(this.hours_to_show));
+    }
+
+    console.log(start.toISOString());
+    console.log(end.toISOString());
 
     try {
       const promise = this.entity.map((entity, i) => this.updateEntity(entity, i, start, end));
@@ -694,7 +791,6 @@ class MiniGraphCard extends LitElement {
     } catch (err) {
       log(err);
     }
-
 
     if (config.show.graph) {
       this.entity.forEach((entity, i) => {
@@ -822,7 +918,7 @@ class MiniGraphCard extends LitElement {
         if (currDataIndex > 0) {
           // include previous item
           currDataIndex -= 1;
-          // but change it's last changed time
+          // but change its last changed time
           stateHistory[currDataIndex].last_changed = initStart;
         }
 

@@ -5,7 +5,7 @@ import {
 } from './const';
 
 export default class Graph {
-  constructor(width, height, margin, hours = 24, points = 1, aggregateFuncName = 'avg', groupBy = 'interval', smoothing = true, logarithmic = false) {
+  constructor(width, height, margin, hours = 24, points = 1, aggregateFuncName = 'avg', groupBy = 'interval', smoothing = true, logarithmic = false, start_days_ago = null, start_on_hour = null, hours_to_show = 24) {
     const aggregateFuncMap = {
       avg: this._average,
       max: this._maximum,
@@ -31,6 +31,9 @@ export default class Graph {
     this._logarithmic = logarithmic;
     this._groupBy = groupBy;
     this._endTime = 0;
+    this.start_days_ago = start_days_ago;
+    this.start_on_hour = start_on_hour;
+    this.hours_to_show = hours_to_show;
   }
 
   get max() { return this._max; }
@@ -250,6 +253,12 @@ export default class Graph {
         break;
       default:
         break;
+    }
+    if (this.start_days_ago && this.start_on_hour && this.start_days_ago !== '' && this.start_on_hour !== '' && this.start_days_ago <= 0) {
+      if (this.start_on_hour < 0 || this.start_on_hour > 23) this.start_on_hour = 0;
+      this._endTime = new Date();
+      this._endTime.setDate(this._endTime.getDate() + this.start_days_ago);
+      this._endTime.setHours(this.start_on_hour + this.hours_to_show, 0, 0, 0);
     }
   }
 }
