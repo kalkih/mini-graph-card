@@ -1,0 +1,6 @@
+views:
+  - title: Main
+    cards:
+      - type: custom:mini-graph-card
+        entities:
+          - sensor.outside_humidity
