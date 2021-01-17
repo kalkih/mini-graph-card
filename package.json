@@ -20,6 +20,7 @@
   "license": "MIT",
   "dependencies": {
     "@kalkih/lz-string": "^1.4.5",
+    "custom-card-helpers": "^1.6.6",
     "lit-element": "^2.2.1",
     "localforage": "^1.7.3"
   },

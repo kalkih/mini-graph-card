@@ -1,5 +1,6 @@
 import { LitElement, html, svg } from 'lit-element';
 import localForage from 'localforage/src/localforage';
+import { stateIcon } from 'custom-card-helpers';
 import Graph from './graph';
 import style from './style';
 import handleClick from './handleClick';
@@ -631,7 +632,7 @@ class MiniGraphCard extends LitElement {
     return (
       this.config.icon
       || entity.attributes.icon
-      || ICONS[entity.attributes.device_class]
+      || stateIcon(entity)
       || ICONS.temperature
     );
   }
