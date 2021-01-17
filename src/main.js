@@ -502,7 +502,7 @@ class MiniGraphCard extends LitElement {
 
     const oneMinInHours = 1 / 60;
     now.setMilliseconds(now.getMilliseconds() - getMilli(offset * id + oneMinInHours));
-    const end = getTime(now, { hour12: !this.config.hour24 }, this._hass.language);
+    const end = getTime(now, format, this._hass.language);
     now.setMilliseconds(now.getMilliseconds() - getMilli(offset - oneMinInHours));
     const start = getTime(now, format, this._hass.language);
 

@@ -79,7 +79,8 @@ export default (config) => {
     conf.color_thresholds_transition,
   );
   const additional = conf.hours_to_show > 24 ? { day: 'numeric', weekday: 'short' } : {};
-  conf.format = { hour12: !conf.hour24, ...additional };
+  const hourFormat = conf.hour24 ? { hourCycle: 'h23' } : { hour12: true };
+  conf.format = { ...hourFormat, ...additional };
 
   // override points per hour to mach group_by function
   switch (conf.group_by) {
