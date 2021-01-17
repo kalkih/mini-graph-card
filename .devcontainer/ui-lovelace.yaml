@@ -3,4 +3,13 @@ views:
     cards:
       - type: custom:mini-graph-card
         entities:
-          - sensor.outside_humidity
+          - sensor.humidity
+      - type: custom:mini-graph-card
+        entities:
+          - sensor.temperature
+      - type: custom:mini-graph-card
+        entities:
+          - sensor.pressure
+        show:
+          extrema: true
+        # decimals: 10
