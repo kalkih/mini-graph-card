@@ -667,11 +667,26 @@ class MiniGraphCard extends LitElement {
     const dec = this.config.decimals;
     const value_factor = 10 ** this.config.value_factor;
 
-    if (dec === undefined || Number.isNaN(dec) || Number.isNaN(state))
-      return Math.round(state * value_factor * 100) / 100;
+    if (dec === undefined || Number.isNaN(dec) || Number.isNaN(state)) {
+      return this.numberFormat(Math.round(state * value_factor * 100) / 100, this._hass.language);
+    }
 
     const x = 10 ** dec;
-    return (Math.round(state * value_factor * x) / x).toFixed(dec);
+    return this.numberFormat(
+      (Math.round(state * value_factor * x) / x).toFixed(dec),
+      this._hass.language, dec,
+    );
+  }
+
+  numberFormat(num, language, dec) {
+    if (!Number.isNaN(Number(num)) && Intl) {
+      if (dec === undefined || Number.isNaN(dec)) {
+        return new Intl.NumberFormat(language).format(Number(num));
+      } else {
+        return new Intl.NumberFormat(language, { minimumFractionDigits: dec }).format(Number(num));
+      }
+    }
+    return num.toString();
   }
 
   updateOnInterval() {
