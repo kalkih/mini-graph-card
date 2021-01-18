@@ -55,6 +55,7 @@
     "rollup": "rollup -c",
     "babel": "babel dist/mini-graph-card-bundle.js --out-file dist/mini-graph-card-bundle.js",
     "lint": "eslint src/* --ext .js",
-    "watch": "rollup -c --watch"
+    "watch": "rollup -c --watch",
+    "postversion": "npm run build"
   }
 }
