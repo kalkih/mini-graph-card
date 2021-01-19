@@ -26,3 +26,11 @@ sensor:
         unit_of_measurement: "%"
         value_template: "{{ state_attr('weather.home', 'humidity') }}"
         device_class: humidity
+  - platform: random
+    name: random0_100
+    minimum: 0
+    maximum: 100
+  - platform: random
+    name: random_big
+    minimum: 12309812
+    maximum: 22309812
