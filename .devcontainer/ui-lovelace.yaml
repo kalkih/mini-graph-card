@@ -30,3 +30,26 @@ views:
             aggregate_func: median
           - entity: sensor.random0_100
             name: Random AVG
+      - type: custom:mini-graph-card
+        hours_to_show: 1
+        points_per_hour: 120
+        lower_bound: 0
+        upper_bound: 1000
+        logarithmic: true
+        smoothing: false
+        height: 400
+        show:
+          points: true
+        entities:
+          - entity: sensor.random_0_1000
+            name: log(0 - 1000) Gradients
+            aggregate_func: last
+        color_thresholds:
+          - value: 0
+            color: "#00ff00"
+          - value: 10
+            color: "#ffff00"
+          - value: 100
+            color: "#ff9900"
+          - value: 500
+            color: "#ff0000"
