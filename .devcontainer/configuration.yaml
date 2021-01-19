@@ -34,3 +34,7 @@ sensor:
     name: random_big
     minimum: 12309812
     maximum: 22309812
+  - platform: random
+    name: random_0_1000
+    minimum: 0
+    maximum: 1000
