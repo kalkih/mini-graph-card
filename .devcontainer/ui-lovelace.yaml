@@ -12,4 +12,21 @@ views:
           - sensor.pressure
         show:
           extrema: true
-        # decimals: 10
+      - type: custom:mini-graph-card
+        hours_to_show: 1
+        points_per_hour: 60
+        entities:
+          - entity: sensor.random0_100
+            name: Random 0 - 100
+      - type: custom:mini-graph-card
+        hours_to_show: 1
+        points_per_hour: 20
+        lower_bound: 0
+        upper_bound: 100
+        # agregate_fun: median
+        entities:
+          - entity: sensor.random0_100
+            name: Random MEDIAN
+            aggregate_func: median
+          - entity: sensor.random0_100
+            name: Random AVG

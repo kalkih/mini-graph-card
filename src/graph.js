@@ -8,6 +8,7 @@ export default class Graph {
   constructor(width, height, margin, hours = 24, points = 1, aggregateFuncName = 'avg', groupBy = 'interval', smoothing = true, logarithmic = false) {
     const aggregateFuncMap = {
       avg: this._average,
+      median: this._median,
       max: this._maximum,
       min: this._minimum,
       first: this._first,
@@ -199,6 +200,14 @@ export default class Graph {
 
   _average(items) {
     return items.reduce((sum, entry) => (sum + parseFloat(entry.state)), 0) / items.length;
+  }
+
+  _median(items) {
+    const itemsDup = [...items].sort((a, b) => parseFloat(a) - parseFloat(b));
+    const mid = Math.floor((itemsDup.length - 1) / 2);
+    if (itemsDup.length % 2 === 1)
+      return parseFloat(itemsDup[mid].state);
+    return (parseFloat(itemsDup[mid].state) + parseFloat(itemsDup[mid + 1].state)) / 2;
   }
 
   _maximum(items) {
