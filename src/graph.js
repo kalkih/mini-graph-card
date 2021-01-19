@@ -203,11 +203,11 @@ export default class Graph {
   }
 
   _median(items) {
-    items.sort((a, b) => a - b);
-    const mid = Math.floor((items.length - 1) / 2);
-    if (items.length % 2 === 1)
-      return items[mid];
-    return (items[mid] + items[mid + 1]) / 2;
+    const itemsDup = [...items].sort((a, b) => parseFloat(a) - parseFloat(b));
+    const mid = Math.floor((itemsDup.length - 1) / 2);
+    if (itemsDup.length % 2 === 1)
+      return parseFloat(itemsDup[mid].state);
+    return (parseFloat(itemsDup[mid].state) + parseFloat(itemsDup[mid + 1].state)) / 2;
   }
 
   _maximum(items) {
