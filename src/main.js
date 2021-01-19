@@ -739,7 +739,9 @@ class MiniGraphCard extends LitElement {
             this.points[i] = this.Graph[i].getPoints();
           }
           if (config.color_thresholds.length > 0 && !config.entities[i].color)
-            this.gradient[i] = this.Graph[i].computeGradient(config.color_thresholds);
+            this.gradient[i] = this.Graph[i].computeGradient(
+              config.color_thresholds, this.config.logarithmic,
+            );
         }
       });
       this.line = [...this.line];
