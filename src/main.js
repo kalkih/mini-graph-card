@@ -145,10 +145,10 @@ class MiniGraphCard extends LitElement {
   }
 
   shouldUpdate(changedProps) {
-    if (!this.entity[0]) return false;
     if (UPDATE_PROPS.some(prop => changedProps.has(prop))) {
       this.color = this.intColor(
-        this.tooltip.value !== undefined ? this.tooltip.value : this.entity[0].state,
+        this.tooltip.value !== undefined
+          ? this.tooltip.value : this.entity[0] && this.entity[0].state,
         this.tooltip.entity || 0,
       );
       return true;
@@ -173,6 +173,11 @@ class MiniGraphCard extends LitElement {
   }
 
   render({ config } = this) {
+    if (!config || !this.entity || !this._hass)
+      return html``;
+    if (this.config.entities.some((_, index) => this.entity[index] === undefined)) {
+      return this.renderWarnings();
+    }
     return html`
       <ha-card
         class="flex"
@@ -190,6 +195,20 @@ class MiniGraphCard extends LitElement {
       </ha-card>
     `;
   }
+
+  renderWarnings() {
+    return html`
+      <hui-warning>
+        <div>mini-graph-card</div>
+        ${this.config.entities.map((_, index) => (!this.entity[index] ? html`
+          <div>
+            Entity not available: ${this.config.entities[index].entity}
+          </div>
+        ` : html``))}
+      </hui-warning>
+    `;
+  }
+
 
   renderHeader() {
     const {
