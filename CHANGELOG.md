@@ -1,3 +1,17 @@
+# [0.11.0-dev.2](https://github.com/kalkih/mini-graph-card/compare/v0.11.0-dev.1...v0.11.0-dev.2) (2021-01-20)
+
+
+### Bug Fixes
+
+* display a warning if entity is not available ([#545](https://github.com/kalkih/mini-graph-card/issues/545)) ([38eddd0](https://github.com/kalkih/mini-graph-card/commit/38eddd095d852c6b44dd3b968799b271ce8549db)), closes [#487](https://github.com/kalkih/mini-graph-card/issues/487)
+* Fix undefined variable introduced by [#545](https://github.com/kalkih/mini-graph-card/issues/545) ([d566b1b](https://github.com/kalkih/mini-graph-card/commit/d566b1bcf44faf27aef4ccb94f6aa4c140b84537))
+* **log:** color_thresholds render incorectly with logaritmic on ([#542](https://github.com/kalkih/mini-graph-card/issues/542)) ([5ab70dc](https://github.com/kalkih/mini-graph-card/commit/5ab70dc5acb1ffb33e27fafa7c8dd1e9981f88a5)), closes [#531](https://github.com/kalkih/mini-graph-card/issues/531)
+
+
+### Features
+
+* **graph:** Add median aggregate function ([#521](https://github.com/kalkih/mini-graph-card/issues/521)) ([e5b3c19](https://github.com/kalkih/mini-graph-card/commit/e5b3c19e72e8779cdb9912799f7af429c4ef3b0b))
+
 # [0.11.0-dev.1](https://github.com/kalkih/mini-graph-card/compare/v0.10.0...v0.11.0-dev.1) (2021-01-17)
 
 
