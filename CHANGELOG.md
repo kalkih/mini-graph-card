@@ -9,6 +9,7 @@
 
 ### Features
 
+* Support multiplication of state to be able to convert units
 * Format numbers according to selected language [[#495](https://github.com/kalkih/mini-graph-card/issues/495) [#509](https://github.com/kalkih/mini-graph-card/issues/509)] ([875b557](https://github.com/kalkih/mini-graph-card/commit/875b55743a0152e7630a6111d7128a2a28657c97))
 
 

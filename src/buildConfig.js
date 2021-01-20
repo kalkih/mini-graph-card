@@ -51,6 +51,7 @@ export default (config) => {
     smoothing: true,
     state_map: [],
     cache: true,
+    multiplier: 1,
     value_factor: 0,
     tap_action: {
       action: 'more-info',
