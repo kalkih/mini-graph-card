@@ -907,7 +907,7 @@ class MiniGraphCard extends LitElement {
 
     if (stateHistory.length === 0) return;
 
-    if (entity.entity_id === this.entity[0].entity_id) {
+    if (this.entity[0] && entity.entity_id === this.entity[0].entity_id) {
       this.updateExtrema(stateHistory);
     }
 
