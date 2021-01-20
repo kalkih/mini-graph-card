@@ -53,3 +53,8 @@ views:
             color: "#ff9900"
           - value: 500
             color: "#ff0000"
+      - type: custom:mini-graph-card
+        entities:
+          - sensor.non_existant
+          - sensor.random_0_1000
+          - sensor.non_existant_2
