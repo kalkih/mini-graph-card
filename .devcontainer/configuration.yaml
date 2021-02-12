@@ -1,0 +1,40 @@
+lovelace:
+  mode: yaml
+  resources:
+    - url: http://127.0.0.1:5000/mini-graph-card-bundle.js
+      type: module
+
+default_config:
+
+demo:
+
+sensor:
+  - platform: template
+    sensors:
+      pressure:
+        friendly_name: "Pressure"
+        unit_of_measurement: "hPa"
+        value_template: "{{ state_attr('weather.home', 'pressure') }}"
+        device_class: pressure
+      temperature:
+        friendly_name: "Temperature"
+        unit_of_measurement: "°C"
+        value_template: "{{ state_attr('weather.home', 'temperature') }}"
+        device_class: temperature
+      humidity:
+        friendly_name: "Humidity"
+        unit_of_measurement: "%"
+        value_template: "{{ state_attr('weather.home', 'humidity') }}"
+        device_class: humidity
+  - platform: random
+    name: random0_100
+    minimum: 0
+    maximum: 100
+  - platform: random
+    name: random_big
+    minimum: 12309812
+    maximum: 22309812
+  - platform: random
+    name: random_0_1000
+    minimum: 0
+    maximum: 1000

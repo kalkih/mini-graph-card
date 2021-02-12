@@ -1,25 +1,68 @@
-## v0.9.4
+# [0.11.0-dev.2](https://github.com/kalkih/mini-graph-card/compare/v0.11.0-dev.1...v0.11.0-dev.2) (2021-01-20)
 
-### ✨ NEW 
+
+### Bug Fixes
+
+* display a warning if entity is not available ([#545](https://github.com/kalkih/mini-graph-card/issues/545)) ([38eddd0](https://github.com/kalkih/mini-graph-card/commit/38eddd095d852c6b44dd3b968799b271ce8549db)), closes [#487](https://github.com/kalkih/mini-graph-card/issues/487)
+* Fix undefined variable introduced by [#545](https://github.com/kalkih/mini-graph-card/issues/545) ([d566b1b](https://github.com/kalkih/mini-graph-card/commit/d566b1bcf44faf27aef4ccb94f6aa4c140b84537))
+* **log:** color_thresholds render incorectly with logaritmic on ([#542](https://github.com/kalkih/mini-graph-card/issues/542)) ([5ab70dc](https://github.com/kalkih/mini-graph-card/commit/5ab70dc5acb1ffb33e27fafa7c8dd1e9981f88a5)), closes [#531](https://github.com/kalkih/mini-graph-card/issues/531)
+
+
+### Features
+
+* **graph:** Add median aggregate function ([#521](https://github.com/kalkih/mini-graph-card/issues/521)) ([e5b3c19](https://github.com/kalkih/mini-graph-card/commit/e5b3c19e72e8779cdb9912799f7af429c4ef3b0b))
+
+# [0.11.0-dev.1](https://github.com/kalkih/mini-graph-card/compare/v0.10.0...v0.11.0-dev.1) (2021-01-17)
+
+
+### Bug Fixes
+
+* icon will properly follow entity's device_class [[#484](https://github.com/kalkih/mini-graph-card/issues/484)] ([738a492](https://github.com/kalkih/mini-graph-card/commit/738a4927a3dab8223c97e49ce58fefc064a4df61))
+* Time would sometime display 24:xx instead of 00:xx [[#536](https://github.com/kalkih/mini-graph-card/issues/536)] ([981fd91](https://github.com/kalkih/mini-graph-card/commit/981fd91deb8370a1039c80b28c4da4d17718fdc5))
+
+
+### Features
+
+* Format numbers according to selected language [[#495](https://github.com/kalkih/mini-graph-card/issues/495) [#509](https://github.com/kalkih/mini-graph-card/issues/509)] ([875b557](https://github.com/kalkih/mini-graph-card/commit/875b55743a0152e7630a6111d7128a2a28657c97))
+
+
+# v0.10.0
+
+### ✨ NEW
+- Added logarithmic scale option (#468) @Hypfer
+- Make card appear in lovelace card picker #493 (#492) @dcs8
+- Display card documentation in HACS @jcgoette
+
+### 🔨 FIXED
+- Fix initial graph load when using 'update_interval' option #465 (#452) @PronkMedia
+
+### 📝 DOCUMENTATION
+- Refine & improve manual installation instructions (#416) @theFork
+- Reorganize examples (#397) @agneevX
+- Spelling fixes in docs (#497) @scop
+
+# v0.9.4
+
+### ✨ NEW
 - Added soft bound support for lower & upper bounds #114 (#330) @Silencer2K
 - Added delta option in aggregate_func (#329) @PierreB49
 - Added `value_factor` option, to scale value shown in state label (#362) @dzikimarian
 - Faster history & decreased data usage #373 (#392)
 
-### 🔨 FIXED  
+### 🔨 FIXED
 - Fixed incorrect value for the first point #289 (#327) @maxwroc
 - Reduce white space when extrema isn't enabled #320 (#325)
 - Check for undefined hass before accessing it (#359)
 - Readme typos & improvements (#340) (#356) @EpicLPer @mikalauskas
 
 
-## v0.9.3
+# v0.9.3
 
 ### FIXED
 - HA 0.106.x compatible #274 (#276)
 
 
-## v0.9.2
+# v0.9.2
 
 ### ADDED
 - Added sum aggregate function #257
@@ -28,13 +71,13 @@
 - Fixed graph not rendering if the same entity is used multiple times in a config #263
 
 
-## v0.9.1
+# v0.9.1
 
 ### FIXED
 - Fixed broken extrema
 
 
-## v0.9.0
+# v0.9.0
 
 ### ADDED
 - New aggregate functions first & last #229 (#241)
@@ -48,8 +91,8 @@
 - Graph date not calculated correctly around midnight in certain configurations (#253)
 - Improved handling of out of bound history entries (#251)
 - Initial graph entry not always correct (#251)
-- Graph missing latest history entry after entity update (#250) 
-- Changes to min, max, avg not updating properly #248 (#249) 
+- Graph missing latest history entry after entity update (#250)
+- Changes to min, max, avg not updating properly #248 (#249)
 - Prevent tooltip from triggering multiple times on legend hover
 - Fixed broken babel build (developers)
 - Graphs not updating in time resulting in inconsistent x/y axis relation #194 #200 (#214)
@@ -59,7 +102,7 @@
 - Fill not showing when line is hidden & animate option is enabled
 
 
-## v0.9.0-beta
+# v0.9.0-beta
 
 ### ADDED
 - Option to enable/disable caching (#212)
@@ -73,7 +116,7 @@
 - Fixed invalid rendering of bars when hiding certain entities
 - Fill not showing when line is hidden & animate option is enabled
 
-## v0.8.2
+# v0.8.2
 
 ### ADDED
 - Support for config updates after initial render (e.g. card editor & lovelace-auto-entities) #184 (#185)
@@ -88,13 +131,13 @@
 - Increased default font weight of title to `500` from `400`
 - Non-numeric states cut off at the bottom
 
-## v0.8.1
+# v0.8.1
 
 ### FIXED
 - Reduced minimum bar height (#178)
 - Parse commas in state (#177)
 
-## v0.8.0
+# v0.8.0
 
 ### ADDED
 - Grouping by date (#78) (#165)- (@maxwroc)
@@ -110,7 +153,7 @@
 - Graph margins & jumpy/jerky movements in certain browsers
 - Threshold color when state is below minimum provided threshold stop
 
-## v0.7.0
+# v0.7.0
 
 ### BREAKING CHANGE
 Dropped support for **custom_updater**, if you relied on **custom_updater**, consider switching to [**HACS**](https://github.com/custom-components/hacs).
@@ -132,7 +175,7 @@ Dropped support for **custom_updater**, if you relied on **custom_updater**, con
 - Preserve aspect ratio of legend indicators (#142)
 - README layout and formatting (#162) - (@danstis)
 
-## v0.6.0
+# v0.6.0
 
 ### ADDED
 - Option `fixed_value` to graph only the current state of an entity (#128) - (@snarky-snark)
@@ -146,7 +189,7 @@ Dropped support for **custom_updater**, if you relied on **custom_updater**, con
 - Pressing graph entries should now properly trigger the more-info popup
 - Broken image link in README
 
-## v0.5.0
+# v0.5.0
 
 ### ADDED
 - Compression of cached data (#98) - (@bramkragten)
@@ -163,7 +206,7 @@ Dropped support for **custom_updater**, if you relied on **custom_updater**, con
 - Line point fill is now based on theme variable `primary-background-color` instead of `paper-card-background-color`
 - Removed letter-spacing from title (#111)
 
-## v0.4.3
+# v0.4.3
 
 ### ADDED
 - Color threshold transition option, `color_thresholds_transition` (yeah...very long name) (#91)
@@ -183,7 +226,7 @@ Dropped support for **custom_updater**, if you relied on **custom_updater**, con
 - Invisible graph lines when color thresholds where out of bounds (#91, #92)
 - Invalid rendering of color thresholds when lower bound wasn't at zero (#91, #92)
 
-## v0.4.3-beta2
+# v0.4.3-beta2
 
 ### CHANGED
 - Redesign of line point hover (#99)
@@ -193,19 +236,19 @@ Dropped support for **custom_updater**, if you relied on **custom_updater**, con
 - Interpolate color for out of bound thresholds (#91)
 - Error when localStorage quota was exceeded (#95, #97)
 
-## v0.4.3-beta
+# v0.4.3-beta
 
 ### FIXED
 - Empty graph when color thresholds wasn't being used (#92)
 - Invisible graph lines when color thresholds where out of bounds (#91, #92)
 - Invalid rendering of color thresholds when lower bound wasn't at zero (#91, #92)
 
-## v0.4.2
+# v0.4.2
 
 ### FIXED
 - Issues related to color_thresholds (#91, #92, #93)
 
-## v0.4.1
+# v0.4.1
 
 ### CHANGED
 - Changed/improved appearance of color thresholds
@@ -214,7 +257,7 @@ Dropped support for **custom_updater**, if you relied on **custom_updater**, con
 ### FIXED
 - Broken line color thresholds
 
-## v0.4.0
+# v0.4.0
 This version brings many improvements to how sensor history is fetched and handled, this should result in much quicker loading of the graph.
 These improvements should also reduce stress on the HA backend, since the card now cache history data locally in the browser and only request data it's missing.
 
@@ -230,22 +273,22 @@ Thanks @bramkragten for the contributions!
 ### FIXED
 - Jitter when hovering over points in particular configs (#87)
 
-## v0.3.3
+# v0.3.3
 - **Fixed:** Fixed values for missing history, was assigned the previous known average value instead of the previous known absolute value (#41)
 
-## v0.3.2
+# v0.3.2
 - **New:** Dates are now formatted by locale
 - **Fixed:** Improved secondary state text alignment (#75)
 - **Fixed:** Max bars check in bar graph
 
-## v0.3.1
+# v0.3.1
 - **New:** Options `name_adaptive_color`, `icon_adaptive_color` in `show` option object to display the name/icon in the entity color (#67, #50)
 - **New:** Option `state_adaptive_color` in entity object, to display the state in the entity color (#67)
 - **New:** Option `show_indicator` in entity object, to display a color indicator next to the state (#72)
 - **New:** Option `font_size_header` added (#53)
 - **New** Added date (day/weekday) to timestamps when timeframe > 24 (#61)
 - **New** It's now possible to set `hours_to_show` to float values and values lower than one.
-- **Changed** Legend color indicators are now ciruclar instead of rectangular
+- **Changed** Legend color indicators are now circular instead of rectangular
 - **Fixed:** Bar chart now shows correct amount of bars
 - **Fixed:** Points should no longer be cut off when at the very bottom of the graph
 - **Fixed:** Timestamps for bars
@@ -253,7 +296,7 @@ Thanks @bramkragten for the contributions!
 - **Fixed:** Unwanted overflow when border radius applied
 - **Fixed:** Improved compatibility (#64)
 
-## v0.3.0
+# v0.3.0
 - **New:** Support for bar charts (#49)
 - **New:** Parameter `bar` added to `show` -> `graph`, display graph as a bar chart (#49)
 - **New:** Option `unit` added to entity object, overrides `unit` set in base
@@ -263,13 +306,13 @@ Thanks @bramkragten for the contributions!
 - **Fixed:** `height` option can now be set to zero
 - **Fixed:** Timestamps are now properly center aligned if state is center aligned
 
-## v0.2.4
+# v0.2.4
 - **New:** Parameter `fade` for `show` -> `fill` option, makes the fill fade out (#45)
 - **Fixed:** History entries with `null` state breaking graph (#46)
 - **Fixed:** compatibility issues with the custom swiper-card
 - **Fixed:** Broken extrema
 
-## v0.2.3
+# v0.2.3
 - **New:** Option `color_thresholds` (#45)
 - **New:** Color thresholds now changes dynamically with the history (#45)
 - **New:** Options `lower_bound` & `upper_bound` added (#40)
@@ -282,7 +325,7 @@ Thanks @bramkragten for the contributions!
 - **Removed:** `entity` option, which was previously deprecated since v0.2.0, use `entities` option (#44) **(BREAKING CHANGE)**.
 - **Removed:** `line_color_above` and `line_color_below`, see new `color_thresholds` option (#45) **(BREAKING CHANGE)**
 
-## v0.2.2
+# v0.2.2
 - **New:** Label design (#35)
 - **New:** Entity name now visible in title when graph point is hovered over (#39)
 - **New:** `hover` parameter for labels
@@ -298,7 +341,7 @@ Thanks @bramkragten for the contributions!
 - **Fixed:** Invisible lines when graph was updated after not covering the full width on load
 - **Fixed:** Align timestamps right when `align_state` is set to `right`
 
-## v0.2.1
+# v0.2.1
 - **Added:** New `hour24` option to choose time format between 12-hour/24-hour clock
 - **Added:** Support for showing multiple sensor states, see new `show_state` option for the entity object (#33)
 - **Added:** Ability to press/click on entities in the graph legend to bring up their "more info" dialog (#31)
@@ -307,7 +350,7 @@ Thanks @bramkragten for the contributions!
 - **Fixed:** Extrema not rendering (#32)
 - **Fixed:** Times on points going backwards (#30)
 
-## v0.2.0
+# v0.2.0
 - **UI redesign**
 - **Added:** support for multiple entities (**BETA**) #28
 - **Added:** support for multiple `line_color` entries
@@ -330,18 +373,18 @@ Thanks @bramkragten for the contributions!
 - **Removed:** `labels` option, use `labels` in new `show` option (**Breaking change**)
 - **Removed:** `line_value_above`, `line_color_above`, `line_value_below` & `line_color_below` options (**Breaking change**)
 
-## v0.1.0
+# v0.1.0
 - Added `hide` option to hide specific UI elements
 - Removed `hide_icon`, use new `hide` option (**Breaking change**)
 - Minor UI changes
 - Fixed issue causing errors if all available history entries had the exact same state
 - Updated dependencies
 
-## v0.0.9
+# v0.0.9
 - Added `decimals` option to display specified amount of decimals for the current state #18
 - Fixed issue where `line_value_above` and `line_value_below` would not work when set to `0` #13
 
-## v0.0.8
+# v0.0.8
 - Major rework of the graph calculation, now taking moving average and timestamps into account
 - Added bundle version
 - Added `detail` option, to specify the detail level of the graph
@@ -349,17 +392,17 @@ Thanks @bramkragten for the contributions!
 - Removed `accuracy` option in favor for `detail`
 - Changed the reported size of the card
 
-## v0.0.7
+# v0.0.7
 - Improved responsive design
 - Fixed overflow issue when stacking several cards in horizontal-stack #11
 - Fixed default font-size when not specified in config
 
-## v0.0.6
+# v0.0.6
 - Improved handling of unknown/unavailable history entries #8
 - Fixed issue where `<path>` error would appear in some scenarios
 - Refactored code responsible for building the line graph #9
 
-## v0.0.5
+# v0.0.5
 - Added `hide_icon` option #5
 - Fixed issue where unknown/unavailable history would make the graph not render #6
 - Fixed issue where graph line would rendering outside svg boundary and get clipped
@@ -367,19 +410,19 @@ Thanks @bramkragten for the contributions!
 - Adjusted line Y-scale
 - Updated to lit-element 0.6.2
 
-## v0.0.4
+# v0.0.4
 - Added options to have the line change color if the state is above/below specified values
 - Fixed graph when setting accuracy option to a higher value than the available data points in history
 
-## v0.0.3
+# v0.0.3
 - Added option `font_size` to modify the font size scale of the state #4
 - Fixed `<path> attribute d: Expected number` errors.
 - Decreased the default font size slightly #4
 - Changed default graph height from 150 to 100;
 - Improved compatibility with other custom cards like vertical-card-stack #3
 
-## v0.0.2
+# v0.0.2
 - Added option to set hours to show
 
-## v0.0.1
+# v0.0.1
 - Initial release

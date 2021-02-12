@@ -13,20 +13,15 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
 
 ### HACS (recommended)
 
-This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community Store).  
+This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community Store).
 <small>*HACS is a third party community store and is not included in Home Assistant out of the box.*</small>
 
 ### Manual install
 
 1. Download and copy `mini-graph-card-bundle.js` from the [latest release](https://github.com/kalkih/mini-graph-card/releases/latest) into your `config/www` directory.
 
-2. Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml` or at the top of the *raw config editor UI*:
+2. Add the resource reference as decribed below.
 
-  ```yaml
-  resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.9.4
-      type: module
-  ```
 
 ### CLI install
 
@@ -35,16 +30,27 @@ This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community St
 2. Grab `mini-graph-card-bundle.js`:
 
   ```
-  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.9.4/mini-graph-card-bundle.js
+  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.10.0/mini-graph-card-bundle.js
   ```
 
-3. Add a reference to `mini-graph-card-bundle.js` inside your `ui-lovelace.yaml`:
+3. Add the resource reference as decribed below.
+
+### Add resource reference
+
+If you configure Lovelace via YAML, add a reference to `mini-graph-card-bundle.js` inside your `configuration.yaml`:
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.9.4
+    - url: /local/mini-graph-card-bundle.js?v=0.10.0
       type: module
   ```
+
+Else, if you prefer the graphical editor, use the menu to add the resource:
+
+1. Make sure, advanced mode is enabled in your user profile (click on your user name to get there)
+2. Navigate to Configuration -> Lovelace Dashboards -> Resources Tab. Hit orange (+) icon
+3. Enter URL `/local/mini-graph-card-bundle.js` and select type "JavaScript Module".
+4. Restart Home Assistant.
 
 ## Updating
 **If you have a version older than v0.0.8 installed, please delete the current files and follow the installation instructions again.**
@@ -57,7 +63,7 @@ This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community St
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.9.4
+    - url: /local/mini-graph-card-bundle.js?v=0.10.0
       type: module
   ```
 
@@ -100,11 +106,15 @@ This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community St
 | align_state | string | `left` | v0.2.0 | Set the alignment of the current state, `left`, `right` or `center`.
 | lower_bound | number *or* string |  | v0.2.3 | Set a fixed lower bound for the graph Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
 | upper_bound | number *or* string |  | v0.2.3 | Set a fixed upper bound for the graph Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
+| min_bound_range | number |  | v0.x.x | Applied after everything, makes sure there's a minimum range that the Y-axis will have. Useful for not making small changes look large because of scale.
 | lower_bound_secondary | number *or* string |  | v0.5.0 | Set a fixed lower bound for the graph secondary Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
 | upper_bound_secondary | number *or* string |  | v0.5.0 | Set a fixed upper bound for the graph secondary Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
+| min_bound_range_secondary | number |  | v0.x.x | Applied after everything, makes sure there's a minimum range that the secondary Y-axis will have. Useful for not making small changes look large because of scale.
 | smoothing | boolean | `true` | v0.8.0 | Whether to make graph line smooth.
 | state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert (order matters as position becomes a value on the graph).
 | value_factor | number | 0 | v0.9.4 | Scale value by order of magnitude (e.g. convert Watts to kilo Watts), use negative value to scale down.
+| logarithmic | boolean | `false` | v0.10.0 | Use a Logarithmic scale for the graph
+
 
 #### Entities object
 Entities may be listed directly (as per `sensor.temperature` in the example below), or defined using
@@ -116,7 +126,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | name | string |  | Set a custom display name, defaults to entity's friendly_name.
 | color | string |  | Set a custom color, overrides all other color options including thresholds.
 | unit | string |  | Set a custom unit of measurement, overrides `unit` set in base config.
-| aggregate_func | string |  | Override for aggregate function used to calculate point on the graph, `avg`, `min`, `max`, `first`, `last`, `sum`.
+| aggregate_func | string |  | Override for aggregate function used to calculate point on the graph, `avg`, `median`, `min`, `max`, `first`, `last`, `sum`.
 | show_state | boolean |  | Display the current state.
 | show_indicator | boolean |  | Display a color indicator next to the state, (only when more than two states are visible).
 | show_graph | boolean |  | Set to false to completely hide the entity in the graph.
@@ -146,7 +156,7 @@ All properties are optional.
 | name | `true` | `true` / `false` | Display name.
 | icon | `true` | `true` / `false` | Display icon.
 | state | `true` | `true` / `false` | Display current state.
-| graph | `line` | `line` / `bar` / `false` | Display option for the graph.
+| graph | `line` | `line` / `bar` / `false` | Display option for the graph. If set to `bar` a maximum of `96` bars will be displayed.
 | fill | `true` | `true` / `false` / `fade` | Display the line graph fill.
 | points | `hover` | `true` / `false` / `hover` | Display graph data points.
 | legend | `true` | `true` / `false` | Display the graph legend (only shown when graph contains multiple entities).
@@ -188,6 +198,7 @@ These buckets are converted later to single point/bar on the graph. Aggregate fu
 | Name | Since | Description |
 |------|:-------:|-------------|
 | `avg` | v0.8.0 | Average
+| `median` | NEXT_VERSION | Median
 | `min` | v0.8.0 | Minimum - lowest value
 | `max` | v0.8.0 | Maximum - largest value
 | `first` | v0.9.0 |
@@ -196,7 +207,7 @@ These buckets are converted later to single point/bar on the graph. Aggregate fu
 | `delta` | v0.9.4 | Calculates difference between max and min value
 
 ### Theme variables
-The following theme variables can be set in your HA theme to customize the appearence of the card.
+The following theme variables can be set in your HA theme to customize the appearance of the card.
 
 | Name | Default | Description |
 |------|:-------:|-------------|
@@ -206,14 +217,19 @@ The following theme variables can be set in your HA theme to customize the appea
 ### Example usage
 
 #### Single entity card
+
+![Single entity card](https://user-images.githubusercontent.com/457678/52009150-884d2500-24d2-11e9-9f2b-2981210d3897.png)
+
 ```yaml
 - type: custom:mini-graph-card
   entities:
    - sensor.illumination
 ```
-![Single entity card](https://user-images.githubusercontent.com/457678/52009150-884d2500-24d2-11e9-9f2b-2981210d3897.png)
 
 #### Alternative style
+
+![Alternative style](https://user-images.githubusercontent.com/457678/52009161-8daa6f80-24d2-11e9-8678-47658a181615.png)
+
 ```yaml
 - type: custom:mini-graph-card
   entities:
@@ -223,9 +239,11 @@ The following theme variables can be set in your HA theme to customize the appea
   show:
     fill: false
 ```
-![Alternative style](https://user-images.githubusercontent.com/457678/52009161-8daa6f80-24d2-11e9-8678-47658a181615.png)
 
 #### Multiple entities card
+
+![Multiple entities card](https://user-images.githubusercontent.com/457678/52009165-900cc980-24d2-11e9-8cc6-c77de58465b5.png)
+
 ```yaml
 - type: custom:mini-graph-card
   name: SERVER
@@ -236,9 +254,11 @@ The following theme variables can be set in your HA theme to customize the appea
     - sensor.server_sent
     - sensor.server_received
 ```
-![Multiple entities card](https://user-images.githubusercontent.com/457678/52009165-900cc980-24d2-11e9-8cc6-c77de58465b5.png)
 
 #### Bar chart card
+
+![Bar chart card](https://user-images.githubusercontent.com/457678/52970286-985e7300-33b3-11e9-89bc-1278c4e2ecf2.png)
+
 ```yaml
 - type: custom:mini-graph-card
   entities:
@@ -247,9 +267,10 @@ The following theme variables can be set in your HA theme to customize the appea
   show:
     graph: bar
 ```
-![Bar chart card](https://user-images.githubusercontent.com/457678/52970286-985e7300-33b3-11e9-89bc-1278c4e2ecf2.png)
 
 #### Show data from the past week
+![Show data from the past week](https://user-images.githubusercontent.com/457678/52009167-913df680-24d2-11e9-8732-52fc65e3f0d8.png)
+
 Use the `hours_to_show` option to specify how many hours of history the graph should represent.
 Use the `points_per_hour` option to specify the accuracy/detail of the graph.
 
@@ -261,7 +282,6 @@ Use the `points_per_hour` option to specify the accuracy/detail of the graph.
   hours_to_show: 168
   points_per_hour: 0.25
 ```
-![Show data from the past week](https://user-images.githubusercontent.com/457678/52009167-913df680-24d2-11e9-8732-52fc65e3f0d8.png)
 
 #### Graph only card
 Use the `show` option to show/hide UI elements.
@@ -278,6 +298,8 @@ Use the `show` option to show/hide UI elements.
 
 #### Horizontally stacked cards
 You can stack cards horizontally by using one or more `horizontal-stack(s)`.
+
+![Horizontally stacked cards](https://user-images.githubusercontent.com/457678/52009171-926f2380-24d2-11e9-9dd4-28f010608858.png)
 
 ```yaml
 - type: horizontal-stack
@@ -301,10 +323,11 @@ You can stack cards horizontally by using one or more `horizontal-stack(s)`.
       line_width: 8
       font_size: 75
 ```
-![Horizontally stacked cards](https://user-images.githubusercontent.com/457678/52009171-926f2380-24d2-11e9-9dd4-28f010608858.png)
 
 #### Dynamic line color
 Have the graph change line color dynamically.
+
+![Dynamic line color](https://user-images.githubusercontent.com/457678/52573150-cbd05900-2e19-11e9-9e01-740753169093.png)
 
 ```yaml
 - type: custom:mini-graph-card
@@ -320,11 +343,12 @@ Have the graph change line color dynamically.
     - value: 21.5
       color: "#c0392b"
 ```
-![Dynamic line color](https://user-images.githubusercontent.com/457678/52573150-cbd05900-2e19-11e9-9e01-740753169093.png)
 
 #### Alternate y-axis
 Have one or more series plot on a separate y-axis, which appears on the right side of the graph. This example also
 shows turning off the line, points and legend.
+
+![Alternate y-axis](https://user-images.githubusercontent.com/373079/60764115-63cf2780-a0c6-11e9-8b9a-97fc47161180.png)
 
 ```yaml
 - type: custom:mini-graph-card
@@ -346,9 +370,12 @@ shows turning off the line, points and legend.
     labels: true
     labels_secondary: true
 ```
-![Alternate y-axis](https://user-images.githubusercontent.com/373079/60764115-63cf2780-a0c6-11e9-8b9a-97fc47161180.png)
+
 
 #### Grouping by date
+
+![mini_energy_daily](https://user-images.githubusercontent.com/8268674/66688605-3ffc1e80-ec7f-11e9-872e-935870a542f3.png)
+
 You can group values by date, this way you can visualize for example daily energy consumption.
 
 ```yaml
@@ -362,11 +389,12 @@ You can group values by date, this way you can visualize for example daily energ
   show:
     graph: bar
 ```
-![mini_energy_daily](https://user-images.githubusercontent.com/8268674/66688605-3ffc1e80-ec7f-11e9-872e-935870a542f3.png)
 
 #### Data aggregation functions
-You can decide how values are agreggated for points on graph. Example how to display min, max, avg temerature per day
+You can decide how values are aggregated for points on graph. Example how to display min, max, avg temperature per day
 from last week.
+
+![mini_temperature_aggregate_daily](https://user-images.githubusercontent.com/8268674/66688610-44c0d280-ec7f-11e9-86c2-a728da239dab.png)
 
 ```yaml
 - type: custom:mini-graph-card
@@ -387,10 +415,11 @@ from last week.
   group_by: date
 ```
 
-![mini_temperature_aggregate_daily](https://user-images.githubusercontent.com/8268674/66688610-44c0d280-ec7f-11e9-86c2-a728da239dab.png)
-
 #### Non-numeric sensor states
-You can render non-numeric states by providing state_map config. For example this way you can show data comming from binary sensors.
+
+![mini_binary_sensor](https://user-images.githubusercontent.com/8268674/66825779-e1ff5d80-ef42-11e9-89eb-673d2ada8d34.png)
+
+You can render non-numeric states by providing state_map config. For example this way you can show data coming from binary sensors.
 
 ```yaml
 - type: custom:mini-graph-card
@@ -418,7 +447,6 @@ You can render non-numeric states by providing state_map config. For example thi
       label: Detected
 ```
 
-![mini_binary_sensor](https://user-images.githubusercontent.com/8268674/66825779-e1ff5d80-ef42-11e9-89eb-673d2ada8d34.png)
 
 ## Development
 
