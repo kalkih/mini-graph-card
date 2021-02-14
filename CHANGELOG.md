@@ -1,3 +1,10 @@
+# [0.11.0-dev.3](https://github.com/kalkih/mini-graph-card/compare/v0.11.0-dev.2...v0.11.0-dev.3) (2021-02-14)
+
+
+### Features
+
+* **attribute:** Retrieve an attribute instead of the state ([#564](https://github.com/kalkih/mini-graph-card/issues/564)) ([3caafdb](https://github.com/kalkih/mini-graph-card/commit/3caafdb6f9b8d9fa1cb86b7ebc9872a79fcf5c19)), closes [#411](https://github.com/kalkih/mini-graph-card/issues/411) [#245](https://github.com/kalkih/mini-graph-card/issues/245) [#501](https://github.com/kalkih/mini-graph-card/issues/501)
+
 # [0.11.0-dev.2](https://github.com/kalkih/mini-graph-card/compare/v0.11.0-dev.1...v0.11.0-dev.2) (2021-01-20)
 
 
