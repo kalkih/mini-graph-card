@@ -1,6 +1,7 @@
 import resolve from 'rollup-plugin-node-resolve';
 import json from '@rollup/plugin-json';
 import serve from 'rollup-plugin-serve';
+import commonjs from '@rollup/plugin-commonjs';
 
 const dev = process.env.ROLLUP_WATCH;
 const serveopts = {
@@ -22,6 +23,7 @@ export default {
     sourcemap: dev ? true : false,
   },
   plugins: [
+    commonjs(),
     json({
       include: 'package.json',
       preferConst: true,
