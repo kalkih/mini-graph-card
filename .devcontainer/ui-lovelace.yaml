@@ -13,6 +13,12 @@ views:
         show:
           extrema: true
       - type: custom:mini-graph-card
+        entities:
+          - entity: weather.home
+            attribute: pressure
+        show:
+          extrema: true
+      - type: custom:mini-graph-card
         hours_to_show: 1
         points_per_hour: 60
         entities:

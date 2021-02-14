@@ -1,11 +1,13 @@
 import { LitElement, html, svg } from 'lit-element';
 import localForage from 'localforage/src/localforage';
 import { stateIcon } from 'custom-card-helpers';
+import SparkMD5 from 'spark-md5';
 import Graph from './graph';
 import style from './style';
 import handleClick from './handleClick';
 import buildConfig from './buildConfig';
 import './initialize';
+import { version } from '../package.json';
 
 import {
   ICONS,
@@ -45,6 +47,7 @@ class MiniGraphCard extends LitElement {
     this.updating = false;
     this.stateChanged = false;
     this.initial = true;
+    this._md5Config = undefined;
   }
 
   static get styles() {
@@ -101,6 +104,7 @@ class MiniGraphCard extends LitElement {
     const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
 
     this.config = buildConfig(config, this.config);
+    this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
 
     if (!this.Graph || entitiesChanged) {
       if (this._hass) this.hass = this._hass;
@@ -249,7 +253,11 @@ class MiniGraphCard extends LitElement {
 
   renderStates() {
     const { entity, value } = this.tooltip;
-    const state = value !== undefined ? value : this.entity[0].state;
+    const state = value !== undefined ? value : (
+      this.config.entities[0].attribute
+        ? this.entity[0].attributes[this.config.entities[0].attribute]
+        : this.entity[0].state
+    );
     const color = this.config.entities[0].state_adaptive_color ? `color: ${this.color};` : '';
     if (this.config.show.state)
       return html`
@@ -827,14 +835,14 @@ class MiniGraphCard extends LitElement {
   }
 
   async getCache(key, compressed) {
-    const data = await localForage.getItem(key + (compressed ? '' : '-raw'));
+    const data = await localForage.getItem(`${key}_${this._md5Config}${(compressed ? '' : '_raw')}`);
     return data ? (compressed ? decompress(data) : data) : null;
   }
 
   async setCache(key, data, compressed) {
     return compressed
-      ? localForage.setItem(key, compress(data))
-      : localForage.setItem(`${key}-raw`, data);
+      ? localForage.setItem(`${key}_${this._md5Config}`, compress(data))
+      : localForage.setItem(`${key}_${this._md5Config}_raw`, data);
   }
 
   async updateEntity(entity, index, initStart, end) {
@@ -849,7 +857,7 @@ class MiniGraphCard extends LitElement {
     let skipInitialState = false;
 
     const history = this.config.cache
-      ? await this.getCache(entity.entity_id, this.config.useCompress)
+      ? await this.getCache(`${entity.entity_id}_${index}`, this.config.useCompress)
       : undefined;
     if (history && history.hours_to_show === this.config.hours_to_show) {
       stateHistory = history.data;
@@ -877,26 +885,47 @@ class MiniGraphCard extends LitElement {
       }
     }
 
-    let newStateHistory = await this.fetchRecent(entity.entity_id, start, end, skipInitialState);
+    let newStateHistory = await this.fetchRecent(
+      entity.entity_id,
+      start,
+      end,
+      this.config.entities[index].attribute ? false : skipInitialState,
+      !!this.config.entities[index].attribute,
+    );
     if (newStateHistory[0] && newStateHistory[0].length > 0) {
+      /**
+      * hack because HA doesn't return anything if skipInitialState is false
+      * when retrieving for attributes so we retrieve it and we remove it.*
+      */
+      if (this.config.entities[index].attribute && skipInitialState) {
+        newStateHistory[0].shift();
+      }
       // check if we should convert states to numeric values
-      if (this.config.state_map.length > 0) {
-        newStateHistory[0].forEach(item => this._convertState(item));
+      if (this.config.state_map.length > 0 || this.config.entities[index].attribute) {
+        newStateHistory[0].forEach((item) => {
+          if (this.config.entities[index].attribute) {
+            item.state = item.attributes[this.config.entities[index].attribute];
+            delete item.attributes;
+          }
+          if (this.config.state_map.length > 0)
+            this._convertState(item);
+        });
       }
 
       newStateHistory = newStateHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
       newStateHistory = newStateHistory.map(item => ({
-        last_changed: item.last_changed,
+        last_changed: this.config.entities[index].attribute ? item.last_updated : item.last_changed,
         state: item.state,
       }));
       stateHistory = [...stateHistory, ...newStateHistory];
 
       if (this.config.cache) {
         this
-          .setCache(entity.entity_id, {
+          .setCache(`${entity.entity_id}_${index}`, {
             hours_to_show: this.config.hours_to_show,
             last_fetched: new Date(),
             data: stateHistory,
+            version,
           }, this.config.useCompress)
           .catch((err) => {
             log(err);
@@ -919,13 +948,14 @@ class MiniGraphCard extends LitElement {
     }
   }
 
-  async fetchRecent(entityId, start, end, skipInitialState) {
+  async fetchRecent(entityId, start, end, skipInitialState, withAttributes) {
     let url = 'history/period';
     if (start) url += `/${start.toISOString()}`;
     url += `?filter_entity_id=${entityId}`;
     if (end) url += `&end_time=${end.toISOString()}`;
     if (skipInitialState) url += '&skip_initial_state';
-    url += '&minimal_response';
+    if (!withAttributes) url += '&minimal_response';
+    if (withAttributes) url += '&significant_changes_only=0';
     return this._hass.callApi('GET', url);
   }
 
