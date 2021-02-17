@@ -1,3 +1,10 @@
+# [0.11.0-dev.4](https://github.com/kalkih/mini-graph-card/compare/v0.11.0-dev.3...v0.11.0-dev.4) (2021-02-17)
+
+
+### Bug Fixes
+
+* Support for `fire-dom-event` ([bcf7ac4](https://github.com/kalkih/mini-graph-card/commit/bcf7ac46e1084817d6cdc394ce0abe6f99cad656)), closes [#563](https://github.com/kalkih/mini-graph-card/issues/563)
+
 # [0.11.0-dev.3](https://github.com/kalkih/mini-graph-card/compare/v0.11.0-dev.2...v0.11.0-dev.3) (2021-02-14)
 
 
