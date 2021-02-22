@@ -168,8 +168,46 @@ See [dynamic line color](#dynamic-line-color) for example usage.
 
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
-| value ***(required)*** | number |  | The threshold for the color stop.
+| value ***(required [except in interpolation (see below)](#line-color-interpolation-of-stop-values))*** | number |  | The threshold for the color stop.
 | color ***(required)*** | string |  | Color in 6 digit hex format (e.g. `#008080`).
+
+##### Line color interpolation of stop values
+As long as the first and last threshold stops have `value` properties, intermediate stops can exclude `value`; they will be interpolated linearly. For example, given stops like:
+
+```yaml
+color_thresholds:
+  - value: 0
+    color: "#ff0000"
+  - color: "#ffff00"
+  - color: "#00ff00"
+  - value: 4
+    color: "#0000ff"
+```
+
+The values will be interpolated as:
+
+```yaml
+color_thresholds:
+  - value: 0
+    color: "#ff0000"
+  - value: 1.333333
+    color: "#ffff00"
+  - value: 2.666667
+    color: "#00ff00"
+  - value: 4
+    color: "#0000ff"
+```
+
+As a shorthand, you can just use a color string for the stops that you want interpolated:
+
+```yaml
+  - value: 0
+    color: "#ff0000"
+  - "#ffff00"
+  - "#00ff00"
+  - value: 4
+    color: "#0000ff"
+```
 
 #### Action object options
 | Name | Type | Default | Options | Description |
