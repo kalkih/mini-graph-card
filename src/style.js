@@ -323,7 +323,7 @@ const style = css`
     font-weight: 400;
     justify-content: space-between;
     margin-right: 10px;
-    padding: .6em;
+    padding: 0 .6em;
     position: absolute;
     pointer-events: none;
     top: 0; bottom: 0;
@@ -333,8 +333,9 @@ const style = css`
     cursor: pointer;
     background: var(--primary-background-color, white);
     border-radius: 1em;
-    padding: .2em .6em;
+    padding: .4em .6em;
     box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.24);
+    line-height: normal;
   }
   .graph__legend {
     display: flex;
