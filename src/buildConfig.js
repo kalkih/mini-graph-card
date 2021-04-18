@@ -23,8 +23,6 @@ const computeThresholds = (stops, type) => {
 };
 
 export default (config) => {
-  if (config.entity)
-    throw new Error(`The "entity" option was removed, please use "entities".\n See ${URL_DOCS}`);
   if (!Array.isArray(config.entities))
     throw new Error(`Please provide the "entities" option as a list.\n See ${URL_DOCS}`);
   if (config.line_color_above || config.line_color_below)
