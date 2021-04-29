@@ -9,7 +9,9 @@ import {
 } from './const';
 
 /**
- * Starting from the given index, increment the index until an array element with a "value" property is found
+ * Starting from the given index, increment the index until an array element with a
+ * "value" property is found
+ *
  * @param {Array} stops
  * @param {number} startIndex
  * @returns {number}
