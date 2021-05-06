@@ -5,6 +5,7 @@ on: workflow_dispatch
 jobs:
   release-bundle:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev'
 
     outputs:
       new_release_published: ${{ steps.semantic.outputs.new_release_published }}
@@ -26,8 +27,6 @@ jobs:
             ${{ runner.OS }}-
       - name: Install dependencies
         run: npm ci
-      - name: Build
-        run: npm run build
       - name: Release
         run: npx semantic-release
         env:

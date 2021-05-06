@@ -2,12 +2,12 @@
   "name": "Mini Graph Card Development",
   "image": "ghcr.io/ludeeus/devcontainer/generic:latest",
   "context": "..",
-  // "remoteUser": "vscode",
+  "remoteUser": "vscode",
   "appPort": [
     "8123:8123",
     "5000:5000",
   ],
-  "postCreateCommand": "npm install && container install",
+  "postCreateCommand": "npm install && sudo container install",
   "extensions": [
     "github.vscode-pull-request-github",
     "eamodio.gitlens",

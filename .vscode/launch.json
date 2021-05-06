@@ -10,7 +10,9 @@
       "name": "Launch Chrome against localhost",
       "url": "http://localhost:8123",
       "webRoot": "${workspaceFolder}/dist",
-      "sourceMaps": true
+      "sourceMaps": true,
+      "preLaunchTask": "debug",
+      "postDebugTask": "devcontainer: stop debug"
     }
   ]
 }
