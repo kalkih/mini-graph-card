@@ -15,6 +15,7 @@ export default class Graph {
       last: this._last,
       sum: this._sum,
       delta: this._delta,
+      range: this._range,
     };
 
     this._history = undefined;
@@ -242,12 +243,16 @@ export default class Graph {
     return items.reduce((sum, entry) => sum + parseFloat(entry.state), 0);
   }
 
-  _delta(items) {
+  _range(items) {
     return this._maximum(items) - this._minimum(items);
   }
 
+  _delta(items) {
+    return this._last(items) - this._first(items);
+  }
+
   _lastValue(items) {
-    if (this.aggregateFuncName === 'delta') {
+    if (this.aggregateFuncName === 'range' || this.aggregateFuncName === 'delta') {
       return 0;
     } else {
       return parseFloat(items[items.length - 1].state) || 0;
