@@ -14,7 +14,7 @@ localForage.iterate((data, key) => {
   const value = key.endsWith('-raw') ? data : decompress(data);
   const start = new Date();
   start.setHours(start.getHours() - value.hours_to_show);
-  if (new Date(value.last_fetched) < start) {
+  if (data.version !== version || new Date(value.last_fetched) < start) {
     localForage.removeItem(key);
   }
 }).catch((err) => {

@@ -11,9 +11,6 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    # push or fork
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
-
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js 12.x
@@ -34,7 +31,6 @@ jobs:
         run: npm run lint --if-present
   build:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
 
     strategy:
       matrix:
