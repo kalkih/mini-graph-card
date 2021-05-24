@@ -5,7 +5,19 @@ import {
 } from './const';
 
 export default class Graph {
-  constructor(width, height, margin, hours = 24, points = 1, aggregateFuncName = 'avg', groupBy = 'interval', smoothing = true, logarithmic = false) {
+  constructor({
+    width,
+    height,
+    margin,
+    hours = 24,
+    points = 1,
+    aggregateFuncName = 'avg',
+    valueFactor = 0,
+    valueMultiplier = 1,
+    groupBy = 'interval',
+    smoothing = true,
+    logarithmic = false
+  }) {
     const aggregateFuncMap = {
       avg: this._average,
       median: this._median,
@@ -28,6 +40,8 @@ export default class Graph {
     this.points = points;
     this.hours = hours;
     this.aggregateFuncName = aggregateFuncName;
+    this.valueFactor = valueFactor;
+    this.valueMultiplier = valueMultiplier;
     this._calcPoint = aggregateFuncMap[aggregateFuncName] || this._average;
     this._smoothing = smoothing;
     this._logarithmic = logarithmic;
