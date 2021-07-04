@@ -60,6 +60,7 @@ const interpolateStops = (stops) => {
 
   return stops.map((stop, stopIndex) => {
     if (stop.value != null) {
+      leftValuedIndex = stopIndex;
       return { ...stop };
     }
 
