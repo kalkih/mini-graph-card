@@ -766,28 +766,23 @@ class MiniGraphCard extends LitElement {
     if (config.show.graph) {
       let graphPos = 0;
       this.entity.forEach((entity, i) => {
-        if (!entity) return;
-
-        const graphEntity = this.Graph[i];
-
-        if (graphEntity.coords.length === 0) return;
-        
+        if (!entity || this.Graph[i].coords.length === 0) return;
         const bound = config.entities[i].y_axis === 'secondary' ? this.boundSecondary : this.bound;
-        [graphEntity.min, graphEntity.max] = [bound[0], bound[1]];
+        [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
         if (config.show.graph === 'bar') {
           const numVisible = this.visibleEntities.length;
-          this.bar[i] = graphEntity.getBars(graphPos, numVisible, config.bar_spacing);
+          this.bar[i] = this.Graph[i].getBars(graphPos, numVisible, config.bar_spacing);
           graphPos += 1;
         } else {
-          const line = graphEntity.getPath();
+          const line = this.Graph[i].getPath();
           if (config.entities[i].show_line !== false) this.line[i] = line;
           if (config.show.fill
-            && config.entities[i].show_fill !== false) this.fill[i] = graphEntity.getFill(line);
+            && config.entities[i].show_fill !== false) this.fill[i] = this.Graph[i].getFill(line);
           if (config.show.points && (config.entities[i].show_points !== false)) {
-            this.points[i] = graphEntity.getPoints();
+            this.points[i] = this.Graph[i].getPoints();
           }
           if (config.color_thresholds.length > 0 && !config.entities[i].color)
-            this.gradient[i] = graphEntity.computeGradient(
+            this.gradient[i] = this.Graph[i].computeGradient(
               config.color_thresholds, this.config.logarithmic,
             );
         }
