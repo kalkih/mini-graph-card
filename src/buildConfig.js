@@ -132,7 +132,6 @@ export default (config) => {
     tap_action: {
       action: 'more-info',
     },
-    reverse_graphs: true,
     ...JSON.parse(JSON.stringify(config)),
     show: { ...DEFAULT_SHOW, ...config.show },
   };

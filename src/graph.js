@@ -5,7 +5,7 @@ import {
 } from './const';
 
 export default class Graph {
-  constructor(width, height, margin, hours = 24, points = 1, aggregateFuncName = 'avg', groupBy = 'interval', smoothing = true, logarithmic = false) {
+  constructor(order, width, height, margin, hours = 24, points = 1, aggregateFuncName = 'avg', groupBy = 'interval', smoothing = true, logarithmic = false) {
     const aggregateFuncMap = {
       avg: this._average,
       median: this._median,
@@ -17,6 +17,7 @@ export default class Graph {
       delta: this._delta,
     };
 
+    this._order = order;
     this._history = undefined;
     this.coords = [];
     this.width = width - margin[X] * 2;
@@ -33,6 +34,8 @@ export default class Graph {
     this._groupBy = groupBy;
     this._endTime = 0;
   }
+
+  get order() { return this._order || 0; }
 
   get max() { return this._max; }
 

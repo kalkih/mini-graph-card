@@ -107,26 +107,30 @@ class MiniGraphCard extends LitElement {
 
     if (!this.Graph || entitiesChanged) {
       if (this._hass) this.hass = this._hass;
-      let { entities } = this.config;
-      if (this.config.reverse_graphs)
-        entities = entities.reverse();
+      let order = 0;
+      this.Graph = this.config.entities.map(
+        entity => {
+          let graphOrder = entity.order;
+          if (!Number.isInteger(graphOrder))
+            graphOrder = order++;
 
-      this.Graph = entities.map(
-        entity => new Graph(
-          500,
-          this.config.height,
-          [this.config.show.fill ? 0 : this.config.line_width, this.config.line_width],
-          this.config.hours_to_show,
-          this.config.points_per_hour,
-          entity.aggregate_func || this.config.aggregate_func,
-          this.config.group_by,
-          getFirstDefinedItem(
-            entity.smoothing,
-            this.config.smoothing,
-            !entity.entity.startsWith('binary_sensor.'), // turn off for binary sensor by default
-          ),
-          this.config.logarithmic,
-        ),
+          return new Graph(
+            graphOrder,
+            500,
+            this.config.height,
+            [this.config.show.fill ? 0 : this.config.line_width, this.config.line_width],
+            this.config.hours_to_show,
+            this.config.points_per_hour,
+            entity.aggregate_func || this.config.aggregate_func,
+            this.config.group_by,
+            getFirstDefinedItem(
+              entity.smoothing,
+              this.config.smoothing,
+              !entity.entity.startsWith('binary_sensor.'), // turn off for binary sensor by default
+            ),
+            this.config.logarithmic,
+          );
+        }
       );
     }
   }
@@ -500,6 +504,20 @@ class MiniGraphCard extends LitElement {
 
   renderSvg() {
     const { height } = this.config;
+
+    const orderedKeys = [...this.fill.keys()];
+
+    // sort keys of elements by their graph order (ascending)
+    orderedKeys.sort((a, b) => this.Graph[b].order - this.Graph[a].order);
+
+    // map element keys to render function
+    let fillMap =     orderedKeys.map(i => this.renderSvgFill(this.fill[i], i));
+    let fillRectMap = orderedKeys.map(i => this.renderSvgFillRect(this.fill[i], i));
+    let lineMap =     orderedKeys.map(i => this.renderSvgLine(this.line[i], i));
+    let lineRectMap = orderedKeys.map(i => this.renderSvgLineRect(this.line[i], i));
+    let barMap =      orderedKeys.map(i => this.renderSvgBars(this.bar[i], i));
+    let pointsMap =   orderedKeys.map(i => this.renderSvgPoints(this.points[i], i));
+
     return svg`
       <svg width='100%' height=${height !== 0 ? '100%' : 0} viewBox='0 0 500 ${height}'
         @click=${e => e.stopPropagation()}>
@@ -507,13 +525,13 @@ class MiniGraphCard extends LitElement {
           <defs>
             ${this.renderSvgGradient(this.gradient)}
           </defs>
-          ${this.fill.map((fill, i) => this.renderSvgFill(fill, i))}
-          ${this.fill.map((fill, i) => this.renderSvgFillRect(fill, i))}
-          ${this.line.map((line, i) => this.renderSvgLine(line, i))}
-          ${this.line.map((line, i) => this.renderSvgLineRect(line, i))}
-          ${this.bar.map((bars, i) => this.renderSvgBars(bars, i))}
+          ${fillMap}
+          ${fillRectMap}
+          ${lineMap}
+          ${lineRectMap}
+          ${barMap}
         </g>
-        ${this.points.map((points, i) => this.renderSvgPoints(points, i))}
+        ${pointsMap}
       </svg>`;
   }
 
@@ -748,23 +766,28 @@ class MiniGraphCard extends LitElement {
     if (config.show.graph) {
       let graphPos = 0;
       this.entity.forEach((entity, i) => {
-        if (!entity || this.Graph[i].coords.length === 0) return;
+        if (!entity) return;
+
+        const graphEntity = this.Graph[i];
+
+        if (graphEntity.coords.length === 0) return;
+        
         const bound = config.entities[i].y_axis === 'secondary' ? this.boundSecondary : this.bound;
-        [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
+        [graphEntity.min, graphEntity.max] = [bound[0], bound[1]];
         if (config.show.graph === 'bar') {
           const numVisible = this.visibleEntities.length;
-          this.bar[i] = this.Graph[i].getBars(graphPos, numVisible, config.bar_spacing);
+          this.bar[i] = graphEntity.getBars(graphPos, numVisible, config.bar_spacing);
           graphPos += 1;
         } else {
-          const line = this.Graph[i].getPath();
+          const line = graphEntity.getPath();
           if (config.entities[i].show_line !== false) this.line[i] = line;
           if (config.show.fill
-            && config.entities[i].show_fill !== false) this.fill[i] = this.Graph[i].getFill(line);
+            && config.entities[i].show_fill !== false) this.fill[i] = graphEntity.getFill(line);
           if (config.show.points && (config.entities[i].show_points !== false)) {
-            this.points[i] = this.Graph[i].getPoints();
+            this.points[i] = graphEntity.getPoints();
           }
           if (config.color_thresholds.length > 0 && !config.entities[i].color)
-            this.gradient[i] = this.Graph[i].computeGradient(
+            this.gradient[i] = graphEntity.computeGradient(
               config.color_thresholds, this.config.logarithmic,
             );
         }
