@@ -107,7 +107,11 @@ class MiniGraphCard extends LitElement {
 
     if (!this.Graph || entitiesChanged) {
       if (this._hass) this.hass = this._hass;
-      this.Graph = this.config.entities.map(
+      let { entities } = this.config;
+      if (this.config.reverse_graphs)
+        entities = entities.reverse();
+
+      this.Graph = entities.map(
         entity => new Graph(
           500,
           this.config.height,
