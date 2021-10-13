@@ -113,6 +113,8 @@ class MiniGraphCard extends LitElement {
           let graphOrder = entity.order;
           if (!Number.isInteger(graphOrder))
             graphOrder = order++;
+          else
+            order = graphOrder + 1;
 
           return new Graph(
             graphOrder,
@@ -357,7 +359,7 @@ class MiniGraphCard extends LitElement {
     `;
   }
 
-  renderSvgFill(fill, i) {
+  renderSvgFill(fill, i, renderOrder) {
     if (!fill) return;
     const fade = this.config.show.fill === 'fade';
     const init = this.length[i] || this.config.entities[i].show_line === false;
@@ -375,7 +377,7 @@ class MiniGraphCard extends LitElement {
         <path class='fill'
           type=${this.config.show.fill}
           .id=${i} anim=${this.config.animate} ?init=${init}
-          style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
+          style="animation-delay: ${this.config.animate ? `${renderOrder * 0.5}s` : '0s'}"
           fill='white'
           mask=${fade ? `url(#fill-grad-mask-${this.id}-${i})` : ''}
           d=${this.fill[i]}
@@ -383,7 +385,7 @@ class MiniGraphCard extends LitElement {
       </mask>`;
   }
 
-  renderSvgLine(line, i) {
+  renderSvgLine(line, i, renderOrder) {
     if (!line) return;
 
     const path = svg`
@@ -391,7 +393,7 @@ class MiniGraphCard extends LitElement {
         class='line'
         .id=${i}
         anim=${this.config.animate} ?init=${this.length[i]}
-        style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
+        style="animation-delay: ${this.config.animate ? `${renderOrder * 0.5}s` : '0s'}"
         fill='none'
         stroke-dasharray=${this.length[i] || 'none'} stroke-dashoffset=${this.length[i] || 'none'}
         stroke=${'white'}
@@ -422,7 +424,7 @@ class MiniGraphCard extends LitElement {
     `;
   }
 
-  renderSvgPoints(points, i) {
+  renderSvgPoints(points, i, renderOrder) {
     if (!points) return;
     const color = this.computeColor(this.entity[i].state, i);
     return svg`
@@ -431,7 +433,7 @@ class MiniGraphCard extends LitElement {
         ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== i}
         ?init=${this.length[i]}
         anim=${this.config.animate && this.config.show.points !== 'hover'}
-        style="animation-delay: ${this.config.animate ? `${i * 0.5 + 0.5}s` : '0s'}"
+        style="animation-delay: ${this.config.animate ? `${renderOrder * 0.5 + 0.5}s` : '0s'}"
         fill=${color}
         stroke=${color}
         stroke-width=${this.config.line_width / 2}>
@@ -511,12 +513,12 @@ class MiniGraphCard extends LitElement {
     orderedKeys.sort((a, b) => this.Graph[b].order - this.Graph[a].order);
 
     // map element keys to render function
-    let fillMap =     orderedKeys.map(i => this.renderSvgFill(this.fill[i], i));
-    let fillRectMap = orderedKeys.map(i => this.renderSvgFillRect(this.fill[i], i));
-    let lineMap =     orderedKeys.map(i => this.renderSvgLine(this.line[i], i));
-    let lineRectMap = orderedKeys.map(i => this.renderSvgLineRect(this.line[i], i));
-    let barMap =      orderedKeys.map(i => this.renderSvgBars(this.bar[i], i));
-    let pointsMap =   orderedKeys.map(i => this.renderSvgPoints(this.points[i], i));
+    let fillMap =     orderedKeys.map((i, order) => this.renderSvgFill(this.fill[i], i, order));
+    let fillRectMap = orderedKeys.map((i, order) => this.renderSvgFillRect(this.fill[i], i));
+    let lineMap =     orderedKeys.map((i, order) => this.renderSvgLine(this.line[i], i, order));
+    let lineRectMap = orderedKeys.map((i, order) => this.renderSvgLineRect(this.line[i], i));
+    let barMap =      orderedKeys.map((i, order) => this.renderSvgBars(this.bar[i], i));
+    let pointsMap =   orderedKeys.map((i, order) => this.renderSvgPoints(this.points[i], i, order));
 
     return svg`
       <svg width='100%' height=${height !== 0 ? '100%' : 0} viewBox='0 0 500 ${height}'
