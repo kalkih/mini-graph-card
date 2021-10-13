@@ -126,6 +126,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | attribute | string | | Retrieves an attribute instead of the state
 | name | string |  | Set a custom display name, defaults to entity's friendly_name.
 | color | string |  | Set a custom color, overrides all other color options including thresholds.
+| order | number |  | Change the order in which graphs are rendered.
 | unit | string |  | Set a custom unit of measurement, overrides `unit` set in base config.
 | aggregate_func | string |  | Override for aggregate function used to calculate point on the graph, `avg`, `median`, `min`, `max`, `first`, `last`, `sum`.
 | show_state | boolean |  | Display the current state.
