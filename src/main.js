@@ -33,8 +33,10 @@ class MiniGraphCard extends LitElement {
     this.boundSecondary = [0, 0];
     this.length = [];
     this.entity = [];
+    this.stateEntity = [];
     this.line = [];
     this.bar = [];
+    this.historyBar = [];
     this.abs = [];
     this.fill = [];
     this.points = [];
@@ -51,6 +53,7 @@ class MiniGraphCard extends LitElement {
   }
 
   set hass(hass) {
+    localForage.clear();
     this._hass = hass;
     let updated = false;
     const queue = [];
@@ -466,8 +469,38 @@ class MiniGraphCard extends LitElement {
     return svg`<g class='bars' ?anim=${this.config.animate}>${items}</g>`;
   }
 
+
+  renderSvgHistoryBars(historyBars, index) {
+    if (!historyBars) return;
+    const items = historyBars.map((bar, i) => {
+      const animation = this.config.animate
+        ? svg`
+          <animate attributeName='y' from=${this.config.height} to=${bar.y} dur='1s' fill='remove'
+            calcMode='spline' keyTimes='0; 1' keySplines='0.215 0.61 0.355 1'>
+          </animate>`
+        : '';
+      // const color = this.computeColor(bar.value, index);
+
+      const color = 'red';
+      if (bar.value === 'home') {
+        return;
+      }
+      console.log({ name: 'renderSvgBars', color, bar });
+
+      return svg`
+        <rect class='historyBar' x=${bar.x} y=${bar.y}
+          height=${bar.height} width=${bar.width} fill=${color} state=${bar.value}
+          @mouseover=${() => this.setTooltip(index, i, bar.value)}
+          @mouseout=${() => (this.tooltip = {})}>
+          ${animation}
+        </rect>`;
+    });
+    return svg`<g class='historyBars' ?anim=${this.config.animate}>${items}</g>`;
+  }
+
   renderSvg() {
     const { height } = this.config;
+
     return svg`
       <svg width='100%' height=${height !== 0 ? '100%' : 0} viewBox='0 0 500 ${height}'
         @click=${e => e.stopPropagation()}>
@@ -480,6 +513,18 @@ class MiniGraphCard extends LitElement {
           ${this.line.map((line, i) => this.renderSvgLine(line, i))}
           ${this.line.map((line, i) => this.renderSvgLineRect(line, i))}
           ${this.bar.map((bars, i) => this.renderSvgBars(bars, i))}
+          ${this.historyBar.map((historyBars, i) => this.renderSvgHistoryBars(historyBars, i))}
+        </g>
+        <g>
+          <line x1="50" y1="0" x2="50" y2="100%" style="stroke:rgb(100,100,100);stroke-width:1" />
+          <line x1="100" y1="0" x2="100" y2="100%" style="stroke:rgb(200,200,200);stroke-width:1" />
+          <line x1="150" y1="0" x2="150" y2="100%" style="stroke:rgb(100,100,100);stroke-width:1" />
+          <line x1="200" y1="0" x2="200" y2="100%" style="stroke:rgb(200,200,200);stroke-width:1" />
+          <line x1="250" y1="0" x2="250" y2="100%" style="stroke:rgb(100,100,100);stroke-width:1" />
+          <line x1="300" y1="0" x2="300" y2="100%" style="stroke:rgb(200,200,200);stroke-width:1" />
+          <line x1="350" y1="0" x2="350" y2="100%" style="stroke:rgb(100,100,100);stroke-width:1" />
+          <line x1="400" y1="0" x2="400" y2="100%" style="stroke:rgb(200,200,200);stroke-width:1" />
+          <line x1="450" y1="0" x2="450" y2="100%" style="stroke:rgb(100,100,100);stroke-width:1" />
         </g>
         ${this.points.map((points, i) => this.renderSvgPoints(points, i))}
       </svg>`;
@@ -724,6 +769,7 @@ class MiniGraphCard extends LitElement {
           if (config.color_thresholds.length > 0 && !config.entities[i].color)
             this.gradient[i] = this.Graph[i].computeGradient(config.color_thresholds);
         }
+        this.historyBar[i] = this.Graph[i].getHistoryBars(graphPos, this.stateEntity.length, config.bar_spacing);
       });
       this.line = [...this.line];
     }
@@ -840,18 +886,28 @@ class MiniGraphCard extends LitElement {
     }
 
     let newStateHistory = await this.fetchRecent(entity.entity_id, start, end, skipInitialState);
+    console.log({
+      entity,
+      newStateHistory,
+      skipInitialState,
+      start,
+      end,
+    });
     if (newStateHistory[0] && newStateHistory[0].length > 0) {
       // check if we should convert states to numeric values
-      if (this.config.state_map.length > 0) {
-        newStateHistory[0].forEach(item => this._convertState(item));
-      }
+      // if (this.config.state_map.length > 0) {
+      //   newStateHistory[0].forEach(item => this._convertState(item));
+      // }
 
-      newStateHistory = newStateHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
-      newStateHistory = newStateHistory.map(item => ({
-        last_changed: item.last_changed,
+      // newStateHistory = newStateHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
+      newStateHistory = newStateHistory[0].map(item => ({
+        last_changed: Date.parse(item.last_changed),
         state: item.state,
       }));
+
       stateHistory = [...stateHistory, ...newStateHistory];
+
+      console.log({ stateHistory, newStateHistory });
 
       if (this.config.cache) {
         this
@@ -950,4 +1006,4 @@ class MiniGraphCard extends LitElement {
   }
 }
 
-customElements.define('mini-graph-card', MiniGraphCard);
+customElements.define('mini-history-graph-card', MiniGraphCard);

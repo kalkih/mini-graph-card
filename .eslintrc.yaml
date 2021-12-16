@@ -11,6 +11,8 @@ rules:
   no-nested-ternary: 0
   camelcase: 0
   linebreak-style: 0
+  max-len: 0
+  no-extend-native: 0
 globals:
   window: true
   Event: true

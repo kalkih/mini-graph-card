@@ -1,7 +1,7 @@
 {
-  "name": "mini-graph-card",
-  "version": "0.9.4",
-  "description": "A minimalistic and customizable graph card for Home Assistant Lovelace UI",
+  "name": "mini-history-graph",
+  "version": "0.0.1",
+  "description": "A minimalistic and customizable history graph card for Home Assistant Lovelace UI",
   "keywords": [
     "home-assistant",
     "homeassistant",
@@ -45,10 +45,10 @@
     "webpack-cli": "^4.8.0"
   },
   "scripts": {
-    "dev": "npm run build && node server.js",
+    "dev": "npm run build",
     "build": "npm run lint && npm run rollup && npm run babel",
     "rollup": "rollup -c",
-    "babel": "babel dist/mini-graph-card-bundle.js --out-file dist/mini-graph-card-bundle.js",
+    "babel": "babel dist/mini-history-graph-bundle.js --out-file dist/mini-history-graph-bundle.min.js",
     "lint": "eslint src/* --ext .js",
     "watch": "rollup -c --watch"
   }
