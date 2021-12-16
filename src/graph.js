@@ -214,7 +214,7 @@ export default class Graph {
     }));
   }
 
-  getHistoryBars(/* position , spacing = 4 */) {
+  getHistoryBars(stateEntity/* position , spacing = 4 */) {
     // const xRatio = ((this.width - spacing) / Math.ceil(this.hours * this.points)) / total;
 
     // console.log({
@@ -246,6 +246,7 @@ export default class Graph {
         height: 25,
         width: (500 * (coord[X] - coord[Y])),
         value: coord[V],
+        stateEntity,
       //   coord,
       };
       console.log({ name: 'getHistoryBars', this: this, obj });

@@ -472,6 +472,9 @@ class MiniGraphCard extends LitElement {
 
   renderSvgHistoryBars(historyBars, index) {
     if (!historyBars) return;
+
+    console.log({ name: 'renderSvgHistoryBars', historyBars, index });
+
     const items = historyBars.map((bar, i) => {
       const animation = this.config.animate
         ? svg`
@@ -482,14 +485,17 @@ class MiniGraphCard extends LitElement {
       // const color = this.computeColor(bar.value, index);
 
       const color = 'red';
-      if (bar.value === 'home') {
-        return;
-      }
-      console.log({ name: 'renderSvgBars', color, bar });
+      const stateSettings = bar.stateEntity.states.find(x => x.value === bar.value);
+      // if (bar.value === bar.stateEntity.states.find(x=>x.value=='home') {
+      //   return;
+      // }
+      console.log({
+        name: 'renderSvgBars', color, bar, stateSettings,
+      });
 
       return svg`
         <rect class='historyBar' x=${bar.x} y=${bar.y}
-          height=${bar.height} width=${bar.width} fill=${color} state=${bar.value}
+          height=${bar.height} width=${bar.width} opacity=${stateSettings.opacity} fill=${stateSettings.color} state=${bar.value}
           @mouseover=${() => this.setTooltip(index, i, bar.value)}
           @mouseout=${() => (this.tooltip = {})}>
           ${animation}
@@ -769,7 +775,8 @@ class MiniGraphCard extends LitElement {
           if (config.color_thresholds.length > 0 && !config.entities[i].color)
             this.gradient[i] = this.Graph[i].computeGradient(config.color_thresholds);
         }
-        this.historyBar[i] = this.Graph[i].getHistoryBars(graphPos, this.stateEntity.length, config.bar_spacing);
+        // this.historyBar[i] = this.Graph[i].getHistoryBars(graphPos, this.stateEntity.length, config.bar_spacing, this.stateEntity);
+        this.historyBar[i] = this.Graph[i].getHistoryBars(config.entities[i]);
       });
       this.line = [...this.line];
     }
