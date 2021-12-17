@@ -292,6 +292,7 @@ class MiniGraphCard extends LitElement {
           ${this.renderLabels()}
           ${this.renderLabelsSecondary()}
           <div class="graph__container__svg">
+            ${this.renderHistorySvg()}
             ${this.renderSvg()}
           </div>
         </div>
@@ -484,12 +485,21 @@ class MiniGraphCard extends LitElement {
           </animate>`
         : '';
 
-      const stateSettings = bar.stateEntity.states.find(x => x.value === bar.value);
+      let stateSettings = bar.stateEntity.states.find(x => x.value === bar.value);
+      if (!stateSettings) {
+        console.log({ bar });
+        console.warn(`Entity: ${bar.stateEntity.name} missing map for ${bar.value}`);
+        stateSettings = {
+          opacity: 0,
+          color: 'black',
+          label: 'Undefined',
+        };
+      }
       // if stateSettings is not found on Per Entity Map look globally
       // if not found globally build a new color
 
       return svg`
-        <rect class='historyBar' x=${bar.x} y=${bar.y}
+        <rect class='historyBar' x=${bar.x} y=${bar.y + index * 25}
           height=${bar.height} width=${bar.width} opacity=${stateSettings.opacity} fill=${stateSettings.color} state=${bar.value}
           @mouseover=${() => this.setTooltip(index, i, bar.value, stateSettings.label)}
           @mouseout=${() => (this.tooltip = {})}>
@@ -497,6 +507,35 @@ class MiniGraphCard extends LitElement {
         </rect>`;
     });
     return svg`<g class='historyBars' ?anim=${this.config.animate}>${items}</g>`;
+  }
+
+
+  renderHistorySvg() {
+    if (this.historyBar.length === 0) {
+      return;
+    }
+    return svg`
+      <svg width='100%' height='100%' viewBox='0 0 500 100'
+        @click=${e => e.stopPropagation()}>
+        <g>
+          <defs>
+            ${this.renderSvgGradient(this.gradient)}
+          </defs>
+          ${this.historyBar.map((historyBars, i) => this.renderSvgHistoryBars(historyBars, i))}
+        </g>
+        <g>
+          <line x1="50" y1="0" x2="50" y2="100%" style="stroke:rgb(100,100,100);stroke-width:1" />
+          <line x1="100" y1="0" x2="100" y2="100%" style="stroke:rgb(200,200,200);stroke-width:1" />
+          <line x1="150" y1="0" x2="150" y2="100%" style="stroke:rgb(100,100,100);stroke-width:1" />
+          <line x1="200" y1="0" x2="200" y2="100%" style="stroke:rgb(200,200,200);stroke-width:1" />
+          <line x1="250" y1="0" x2="250" y2="100%" style="stroke:rgb(100,100,100);stroke-width:1" />
+          <line x1="300" y1="0" x2="300" y2="100%" style="stroke:rgb(200,200,200);stroke-width:1" />
+          <line x1="350" y1="0" x2="350" y2="100%" style="stroke:rgb(100,100,100);stroke-width:1" />
+          <line x1="400" y1="0" x2="400" y2="100%" style="stroke:rgb(200,200,200);stroke-width:1" />
+          <line x1="450" y1="0" x2="450" y2="100%" style="stroke:rgb(100,100,100);stroke-width:1" />
+        </g>
+        ${this.points.map((points, i) => this.renderSvgPoints(points, i))}
+      </svg>`;
   }
 
   renderSvg() {
