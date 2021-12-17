@@ -243,7 +243,7 @@ export default class Graph {
     return this.coords.map((coord) => {
       const obj = {
         x: (500 * coord[Y]),
-        y: 10,
+        y: 0,
         height: 25,
         width: (500 * (coord[X] - coord[Y])),
         value: coord[V],
