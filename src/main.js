@@ -391,6 +391,7 @@ class MiniGraphCard extends LitElement {
 
   renderSvgPoints(points, i) {
     if (!points) return;
+    console.log({ points });
     const color = this.computeColor(this.entity[i].state, i);
     return svg`
       <g class='line--points'
@@ -482,21 +483,15 @@ class MiniGraphCard extends LitElement {
             calcMode='spline' keyTimes='0; 1' keySplines='0.215 0.61 0.355 1'>
           </animate>`
         : '';
-      // const color = this.computeColor(bar.value, index);
 
-      const color = 'red';
       const stateSettings = bar.stateEntity.states.find(x => x.value === bar.value);
-      // if (bar.value === bar.stateEntity.states.find(x=>x.value=='home') {
-      //   return;
-      // }
-      console.log({
-        name: 'renderSvgBars', color, bar, stateSettings,
-      });
+      // if stateSettings is not found on Per Entity Map look globally
+      // if not found globally build a new color
 
       return svg`
         <rect class='historyBar' x=${bar.x} y=${bar.y}
           height=${bar.height} width=${bar.width} opacity=${stateSettings.opacity} fill=${stateSettings.color} state=${bar.value}
-          @mouseover=${() => this.setTooltip(index, i, bar.value)}
+          @mouseover=${() => this.setTooltip(index, i, bar.value, stateSettings.label)}
           @mouseout=${() => (this.tooltip = {})}>
           ${animation}
         </rect>`;
@@ -556,6 +551,7 @@ class MiniGraphCard extends LitElement {
     now.setMilliseconds(now.getMilliseconds() - getMilli(offset - oneMinInHours));
     const start = getTime(now, format, this._hass.language);
 
+
     this.tooltip = {
       value,
       id,
@@ -564,6 +560,7 @@ class MiniGraphCard extends LitElement {
       index,
       label,
     };
+    console.log({ tooltip: this.tooltip });
   }
 
   renderLabels() {
@@ -748,7 +745,8 @@ class MiniGraphCard extends LitElement {
 
     if (config.show.graph) {
       this.entity.forEach((entity, i) => {
-        if (entity) this.Graph[i].update();
+        if (entity && (config.entities[i].style === 'historyBar')) this.Graph[i].updateHistory();
+        else if (entity) this.Graph[i].update();
       });
     }
 
@@ -758,25 +756,28 @@ class MiniGraphCard extends LitElement {
       let graphPos = 0;
       this.entity.forEach((entity, i) => {
         if (!entity || this.Graph[i].coords.length === 0) return;
-        const bound = config.entities[i].y_axis === 'secondary' ? this.boundSecondary : this.bound;
-        [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
-        if (config.show.graph === 'bar') {
-          const numVisible = this.visibleEntities.length;
-          this.bar[i] = this.Graph[i].getBars(graphPos, numVisible, config.bar_spacing);
-          graphPos += 1;
+
+        if (config.entities[i].style === 'historyBar') {
+          this.historyBar[i] = this.Graph[i].getHistoryBars(config.entities[i]);
         } else {
-          const line = this.Graph[i].getPath();
-          if (config.entities[i].show_line !== false) this.line[i] = line;
-          if (config.show.fill
+          const bound = config.entities[i].y_axis === 'secondary' ? this.boundSecondary : this.bound;
+          [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
+          if (config.show.graph === 'bar') {
+            const numVisible = this.visibleEntities.length;
+            this.bar[i] = this.Graph[i].getBars(graphPos, numVisible, config.bar_spacing);
+            graphPos += 1;
+          } else {
+            const line = this.Graph[i].getPath();
+            if (config.entities[i].show_line !== false) this.line[i] = line;
+            if (config.show.fill
             && config.entities[i].show_fill !== false) this.fill[i] = this.Graph[i].getFill(line);
-          if (config.show.points && (config.entities[i].show_points !== false)) {
-            this.points[i] = this.Graph[i].getPoints();
+            if (config.show.points && (config.entities[i].show_points !== false)) {
+              this.points[i] = this.Graph[i].getPoints();
+            }
+            if (config.color_thresholds.length > 0 && !config.entities[i].color)
+              this.gradient[i] = this.Graph[i].computeGradient(config.color_thresholds);
           }
-          if (config.color_thresholds.length > 0 && !config.entities[i].color)
-            this.gradient[i] = this.Graph[i].computeGradient(config.color_thresholds);
         }
-        // this.historyBar[i] = this.Graph[i].getHistoryBars(graphPos, this.stateEntity.length, config.bar_spacing, this.stateEntity);
-        this.historyBar[i] = this.Graph[i].getHistoryBars(config.entities[i]);
       });
       this.line = [...this.line];
     }
@@ -902,14 +903,14 @@ class MiniGraphCard extends LitElement {
     });
     if (newStateHistory[0] && newStateHistory[0].length > 0) {
       // check if we should convert states to numeric values
-      // if (this.config.state_map.length > 0) {
-      //   newStateHistory[0].forEach(item => this._convertState(item));
-      // }
+      if (this.config.state_map.length > 0) {
+        newStateHistory[0].forEach(item => this._convertState(item));
+      }
 
       // newStateHistory = newStateHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
       newStateHistory = newStateHistory[0].map(item => ({
         last_changed: Date.parse(item.last_changed),
-        state: item.state,
+        state: Number.isNaN(parseFloat(item.state)) ? item.state : parseFloat(item.state),
       }));
 
       stateHistory = [...stateHistory, ...newStateHistory];

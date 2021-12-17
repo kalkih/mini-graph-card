@@ -47,7 +47,7 @@ export default class Graph {
 
     const histGroups = this._history.reduce((res, item) => this._reducer(res, item), []);
 
-    console.log({ _history: this._history, histGroups });
+    console.log({ update: this._history, histGroups });
 
     // drop potential out of bound entry's except one
     if (histGroups[0] && histGroups[0].length) {
@@ -59,8 +59,33 @@ export default class Graph {
     histGroups.length = requiredNumOfPoints;
 
 
+    // this.coords = this._calcPoints2(this._history);
+    this.coords = this._calcPoints(histGroups);
+    this.min = Math.min(...this.coords.map(item => Number(item[V])));
+    this.max = Math.max(...this.coords.map(item => Number(item[V])));
+  }
+
+  updateHistory(history = undefined) {
+    if (history) {
+      this._history = history;
+    }
+    if (!this._history) return;
+    this._updateEndTime();
+
+    const histGroups = this._history.reduce((res, item) => this._reducer(res, item), []);
+
+    console.log({ updateHistory: this._history, histGroups });
+
+    // drop potential out of bound entry's except one
+    if (histGroups[0] && histGroups[0].length) {
+      histGroups[0] = [histGroups[0][histGroups[0].length - 1]];
+    }
+
+    // extend length to fill missing history
+    const requiredNumOfPoints = Math.ceil(this.hours * this.points);
+    histGroups.length = requiredNumOfPoints;
+
     this.coords = this._calcPoints2(this._history);
-    // this.coords = this._calcPoints(histGroups);
     this.min = Math.min(...this.coords.map(item => Number(item[V])));
     this.max = Math.max(...this.coords.map(item => Number(item[V])));
   }
@@ -215,31 +240,7 @@ export default class Graph {
   }
 
   getHistoryBars(stateEntity/* position , spacing = 4 */) {
-    // const xRatio = ((this.width - spacing) / Math.ceil(this.hours * this.points)) / total;
-
-    // console.log({
-    //   name: 'getHistoryBars', position, spacing, xRatio, 'this.coords': this.coords, coords,
-    // });
-
     return this.coords.map((coord) => {
-      // return coords.map((coord, i) => {
-      // const obj = {
-      //   x: (xRatio * i * total) + (xRatio * position) + spacing,
-      //   y: coord[Y],
-      //   height: this.height - coord[Y] + this.margin[Y] * 4,
-      //   width: xRatio - spacing,
-      //   value: coord[V],
-      // };
-
-      // const obj = {
-      //   x: (xRatio * i * total) + (xRatio * position) + spacing,
-      //   y: 10,
-      //   height: 25,
-      //   width: xRatio - spacing,
-      //   value: coord[V],
-      //   coord,
-      // };
-
       const obj = {
         x: (500 * coord[Y]),
         y: 10,
