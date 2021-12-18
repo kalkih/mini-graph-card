@@ -474,6 +474,7 @@ class MiniGraphCard extends LitElement {
 
   renderSvgHistoryBars(historyBars, index) {
     if (!historyBars) return;
+    const barGap = index * this.config.historyGraph.bar_gap;
 
     console.log({
       name: 'renderSvgHistoryBars', historyBars, index, config: this.config,
@@ -500,8 +501,9 @@ class MiniGraphCard extends LitElement {
       // if stateSettings is not found on Per Entity Map look globally
       // if not found globally build a new color
 
+
       return svg`
-        <rect class='historyBar' x=${bar.x} y=${index * this.config.historyGraph.bar_height}
+        <rect class='historyBar' x=${bar.x} y=${index * this.config.historyGraph.bar_height + barGap}
           height=${this.config.historyGraph.bar_height} width=${bar.width} opacity=${stateSettings.opacity} fill=${stateSettings.color} state=${bar.value}
           @mouseover=${() => this.setTooltip(index, i, bar.value, stateSettings.label)}
           @mouseout=${() => (this.tooltip = {})}>
@@ -510,7 +512,7 @@ class MiniGraphCard extends LitElement {
     });
     return svg`<g class='historyBars' ?anim=${this.config.animate}>
       ${items}
-      <text x="10" y="${index * this.config.historyGraph.bar_height + (this.config.historyGraph.bar_height / 2)}" style="fill: #999999; font-style: "bold"; font-size: 25px;" font-family: "monospace">${historyBars[0].stateEntity.title}</text>
+      <text x="10" y="${index * this.config.historyGraph.bar_height + (this.config.historyGraph.bar_height / 1.5) + barGap}" style="fill: #999999; font-style: bold; font-size: ${this.config.historyGraph.bar_height / 1.5}px;" font-family: "monospace">${historyBars[0].stateEntity.title}</text>
     </g>`;
   }
 
