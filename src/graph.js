@@ -72,22 +72,22 @@ export default class Graph {
     if (!this._history) return;
     this._updateEndTime();
 
-    const histGroups = this._history.reduce((res, item) => this._reducer(res, item), []);
+    // const histGroups = this._history.reduce((res, item) => this._reducer(res, item), []);
 
-    console.log({ updateHistory: this._history, histGroups });
+    // console.log({ updateHistory: this._history, histGroups });
 
-    // drop potential out of bound entry's except one
-    if (histGroups[0] && histGroups[0].length) {
-      histGroups[0] = [histGroups[0][histGroups[0].length - 1]];
-    }
+    // // drop potential out of bound entry's except one
+    // if (histGroups[0] && histGroups[0].length) {
+    //   histGroups[0] = [histGroups[0][histGroups[0].length - 1]];
+    // }
 
-    // extend length to fill missing history
-    const requiredNumOfPoints = Math.ceil(this.hours * this.points);
-    histGroups.length = requiredNumOfPoints;
+    // // extend length to fill missing history
+    // const requiredNumOfPoints = Math.ceil(this.hours * this.points);
+    // histGroups.length = requiredNumOfPoints;
 
-    this.coords = this._calcPoints2(this._history);
-    this.min = Math.min(...this.coords.map(item => Number(item[V])));
-    this.max = Math.max(...this.coords.map(item => Number(item[V])));
+    this.coords = this._calcHistoryPoints(this._history);
+    // this.min = Math.min(...this.coords.map(item => Number(item[V])));
+    // this.max = Math.max(...this.coords.map(item => Number(item[V])));
   }
 
   _reducer(res, item) {
@@ -100,7 +100,7 @@ export default class Graph {
   }
 
 
-  _calcPoints2(history) {
+  _calcHistoryPoints(history) {
     const coords = [];
     const end = this._endTime;
     const start = end.addHours(0 - this.hours);

@@ -187,7 +187,11 @@ class MiniGraphCard extends LitElement {
         style="font-size: ${config.font_size}px;"
         @click=${e => this.handlePopup(e, config.tap_action.entity || this.entity[0])}
       >
-        ${this.renderHeader()} ${this.renderStates()} ${this.renderGraph()} ${this.renderInfo()}
+        ${this.renderHeader()} 
+        ${this.renderStates()} 
+        ${this.renderHistoryGraph()}
+        ${this.renderGraph()} 
+        ${this.renderInfo()}
       </ha-card>
     `;
   }
@@ -286,13 +290,12 @@ class MiniGraphCard extends LitElement {
   }
 
   renderGraph() {
-    return this.config.show.graph ? html`
+    return this.config.show.graph && this.config.entities.filter(x => x.style !== 'historyBar').length > 0 ? html`
       <div class="graph">
         <div class="graph__container">
           ${this.renderLabels()}
           ${this.renderLabelsSecondary()}
           <div class="graph__container__svg">
-            ${this.renderHistorySvg()}
             ${this.renderSvg()}
           </div>
         </div>
@@ -488,7 +491,7 @@ class MiniGraphCard extends LitElement {
           </animate>`
         : '';
 
-      let stateSettings = bar.stateEntity.states.find(x => x.value === bar.value);
+      let stateSettings = bar.stateEntity.states.find(x => x && x.value === bar.value);
       if (!stateSettings) {
         console.log({ bar });
         console.warn(`Entity: ${bar.stateEntity.name} missing map for ${bar.value}`);
@@ -501,18 +504,29 @@ class MiniGraphCard extends LitElement {
       // if stateSettings is not found on Per Entity Map look globally
       // if not found globally build a new color
 
+      const { x, value } = bar;
+      const y = index * this.config.historyGraph.bar_height + barGap;
+      const height = this.config.historyGraph.bar_height;
+      const { width } = bar;
+      const { opacity, color } = stateSettings;
+
 
       return svg`
-        <rect class='historyBar' x=${bar.x} y=${index * this.config.historyGraph.bar_height + barGap}
-          height=${this.config.historyGraph.bar_height} width=${bar.width} opacity=${stateSettings.opacity} fill=${stateSettings.color} state=${bar.value}
-          @mouseover=${() => this.setTooltip(index, i, bar.value, stateSettings.label)}
+        <rect class='historyBar' x=${x} y=${y}
+          height=${height} width=${width} opacity=${opacity} fill=${color} state=${value}
+          @mouseover=${() => this.setTooltip(index, i, value, stateSettings.label)}
           @mouseout=${() => (this.tooltip = {})}>
           ${animation}
         </rect>`;
     });
+
+
+    const textY = index * this.config.historyGraph.bar_height + (this.config.historyGraph.bar_height / 1.5) + barGap;
+    const textFontSize = this.config.historyGraph.bar_height / 1.5;
+
     return svg`<g class='historyBars' ?anim=${this.config.animate}>
       ${items}
-      <text x="10" y="${index * this.config.historyGraph.bar_height + (this.config.historyGraph.bar_height / 1.5) + barGap}" style="fill: #999999; font-style: bold; font-size: ${this.config.historyGraph.bar_height / 1.5}px;" font-family: "monospace">${historyBars[0].stateEntity.title}</text>
+      <text x="10" y="${textY}" style="fill: #999999; font-style: bold; font-size: ${textFontSize}px;" font-family: "monospace">${historyBars[0].stateEntity.title}</text>
     </g>`;
   }
 
@@ -529,12 +543,32 @@ class MiniGraphCard extends LitElement {
   //         <line x1="450" y1="0" x2="450" y2="100%" style="stroke:rgb(100,100,100);stroke-width:1" />
   //       </g>
 
-  renderHistorySvg() {
+  renderHistoryGraph() {
     if (this.historyBar.length === 0) {
+      console.warn('No History Bars Detected');
       return;
     }
     return svg`
-      <svg width='100%' height='100%' viewBox='0 0 500 100'
+      ${this.renderHistorySvg()}`;
+    // return svg`
+    //  <div class="graph">
+    //      <div class="graph__container">
+    //        <div class="graph__container__svg">
+    //         ${this.renderHistorySvg()}
+    //       </div>
+    //   </div>
+    // </div>`;
+  }
+
+  renderHistorySvg() {
+    // if (this.historyBar.length === 0) {
+    //  return;
+    // }
+
+    const height = this.historyBar.length * (this.config.historyGraph.bar_height + this.config.historyGraph.bar_gap);
+
+    return svg`
+      <svg width='100%' height='100%' viewBox='0 0 500 ${height}'
         @click=${e => e.stopPropagation()}>
         
         <g>
@@ -561,18 +595,6 @@ class MiniGraphCard extends LitElement {
           ${this.line.map((line, i) => this.renderSvgLine(line, i))}
           ${this.line.map((line, i) => this.renderSvgLineRect(line, i))}
           ${this.bar.map((bars, i) => this.renderSvgBars(bars, i))}
-          ${this.historyBar.map((historyBars, i) => this.renderSvgHistoryBars(historyBars, i))}
-        </g>
-        <g>
-          <line x1="50" y1="0" x2="50" y2="100%" style="stroke:rgb(100,100,100);stroke-width:1" />
-          <line x1="100" y1="0" x2="100" y2="100%" style="stroke:rgb(200,200,200);stroke-width:1" />
-          <line x1="150" y1="0" x2="150" y2="100%" style="stroke:rgb(100,100,100);stroke-width:1" />
-          <line x1="200" y1="0" x2="200" y2="100%" style="stroke:rgb(200,200,200);stroke-width:1" />
-          <line x1="250" y1="0" x2="250" y2="100%" style="stroke:rgb(100,100,100);stroke-width:1" />
-          <line x1="300" y1="0" x2="300" y2="100%" style="stroke:rgb(200,200,200);stroke-width:1" />
-          <line x1="350" y1="0" x2="350" y2="100%" style="stroke:rgb(100,100,100);stroke-width:1" />
-          <line x1="400" y1="0" x2="400" y2="100%" style="stroke:rgb(200,200,200);stroke-width:1" />
-          <line x1="450" y1="0" x2="450" y2="100%" style="stroke:rgb(100,100,100);stroke-width:1" />
         </g>
         ${this.points.map((points, i) => this.renderSvgPoints(points, i))}
       </svg>`;
@@ -954,11 +976,15 @@ class MiniGraphCard extends LitElement {
         newStateHistory[0].forEach(item => this._convertState(item));
       }
 
-      // newStateHistory = newStateHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
-      newStateHistory = newStateHistory[0].map(item => ({
-        last_changed: Date.parse(item.last_changed),
-        state: Number.isNaN(parseFloat(item.state)) ? item.state : parseFloat(item.state),
-      }));
+      if (this.config.entities[index].style === 'historyBar') {
+        newStateHistory = newStateHistory[0].map(item => ({
+          last_changed: Date.parse(item.last_changed),
+          state: Number.isNaN(parseFloat(item.state)) ? item.state : parseFloat(item.state),
+        }));
+      } else {
+        newStateHistory = newStateHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
+      }
+
 
       stateHistory = [...stateHistory, ...newStateHistory];
 
