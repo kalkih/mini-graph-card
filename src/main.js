@@ -253,11 +253,13 @@ class MiniGraphCard extends LitElement {
 
   renderStates() {
     const { entity, value } = this.tooltip;
-    const state = value !== undefined ? value : (
-      this.config.entities[0].attribute
-        ? this.entity[0].attributes[this.config.entities[0].attribute]
-        : this.entity[0].state
-    );
+    const state = value !== undefined ? value : (this.config.show.state === 'last'
+      ? this.points[0][this.points[0].length - 1][V]
+      : (
+        this.config.entities[0].attribute
+          ? this.entity[0].attributes[this.config.entities[0].attribute]
+          : this.entity[0].state
+      ));
     const color = this.config.entities[0].state_adaptive_color ? `color: ${this.color};` : '';
     if (this.config.show.state)
       return html`
@@ -764,6 +766,7 @@ class MiniGraphCard extends LitElement {
             && config.entities[i].show_fill !== false) this.fill[i] = this.Graph[i].getFill(line);
           if (config.show.points && (config.entities[i].show_points !== false)) {
             this.points[i] = this.Graph[i].getPoints();
+            console.log(`### lastpoint ${this.points[i][this.points[i].length - 1][V]}`);
           }
           if (config.color_thresholds.length > 0 && !config.entities[i].color)
             this.gradient[i] = this.Graph[i].computeGradient(
