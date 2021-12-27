@@ -876,11 +876,12 @@ class MiniGraphCard extends LitElement {
 
     if (config.show.graph) {
       let graphPos = 0;
+      this.historyBar = [];
       this.entity.forEach((entity, i) => {
         if (!entity || this.Graph[i].coords.length === 0) return;
 
         if (config.entities[i].style === 'historyBar') {
-          this.historyBar[i] = this.Graph[i].getHistoryBars(config.entities[i]);
+          this.historyBar.push(this.Graph[i].getHistoryBars(config.entities[i]));
         } else {
           const bound = config.entities[i].y_axis === 'secondary' ? this.boundSecondary : this.bound;
           [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
