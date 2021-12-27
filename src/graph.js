@@ -4,14 +4,18 @@ import {
   ONE_HOUR,
 } from './const';
 
-Date.prototype.addHours = (h) => {
-  const dateReturn = new Date();
-  dateReturn.setTime(dateReturn.getTime() + (h * 60 * 60 * 1000));
-  return dateReturn;
-};
-
 export default class Graph {
   constructor(width, height, margin, hours = 24, points = 1, aggregateFuncName = 'avg', groupBy = 'interval', smoothing = true) {
+    const aggregateFuncMap = {
+      avg: this._average,
+      max: this._maximum,
+      min: this._minimum,
+      first: this._first,
+      last: this._last,
+      sum: this._sum,
+      delta: this._delta,
+    };
+
     this._history = undefined;
     this.coords = [];
     this.width = width - margin[X] * 2;
@@ -22,7 +26,7 @@ export default class Graph {
     this.points = points;
     this.hours = hours;
     this.aggregateFuncName = aggregateFuncName;
-    this._calcPoint = this._average;
+    this._calcPoint = aggregateFuncMap[aggregateFuncName] || this._average;
     this._smoothing = smoothing;
     this._groupBy = groupBy;
     this._endTime = 0;
@@ -47,8 +51,6 @@ export default class Graph {
 
     const histGroups = this._history.reduce((res, item) => this._reducer(res, item), []);
 
-    console.log({ update: this._history, histGroups });
-
     // drop potential out of bound entry's except one
     if (histGroups[0] && histGroups[0].length) {
       histGroups[0] = [histGroups[0][histGroups[0].length - 1]];
@@ -58,36 +60,13 @@ export default class Graph {
     const requiredNumOfPoints = Math.ceil(this.hours * this.points);
     histGroups.length = requiredNumOfPoints;
 
+    // this.histGroups = this._calcPoints(histGroups);
+    // this.min = Math.min(...this.histGroups.map(item => Number(item[V])));
+    // this.max = Math.max(...this.histGroups.map(item => Number(item[V])));
 
-    // this.coords = this._calcPoints2(this._history);
     this.coords = this._calcPoints(histGroups);
     this.min = Math.min(...this.coords.map(item => Number(item[V])));
     this.max = Math.max(...this.coords.map(item => Number(item[V])));
-  }
-
-  updateHistory(history = undefined) {
-    if (history) {
-      this._history = history;
-    }
-    if (!this._history) return;
-    this._updateEndTime();
-
-    // const histGroups = this._history.reduce((res, item) => this._reducer(res, item), []);
-
-    // console.log({ updateHistory: this._history, histGroups });
-
-    // // drop potential out of bound entry's except one
-    // if (histGroups[0] && histGroups[0].length) {
-    //   histGroups[0] = [histGroups[0][histGroups[0].length - 1]];
-    // }
-
-    // // extend length to fill missing history
-    // const requiredNumOfPoints = Math.ceil(this.hours * this.points);
-    // histGroups.length = requiredNumOfPoints;
-
-    this.coords = this._calcHistoryPoints(this._history);
-    // this.min = Math.min(...this.coords.map(item => Number(item[V])));
-    // this.max = Math.max(...this.coords.map(item => Number(item[V])));
   }
 
   _reducer(res, item) {
@@ -99,22 +78,6 @@ export default class Graph {
     return res;
   }
 
-
-  _calcHistoryPoints(history) {
-    const coords = [];
-    const end = this._endTime;
-    const start = end.addHours(0 - this.hours);
-    const span = end - start;
-    let prev = 1;
-
-    history.reverse().forEach((item) => {
-      const next = (item.last_changed - start) / span;
-      coords.push([prev, next < 0 ? 0 : next, item.state]);
-      prev = next;
-    });
-    return coords;
-  }
-
   _calcPoints(history) {
     const coords = [];
     let xRatio = this.width / (this.hours * this.points - 1);
@@ -122,26 +85,11 @@ export default class Graph {
 
     const first = history.filter(Boolean)[0];
     let last = [this._calcPoint(first), this._lastValue(first)];
-
-    console.log({
-      name: '_calcPoints(history)',
-      this: this,
-      history,
-      first,
-      last,
-      xRatio,
-    });
-
-    // let prev = null;
     const getCoords = (item, i) => {
       const x = xRatio * i + this.margin[X];
-      if (item) {
-        // prev = item;
+      if (item)
         last = [this._calcPoint(item), this._lastValue(item)];
-
-        // console.log({ this: this, coord: [x, 0, item ? last[0] : last[1]] });
-        return coords.push([x, 0, item ? last[0] : last[1]]);
-      }
+      return coords.push([x, 0, item ? last[0] : last[1]]);
     };
 
     for (let i = 0; i < history.length; i += 1)
@@ -237,22 +185,6 @@ export default class Graph {
       width: xRatio - spacing,
       value: coord[V],
     }));
-  }
-
-  getHistoryBars(stateEntity/* position , spacing = 4 */) {
-    return this.coords.map((coord) => {
-      const obj = {
-        x: (500 * coord[Y]),
-        y: 0,
-        height: 25,
-        width: (500 * (coord[X] - coord[Y])),
-        value: coord[V],
-        stateEntity,
-      //   coord,
-      };
-      console.log({ name: 'getHistoryBars', this: this, obj });
-      return obj;
-    });
   }
 
   _midPoint(Ax, Ay, Bx, By) {

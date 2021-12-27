@@ -1,6 +1,7 @@
 import { LitElement, html, svg } from 'lit-element';
 import localForage from 'localforage/src/localforage';
 import Graph from './graph';
+import HistoryGraph from './historyGraph';
 import style from './style';
 import handleClick from './handleClick';
 import buildConfig from './buildConfig';
@@ -107,19 +108,40 @@ class MiniGraphCard extends LitElement {
     if (!this.Graph || entitiesChanged) {
       if (this._hass) this.hass = this._hass;
       this.Graph = this.config.entities.map(
-        entity => new Graph(
-          500,
-          this.config.height,
-          [this.config.show.fill ? 0 : this.config.line_width, this.config.line_width],
-          this.config.hours_to_show,
-          this.config.points_per_hour,
-          entity.aggregate_func || this.config.aggregate_func,
-          this.config.group_by,
-          getFirstDefinedItem(
-            entity.smoothing,
-            this.config.smoothing,
-            !entity.entity.startsWith('binary_sensor.'), // turn off for binary sensor by default
-          ),
+        entity => this.createGraph(entity),
+      );
+    }
+  }
+
+  createGraph(entity) {
+    if (entity.style === 'historyBar') {
+      return new HistoryGraph(
+        500,
+        this.config.height,
+        [this.config.show.fill ? 0 : this.config.line_width, this.config.line_width],
+        this.config.hours_to_show,
+        this.config.points_per_hour,
+        entity.aggregate_func || this.config.aggregate_func,
+        this.config.group_by,
+        getFirstDefinedItem(
+          entity.smoothing,
+          this.config.smoothing,
+          !entity.entity.startsWith('binary_sensor.'), // turn off for binary sensor by default
+        ),
+      );
+    } else {
+      return new Graph(
+        500,
+        this.config.height,
+        [this.config.show.fill ? 0 : this.config.line_width, this.config.line_width],
+        this.config.hours_to_show,
+        this.config.points_per_hour,
+        entity.aggregate_func || this.config.aggregate_func,
+        this.config.group_by,
+        getFirstDefinedItem(
+          entity.smoothing,
+          this.config.smoothing,
+          !entity.entity.startsWith('binary_sensor.'), // turn off for binary sensor by default
         ),
       );
     }
@@ -237,6 +259,15 @@ class MiniGraphCard extends LitElement {
     const { entity, value } = this.tooltip;
     const state = value !== undefined ? value : this.entity[0].state;
     const color = this.config.entities[0].state_adaptive_color ? `color: ${this.color};` : '';
+
+    // if (value === undefined) {
+    //   const stateSettings = _.get(this, 'config.entities[0].states').find(x => x && x.value === state);
+    //   if (stateSettings) {
+    //     state = stateSettings.label;
+    //     ({ color } = stateSettings);
+    //   }
+    // }
+
     if (this.config.show.state)
       return html`
         <div class="states flex" loc=${this.config.align_state}>
@@ -258,6 +289,8 @@ class MiniGraphCard extends LitElement {
   renderState(entity, id) {
     if (entity.show_state && id !== 0) {
       const { state } = this.entity[id];
+
+
       return html`
         <div
           class="state state--small"
@@ -483,7 +516,7 @@ class MiniGraphCard extends LitElement {
       name: 'renderSvgHistoryBars', historyBars, index, config: this.config,
     });
 
-    const items = historyBars.map((bar, i) => {
+    const items = historyBars.map((bar) => {
       const animation = this.config.animate
         ? svg`
           <animate attributeName='y' from=${this.config.height} to=${bar.y} dur='1s' fill='remove'
@@ -514,7 +547,16 @@ class MiniGraphCard extends LitElement {
       return svg`
         <rect class='historyBar' x=${x} y=${y}
           height=${height} width=${width} opacity=${opacity} fill=${color} state=${value}
-          @mouseover=${() => this.setTooltip(index, i, value, stateSettings.label)}
+          @mouseover=${() => {
+    this.tooltip = {
+      value: stateSettings.label,
+      id: index,
+      entity: index,
+      time: [getTime(bar.startTime, this.config.format, this._hass.language), getTime(bar.endTime, this.config.format, this._hass.language)],
+      index,
+    };
+    console.log({ name: 'ToolTipSet', tooltip: this.tooltip });
+  }}
           @mouseout=${() => (this.tooltip = {})}>
           ${animation}
         </rect>`;
@@ -526,38 +568,48 @@ class MiniGraphCard extends LitElement {
 
     return svg`<g class='historyBars' ?anim=${this.config.animate}>
       ${items}
-      <text x="10" y="${textY}" style="fill: #999999; font-style: bold; font-size: ${textFontSize}px;" font-family: "monospace">${historyBars[0].stateEntity.title}</text>
+      <text x="10" y="${textY}" style="fill: #999999; font-style: bold; font-size: ${textFontSize}px;" font-family: "monospace">${historyBars[0].stateEntity.name}</text>
     </g>`;
   }
-
-
-  // <g>
-  //         <line x1="50" y1="0" x2="50" y2="100%" style="stroke:rgb(100,100,100);stroke-width:1" />
-  //         <line x1="100" y1="0" x2="100" y2="100%" style="stroke:rgb(200,200,200);stroke-width:1" />
-  //         <line x1="150" y1="0" x2="150" y2="100%" style="stroke:rgb(100,100,100);stroke-width:1" />
-  //         <line x1="200" y1="0" x2="200" y2="100%" style="stroke:rgb(200,200,200);stroke-width:1" />
-  //         <line x1="250" y1="0" x2="250" y2="100%" style="stroke:rgb(100,100,100);stroke-width:1" />
-  //         <line x1="300" y1="0" x2="300" y2="100%" style="stroke:rgb(200,200,200);stroke-width:1" />
-  //         <line x1="350" y1="0" x2="350" y2="100%" style="stroke:rgb(100,100,100);stroke-width:1" />
-  //         <line x1="400" y1="0" x2="400" y2="100%" style="stroke:rgb(200,200,200);stroke-width:1" />
-  //         <line x1="450" y1="0" x2="450" y2="100%" style="stroke:rgb(100,100,100);stroke-width:1" />
-  //       </g>
 
   renderHistoryGraph() {
     if (this.historyBar.length === 0) {
       console.warn('No History Bars Detected');
       return;
     }
-    return svg`
-      ${this.renderHistorySvg()}`;
+    const bars = this.renderHistorySvg();
     // return svg`
-    //  <div class="graph">
-    //      <div class="graph__container">
-    //        <div class="graph__container__svg">
-    //         ${this.renderHistorySvg()}
+    //   ${this.renderHistorySvg()}`;
+    // return svg`
+    //   <div class="graph">
+    //     <div class="graph__container">
+    //       <div class="graph__container__svg" style="height:500px;width:100px;">
+    //         ${bars}
     //       </div>
-    //   </div>
-    // </div>`;
+    //     </div>
+    //   </div>`;
+    return svg`
+        ${bars}
+    `;
+  }
+
+  drawHours({ config } = this) {
+    const { lines_every_x_hour, hours_to_show } = config;
+    const end = this.getEndDate();
+    const start = new Date(end);
+    start.setMilliseconds(start.getMilliseconds() - getMilli(hours_to_show));
+    const current = new Date(start);
+    current.setHours(current.getHours() + 1);
+    current.setMinutes(0, 0, 0);
+    const hours = [];
+
+    while (current < end) {
+      if (current.getHours() % lines_every_x_hour === 0) {
+        hours.push({ time: new Date(current), x: (current - start) / (end - start) });
+      }
+      current.setHours(current.getHours() + 1);
+    }
+    return hours.map(time => svg`<line x1="${time.x * 500}" y1="0" x2="${time.x * 500}" y2="100%" style="stroke:rgb(100,100,100);stroke-width:1" />`);
   }
 
   renderHistorySvg() {
@@ -570,7 +622,9 @@ class MiniGraphCard extends LitElement {
     return svg`
       <svg width='100%' height='100%' viewBox='0 0 500 ${height}'
         @click=${e => e.stopPropagation()}>
-        
+        <g>
+          ${this.drawHours()}
+        </g>
         <g>
           <defs>
             ${this.renderSvgGradient(this.gradient)}
@@ -586,6 +640,9 @@ class MiniGraphCard extends LitElement {
     return svg`
       <svg width='100%' height=${height !== 0 ? '100%' : 0} viewBox='0 0 500 ${height}'
         @click=${e => e.stopPropagation()}>
+        <g>
+          ${this.drawHours()}
+        </g>
         <g>
           <defs>
             ${this.renderSvgGradient(this.gradient)}
@@ -736,6 +793,7 @@ class MiniGraphCard extends LitElement {
       }
     }
 
+    console.log({ name: 'intColor', i, configEntities: this.config.entities });
     return this.config.entities[i].color || intColor || line_color[i] || line_color[0];
   }
 
@@ -780,6 +838,11 @@ class MiniGraphCard extends LitElement {
     } else {
       state = Number(inState);
     }
+
+    if (Number.isNaN(state) && typeof inState === 'string') {
+      return inState;
+    }
+
     const dec = this.config.decimals;
     const value_factor = 10 ** this.config.value_factor;
 

@@ -52,8 +52,13 @@ export default (config) => {
     state_map: [],
     cache: true,
     value_factor: 0,
+    lines_every_x_hour: 2,
     tap_action: {
       action: 'more-info',
+    },
+    historyGraph: {
+      bar_height: 20,
+      bar_gap: 10,
     },
     ...JSON.parse(JSON.stringify(config)),
     show: { ...DEFAULT_SHOW, ...config.show },
