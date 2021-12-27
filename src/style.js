@@ -233,6 +233,7 @@ const style = css`
     flex-direction: column;
     margin-top: auto;
     width: 100%;
+    padding: 0px;
   }
   .graph__container {
     display: flex;

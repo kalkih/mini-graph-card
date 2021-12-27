@@ -428,7 +428,6 @@ class MiniGraphCard extends LitElement {
 
   renderSvgPoints(points, i) {
     if (!points) return;
-    console.log({ points });
     const color = this.computeColor(this.entity[i].state, i);
     return svg`
       <g class='line--points'
@@ -512,10 +511,6 @@ class MiniGraphCard extends LitElement {
     if (!historyBars) return;
     const barGap = index * this.config.historyGraph.bar_gap;
 
-    console.log({
-      name: 'renderSvgHistoryBars', historyBars, index, config: this.config,
-    });
-
     const items = historyBars.map((bar) => {
       const animation = this.config.animate
         ? svg`
@@ -526,7 +521,6 @@ class MiniGraphCard extends LitElement {
 
       let stateSettings = bar.stateEntity.states.find(x => x && x.value === bar.value);
       if (!stateSettings) {
-        console.log({ bar });
         console.warn(`Entity: ${bar.stateEntity.name} missing map for ${bar.value}`);
         stateSettings = {
           opacity: 0,
@@ -555,7 +549,6 @@ class MiniGraphCard extends LitElement {
       time: [getTime(bar.startTime, this.config.format, this._hass.language), getTime(bar.endTime, this.config.format, this._hass.language)],
       index,
     };
-    console.log({ name: 'ToolTipSet', tooltip: this.tooltip });
   }}
           @mouseout=${() => (this.tooltip = {})}>
           ${animation}
@@ -574,7 +567,6 @@ class MiniGraphCard extends LitElement {
 
   renderHistoryGraph() {
     if (this.historyBar.length === 0) {
-      console.warn('No History Bars Detected');
       return;
     }
     const bars = this.renderHistorySvg();
@@ -686,7 +678,6 @@ class MiniGraphCard extends LitElement {
       index,
       label,
     };
-    console.log({ tooltip: this.tooltip });
   }
 
   renderLabels() {
@@ -793,7 +784,6 @@ class MiniGraphCard extends LitElement {
       }
     }
 
-    console.log({ name: 'intColor', i, configEntities: this.config.entities });
     return this.config.entities[i].color || intColor || line_color[i] || line_color[0];
   }
 
@@ -1026,13 +1016,6 @@ class MiniGraphCard extends LitElement {
     }
 
     let newStateHistory = await this.fetchRecent(entity.entity_id, start, end, skipInitialState);
-    console.log({
-      entity,
-      newStateHistory,
-      skipInitialState,
-      start,
-      end,
-    });
     if (newStateHistory[0] && newStateHistory[0].length > 0) {
       // check if we should convert states to numeric values
       if (this.config.state_map.length > 0) {
@@ -1050,8 +1033,6 @@ class MiniGraphCard extends LitElement {
 
 
       stateHistory = [...stateHistory, ...newStateHistory];
-
-      console.log({ stateHistory, newStateHistory });
 
       if (this.config.cache) {
         this
