@@ -37,9 +37,9 @@ export default class Graph {
     const start = (new Date(end)).addHours(0 - this.hours);
     const span = end - start;
     let prev = 1;
-    let prevTime = start;
+    let prevTime = new Date(start);
 
-    history.reverse().forEach((item) => {
+    history.sort((a, b) => ((a.last_changed < b.last_changed) ? 1 : -1)).forEach((item) => {
       const next = (item.last_changed - start) / span;
       const lastChangedDate = new Date(item.last_changed);
 
@@ -53,7 +53,7 @@ export default class Graph {
 
       coords.push(coord);
       prev = next;
-      prevTime = lastChangedDate;
+      prevTime = new Date(lastChangedDate);
     });
     return coords;
   }
@@ -62,8 +62,6 @@ export default class Graph {
     return this.coords.map((coord) => {
       const obj = {
         x: (this.width * coord.startRatio),
-        y: 0,
-        height: 25,
         width: (this.width * (coord.endRatio - coord.startRatio)),
         value: coord.value,
         startTime: coord.startTime,

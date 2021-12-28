@@ -113,6 +113,15 @@ class MiniGraphCard extends LitElement {
     }
   }
 
+
+  normalEntities() {
+    return (this.enconfig.entities.filter(x => x.style !== 'historyBar'));
+  }
+
+  historyBarEntities() {
+    return (this.enconfig.entities.filter(x => x.style === 'historyBar'));
+  }
+
   createGraph(entity) {
     if (entity.style === 'historyBar') {
       return new HistoryGraph(
@@ -512,16 +521,13 @@ class MiniGraphCard extends LitElement {
     const barGap = index * this.config.historyGraph.bar_gap;
 
     const items = historyBars.map((bar) => {
-      const animation = this.config.animate
-        ? svg`
-          <animate attributeName='y' from=${this.config.height} to=${bar.y} dur='1s' fill='remove'
-            calcMode='spline' keyTimes='0; 1' keySplines='0.215 0.61 0.355 1'>
-          </animate>`
-        : '';
+      const {
+        x, width, value, stateEntity,
+      } = bar;
 
-      let stateSettings = bar.stateEntity.states.find(x => x && x.value === bar.value);
+      let stateSettings = stateEntity.states.find(state => state && state.value === value);
       if (!stateSettings) {
-        console.warn(`Entity: ${bar.stateEntity.name} missing map for ${bar.value}`);
+        console.warn(`Entity: ${stateEntity.name} missing map for ${value}`);
         stateSettings = {
           opacity: 0,
           color: 'black',
@@ -531,10 +537,8 @@ class MiniGraphCard extends LitElement {
       // if stateSettings is not found on Per Entity Map look globally
       // if not found globally build a new color
 
-      const { x, value } = bar;
       const y = index * this.config.historyGraph.bar_height + barGap;
       const height = this.config.historyGraph.bar_height;
-      const { width } = bar;
       const { opacity, color } = stateSettings;
 
 
@@ -551,7 +555,6 @@ class MiniGraphCard extends LitElement {
     };
   }}
           @mouseout=${() => (this.tooltip = {})}>
-          ${animation}
         </rect>`;
     });
 
