@@ -115,11 +115,11 @@ class MiniGraphCard extends LitElement {
 
 
   normalEntities() {
-    return (this.enconfig.entities.filter(x => x.style !== 'historyBar'));
+    return (this.config.entities.filter(x => x.style !== 'historyBar'));
   }
 
   historyBarEntities() {
-    return (this.enconfig.entities.filter(x => x.style === 'historyBar'));
+    return (this.config.entities.filter(x => x.style === 'historyBar'));
   }
 
   createGraph(entity) {
@@ -268,6 +268,7 @@ class MiniGraphCard extends LitElement {
     const { entity, value } = this.tooltip;
     const state = value !== undefined ? value : this.entity[0].state;
     const color = this.config.entities[0].state_adaptive_color ? `color: ${this.color};` : '';
+    // const color = this.normalEntities()[0].state_adaptive_color ? `color: ${this.color};` : '';
 
     // if (value === undefined) {
     //   const stateSettings = _.get(this, 'config.entities[0].states').find(x => x && x.value === state);
@@ -289,7 +290,7 @@ class MiniGraphCard extends LitElement {
             </span>
             ${this.renderStateTime()}
           </div>
-          <div class="states--secondary">${this.config.entities.map((ent, i) => this.renderState(ent, i))}</div>
+          <div class="states--secondary">${this.normalEntities().map((ent, i) => this.renderState(ent, i))}</div>
           ${this.config.align_icon === 'state' ? this.renderIcon() : ''}
         </div>
       `;
@@ -332,7 +333,7 @@ class MiniGraphCard extends LitElement {
   }
 
   renderGraph() {
-    return this.config.show.graph && this.config.entities.filter(x => x.style !== 'historyBar').length > 0 ? html`
+    return this.config.show.graph && this.normalEntities().length > 0 ? html`
       <div class="graph">
         <div class="graph__container">
           ${this.renderLabels()}
@@ -738,7 +739,7 @@ class MiniGraphCard extends LitElement {
   }
 
   get visibleEntities() {
-    return this.config.entities.filter(entity => entity.show_graph !== false);
+    return this.normalEntities().filter(entity => entity.show_graph !== false);
   }
 
   get primaryYaxisEntities() {
@@ -946,7 +947,6 @@ class MiniGraphCard extends LitElement {
         ];
       }
     }
-
     return boundary;
   }
 
