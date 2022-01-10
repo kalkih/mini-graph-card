@@ -252,13 +252,22 @@ class MiniGraphCard extends LitElement {
   }
 
   renderStates() {
-    const { entity, value } = this.tooltip;
-    const state = value !== undefined ? value : (
-      this.config.entities[0].attribute
-        ? this.entity[0].attributes[this.config.entities[0].attribute]
-        : this.entity[0].state
-    );
-    const color = this.config.entities[0].state_adaptive_color ? `color: ${this.color};` : '';
+    const { entity, value: tooltipValue } = this.tooltip;
+    let state;
+    const [firstEntityConfig] = this.config.entities;
+    if (tooltipValue !== undefined) {
+      state = tooltipValue;
+    } else if (this.config.show.state === 'last') {
+      state = this.points[0][this.points[0].length - 1][V];
+    } else {
+      const [firstEntity] = this.entity;
+      if (firstEntityConfig.attribute) {
+        state = firstEntity.attributes[firstEntityConfig.attribute];
+      } else {
+        ({ state } = firstEntity);
+      }
+    }
+    const color = firstEntityConfig.state_adaptive_color ? `color: ${this.color};` : '';
     if (this.config.show.state)
       return html`
         <div class="states flex" loc=${this.config.align_state}>
