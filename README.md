@@ -68,6 +68,9 @@ Else, if you prefer the graphical editor, use the menu to add the resource:
 
 ## Using the card
 
+We recommend looking at the [Example usage section](#example-usage) to understand the basics to configure this card.
+(also) pay attention to the **required** options mentioned below.
+
 ### Options
 
 #### Card options
