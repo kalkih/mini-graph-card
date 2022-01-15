@@ -5,7 +5,7 @@ import {
 } from './const';
 
 export default class Graph {
-  constructor(width, height, margin, hours = 24, points = 1, aggregateFuncName = 'avg', groupBy = 'interval', smoothing = true) {
+  constructor(width, height, margin, hours = 24, points = 1, aggregateFuncName = 'avg', groupBy = 'interval', smoothing = true, logarithmic = false) {
     const aggregateFuncMap = {
       avg: this._average,
       max: this._maximum,
@@ -28,6 +28,7 @@ export default class Graph {
     this.aggregateFuncName = aggregateFuncName;
     this._calcPoint = aggregateFuncMap[aggregateFuncName] || this._average;
     this._smoothing = smoothing;
+    this._logarithmic = logarithmic;
     this._groupBy = groupBy;
     this._endTime = 0;
   }
@@ -99,12 +100,18 @@ export default class Graph {
   }
 
   _calcY(coords) {
-    const yRatio = ((this.max - this.min) / this.height) || 1;
-    return coords.map(coord => [
-      coord[X],
-      this.height - ((coord[V] - this.min) / yRatio) + this.margin[Y] * 2,
-      coord[V],
-    ]);
+    // account for logarithmic graph
+    const max = this._logarithmic ? Math.log10(Math.max(1, this.max)) : this.max;
+    const min = this._logarithmic ? Math.log10(Math.max(1, this.min)) : this.min;
+
+    const yRatio = ((max - min) / this.height) || 1;
+    const coords2 = coords.map((coord) => {
+      const val = this._logarithmic ? Math.log10(Math.max(1, coord[V])) : coord[V];
+      const coordY = this.height - ((val - min) / yRatio) + this.margin[Y] * 2;
+      return [coord[X], coordY, coord[V]];
+    });
+
+    return coords2;
   }
 
   getPoints() {
@@ -125,6 +132,7 @@ export default class Graph {
     });
     return coords2;
   }
+
 
   getPath() {
     let { coords } = this;

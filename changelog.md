@@ -1,3 +1,18 @@
+## v0.10.0
+
+### ✨ NEW
+- Added logarithmic scale option (#468) @Hypfer
+- Make card appear in lovelace card picker #493 (#492) @dcs8
+- Display card documentation in HACS @jcgoette
+
+### 🔨 FIXED
+- Fix initial graph load when using 'update_interval' option #465 (#452) @PronkMedia
+
+### 📝 DOCUMENTATION
+- Refine & improve manual installation instructions (#416) @theFork
+- Reorganize examples (#397) @agneevX
+- Spelling fixes in docs (#497) @scop
+
 ## v0.9.4
 
 ### ✨ NEW 
@@ -245,7 +260,7 @@ Thanks @bramkragten for the contributions!
 - **New:** Option `font_size_header` added (#53)
 - **New** Added date (day/weekday) to timestamps when timeframe > 24 (#61)
 - **New** It's now possible to set `hours_to_show` to float values and values lower than one.
-- **Changed** Legend color indicators are now ciruclar instead of rectangular
+- **Changed** Legend color indicators are now circular instead of rectangular
 - **Fixed:** Bar chart now shows correct amount of bars
 - **Fixed:** Points should no longer be cut off when at the very bottom of the graph
 - **Fixed:** Timestamps for bars

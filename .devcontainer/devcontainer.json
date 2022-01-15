@@ -1,0 +1,35 @@
+{
+  "name": "Mini Graph Card Development",
+  "image": "ghcr.io/ludeeus/devcontainer/generic:latest",
+  "context": "..",
+  // "remoteUser": "vscode",
+  "appPort": [
+    "8123:8123",
+    "5000:5000",
+  ],
+  "postCreateCommand": "npm install && container install",
+  "extensions": [
+    "github.vscode-pull-request-github",
+    "eamodio.gitlens",
+    "dbaeumer.vscode-eslint",
+    "redhat.vscode-yaml",
+    "yzhang.markdown-all-in-one",
+  ],
+  "settings": {
+    "files.eol": "\n",
+    "editor.tabSize": 2,
+    "terminal.integrated.shell.linux": "/bin/bash",
+    "editor.formatOnPaste": false,
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "files.trimTrailingWhitespace": true,
+    "markdown.extension.toc.githubCompatibility": true,
+    "files.watcherExclude": {
+      "**/.git/objects/**": true,
+      "**/.git/subtree-cache/**": true,
+      "**/node_modules/**": true,
+      "**/.hg/store/**": true,
+      "**/.rpt2_cache/**": true
+    }
+  }
+}
