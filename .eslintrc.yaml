@@ -13,6 +13,7 @@ rules:
   linebreak-style: 0
   max-len: 0
   no-extend-native: 0
+  no-console: ["error", { allow: ["warn", "error"] }]
 globals:
   window: true
   Event: true

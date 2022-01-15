@@ -53,6 +53,7 @@ export default (config) => {
     cache: true,
     value_factor: 0,
     lines_every_x_hour: 2,
+    states: [],
     tap_action: {
       action: 'more-info',
     },

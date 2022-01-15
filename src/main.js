@@ -526,14 +526,18 @@ class MiniGraphCard extends LitElement {
         x, width, value, stateEntity,
       } = bar;
 
-      let stateSettings = stateEntity.states.find(state => state && state.value === value);
+      let stateSettings = (stateEntity.states || []).find(state => state && state.value === value);
       if (!stateSettings) {
-        console.warn(`Entity: ${stateEntity.name} missing map for ${value}`);
-        stateSettings = {
-          opacity: 0,
-          color: 'black',
-          label: 'Undefined',
-        };
+        stateSettings = this.config.states.find(state => state && state.value === value);
+        if (!stateSettings) {
+          console.warn(`Entity: ${stateEntity.name} missing map for ${value}`);
+          stateSettings = {
+            color: this.config.line_color[this.config.states.length % this.config.line_color.length],
+            label: value,
+            value,
+          };
+          this.config.states.push(stateSettings);
+        }
       }
       // if stateSettings is not found on Per Entity Map look globally
       // if not found globally build a new color
