@@ -16,7 +16,7 @@ const serveopts = {
 export default {
   input: 'src/main.js',
   output: {
-    file: 'dist/mini-history-graph-bundle.js',
+    file: 'dist/mini-graph-card-bundle.js',
     format: 'umd',
     name: 'MiniStateCard',
     sourcemap: !!dev,
