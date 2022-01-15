@@ -101,10 +101,9 @@ class MiniGraphCard extends LitElement {
   }
 
   setConfig(config) {
-    const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
-
     this.config = buildConfig(config, this.config);
     this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
+    const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
 
     if (!this.Graph || entitiesChanged) {
       if (this._hass) this.hass = this._hass;
