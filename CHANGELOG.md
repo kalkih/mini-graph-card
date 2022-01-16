@@ -1,3 +1,15 @@
+# [0.11.0-dev.5](https://github.com/kalkih/mini-graph-card/compare/v0.11.0-dev.4...v0.11.0-dev.5) (2022-01-16)
+
+
+### Bug Fixes
+
+* **config:** Remove entity config error [#592](https://github.com/kalkih/mini-graph-card/issues/592) ([#593](https://github.com/kalkih/mini-graph-card/issues/593)) ([b3edf6a](https://github.com/kalkih/mini-graph-card/commit/b3edf6a00b9dd74c527f09bbd5fb1f32e3668fd7))
+
+
+### Features
+
+* Interpolate color threshold stops ([#596](https://github.com/kalkih/mini-graph-card/issues/596)) ([61e2d62](https://github.com/kalkih/mini-graph-card/commit/61e2d62b2b10464196468bb44897f28fd20b20c5))
+
 # [0.11.0-dev.4](https://github.com/kalkih/mini-graph-card/compare/v0.11.0-dev.3...v0.11.0-dev.4) (2021-02-17)
 
 
