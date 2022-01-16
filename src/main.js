@@ -251,55 +251,46 @@ class MiniGraphCard extends LitElement {
   }
 
   renderStates() {
-    const { entity, value: tooltipValue } = this.tooltip;
-    let state;
     const [firstEntityConfig] = this.config.entities;
-    if (tooltipValue !== undefined) {
-      state = tooltipValue;
-    } else if (this.config.show.state === 'last') {
-      state = this.points[0][this.points[0].length - 1][V];
-    } else {
-      const [firstEntity] = this.entity;
-      if (firstEntityConfig.attribute) {
-        state = firstEntity.attributes[firstEntityConfig.attribute];
-      } else {
-        ({ state } = firstEntity);
-      }
-    }
-    const color = firstEntityConfig.state_adaptive_color ? `color: ${this.color};` : '';
     if (this.config.show.state)
       return html`
         <div class="states flex" loc=${this.config.align_state}>
-          <div class="state">
-            <span class="state__value ellipsis" style=${color}>
-              ${this.computeState(state)}
-            </span>
-            <span class="state__uom ellipsis" style=${color}>
-              ${this.computeUom(entity || 0)}
-            </span>
-            ${this.renderStateTime()}
-          </div>
-          <div class="states--secondary">${this.config.entities.map((ent, i) => this.renderState(ent, i))}</div>
+          ${this.renderState(firstEntityConfig, 0)}
+          <div class="states--secondary">${this.config.entities.map((entityConfig, i) => i > 0 && this.renderState(entityConfig, i) || '')}</div>
           ${this.config.align_icon === 'state' ? this.renderIcon() : ''}
         </div>
       `;
   }
 
-  renderState(entity, id) {
-    if (entity.show_state && id !== 0) {
-      const { state } = this.entity[id];
+  getEntityState(id) {
+    const entityConfig = this.config.entities[id];
+    if (this.config.show.state === 'last') {
+      return this.points[id][this.points[id].length - 1][V];
+    } else if (entityConfig.attribute) {
+      return this.entity[id].attributes[entityConfig.attribute];
+    } else {
+      return this.entity[id].state;
+    }
+  }
+
+  renderState(entityConfig, id) {
+    const isPrimary = id === 0;
+    if (isPrimary || entityConfig.show_state) {
+      const { entity, value: tooltipValue } = this.tooltip;
+      const state = this.getEntityState(id);
       return html`
         <div
-          class="state state--small"
+          class="state ${!isPrimary && 'state--small'}"
           @click=${e => this.handlePopup(e, this.entity[id])}
-          style=${entity.state_adaptive_color ? `color: ${this.computeColor(state, id)};` : ''}>
-          ${entity.show_indicator ? this.renderIndicator(state, id) : ''}
+          style=${entityConfig.state_adaptive_color ? `color: ${this.computeColor(state, id)};` : ''}>
+          ${entityConfig.show_indicator ? this.renderIndicator(state, id) : ''}
           <span class="state__value ellipsis">
-            ${this.computeState(state)}
+            ${this.computeState(isPrimary && tooltipValue || state)}
           </span>
           <span class="state__uom ellipsis">
-            ${this.computeUom(id)}
+            ${this.computeUom(isPrimary && entity || id)}
           </span>
+          ${isPrimary && this.renderStateTime() || ''}
         </div>
       `;
     }
@@ -340,7 +331,7 @@ class MiniGraphCard extends LitElement {
         ${this.visibleLegends.map(entity => html`
           <div class="graph__legend__item"
             @click=${e => this.handlePopup(e, this.entity[entity.index])}
-            @mouseenter=${() => this.setTooltip(entity.index, -1, this.entity[entity.index].state, 'Current')}
+            @mouseenter=${() => this.setTooltip(entity.index, -1, this.getEntityState(entity.index), 'Current')}
             @mouseleave=${() => (this.tooltip = {})}>
             ${this.renderIndicator(this.entity[entity.index].state, entity.index)}
             <span class="ellipsis">${this.computeName(entity.index)}</span>
@@ -715,13 +706,8 @@ class MiniGraphCard extends LitElement {
   }
 
   numberFormat(num, language, dec) {
-    if (!Number.isNaN(Number(num)) && Intl) {
-      if (dec === undefined || Number.isNaN(dec)) {
-        return new Intl.NumberFormat(language).format(Number(num));
-      } else {
-        return new Intl.NumberFormat(language, { minimumFractionDigits: dec }).format(Number(num));
-      }
-    }
+    if (!Number.isNaN(Number(num)) && Intl)
+      return new Intl.NumberFormat(language, { minimumFractionDigits: dec }).format(Number(num));
     return num.toString();
   }
 
