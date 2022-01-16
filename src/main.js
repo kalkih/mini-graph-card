@@ -257,7 +257,7 @@ class MiniGraphCard extends LitElement {
       return html`
         <div class="states flex" loc=${this.config.align_state}>
           ${this.renderState(firstEntityConfig, 0)}
-          <div class="states--secondary">${this.config.entities.map((ent, i) => i > 0 && this.renderState(ent, i) || '')}</div>
+          <div class="states--secondary">${this.config.entities.map((entityConfig, i) => i > 0 && this.renderState(entityConfig, i) || '')}</div>
           ${this.config.align_icon === 'state' ? this.renderIcon() : ''}
         </div>
       `;
