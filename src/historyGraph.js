@@ -21,7 +21,7 @@ export default class Graph {
 
   set history(data) { this._history = data; }
 
-  updateHistory(history = undefined) {
+  update(history = undefined) {
     if (history) {
       this._history = history;
     }

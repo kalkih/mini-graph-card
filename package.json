@@ -20,7 +20,6 @@
   "license": "MIT",
   "dependencies": {
     "@kalkih/lz-string": "^1.4.5",
-    "express": "^4.17.1",
     "lit-element": "^2.2.1",
     "localforage": "^1.7.3"
   },
@@ -54,7 +53,7 @@
     "dev": "npm run build",
     "build": "npm run lint && npm run rollup && npm run babel",
     "rollup": "rollup -c",
-    "babel": "babel dist/mini-graph-card-bundle.js --out-file dist/mini-graph-card-bundle.min.js",
+    "babel": "babel dist/mini-graph-card-bundle.js --out-file dist/mini-graph-card-bundle.js",
     "lint": "eslint src/* --ext .js",
     "watch": "rollup -c --watch"
   }

@@ -54,7 +54,6 @@ class MiniGraphCard extends LitElement {
   }
 
   set hass(hass) {
-    localForage.clear();
     this._hass = hass;
     let updated = false;
     const queue = [];
@@ -875,8 +874,7 @@ class MiniGraphCard extends LitElement {
 
     if (config.show.graph) {
       this.entity.forEach((entity, i) => {
-        if (entity && (config.entities[i].style === 'historyBar')) this.Graph[i].updateHistory();
-        else if (entity) this.Graph[i].update();
+        if (entity) this.Graph[i].update();
       });
     }
 
