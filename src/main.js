@@ -267,15 +267,6 @@ class MiniGraphCard extends LitElement {
     const { entity, value } = this.tooltip;
     const state = value !== undefined ? value : this.entity[0].state;
     const color = this.config.entities[0].state_adaptive_color ? `color: ${this.color};` : '';
-    // const color = this.normalEntities()[0].state_adaptive_color ? `color: ${this.color};` : '';
-
-    // if (value === undefined) {
-    //   const stateSettings = _.get(this, 'config.entities[0].states').find(x => x && x.value === state);
-    //   if (stateSettings) {
-    //     state = stateSettings.label;
-    //     ({ color } = stateSettings);
-    //   }
-    // }
 
     if (this.config.show.state)
       return html`
@@ -525,6 +516,8 @@ class MiniGraphCard extends LitElement {
         x, width, value, stateEntity,
       } = bar;
 
+      // if stateSettings is not found on Per Entity Map look globally
+      // if not found globally build a new color
       let stateSettings = (stateEntity.states || []).find(state => state && state.value === value);
       if (!stateSettings) {
         stateSettings = this.config.states.find(state => state && state.value === value);
@@ -538,8 +531,6 @@ class MiniGraphCard extends LitElement {
           this.config.states.push(stateSettings);
         }
       }
-      // if stateSettings is not found on Per Entity Map look globally
-      // if not found globally build a new color
 
       const y = index * this.config.historyGraph.bar_height + barGap;
       const height = this.config.historyGraph.bar_height;
