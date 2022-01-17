@@ -515,10 +515,10 @@ class MiniGraphCard extends LitElement {
 
     // map element keys to render function
     const fillMap = orderedKeys.map((i, order) => this.renderSvgFill(this.fill[i], i, order));
-    const fillRectMap = orderedKeys.map((i) => this.renderSvgFillRect(this.fill[i], i));
+    const fillRectMap = orderedKeys.map(i => this.renderSvgFillRect(this.fill[i], i));
     const lineMap = orderedKeys.map((i, order) => this.renderSvgLine(this.line[i], i, order));
-    const lineRectMap = orderedKeys.map((i) => this.renderSvgLineRect(this.line[i], i));
-    const barMap = orderedKeys.map((i) => this.renderSvgBars(this.bar[i], i));
+    const lineRectMap = orderedKeys.map(i => this.renderSvgLineRect(this.line[i], i));
+    const barMap = orderedKeys.map(i => this.renderSvgBars(this.bar[i], i));
     const pointsMap = orderedKeys.map((i, order) => this.renderSvgPoints(this.points[i], i, order));
 
     return svg`
