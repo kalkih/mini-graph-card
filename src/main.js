@@ -109,11 +109,12 @@ class MiniGraphCard extends LitElement {
       if (this._hass) this.hass = this._hass;
       let order = 0;
       this.Graph = this.config.entities.map(
-        entity => {
+        (entity) => {
           let graphOrder = entity.order;
-          if (!Number.isInteger(graphOrder))
-            graphOrder = order++;
-          else
+          if (!Number.isInteger(graphOrder)) {
+            order += 1;
+            graphOrder = order;
+          } else
             order = graphOrder + 1;
 
           return new Graph(
@@ -132,7 +133,7 @@ class MiniGraphCard extends LitElement {
             ),
             this.config.logarithmic,
           );
-        }
+        },
       );
     }
   }
@@ -513,12 +514,12 @@ class MiniGraphCard extends LitElement {
     orderedKeys.sort((a, b) => this.Graph[b].order - this.Graph[a].order);
 
     // map element keys to render function
-    let fillMap =     orderedKeys.map((i, order) => this.renderSvgFill(this.fill[i], i, order));
-    let fillRectMap = orderedKeys.map((i, order) => this.renderSvgFillRect(this.fill[i], i));
-    let lineMap =     orderedKeys.map((i, order) => this.renderSvgLine(this.line[i], i, order));
-    let lineRectMap = orderedKeys.map((i, order) => this.renderSvgLineRect(this.line[i], i));
-    let barMap =      orderedKeys.map((i, order) => this.renderSvgBars(this.bar[i], i));
-    let pointsMap =   orderedKeys.map((i, order) => this.renderSvgPoints(this.points[i], i, order));
+    const fillMap = orderedKeys.map((i, order) => this.renderSvgFill(this.fill[i], i, order));
+    const fillRectMap = orderedKeys.map((i) => this.renderSvgFillRect(this.fill[i], i));
+    const lineMap = orderedKeys.map((i, order) => this.renderSvgLine(this.line[i], i, order));
+    const lineRectMap = orderedKeys.map((i) => this.renderSvgLineRect(this.line[i], i));
+    const barMap = orderedKeys.map((i) => this.renderSvgBars(this.bar[i], i));
+    const pointsMap = orderedKeys.map((i, order) => this.renderSvgPoints(this.points[i], i, order));
 
     return svg`
       <svg width='100%' height=${height !== 0 ? '100%' : 0} viewBox='0 0 500 ${height}'
