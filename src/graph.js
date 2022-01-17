@@ -252,7 +252,7 @@ export default class Graph {
   }
 
   _lastValue(items) {
-    if (this.aggregateFuncName === 'delta' || this.aggregateFuncName === 'diff') {
+    if (['delta', 'diff'].includes(this.aggregateFuncName)) {
       return 0;
     } else {
       return parseFloat(items[items.length - 1].state) || 0;
