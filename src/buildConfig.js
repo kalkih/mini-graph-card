@@ -8,23 +8,100 @@ import {
   DEFAULT_SHOW,
 } from './const';
 
+/**
+ * Starting from the given index, increment the index until an array element with a
+ * "value" property is found
+ *
+ * @param {Array} stops
+ * @param {number} startIndex
+ * @returns {number}
+ */
+const findFirstValuedIndex = (stops, startIndex) => {
+  for (let i = startIndex, l = stops.length; i < l; i += 1) {
+    if (stops[i].value != null) {
+      return i;
+    }
+  }
+  throw new Error(
+    'Error in threshold interpolation: could not find right-nearest valued stop. '
+    + 'Do the first and last thresholds have a set "value"?',
+  );
+};
+
+/**
+ * Interpolates the "value" of each stop. Each stop can be a color string or an object of type
+ * ```
+ * {
+ *   color: string
+ *   value?: number | null
+ * }
+ * ```
+ * And the values will be interpolated by the nearest valued stops.
+ *
+ * For example, given values `[ 0, null, null, 4, null, 3]`,
+ * the interpolation will output `[ 0, 1.3333, 2.6667, 4, 3.5, 3 ]`
+ *
+ * Note that values will be interpolated ascending and descending.
+ * All that's necessary is that the first and the last elements have values.
+ *
+ * @param {Array} stops
+ * @returns {Array<{ color: string, value: number }>}
+ */
+const interpolateStops = (stops) => {
+  if (!stops || !stops.length) {
+    return stops;
+  }
+  if (stops[0].value == null || stops[stops.length - 1].value == null) {
+    throw new Error(`The first and last thresholds must have a set "value".\n See ${URL_DOCS}`);
+  }
+
+  let leftValuedIndex = 0;
+  let rightValuedIndex = null;
+
+  return stops.map((stop, stopIndex) => {
+    if (stop.value != null) {
+      leftValuedIndex = stopIndex;
+      return { ...stop };
+    }
+
+    if (rightValuedIndex == null) {
+      rightValuedIndex = findFirstValuedIndex(stops, stopIndex);
+    } else if (stopIndex > rightValuedIndex) {
+      leftValuedIndex = rightValuedIndex;
+      rightValuedIndex = findFirstValuedIndex(stops, stopIndex);
+    }
+
+    // y = mx + b
+    // m = dY/dX
+    // x = index in question
+    // b = left value
+
+    const leftValue = stops[leftValuedIndex].value;
+    const rightValue = stops[rightValuedIndex].value;
+    const m = (rightValue - leftValue) / (rightValuedIndex - leftValuedIndex);
+    return {
+      color: typeof stop === 'string' ? stop : stop.color,
+      value: m * stopIndex + leftValue,
+    };
+  });
+};
+
 const computeThresholds = (stops, type) => {
-  stops.sort((a, b) => b.value - a.value);
+  const valuedStops = interpolateStops(stops);
+  valuedStops.sort((a, b) => b.value - a.value);
 
   if (type === 'smooth') {
-    return stops;
+    return valuedStops;
   } else {
-    const rect = [].concat(...stops.map((stop, i) => ([stop, {
+    const rect = [].concat(...valuedStops.map((stop, i) => ([stop, {
       value: stop.value - 0.0001,
-      color: stops[i + 1] ? stops[i + 1].color : stop.color,
+      color: valuedStops[i + 1] ? valuedStops[i + 1].color : stop.color,
     }])));
     return rect;
   }
 };
 
 export default (config) => {
-  if (config.entity)
-    throw new Error(`The "entity" option was removed, please use "entities".\n See ${URL_DOCS}`);
   if (!Array.isArray(config.entities))
     throw new Error(`Please provide the "entities" option as a list.\n See ${URL_DOCS}`);
   if (config.line_color_above || config.line_color_below)
@@ -85,7 +162,8 @@ export default (config) => {
     conf.color_thresholds_transition,
   );
   const additional = conf.hours_to_show > 24 ? { day: 'numeric', weekday: 'short' } : {};
-  conf.format = { hour12: !conf.hour24, ...additional };
+  const hourFormat = conf.hour24 ? { hourCycle: 'h23' } : { hour12: true };
+  conf.format = { ...hourFormat, ...additional };
 
   // override points per hour to mach group_by function
   switch (conf.group_by) {

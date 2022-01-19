@@ -9,7 +9,7 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
 
 ### HACS (recommended)
 
-This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community Store).  
+This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community Store).
 <small>*HACS is a third party community store and is not included in Home Assistant out of the box.*</small>
 
 ### Manual install
@@ -46,6 +46,7 @@ Else, if you prefer the graphical editor, use the menu to add the resource:
 1. Make sure, advanced mode is enabled in your user profile (click on your user name to get there)
 2. Navigate to Configuration -> Lovelace Dashboards -> Resources Tab. Hit orange (+) icon
 3. Enter URL `/local/mini-graph-card-bundle.js` and select type "JavaScript Module".
+(Use `/hacsfiles/mini-graph-card/mini-graph-card-bundle.js` and select "JavaScript Module" for HACS install)
 4. Restart Home Assistant.
 
 ## Updating
@@ -66,6 +67,9 @@ Else, if you prefer the graphical editor, use the menu to add the resource:
 *You may need to empty the browsers cache if you have problems loading the updated card.*
 
 ## Using the card
+
+We recommend looking at the [Example usage section](#example-usage) to understand the basics to configure this card.
+(also) pay attention to the **required** options mentioned below.
 
 ### Options
 
@@ -119,10 +123,11 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
 | entity ***(required)*** | string |  | Entity id of the sensor.
+| attribute | string | | Retrieves an attribute instead of the state
 | name | string |  | Set a custom display name, defaults to entity's friendly_name.
 | color | string |  | Set a custom color, overrides all other color options including thresholds.
 | unit | string |  | Set a custom unit of measurement, overrides `unit` set in base config.
-| aggregate_func | string |  | Override for aggregate function used to calculate point on the graph, `avg`, `min`, `max`, `first`, `last`, `sum`.
+| aggregate_func | string |  | Override for aggregate function used to calculate point on the graph, `avg`, `median`, `min`, `max`, `first`, `last`, `sum`.
 | show_state | boolean |  | Display the current state.
 | show_indicator | boolean |  | Display a color indicator next to the state, (only when more than two states are visible).
 | show_graph | boolean |  | Set to false to completely hide the entity in the graph.
@@ -151,8 +156,8 @@ All properties are optional.
 |------|:-------:|:-------:|-------------|
 | name | `true` | `true` / `false` | Display name.
 | icon | `true` | `true` / `false` | Display icon.
-| state | `true` | `true` / `false` | Display current state.
-| graph | `line` | `line` / `bar` / `false` | Display option for the graph.
+| state | `true` | `true` / `false` / `last` | Display current state. `last` will show the last graph point's value.
+| graph | `line` | `line` / `bar` / `false` | Display option for the graph. If set to `bar` a maximum of `96` bars will be displayed.
 | fill | `true` | `true` / `false` / `fade` | Display the line graph fill.
 | points | `hover` | `true` / `false` / `hover` | Display graph data points.
 | legend | `true` | `true` / `false` | Display the graph legend (only shown when graph contains multiple entities).
@@ -168,8 +173,46 @@ See [dynamic line color](#dynamic-line-color) for example usage.
 
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
-| value ***(required)*** | number |  | The threshold for the color stop.
+| value ***(required [except in interpolation (see below)](#line-color-interpolation-of-stop-values))*** | number |  | The threshold for the color stop.
 | color ***(required)*** | string |  | Color in 6 digit hex format (e.g. `#008080`).
+
+##### Line color interpolation of stop values
+As long as the first and last threshold stops have `value` properties, intermediate stops can exclude `value`; they will be interpolated linearly. For example, given stops like:
+
+```yaml
+color_thresholds:
+  - value: 0
+    color: "#ff0000"
+  - color: "#ffff00"
+  - color: "#00ff00"
+  - value: 4
+    color: "#0000ff"
+```
+
+The values will be interpolated as:
+
+```yaml
+color_thresholds:
+  - value: 0
+    color: "#ff0000"
+  - value: 1.333333
+    color: "#ffff00"
+  - value: 2.666667
+    color: "#00ff00"
+  - value: 4
+    color: "#0000ff"
+```
+
+As a shorthand, you can just use a color string for the stops that you want interpolated:
+
+```yaml
+  - value: 0
+    color: "#ff0000"
+  - "#ffff00"
+  - "#00ff00"
+  - value: 4
+    color: "#0000ff"
+```
 
 #### Action object options
 | Name | Type | Default | Options | Description |
@@ -194,12 +237,14 @@ These buckets are converted later to single point/bar on the graph. Aggregate fu
 | Name | Since | Description |
 |------|:-------:|-------------|
 | `avg` | v0.8.0 | Average
+| `median` | NEXT_VERSION | Median
 | `min` | v0.8.0 | Minimum - lowest value
 | `max` | v0.8.0 | Maximum - largest value
 | `first` | v0.9.0 |
 | `last` | v0.9.0 |
 | `sum` | v0.9.2 |
 | `delta` | v0.9.4 | Calculates difference between max and min value
+| `diff` | v0.11.0 | Calculates difference between first and last value
 
 ### Theme variables
 The following theme variables can be set in your HA theme to customize the appearance of the card.

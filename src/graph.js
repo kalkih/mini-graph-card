@@ -8,12 +8,14 @@ export default class Graph {
   constructor(width, height, margin, hours = 24, points = 1, aggregateFuncName = 'avg', groupBy = 'interval', smoothing = true, logarithmic = false) {
     const aggregateFuncMap = {
       avg: this._average,
+      median: this._median,
       max: this._maximum,
       min: this._minimum,
       first: this._first,
       last: this._last,
       sum: this._sum,
       delta: this._delta,
+      diff: this._diff,
     };
 
     this._history = undefined;
@@ -152,8 +154,10 @@ export default class Graph {
     return path;
   }
 
-  computeGradient(thresholds) {
-    const scale = this._max - this._min;
+  computeGradient(thresholds, logarithmic) {
+    const scale = logarithmic
+      ? Math.log10(Math.max(1, this._max)) - Math.log10(Math.max(1, this._min))
+      : this._max - this._min;
 
     return thresholds.map((stop, index, arr) => {
       let color;
@@ -164,9 +168,19 @@ export default class Graph {
         const factor = (arr[index - 1].value - this._min) / (arr[index - 1].value - stop.value);
         color = interpolateColor(arr[index - 1].color, stop.color, factor);
       }
+      let offset;
+      if (scale <= 0) {
+        offset = 0;
+      } else if (logarithmic) {
+        offset = (Math.log10(Math.max(1, this._max))
+          - Math.log10(Math.max(1, stop.value)))
+          * (100 / scale);
+      } else {
+        offset = (this._max - stop.value) * (100 / scale);
+      }
       return {
         color: color || stop.color,
-        offset: scale <= 0 ? 0 : (this._max - stop.value) * (100 / scale),
+        offset,
       };
     });
   }
@@ -201,6 +215,14 @@ export default class Graph {
     return items.reduce((sum, entry) => (sum + parseFloat(entry.state)), 0) / items.length;
   }
 
+  _median(items) {
+    const itemsDup = [...items].sort((a, b) => parseFloat(a) - parseFloat(b));
+    const mid = Math.floor((itemsDup.length - 1) / 2);
+    if (itemsDup.length % 2 === 1)
+      return parseFloat(itemsDup[mid].state);
+    return (parseFloat(itemsDup[mid].state) + parseFloat(itemsDup[mid + 1].state)) / 2;
+  }
+
   _maximum(items) {
     return Math.max(...items.map(item => item.state));
   }
@@ -225,8 +247,12 @@ export default class Graph {
     return this._maximum(items) - this._minimum(items);
   }
 
+  _diff(items) {
+    return this._last(items) - this._first(items);
+  }
+
   _lastValue(items) {
-    if (this.aggregateFuncName === 'delta') {
+    if (['delta', 'diff'].includes(this.aggregateFuncName)) {
       return 0;
     } else {
       return parseFloat(items[items.length - 1].state) || 0;
