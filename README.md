@@ -26,7 +26,7 @@ This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community St
 2. Grab `mini-graph-card-bundle.js`:
 
   ```
-  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.10.0/mini-graph-card-bundle.js
+  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.11.0/mini-graph-card-bundle.js
   ```
 
 3. Add the resource reference as decribed below.
@@ -37,7 +37,7 @@ If you configure Lovelace via YAML, add a reference to `mini-graph-card-bundle.j
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.10.0
+    - url: /local/mini-graph-card-bundle.js?v=0.11.0
       type: module
   ```
 
@@ -60,7 +60,7 @@ Else, if you prefer the graphical editor, use the menu to add the resource:
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.10.0
+    - url: /local/mini-graph-card-bundle.js?v=0.11.0
       type: module
   ```
 
@@ -237,7 +237,7 @@ These buckets are converted later to single point/bar on the graph. Aggregate fu
 | Name | Since | Description |
 |------|:-------:|-------------|
 | `avg` | v0.8.0 | Average
-| `median` | NEXT_VERSION | Median
+| `median` | v0.11.0 | Median
 | `min` | v0.8.0 | Minimum - lowest value
 | `max` | v0.8.0 | Maximum - largest value
 | `first` | v0.9.0 |

@@ -1,3 +1,24 @@
+# [0.11.0](https://github.com/kalkih/mini-graph-card/compare/v0.10.0...v0.11.0) (2022-01-22)
+
+
+### Bug Fixes
+
+* **config:** Remove entity config error [#592](https://github.com/kalkih/mini-graph-card/issues/592) ([#593](https://github.com/kalkih/mini-graph-card/issues/593)) ([53d923a](https://github.com/kalkih/mini-graph-card/commit/53d923a8d4979169cb48073d4ac0f595fc80e6a7))
+* display a warning if entity is not available ([#545](https://github.com/kalkih/mini-graph-card/issues/545)) ([a334b84](https://github.com/kalkih/mini-graph-card/commit/a334b84f6c76a75d3af212ec18c7a423b2a2c022)), closes [#487](https://github.com/kalkih/mini-graph-card/issues/487)
+* Fix undefined variable introduced by [#545](https://github.com/kalkih/mini-graph-card/issues/545) ([9e923f5](https://github.com/kalkih/mini-graph-card/commit/9e923f55af19e0dcacf58ec3c5e38ae085c144ec))
+* Support for `fire-dom-event` ([c29f55f](https://github.com/kalkih/mini-graph-card/commit/c29f55f78b24f8ec2a7f44aae1c40dfe0f837c81)), closes [#563](https://github.com/kalkih/mini-graph-card/issues/563)
+* **log:** color_thresholds render incorectly with logaritmic on ([#542](https://github.com/kalkih/mini-graph-card/issues/542)) ([b704885](https://github.com/kalkih/mini-graph-card/commit/b704885746f6ead103e5b4285cd6554bb4ba7554)), closes [#531](https://github.com/kalkih/mini-graph-card/issues/531)
+* icon will properly follow entity's device_class [[#484](https://github.com/kalkih/mini-graph-card/issues/484)] ([2f9e0a7](https://github.com/kalkih/mini-graph-card/commit/2f9e0a75c10d6df932025df1e39faffd5f7992a7))
+* Time would sometime display 24:xx instead of 00:xx [[#536](https://github.com/kalkih/mini-graph-card/issues/536)] ([7c7d921](https://github.com/kalkih/mini-graph-card/commit/7c7d9210810e3fd8ca4f77b9708a09fadc963a93))
+
+
+### Features
+
+* Interpolate color threshold stops ([#596](https://github.com/kalkih/mini-graph-card/issues/596)) ([3826c0d](https://github.com/kalkih/mini-graph-card/commit/3826c0dd7e647792ac01fae47a9b057deefad337))
+* **attribute:** Retrieve an attribute instead of the state ([#564](https://github.com/kalkih/mini-graph-card/issues/564)) ([708bfde](https://github.com/kalkih/mini-graph-card/commit/708bfde41dffafcef5378da4365ef394b533d6c7)), closes [#411](https://github.com/kalkih/mini-graph-card/issues/411) [#245](https://github.com/kalkih/mini-graph-card/issues/245) [#501](https://github.com/kalkih/mini-graph-card/issues/501)
+* **graph:** Add median aggregate function ([#521](https://github.com/kalkih/mini-graph-card/issues/521)) ([57219bd](https://github.com/kalkih/mini-graph-card/commit/57219bd928006286d38ff7628454af36db6c6349))
+* Format numbers according to selected language [[#495](https://github.com/kalkih/mini-graph-card/issues/495) [#509](https://github.com/kalkih/mini-graph-card/issues/509)] ([5785bd8](https://github.com/kalkih/mini-graph-card/commit/5785bd8a9c1912ef22a8e70abab7c4b5e00abe74))
+
 # [0.11.0-dev.5](https://github.com/kalkih/mini-graph-card/compare/v0.11.0-dev.4...v0.11.0-dev.5) (2022-01-16)
 
 
