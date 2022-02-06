@@ -36,7 +36,7 @@ markComment: >
   for your contributions.  
   If this is still an active issue, please let us know!
 
-Comment to post when removing the stale label.
+# Comment to post when removing the stale label.
 unmarkComment: >
   Still an active issue, got it! _Removing stale label._
 
