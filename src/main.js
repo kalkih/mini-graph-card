@@ -287,6 +287,7 @@ class MiniGraphCard extends LitElement {
   }
 
   renderStates() {
+    const [firstEntityConfig] = this.config.entities;
     const { entity, value } = this.tooltip;
     const state = value !== undefined ? value : this.entity[0].state;
     const color = this.config.entities[0].state_adaptive_color ? `color: ${this.color};` : '';
@@ -294,6 +295,8 @@ class MiniGraphCard extends LitElement {
     if (this.config.show.state)
       return html`
         <div class="states flex" loc=${this.config.align_state}>
+          ${this.renderState(firstEntityConfig, 0)}
+          <div class="states--secondary">${this.config.entities.map((entityConfig, i) => i > 0 && this.renderState(entityConfig, i) || '')}</div>
           <div class="state">
             <span class="state__value ellipsis" style=${color}>
               ${this.computeState(state)}

@@ -8,7 +8,7 @@ Date.prototype.addHours = (h) => {
   return dateReturn;
 };
 
-export default class Graph {
+export default class HistoryGraph {
   constructor(width, height, margin, hours = 24) {
     this._history = undefined;
     this.coords = [];
