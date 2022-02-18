@@ -114,6 +114,9 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert (order matters as position becomes a value on the graph).
 | value_factor | number | 0 | v0.9.4 | Scale value by order of magnitude (e.g. convert Watts to kilo Watts), use negative value to scale down.
 | logarithmic | boolean | `false` | v0.10.0 | Use a Logarithmic scale for the graph
+| lines_every_x_hour | number |  | NEXT_VERSION | draws a vertical line based on fraction of hours.
+| historyGraph | object | |  NEXT_VERSION | Space settings for showing history bars on top of graph.
+| states | list |  | NEXT_VERSION | Per Entity State map overrides any global set state display settings.
 
 
 #### Entities object
@@ -139,6 +142,8 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | y_axis | string |  | If 'secondary', displays using the secondary y-axis on the right.
 | fixed_value | boolean |  | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 | smoothing | boolean |  | Override for a flag indicating whether to make graph line smooth.
+| style | string |  | "historyBar" used to indicate entity should render states as a history bar vs line/bar graph
+| states | list |  | Per Entity State map overrides any global set state display settings
 
 ```yaml
 entities:
@@ -487,6 +492,325 @@ You can render non-numeric states by providing state_map config. For example thi
       label: Detected
 ```
 
+
+#### History Graphs
+
+To have an entity shown as a history bar its style should be set to "historyBar".  The control will output any states it encounters that it does not have maps for as warnings and assign them colors in the same order that is used when assigning colors for graphs.
+
+historyGraph
+| Name | Since | Type | Description |
+|------|:-------:|---------|-------------|
+| `bar_height` | NEXT_VERSION | number | Height of each history bar
+| `bar_gap` | NEXT_VERSION | number | Space between each history bar
+
+state Can be specified globally or for each entity, settings on entity will override the global state for that entity.
+| Name | Since | Type | Description |
+|------|:-------:|---------|-------------|
+| `value` | NEXT_VERSION | string | Value from the entity that this config matches
+| `label` | NEXT_VERSION | string | Label changes the value displayed when selecting this part of the history graph
+| `color` | NEXT_VERSION | string | Color applied for this state
+| `opacity` | NEXT_VERSION | number | Clear is 0, fully visible is 1 default is 1.
+
+![state_history_with_lines](https://user-images.githubusercontent.com/1956918/149703818-39cd679f-b52b-40ca-9dbe-4371f478fa96.png)
+
+```yaml
+entities:
+  - entity: sensor.hvac_temperature
+    name: HVAC
+    color: yellow
+  - entity: sensor.basement_leak_temperature
+    name: Basement
+  - entity: sensor.smartthings_motion_temperature
+    name: Upstairs
+  - entity: sensor.openweathermap_temperature
+    name: Outside
+    color: purple
+  - entity: sensor.basement_multisensor_temperature
+    name: Office
+  - entity: sensor.upstairs_multisensor_temperature_2
+    name: Master Bedroom
+  - entity: sensor.hvac_action
+    name: HVAC Action
+    style: historyBar
+    states:
+      - value: idle
+        label: 'Off'
+        color: black
+        opacity: 0.1
+      - value: heating
+        color: '#B71C1C'
+        label: Heat
+      - value: cooling
+        label: Cool
+        color: '#1A237E'
+      - value: fan
+        color: '#1565C0'
+        label: Fan
+      - value: unknown
+        label: Unavailable
+        color: '#9E9E9E'
+hours_to_show: 48
+line_width: 3
+points_per_hour: 2
+refresh_interval: 0
+show:
+  fill: false
+  labeles_secondary: true
+  labels: true
+show_legend: false
+show_line: false
+show_points: false
+historyGraph:
+  bar_height: 20
+  bar_gap: 10
+y_axis: secondary
+type: custom:mini-graph-card
+```
+
+![state_history](https://user-images.githubusercontent.com/1956918/149703856-eef2eec4-8f17-47c7-b8de-5bd8d4c80fc7.png)
+```yaml
+entities:
+  - entity: person.john
+    style: historyBar
+    show_legend: false
+    name: John
+    states:
+      - value: home
+        label: Home
+        color: '#1b1b1b'
+        opacity: 0.95
+      - value: Target
+        color: '#B71C1C'
+        label: Target
+      - value: not_home
+        label: Out
+        color: '#1A237E'
+      - value: The Valley
+        color: '#1565C0'
+        label: The Valley
+      - value: Waterloo
+        color: '#D84315'
+        label: Waterloo
+  - entity: person.lyndsy
+    style: historyBar
+    name: Lyndsy
+    show_legend: false
+    states:
+      - value: home
+        label: Home
+        color: '#1b1b1b'
+        opacity: 0.95
+      - value: Target
+        color: '#B71C1C'
+        label: Target
+      - value: not_home
+        label: Out
+        color: '#1A237E'
+      - value: The Valley
+        color: '#1565C0'
+        label: The Valley
+      - value: Waterloo
+        color: '#D84315'
+        label: Waterloo
+      - value: unavailable
+        label: Unavailable
+        color: '#9E9E9E'
+  - entity: lock.front_door
+    style: historyBar
+    name: Front Door
+    show_legend: false
+    states:
+      - value: unlocked
+        label: Unlocked
+        color: '#880E4F'
+      - value: locked
+        label: Locked
+        color: '#1b1b1b'
+        opacity: 0.95
+      - value: unavailable
+        label: Unavailable
+        color: '#9E9E9E'
+  - entity: lock.back_door
+    style: historyBar
+    name: Back Door
+    show_legend: false
+    states:
+      - value: unlocked
+        label: Unlocked
+        color: '#880E4F'
+      - value: locked
+        label: Locked
+        color: '#1b1b1b'
+        opacity: 0.95
+      - value: unavailable
+        label: Unavailable
+        color: '#9E9E9E'
+  - entity: cover.garage_door
+    style: historyBar
+    name: Garage
+    show_legend: false
+    states:
+      - value: open
+        label: Open
+        color: '#880E4F'
+      - value: closing
+        label: Closing
+        color: '#880E4F'
+      - value: unavailable
+        label: Unavailable
+        color: '#9E9E9E'
+      - value: opening
+        label: Opening
+        color: '#880E4F'
+      - value: closed
+        label: Closed
+        color: '#1b1b1b'
+        opacity: 0.95
+  - entity: binary_sensor.basement_leak_moisture
+    style: historyBar
+    name: Basement Drain
+    states:
+      - value: 'off'
+        label: Dry
+        color: '#1b1b1b'
+        opacity: 0.95
+      - value: 'on'
+        label: Leak
+        color: '#880E4F'
+      - value: unavailable
+        label: Unavailable
+        color: '#880E4F'
+  - entity: binary_sensor.front_door_motion
+    style: historyBar
+    name: Front Door Motion
+    states:
+      - value: 'off'
+        label: None
+        color: '#1b1b1b'
+        opacity: 0.95
+      - value: 'on'
+        label: Motion
+        color: '#880E4F'
+  - entity: binary_sensor.front_door_ding
+    style: historyBar
+    name: Doorbell
+    states:
+      - value: 'off'
+        label: None
+        color: '#1b1b1b'
+        opacity: 0.95
+      - value: 'on'
+        label: Ding
+        color: '#880E4F'
+historyGraph:
+  bar_height: 15
+  bar_gap: 5
+hours_to_show: 12
+line_width: 3
+points_per_hour: 12
+refresh_interval: 5
+lines_every_x_hour: 1
+height: 500
+fill: false
+type: custom:mini-graph-card
+```
+
+![state_history_global_states](https://user-images.githubusercontent.com/1956918/149703887-ed6aeeba-08d1-42b9-a968-391683f2ac6d.png)
+
+```yaml
+entities:
+  - entity: binary_sensor.ac
+    style: historyBar
+    name: AC
+  - entity: binary_sensor.coffee_maker
+    style: historyBar
+    name: Coffee Maker
+  - entity: binary_sensor.dishwasher
+    style: historyBar
+    name: Dishwasher
+  - entity: binary_sensor.dryer
+    style: historyBar
+    name: Dryer
+  - entity: binary_sensor.electric_blanket
+    style: historyBar
+    name: Heated Blanket
+  - entity: binary_sensor.furnace_2
+    style: historyBar
+    name: Furnace
+  - entity: binary_sensor.heat_3
+    style: historyBar
+    name: Heat
+  - entity: binary_sensor.heat_5
+    style: historyBar
+    name: Heat
+  - entity: binary_sensor.heat_6
+    style: historyBar
+    name: Heat
+  - entity: binary_sensor.heat_7
+    style: historyBar
+    name: Heat
+  - entity: binary_sensor.heat_8
+    style: historyBar
+    name: Heat
+  - entity: binary_sensor.hot_water_heater_fan
+    style: historyBar
+    name: Hot Water Fan
+  - entity: binary_sensor.microwave
+    style: historyBar
+    name: Microwave
+  - entity: binary_sensor.oven
+    style: historyBar
+    name: Oven
+  - entity: binary_sensor.stove
+    style: historyBar
+    name: Stove
+  - entity: binary_sensor.washer
+    style: historyBar
+    name: Washer
+  - entity: sensor.hvac_action
+    name: HVAC Action
+    style: historyBar
+  - entity: sensor.energy_usage
+    name: Usage
+hours_to_show: 120
+line_width: 3
+points_per_hour: 0.5
+refresh_interval: 0
+show:
+  fill: false
+show_legend: false
+show_line: true
+show_points: false
+historyGraph:
+  bar_height: 10
+  bar_gap: 2
+y_axis: secondary
+states:
+  - value: 'off'
+    label: 'Off'
+    color: '#1b1b1b'
+    opacity: 0.95
+  - value: 'on'
+    color: '#B71C1C'
+    label: 'On'
+  - value: idle
+    label: 'Off'
+    color: '#1b1b1b'
+    opacity: 0.95
+  - value: heating
+    color: '#B71C1C'
+    label: Heat
+  - value: cooling
+    label: Cool
+    color: '#1A237E'
+  - value: fan
+    color: '#1565C0'
+    label: Fan
+  - value: unknown
+    label: Unavailable
+    color: '#9E9E9E'
+type: custom:mini-graph-card
+```
 
 ## Development
 
