@@ -950,7 +950,7 @@ class MiniGraphCard extends LitElement {
     url += `?filter_entity_id=${entityId}`;
     if (end) url += `&end_time=${end.toISOString()}`;
     if (skipInitialState) url += '&skip_initial_state';
-    if (!withAttributes) url += '&minimal_response';
+    if (!withAttributes) url += '&minimal_response&no_attributes';
     if (withAttributes) url += '&significant_changes_only=0';
     return this._hass.callApi('GET', url);
   }
