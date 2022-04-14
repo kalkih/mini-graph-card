@@ -227,6 +227,13 @@ class MiniGraphCard extends LitElement {
   }
 
   renderIcon() {
+
+    if (this.config.icon_image != undefined){
+      return html` <div class="entity__icon">
+        <img src="${this.config.icon_image}" height=25/>
+      </div>`;
+    }
+    
     const { icon, icon_adaptive_color } = this.config.show;
     return icon ? html`
       <div class="icon" loc=${this.config.align_icon}
