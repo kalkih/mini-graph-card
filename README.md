@@ -261,9 +261,9 @@ The following theme variables can be set in your HA theme to customize the appea
 ![Single entity card](https://user-images.githubusercontent.com/457678/52009150-884d2500-24d2-11e9-9f2b-2981210d3897.png)
 
 ```yaml
-- type: custom:mini-graph-card
-  entities:
-   - sensor.illumination
+type: custom:mini-graph-card
+entities:
+ - sensor.illumination
 ```
 
 #### Alternative style
@@ -271,13 +271,13 @@ The following theme variables can be set in your HA theme to customize the appea
 ![Alternative style](https://user-images.githubusercontent.com/457678/52009161-8daa6f80-24d2-11e9-8678-47658a181615.png)
 
 ```yaml
-- type: custom:mini-graph-card
-  entities:
-   - sensor.illumination
-  align_icon: left
-  align_state: center
-  show:
-    fill: false
+type: custom:mini-graph-card
+entities:
+ - sensor.illumination
+align_icon: left
+align_state: center
+show:
+  fill: false
 ```
 
 #### Multiple entities card
@@ -285,14 +285,14 @@ The following theme variables can be set in your HA theme to customize the appea
 ![Multiple entities card](https://user-images.githubusercontent.com/457678/52009165-900cc980-24d2-11e9-8cc6-c77de58465b5.png)
 
 ```yaml
-- type: custom:mini-graph-card
-  name: SERVER
-  icon: mdi:server
-  entities:
-    - entity: sensor.server_total
-      name: TOTAL
-    - sensor.server_sent
-    - sensor.server_received
+type: custom:mini-graph-card
+name: SERVER
+icon: mdi:server
+entities:
+  - entity: sensor.server_total
+    name: TOTAL
+  - sensor.server_sent
+  - sensor.server_received
 ```
 
 #### Bar chart card
@@ -300,12 +300,12 @@ The following theme variables can be set in your HA theme to customize the appea
 ![Bar chart card](https://user-images.githubusercontent.com/457678/52970286-985e7300-33b3-11e9-89bc-1278c4e2ecf2.png)
 
 ```yaml
-- type: custom:mini-graph-card
-  entities:
-    - entity: sensor.energy_consumption
-  name: ENERGY CONSUMPTION
-  show:
-    graph: bar
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.energy_consumption
+name: ENERGY CONSUMPTION
+show:
+  graph: bar
 ```
 
 #### Show data from the past week
@@ -315,25 +315,25 @@ Use the `hours_to_show` option to specify how many hours of history the graph sh
 Use the `points_per_hour` option to specify the accuracy/detail of the graph.
 
 ```yaml
-- type: custom:mini-graph-card
-  entities:
-    - sensor.living_room_temp
-  name: LIVING ROOM
-  hours_to_show: 168
-  points_per_hour: 0.25
+type: custom:mini-graph-card
+entities:
+  - sensor.living_room_temp
+name: LIVING ROOM
+hours_to_show: 168
+points_per_hour: 0.25
 ```
 
 #### Graph only card
 Use the `show` option to show/hide UI elements.
 
 ```yaml
-- type: custom:mini-graph-card
-  entities:
-    - sensor.humidity
-  show:
-    icon: false
-    name: false
-    state: false
+type: custom:mini-graph-card
+entities:
+  - sensor.humidity
+show:
+  icon: false
+  name: false
+  state: false
 ```
 
 #### Horizontally stacked cards
@@ -342,26 +342,26 @@ You can stack cards horizontally by using one or more `horizontal-stack(s)`.
 ![Horizontally stacked cards](https://user-images.githubusercontent.com/457678/52009171-926f2380-24d2-11e9-9dd4-28f010608858.png)
 
 ```yaml
-- type: horizontal-stack
-  cards:
-    - type: custom:mini-graph-card
-      entities:
-        - sensor.humidity
-      line_color: blue
-      line_width: 8
-      font_size: 75
-    - type: custom:mini-graph-card
-      entities:
-        - sensor.illumination
-      line_color: '#e74c3c'
-      line_width: 8
-      font_size: 75
-    - type: custom:mini-graph-card
-      entities:
-        - sensor.temperature
-      line_color: var(--accent-color)
-      line_width: 8
-      font_size: 75
+type: horizontal-stack
+cards:
+  - type: custom:mini-graph-card
+    entities:
+      - sensor.humidity
+    line_color: blue
+    line_width: 8
+    font_size: 75
+  - type: custom:mini-graph-card
+    entities:
+      - sensor.illumination
+    line_color: '#e74c3c'
+    line_width: 8
+    font_size: 75
+  - type: custom:mini-graph-card
+    entities:
+      - sensor.temperature
+    line_color: var(--accent-color)
+    line_width: 8
+    font_size: 75
 ```
 
 #### Dynamic line color
@@ -370,18 +370,18 @@ Have the graph change line color dynamically.
 ![Dynamic line color](https://user-images.githubusercontent.com/457678/52573150-cbd05900-2e19-11e9-9e01-740753169093.png)
 
 ```yaml
-- type: custom:mini-graph-card
-  entities:
-    - sensor.sensor_temperature
-  show:
-    labels: true
-  color_thresholds:
-    - value: 20
-      color: "#f39c12"
-    - value: 21
-      color: "#d35400"
-    - value: 21.5
-      color: "#c0392b"
+type: custom:mini-graph-card
+entities:
+  - sensor.sensor_temperature
+show:
+  labels: true
+color_thresholds:
+  - value: 20
+    color: "#f39c12"
+  - value: 21
+    color: "#d35400"
+  - value: 21.5
+    color: "#c0392b"
 ```
 
 #### Alternate y-axis
@@ -391,24 +391,24 @@ shows turning off the line, points and legend.
 ![Alternate y-axis](https://user-images.githubusercontent.com/373079/60764115-63cf2780-a0c6-11e9-8b9a-97fc47161180.png)
 
 ```yaml
-- type: custom:mini-graph-card
-  entities:
-    - entity: sensor.verandah
-      name: Verandah
-    - entity: sensor.lounge
-      name: Lounge
-    - entity: sensor.kitchen
-      name: Kitchen
-    - color: gray
-      entity: input_number.nighttime
-      name: Night
-      show_line: false
-      show_points: false
-      show_legend: false
-      y_axis: secondary
-  show:
-    labels: true
-    labels_secondary: true
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.verandah
+    name: Verandah
+  - entity: sensor.lounge
+    name: Lounge
+  - entity: sensor.kitchen
+    name: Kitchen
+  - color: gray
+    entity: input_number.nighttime
+    name: Night
+    show_line: false
+    show_points: false
+    show_legend: false
+    y_axis: secondary
+show:
+  labels: true
+  labels_secondary: true
 ```
 
 
@@ -419,15 +419,15 @@ shows turning off the line, points and legend.
 You can group values by date, this way you can visualize for example daily energy consumption.
 
 ```yaml
-- type: custom:mini-graph-card
-  entities:
-    - entity: sensor.energy_daily
-  name: Energy consumption
-  hours_to_show: 168
-  aggregate_func: max
-  group_by: date
-  show:
-    graph: bar
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.energy_daily
+name: Energy consumption
+hours_to_show: 168
+aggregate_func: max
+group_by: date
+show:
+  graph: bar
 ```
 
 #### Data aggregation functions
@@ -437,22 +437,22 @@ from last week.
 ![mini_temperature_aggregate_daily](https://user-images.githubusercontent.com/8268674/66688610-44c0d280-ec7f-11e9-86c2-a728da239dab.png)
 
 ```yaml
-- type: custom:mini-graph-card
-  entities:
-    - entity: sensor.outside_temp
-      aggregate_func: max
-      name: Max
-      color: #e74c3c
-    - entity: sensor.outside_temp
-      aggregate_func: min
-      name: Min
-    - entity: sensor.outside_temp
-      aggregate_func: avg
-      name: Avg
-      color: green
-  name: Temp outside daily (last week)
-  hours_to_show: 168
-  group_by: date
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.outside_temp
+    aggregate_func: max
+    name: Max
+    color: #e74c3c
+  - entity: sensor.outside_temp
+    aggregate_func: min
+    name: Min
+  - entity: sensor.outside_temp
+    aggregate_func: avg
+    name: Avg
+    color: green
+name: Temp outside daily (last week)
+hours_to_show: 168
+group_by: date
 ```
 
 #### Non-numeric sensor states
@@ -462,29 +462,29 @@ from last week.
 You can render non-numeric states by providing state_map config. For example this way you can show data coming from binary sensors.
 
 ```yaml
-- type: custom:mini-graph-card
-  entities:
-    - entity: binary_sensor.living_room_motion
-      name: Living room
-    - entity: binary_sensor.corridor_motion
-      name: Corridor
-    - entity: binary_sensor.master_bed_motion
-      name: Master bed.
-      color: green
-    - entity: binary_sensor.bedroom_motion
-      name: Bedroom
-  name: Motion last hour
-  hours_to_show: 1
-  points_per_hour: 60
-  update_interval: 30
-  aggregate_func: max
-  line_width: 2
-  smoothing: false
-  state_map:
-    - value: "off"
-      label: Clear
-    - value: "on"
-      label: Detected
+type: custom:mini-graph-card
+entities:
+  - entity: binary_sensor.living_room_motion
+    name: Living room
+  - entity: binary_sensor.corridor_motion
+    name: Corridor
+  - entity: binary_sensor.master_bed_motion
+    name: Master bed.
+    color: green
+  - entity: binary_sensor.bedroom_motion
+    name: Bedroom
+name: Motion last hour
+hours_to_show: 1
+points_per_hour: 60
+update_interval: 30
+aggregate_func: max
+line_width: 2
+smoothing: false
+state_map:
+  - value: "off"
+    label: Clear
+  - value: "on"
+    label: Detected
 ```
 
 
