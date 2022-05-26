@@ -492,7 +492,7 @@ state_map:
 ![изображение](https://user-images.githubusercontent.com/71872483/170584118-ef826b60-dce3-42ec-a005-0f467616cd37.png)
 
 It is possible to show a state without displaying a graph for a sensor.
-Imagine there are 2 temperature sensors & 1 humidity sensor; graphs are displayed for the temperatures only, and the humidity is shown as a state only.
+Imagine there are two CO-2 sensors & one humidity sensor; graphs are displayed for the CO-2 only, and the humidity is shown as a state only.
 ```
 type: custom:mini-graph-card
 entities:
