@@ -516,7 +516,6 @@ show:
   legend: true
   icon: false
   labels: true
-  labels_secondary: false
 ```
 
 
