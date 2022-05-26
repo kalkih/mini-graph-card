@@ -516,6 +516,7 @@ show:
   icon: false
   labels: true
 ```
+This method may be also used to add a calculated value with it's own `aggregate_func` option.
 
 
 ## Development
