@@ -161,6 +161,15 @@ export default (config) => {
 
   // override points per hour to mach group_by function
   switch (conf.group_by) {
+    case 'year':
+      conf.points_per_hour = 1 / (24 * 7 * 365);
+      break;
+    case 'month':
+      conf.points_per_hour = 1 / (24 * 7 * 4); // cheating a bit, this is actually 4 weeks
+      break;
+    case 'week':
+      conf.points_per_hour = 1 / (24 * 7);
+      break;
     case 'date':
       conf.points_per_hour = 1 / 24;
       break;
