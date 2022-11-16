@@ -1,5 +1,5 @@
 name: "Semantic PR"
-description: Ensure your PR title matches the Conventional Commits spec (https://www.conventionalcommits.org/).
+# description: Ensure your PR title matches the Conventional Commits spec (https://www.conventionalcommits.org/).
 
 on:
   pull_request_target:
