@@ -273,6 +273,26 @@ class MiniGraphCard extends LitElement {
     }
   }
 
+  unitFirstOrLast(isPrimary, tooltipValue, state, id, entity) {
+    if (this.config.unit_first) {
+      return html`
+        <span class="state__uom ellipsis">
+          ${this.computeUom(isPrimary && entity || id)}
+        </span>
+        <span class="state__value ellipsis">
+          ${this.computeState(isPrimary && tooltipValue || state)}
+        </span>`;
+    } else {
+      return html`
+        <span class="state__value ellipsis">
+          ${this.computeState(isPrimary && tooltipValue || state)}
+        </span>
+        <span class="state__uom ellipsis">
+          ${this.computeUom(isPrimary && entity || id)}
+        </span>`;
+    }
+  }
+
   renderState(entityConfig, id) {
     const isPrimary = id === 0;
     if (isPrimary || entityConfig.show_state) {
@@ -284,15 +304,10 @@ class MiniGraphCard extends LitElement {
           @click=${e => this.handlePopup(e, this.entity[id])}
           style=${entityConfig.state_adaptive_color ? `color: ${this.computeColor(state, id)};` : ''}>
           ${entityConfig.show_indicator ? this.renderIndicator(state, id) : ''}
-          <span class="state__value ellipsis">
-            ${this.computeState(isPrimary && tooltipValue || state)}
-          </span>
-          <span class="state__uom ellipsis">
-            ${this.computeUom(isPrimary && entity || id)}
-          </span>
+          ${this.unitFirstOrLast(isPrimary, tooltipValue, state, id, entity)}
           ${isPrimary && this.renderStateTime() || ''}
-        </div>
-      `;
+        </div >
+        `;
     }
   }
 
@@ -570,7 +585,7 @@ class MiniGraphCard extends LitElement {
           <div class="info__item">
             <span class="info__item__type">${entry.type}</span>
             <span class="info__item__value">
-              ${this.config.unit_first ? this.computeUom(0) this.computeState(entry.state) : this.computeState(entry.state) this.computeUom(0)}
+              ${this.computeState(entry.state)} ${this.computeUom(0)}
             </span>
             <span class="info__item__time">
               ${entry.type !== 'avg' ? getTime(new Date(entry.last_changed), this.config.format, this._hass.language) : ''}
