@@ -12,11 +12,9 @@ export default class Graph {
     hours = 24,
     points = 1,
     aggregateFuncName = 'avg',
-    valueFactor = 0,
-    valueMultiplier = 1,
     groupBy = 'interval',
     smoothing = true,
-    logarithmic = false
+    logarithmic = false,
   }) {
     const aggregateFuncMap = {
       avg: this._average,
@@ -40,8 +38,6 @@ export default class Graph {
     this.points = points;
     this.hours = hours;
     this.aggregateFuncName = aggregateFuncName;
-    this.valueFactor = valueFactor;
-    this.valueMultiplier = valueMultiplier;
     this._calcPoint = aggregateFuncMap[aggregateFuncName] || this._average;
     this._smoothing = smoothing;
     this._logarithmic = logarithmic;

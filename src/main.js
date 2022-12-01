@@ -114,8 +114,6 @@ class MiniGraphCard extends LitElement {
           hours: this.config.hours_to_show,
           points: this.config.points_per_hour,
           aggregateFuncName: entity.aggregate_func || this.config.aggregate_func,
-          valueFactor: entity.valueFactor || this.config.valueFactor,
-          valueMultiplier: entity.valueMultiplier || this.config.valueMultiplier,
           groupBy: this.config.group_by,
           smoothing: getFirstDefinedItem(
             entity.smoothing,
@@ -294,7 +292,7 @@ class MiniGraphCard extends LitElement {
           style=${entityConfig.state_adaptive_color ? `color: ${this.computeColor(state, id)};` : ''}>
           ${entityConfig.show_indicator ? this.renderIndicator(state, id) : ''}
           <span class="state__value ellipsis">
-            ${this.computeState(isPrimary && tooltipValue || state)}
+            ${this.computeState(isPrimary && tooltipValue || state, entityConfig.value_multipler)}
           </span>
           <span class="state__uom ellipsis">
             ${this.computeUom(isPrimary && entity || id)}
@@ -579,7 +577,7 @@ class MiniGraphCard extends LitElement {
           <div class="info__item">
             <span class="info__item__type">${entry.type}</span>
             <span class="info__item__value">
-              ${this.computeState(entry.state)} ${this.computeUom(0)}
+              ${this.computeState(entry.state, entry.value_multipler)} ${this.computeUom(0)}
             </span>
             <span class="info__item__time">
               ${entry.type !== 'avg' ? getTime(new Date(entry.last_changed), this.config.format, this._hass.language) : ''}
@@ -681,7 +679,7 @@ class MiniGraphCard extends LitElement {
     );
   }
 
-  computeState(inState) {
+  computeState(inState, default_multiplier) {
     if (this.config.state_map.length > 0) {
       const stateMap = Number.isInteger(inState)
         ? this.config.state_map[inState]
@@ -702,15 +700,16 @@ class MiniGraphCard extends LitElement {
     }
     const dec = this.config.decimals;
     const value_factor = 10 ** this.config.value_factor;
-    const value_multipler = this.config.value_multipler || 1;
+    const value_multipler = this.config.value_multipler || default_multiplier || 1;
 
     if (dec === undefined || Number.isNaN(dec) || Number.isNaN(state)) {
-      return this.numberFormat(Math.round(state * value_factor * value_multiplier * 100) / 100), this._hass.language);
+      return this.numberFormat((Math.round(state * value_factor * value_multipler * 100) / 100),
+        this._hass.language);
     }
 
     const x = 10 ** dec;
     return this.numberFormat(
-      (Math.round(state * value_factor * x * value_multiplier) / x).toFixed(dec),
+      (Math.round(state * value_factor * x * value_multipler) / x).toFixed(dec),
       this._hass.language, dec,
     );
   }
@@ -943,7 +942,7 @@ class MiniGraphCard extends LitElement {
     if (stateHistory.length === 0) return;
 
     if (this.entity[0] && entity.entity_id === this.entity[0].entity_id) {
-      this.updateExtrema(stateHistory);
+      this.updateExtrema(stateHistory, this.config.entities[index].value_multipler || 1);
     }
 
     if (this.config.entities[index].fixed_value === true) {
@@ -965,19 +964,22 @@ class MiniGraphCard extends LitElement {
     return this._hass.callApi('GET', url);
   }
 
-  updateExtrema(history) {
+  updateExtrema(history, value_multipler) {
     const { extrema, average } = this.config.show;
     this.abs = [
       ...(extrema ? [{
         type: 'min',
+        value_multipler,
         ...getMin(history, 'state'),
       }] : []),
       ...(average ? [{
         type: 'avg',
+        value_multipler,
         state: getAvg(history, 'state'),
       }] : []),
       ...(extrema ? [{
         type: 'max',
+        value_multipler,
         ...getMax(history, 'state'),
       }] : []),
     ];
