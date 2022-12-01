@@ -106,6 +106,7 @@ class MiniGraphCard extends LitElement {
     const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
     if (!this.Graph || entitiesChanged) {
       if (this._hass) this.hass = this._hass;
+      const valueFactor = 10 ** this.config.value_factor;
       this.Graph = this.config.entities.map(
         entity => new Graph({
           width: 500,
@@ -121,6 +122,8 @@ class MiniGraphCard extends LitElement {
             !entity.entity.startsWith('binary_sensor.'), // turn off for binary sensor by default
           ),
           logarithmic: this.config.logarithmic,
+          valueMultipler: (entity.value_multipler ? entity.value_multipler : 1)
+            * (entity.value_factor ? 10 ** entity.value_factor : valueFactor),
         }),
       );
     }

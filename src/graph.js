@@ -12,6 +12,7 @@ export default class Graph {
     hours = 24,
     points = 1,
     aggregateFuncName = 'avg',
+    valueMultipler = 1,
     groupBy = 'interval',
     smoothing = true,
     logarithmic = false,
@@ -38,6 +39,7 @@ export default class Graph {
     this.points = points;
     this.hours = hours;
     this.aggregateFuncName = aggregateFuncName;
+    this._valueMultipler = valueMultipler;
     this._calcPoint = aggregateFuncMap[aggregateFuncName] || this._average;
     this._smoothing = smoothing;
     this._logarithmic = logarithmic;
@@ -74,8 +76,9 @@ export default class Graph {
     histGroups.length = requiredNumOfPoints;
 
     this.coords = this._calcPoints(histGroups);
-    this.min = Math.min(...this.coords.map(item => Number(item[V])));
-    this.max = Math.max(...this.coords.map(item => Number(item[V])));
+    this.min = this._scale(Math.min(...this.coords.map(item => Number(item[V]))));
+    this.max = this._scale(Math.max(...this.coords.map(item => Number(item[V]))));
+    if (this.min > this.max) [this.min, this.max] = [this.max, this.min];
   }
 
   _reducer(res, item) {
@@ -107,6 +110,10 @@ export default class Graph {
     return coords;
   }
 
+  _scale(value) {
+    return this._valueMultipler * value;
+  }
+
   _calcY(coords) {
     // account for logarithmic graph
     const max = this._logarithmic ? Math.log10(Math.max(1, this.max)) : this.max;
@@ -114,7 +121,8 @@ export default class Graph {
 
     const yRatio = ((max - min) / this.height) || 1;
     const coords2 = coords.map((coord) => {
-      const val = this._logarithmic ? Math.log10(Math.max(1, coord[V])) : coord[V];
+      const val = this._logarithmic
+        ? Math.log10(Math.max(1, this._scale(coord[V]))) : this._scale(coord[V]);
       const coordY = this.height - ((val - min) / yRatio) + this.margin[Y] * 2;
       return [coord[X], coordY, coord[V]];
     });
