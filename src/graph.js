@@ -120,13 +120,12 @@ export default class Graph {
     coords = this._calcY(this.coords);
     let next; let Z;
     let last = coords[0];
-    coords.shift();
     const coords2 = coords.map((point, i) => {
       next = point;
       Z = this._smoothing ? this._midPoint(last[X], last[Y], next[X], next[Y]) : next;
       const sum = this._smoothing ? (next[V] + last[V]) / 2 : next[V];
       last = next;
-      return [Z[X], Z[Y], sum, i + 1];
+      return [Z[X], Z[Y], sum, i];
     });
     return coords2;
   }
