@@ -54,11 +54,6 @@ export default class Graph {
 
     const histGroups = this._history.reduce((res, item) => this._reducer(res, item), []);
 
-    // drop potential out of bound entry's except one
-    if (histGroups[0] && histGroups[0].length) {
-      histGroups[0] = [histGroups[0][histGroups[0].length - 1]];
-    }
-
     // extend length to fill missing history
     const requiredNumOfPoints = Math.ceil(this.hours * this.points);
     histGroups.length = requiredNumOfPoints;
@@ -71,9 +66,11 @@ export default class Graph {
   _reducer(res, item) {
     const age = this._endTime - new Date(item.last_changed).getTime();
     const interval = (age / ONE_HOUR * this.points) - this.hours * this.points;
-    const key = interval < 0 ? Math.floor(Math.abs(interval)) : 0;
-    if (!res[key]) res[key] = [];
-    res[key].push(item);
+    if (interval < 0) {
+      const key = Math.floor(Math.abs(interval));
+      if (!res[key]) res[key] = [];
+      res[key].push(item);
+    }
     return res;
   }
 
