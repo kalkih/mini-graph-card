@@ -306,8 +306,8 @@ class MiniGraphCard extends LitElement {
           ${entityConfig.show_indicator ? this.renderIndicator(state, id) : ''}
           ${this.unitFirstOrLast(isPrimary, tooltipValue, state, id, entity)}
           ${isPrimary && this.renderStateTime() || ''}
-        </div >
-        `;
+        </div>
+      `;
     }
   }
 
