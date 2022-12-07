@@ -12,7 +12,7 @@ export default class Graph {
     hours = 24,
     points = 1,
     aggregateFuncName = 'avg',
-    valueMultipler = 1,
+    scaleFactor = 1,
     groupBy = 'interval',
     smoothing = true,
     logarithmic = false,
@@ -39,7 +39,7 @@ export default class Graph {
     this.points = points;
     this.hours = hours;
     this.aggregateFuncName = aggregateFuncName;
-    this._valueMultipler = valueMultipler;
+    this._scaleFactor = scaleFactor;
     this._calcPoint = aggregateFuncMap[aggregateFuncName] || this._average;
     this._smoothing = smoothing;
     this._logarithmic = logarithmic;
@@ -111,7 +111,7 @@ export default class Graph {
   }
 
   _scale(value) {
-    return this._valueMultipler * value;
+    return this._scaleFactor * value;
   }
 
   _calcY(coords) {

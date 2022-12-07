@@ -140,7 +140,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | y_axis | string |  | If 'secondary', displays using the secondary y-axis on the right.
 | fixed_value | boolean |  | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 | smoothing | boolean |  | Override for a flag indicating whether to make graph line smooth.
-| value_multipler | number | 1 | Set a multiplier to use on the graph's value
+| scale_factor | number | 1 | Set a scale factor to use on the graph's value
 | value_factor | number | 0 | Scale value by order of magnitude (e.g. convert Watts to kilo Watts), use negative value to scale down.
 
 ```yaml
@@ -149,7 +149,7 @@ entities:
   - entity: sensor.pressure
     name: Pressure
     show_state: true
-    value_multipler: -2.1
+    scale_factor: -2.1
   - sensor.humidity
 ```
 
