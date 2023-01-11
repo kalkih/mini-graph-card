@@ -141,7 +141,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | fixed_value | boolean |  | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 | smoothing | boolean |  | Override for a flag indicating whether to make graph line smooth.
 | scale_factor | number | 1 | Set a scale factor to use on the graph's value
-| value_factor | number | 0 | Scale value by order of magnitude (e.g. convert Watts to kilo Watts), use negative value to scale down.
+| value_factor | number | 0 | (DEPRECATED) Scale value by order of magnitude (e.g. convert Watts to kilo Watts), use negative value to scale down.
 
 ```yaml
 entities:
