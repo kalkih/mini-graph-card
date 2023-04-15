@@ -443,7 +443,7 @@ entities:
   - entity: sensor.outside_temp
     aggregate_func: max
     name: Max
-    color: #e74c3c
+    color: "#e74c3c"
   - entity: sensor.outside_temp
     aggregate_func: min
     name: Min
