@@ -5,7 +5,18 @@ import {
 } from './const';
 
 export default class Graph {
-  constructor(width, height, margin, hours = 24, points = 1, aggregateFuncName = 'avg', groupBy = 'interval', smoothing = true, logarithmic = false) {
+  constructor({
+    width,
+    height,
+    margin,
+    hours = 24,
+    points = 1,
+    aggregateFuncName = 'avg',
+    scaleFactor = 1,
+    groupBy = 'interval',
+    smoothing = true,
+    logarithmic = false,
+  }) {
     const aggregateFuncMap = {
       avg: this._average,
       median: this._median,
@@ -28,6 +39,7 @@ export default class Graph {
     this.points = points;
     this.hours = hours;
     this.aggregateFuncName = aggregateFuncName;
+    this._scaleFactor = scaleFactor;
     this._calcPoint = aggregateFuncMap[aggregateFuncName] || this._average;
     this._smoothing = smoothing;
     this._logarithmic = logarithmic;
@@ -64,8 +76,9 @@ export default class Graph {
     histGroups.length = requiredNumOfPoints;
 
     this.coords = this._calcPoints(histGroups);
-    this.min = Math.min(...this.coords.map(item => Number(item[V])));
-    this.max = Math.max(...this.coords.map(item => Number(item[V])));
+    this.min = this._scale(Math.min(...this.coords.map(item => Number(item[V]))));
+    this.max = this._scale(Math.max(...this.coords.map(item => Number(item[V]))));
+    if (this.min > this.max) [this.min, this.max] = [this.max, this.min];
   }
 
   _reducer(res, item) {
@@ -97,6 +110,10 @@ export default class Graph {
     return coords;
   }
 
+  _scale(value) {
+    return this._scaleFactor * value;
+  }
+
   _calcY(coords) {
     // account for logarithmic graph
     const max = this._logarithmic ? Math.log10(Math.max(1, this.max)) : this.max;
@@ -104,7 +121,8 @@ export default class Graph {
 
     const yRatio = ((max - min) / this.height) || 1;
     const coords2 = coords.map((coord) => {
-      const val = this._logarithmic ? Math.log10(Math.max(1, coord[V])) : coord[V];
+      const val = this._logarithmic
+        ? Math.log10(Math.max(1, this._scale(coord[V]))) : this._scale(coord[V]);
       const coordY = this.height - ((val - min) / yRatio) + this.margin[Y] * 2;
       return [coord[X], coordY, coord[V]];
     });
