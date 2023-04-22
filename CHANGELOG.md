@@ -1,3 +1,10 @@
+# [0.12.0-dev.2](https://github.com/kalkih/mini-graph-card/compare/v0.12.0-dev.1...v0.12.0-dev.2) (2023-04-22)
+
+
+### Bug Fixes
+
+* cards would always assume icon_image was set ([#957](https://github.com/kalkih/mini-graph-card/issues/957)) ([f376732](https://github.com/kalkih/mini-graph-card/commit/f376732f0a82251e3c66aa22500b377d1c7ef9b8))
+
 # [0.12.0-dev.1](https://github.com/kalkih/mini-graph-card/compare/v0.11.0...v0.12.0-dev.1) (2023-04-22)
 
 
