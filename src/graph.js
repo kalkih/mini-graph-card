@@ -118,17 +118,18 @@ export default class Graph {
       coords[1] = [this.width + this.margin[X], 0, coords[0][V]];
     }
     coords = this._calcY(this.coords);
-    let next; let Z;
-    let last = coords[0];
-    coords.shift();
-    const coords2 = coords.map((point, i) => {
-      next = point;
-      Z = this._smoothing ? this._midPoint(last[X], last[Y], next[X], next[Y]) : next;
-      const sum = this._smoothing ? (next[V] + last[V]) / 2 : next[V];
-      last = next;
-      return [Z[X], Z[Y], sum, i + 1];
-    });
-    return coords2;
+    if (this._smoothing) {
+      let last = coords[0];
+      coords.shift();
+      return coords.map((point, i) => {
+        const Z = this._midPoint(last[X], last[Y], point[X], point[Y]);
+        const sum = (last[V] + point[V]) / 2;
+        last = point;
+        return [Z[X], Z[Y], sum, i + 1];
+      });
+    } else {
+      return coords.map((point, i) => [point[X], point[Y], point[V], i]);
+    }
   }
 
 
