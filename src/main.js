@@ -227,7 +227,7 @@ class MiniGraphCard extends LitElement {
   }
 
   renderIcon() {
-    if (this.config.icon_image !== 'undefined') {
+    if (this.config.icon_image !== undefined) {
       return html`
         <div class="icon">
           <img src="${this.config.icon_image}" height="25"/>
