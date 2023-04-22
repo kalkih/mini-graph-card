@@ -1,3 +1,20 @@
+# [0.12.0-dev.1](https://github.com/kalkih/mini-graph-card/compare/v0.11.0...v0.12.0-dev.1) (2023-04-22)
+
+
+### Bug Fixes
+
+* add first datapoint tooltip for line graph ([#882](https://github.com/kalkih/mini-graph-card/issues/882)) ([7576fe6](https://github.com/kalkih/mini-graph-card/commit/7576fe6460803546936c18fcadebf86a63c9ebfa))
+* allow zero tooltip ([057a395](https://github.com/kalkih/mini-graph-card/commit/057a395ecbf8cfeb92ffa2805f1f8204778d7948)), closes [#805](https://github.com/kalkih/mini-graph-card/issues/805)
+* drop out-of-bound coords in reducer ([#881](https://github.com/kalkih/mini-graph-card/issues/881)) ([527f005](https://github.com/kalkih/mini-graph-card/commit/527f005c902be8a9d572aabcb82993dfedd73572)), closes [#251](https://github.com/kalkih/mini-graph-card/issues/251)
+* **documentation:** enquote html color ([dbdeab8](https://github.com/kalkih/mini-graph-card/commit/dbdeab86f987d74583fea37f57b0499bf474639f)), closes [#872](https://github.com/kalkih/mini-graph-card/issues/872)
+* **stalebot:** issues should also use exemptLabels ([4d74c1f](https://github.com/kalkih/mini-graph-card/commit/4d74c1f103af7c830291c2c85a505adba9a9f4f9))
+* **workflows:** remove invalid description field ([e755e24](https://github.com/kalkih/mini-graph-card/commit/e755e24efe37d53d8ba02852f2ba23ed8444f1da))
+
+
+### Features
+
+* **option:** override icon with an image URL ([#789](https://github.com/kalkih/mini-graph-card/issues/789)) ([2860a09](https://github.com/kalkih/mini-graph-card/commit/2860a094e782d8af3c80c46b56aa80e079b9755b))
+
 # [0.11.0](https://github.com/kalkih/mini-graph-card/compare/v0.10.0...v0.11.0) (2022-01-22)
 
 
