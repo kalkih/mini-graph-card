@@ -75,22 +75,21 @@ export default class Graph {
   }
 
   _calcPoints(history) {
-    const coords = [];
     let xRatio = this.width / (this.hours * this.points - 1);
     xRatio = Number.isFinite(xRatio) ? xRatio : this.width;
 
-    const first = history.filter(Boolean)[0];
-    let last = [this._calcPoint(first), this._lastValue(first)];
-    const getCoords = (item, i) => {
-      const x = xRatio * i + this.margin[X];
-      if (item)
-        last = [this._calcPoint(item), this._lastValue(item)];
-      return coords.push([x, 0, item ? last[0] : last[1]]);
-    };
-
-    for (let i = 0; i < history.length; i += 1)
-      getCoords(history[i], i);
-
+    const coords = [];
+    let last = history.filter(Boolean)[0];
+    let x;
+    for (let i = 0; i < history.length; i += 1) {
+      x = xRatio * i + this.margin[X];
+      if (history[i]) {
+        last = history[i];
+        coords.push([x, 0, this._calcPoint(last)]);
+      } else {
+        coords.push([x, 0, this._lastValue(last)]);
+      }
+    }
     return coords;
   }
 
