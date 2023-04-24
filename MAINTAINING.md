@@ -28,7 +28,17 @@ This is especially the case for layout options, that can be achieved using gener
 
 PRs including new features should be approved by two maintainers.
 
+# Documentation
+
+Make sure all features and options are documented correctly in the `README.md`.
+If new options are added, mark them as `NEXT_VERSION` in the `since` column.
+The release script will replace this with the correct version.
+
 # New releases
 We follow semantic versioning conventions.
 
-We try to publish new releases monthly, if there have been new commits to the project.
+This means, we require semantic commit messages. For PRs, this is ensured using a GitHub action.
+
+Releases are published using another GitHub action.
+It must be triggered manually and it can be run on the `dev` branch for pre-releases or on the `master` branch for official releases.
+We create frequent pre-releases (if there are changes) to ship improvements in a timely manner.
