@@ -70,6 +70,8 @@ export default class Graph {
       const key = Math.floor(Math.abs(interval));
       if (!res[key]) res[key] = [];
       res[key].push(item);
+    } else {
+      res[0] = [item];
     }
     return res;
   }
