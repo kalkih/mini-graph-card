@@ -1,3 +1,10 @@
+# [0.12.0-dev.3](https://github.com/kalkih/mini-graph-card/compare/v0.12.0-dev.2...v0.12.0-dev.3) (2023-04-27)
+
+
+### Bug Fixes
+
+* retain the last out-of-bounds state ([#961](https://github.com/kalkih/mini-graph-card/issues/961)) ([8ebe173](https://github.com/kalkih/mini-graph-card/commit/8ebe173b8362e41b3287aaf04114d882aae78207)), closes [#881](https://github.com/kalkih/mini-graph-card/issues/881) [#960](https://github.com/kalkih/mini-graph-card/issues/960)
+
 # [0.12.0-dev.2](https://github.com/kalkih/mini-graph-card/compare/v0.12.0-dev.1...v0.12.0-dev.2) (2023-04-22)
 
 
