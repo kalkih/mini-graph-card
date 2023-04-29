@@ -489,53 +489,6 @@ state_map:
 ```
 
 
-## Development
-
-1. Clone this repository into your `config/www` folder using git:
-
-```
-$ git clone https://github.com/kalkih/mini-graph-card.git
-```
-
-2. Add a reference to the card in your `ui-lovelace.yaml`:
-
-```yaml
-resources:
-  - url: /local/mini-graph-card/dist/mini-graph-card-bundle.js
-    type: module
-```
-
-### Instructions
-
-*Requires `nodejs` & `npm`.*
-
-1. Move into the `mini-graph-card` repo, checkout the *dev* branch & install dependencies:
-```console
-$ cd mini-graph-card && git checkout dev && npm install
-```
-
-2. Make changes to the source code.
-
-3. Build the source by running:
-```console
-$ npm run build
-```
-
-4. Refresh the browser to see changes.
-
-    *Make sure cache is cleared or disabled.*
-
-5. *(Optional)* Watch the source and automatically rebuild on save:
-```console
-$ npm run watch
-```
-
-*The new `mini-graph-card-bundle.js` will be build and ready inside `/dist`.*
-
-**If you plan to submit a PR, please base it on the `dev` branch.**
-
-Refer to [CONTRIBUTING.md](CONTRIBUTING.md) for some general considerations on the types of changes that will likely be accepted.
-
 ## Getting errors?
 Make sure you have `javascript_version: latest` in your `configuration.yaml` under `frontend:`.
 

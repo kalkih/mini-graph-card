@@ -1,4 +1,70 @@
-# Current situation
+# Guide for contributing to mini-graph-card
+
+Welcome to `mini-graph-card` and thank you for contributing!
+
+In this document, you will find information on
+* [developing](#development),
+* [contributing](#contributions) to and
+* [maintaining](#maintaining) the project.
+
+
+
+## Development
+
+1. Clone this repository into your `config/www` folder using git:
+
+```
+$ git clone https://github.com/kalkih/mini-graph-card.git
+```
+
+2. Add a reference to the card in your `ui-lovelace.yaml`:
+
+```yaml
+resources:
+  - url: /local/mini-graph-card/dist/mini-graph-card-bundle.js
+    type: module
+```
+
+### Instructions
+
+*Requires `nodejs` & `npm`.*
+
+1. Move into the `mini-graph-card` repo, checkout the *dev* branch & install dependencies:
+```console
+$ cd mini-graph-card && git checkout dev && npm install
+```
+
+2. Make changes to the source code.
+
+3. Build the source by running:
+```console
+$ npm run build
+```
+
+4. Refresh the browser to see changes.
+
+    *Make sure cache is cleared or disabled.*
+
+5. *(Optional)* Watch the source and automatically rebuild on save:
+```console
+$ npm run watch
+```
+
+*The new `mini-graph-card-bundle.js` will be build and ready inside `/dist`.*
+
+
+
+# Contributions
+
+**If you plan to submit a PR, please base it on the `dev` branch.**
+
+Refer to the [maintaining](#maintaining) section for some general considerations on the types of changes that will likely be accepted.
+
+
+
+# Maintaining
+
+## Current situation
 Unfortunately, the project currently lacks maintainers with enough time at their hands to actively develop this project further.
 Also, `mini-graph-card` is already very feature-rich and has grown quite a complex codebase.
 
@@ -6,7 +72,7 @@ Thus, we try to avoid introducing new features, especially if they add complexit
 We are, however, committed to making bug fixes available in a timely manner.
 We will also invest in this project staying compatible with new releases of home assistant.
 
-# Guide for merging PRs
+## Guide for merging PRs
 *Bug fixes* are the priority.
 We will still try to keep them as minimally invasive as possible.
 They should either just fix the bug in very limited spots or, ideally, even reduce complexity.
@@ -28,13 +94,13 @@ This is especially the case for layout options, that can be achieved using gener
 
 PRs including new features should be approved by two maintainers.
 
-# Documentation
+## Documentation
 
 Make sure all features and options are documented correctly in the `README.md`.
 If new options are added, mark them as `NEXT_VERSION` in the `since` column.
 The release script will replace this with the correct version.
 
-# New releases
+## New releases
 We follow semantic versioning conventions.
 
 This means, we require semantic commit messages. For PRs, this is ensured using a GitHub action.
