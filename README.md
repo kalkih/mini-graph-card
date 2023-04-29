@@ -534,7 +534,7 @@ $ npm run watch
 
 **If you plan to submit a PR, please base it on the `dev` branch.**
 
-Refer to [MAINTAINING.md](MAINTAINING.md) for some general considerations on the types of changes that will likely be accepted.
+Refer to [CONTRIBUTING.md](CONTRIBUTING.md) for some general considerations on the types of changes that will likely be accepted.
 
 ## Getting errors?
 Make sure you have `javascript_version: latest` in your `configuration.yaml` under `frontend:`.
