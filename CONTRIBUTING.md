@@ -3,18 +3,18 @@
 Welcome to `mini-graph-card` and thank you for contributing!
 
 In this document, you will find information on
-* [contributing](#contributions) to and
+* [contributing](#contributing) to and
 * [maintaining](#maintaining) the project.
 
 
 
-# Contributions
+# Contributing
 
-**If you plan to submit a PR, please base it on the `dev` branch.**
+Please base your contributions on the `dev` branch to ensure compatibility with the latest code being validated.
 
-Refer to the [maintaining](#maintaining) section for some general considerations on the types of changes that will likely be accepted.
+As the project maintainers are currently very limited in time, please discuss new features and enhancements via an issue before implementation to avoid your PR getting rejected to avoid extra maintenance burden.
 
-
+Refer to the [maintaining](#maintaining) section for more information and some general considerations on the types of changes that will likely be accepted at this time.
 
 # Maintaining
 
