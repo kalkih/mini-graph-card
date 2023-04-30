@@ -3,54 +3,8 @@
 Welcome to `mini-graph-card` and thank you for contributing!
 
 In this document, you will find information on
-* [developing](#development),
 * [contributing](#contributions) to and
 * [maintaining](#maintaining) the project.
-
-
-
-## Development
-
-1. Clone this repository into your `config/www` folder using git:
-
-```
-$ git clone https://github.com/kalkih/mini-graph-card.git
-```
-
-2. Add a reference to the card in your `ui-lovelace.yaml`:
-
-```yaml
-resources:
-  - url: /local/mini-graph-card/dist/mini-graph-card-bundle.js
-    type: module
-```
-
-### Instructions
-
-*Requires `nodejs` & `npm`.*
-
-1. Move into the `mini-graph-card` repo, checkout the *dev* branch & install dependencies:
-```console
-$ cd mini-graph-card && git checkout dev && npm install
-```
-
-2. Make changes to the source code.
-
-3. Build the source by running:
-```console
-$ npm run build
-```
-
-4. Refresh the browser to see changes.
-
-    *Make sure cache is cleared or disabled.*
-
-5. *(Optional)* Watch the source and automatically rebuild on save:
-```console
-$ npm run watch
-```
-
-*The new `mini-graph-card-bundle.js` will be build and ready inside `/dist`.*
 
 
 
