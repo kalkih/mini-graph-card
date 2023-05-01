@@ -28,7 +28,7 @@ If new options are added, mark them as `NEXT_VERSION` in the `since` column.
 The release script will replace this with the correct version.
 
 We follow *semantic versioning* conventions and enforce it using GitHub release actions.
-This means, we require semantic commit messages.
+This means, we require semantic commit messages, following the [angular conventional commit](https://www.conventionalcommits.org) style.
 For PRs, this is ensured using a GitHub action.
 
 
