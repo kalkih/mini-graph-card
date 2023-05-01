@@ -14,7 +14,7 @@ In this document, you will find information on
 
 We are glad that you are planning to contribute to the project! :tada:
 
-As the project maintainers are currently very limited in time, however, please discuss new features and enhancements first via an issue before implementation to avoid your PR getting rejected to avoid extra maintenance burden.
+As the project maintainers are currently very limited in time, please discuss new features and enhancements via an issue first, to avoid getting your PR rejected after your hard work.
 
 Refer to the [maintaining](#maintaining) section for more information and some general considerations on the types of changes that will likely be accepted at this time.
 
