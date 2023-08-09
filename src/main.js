@@ -262,12 +262,34 @@ class MiniGraphCard extends LitElement {
       `;
   }
 
+  isObject(o) {
+    return o instanceof Object && o.constructor === Object;
+  }
+
   getEntityState(id) {
     const entityConfig = this.config.entities[id];
     if (this.config.show.state === 'last') {
       return this.points[id][this.points[id].length - 1][V];
     } else if (entityConfig.attribute) {
-      return this.entity[id].attributes[entityConfig.attribute];
+      if (entityConfig.attribute.includes('.')) {
+        // Is attribute an object ?
+        if (typeof this.entity[id].attributes !== 'undefined') {
+          let state;
+          const ary = entityConfig.attribute.split('.');
+          let o = this.entity[id].attributes;
+          ary.every((key) => {
+            if (this.isObject(o[key])) o = o[key];
+            else {
+              state = o[key];
+              return false;
+            }
+            return true;
+          });
+          return state;
+        }
+      } else {
+        return this.entity[id].attributes[entityConfig.attribute];
+      }
     } else {
       return this.entity[id].state;
     }
@@ -899,7 +921,26 @@ class MiniGraphCard extends LitElement {
         newStateHistory[0].forEach((item) => {
           if (this.config.entities[index].attribute) {
             // eslint-disable-next-line no-param-reassign
-            item.state = item.attributes[this.config.entities[index].attribute];
+            if (this.config.entities[index].attribute.includes('.')) {
+              // Is attribute an object ?
+              if (typeof item.attributes !== 'undefined') {
+                let state;
+                const ary = this.config.entities[index].attribute.split('.');
+                let o = item.attributes;
+                ary.every((key) => {
+                  if (this.isObject(o[key])) o = o[key];
+                  else {
+                    state = o[key];
+                    return false;
+                  }
+                  return true;
+                });
+                // eslint-disable-next-line no-param-reassign
+                item.state = state;
+              }
+            } else
+              // eslint-disable-next-line no-param-reassign
+              item.state = item.attributes[this.config.entities[index].attribute];
             // eslint-disable-next-line no-param-reassign
             delete item.attributes;
           }
