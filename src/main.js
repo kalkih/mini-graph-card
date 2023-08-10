@@ -919,13 +919,12 @@ class MiniGraphCard extends LitElement {
               // eslint-disable-next-line no-param-reassign
               item.state = this.getObjectAttr(item.attributes,
                 this.config.entities[index].attribute);
-            }
-          } else
+            } else
+              // eslint-disable-next-line no-param-reassign
+              item.state = item.attributes[this.config.entities[index].attribute];
             // eslint-disable-next-line no-param-reassign
-            item.state = item.attributes[this.config.entities[index].attribute];
-          // eslint-disable-next-line no-param-reassign
-          delete item.attributes;
-
+            delete item.attributes;
+          }
           if (this.config.state_map.length > 0)
             this._convertState(item);
         });
