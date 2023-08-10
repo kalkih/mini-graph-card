@@ -279,11 +279,7 @@ class MiniGraphCard extends LitElement {
     if (this.config.show.state === 'last') {
       return this.points[id][this.points[id].length - 1][V];
     } else if (entityConfig.attribute) {
-      if (entityConfig.attribute.includes('.')) {
-        return this.getObjectAttr(this.entity[id].attributes, entityConfig.attribute);
-      } else {
-        return this.entity[id].attributes[entityConfig.attribute];
-      }
+      return this.getObjectAttr(this.entity[id].attributes, entityConfig.attribute);
     } else {
       return this.entity[id].state;
     }
