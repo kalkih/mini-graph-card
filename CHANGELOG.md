@@ -1,3 +1,10 @@
+# [0.12.0-dev.4](https://github.com/kalkih/mini-graph-card/compare/v0.12.0-dev.3...v0.12.0-dev.4) (2023-08-10)
+
+
+### Features
+
+* Add support of attribute tree when available ([#996](https://github.com/kalkih/mini-graph-card/issues/996)) ([9c1c31e](https://github.com/kalkih/mini-graph-card/commit/9c1c31eaef3b81f45374441823a40b8f06196fc7))
+
 # [0.12.0-dev.3](https://github.com/kalkih/mini-graph-card/compare/v0.12.0-dev.2...v0.12.0-dev.3) (2023-04-27)
 
 
