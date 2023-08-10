@@ -914,7 +914,6 @@ class MiniGraphCard extends LitElement {
       if (this.config.state_map.length > 0 || this.config.entities[index].attribute) {
         newStateHistory[0].forEach((item) => {
           if (this.config.entities[index].attribute) {
-            // eslint-disable-next-line no-param-reassign
             if (this.config.entities[index].attribute.includes('.')) {
               // eslint-disable-next-line no-param-reassign
               item.state = this.getObjectAttr(item.attributes,
