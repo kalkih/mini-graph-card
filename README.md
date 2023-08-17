@@ -518,7 +518,7 @@ show:
 ```
 This method may be also used to add a calculated value with it's own `aggregate_func` option.
 
-### Addressing data in complex structures
+#### Addressing data in complex structures
 
 When data are stored inside a DICTIONARY named `long_state`:
 ```yaml
