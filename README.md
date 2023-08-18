@@ -520,9 +520,9 @@ This method may be also used to add a calculated value with it's own `aggregate_
 
 #### Addressing data in complex structures
 
-When data are stored inside a DICTIONARY named `long_state`:
+When data are stored inside a DICTIONARY named `dict_data`:
 ```yaml
-long_state:
+dict_data:
   value_1: '53'
   value_2: '64'
   value_3: '72'
@@ -532,14 +532,14 @@ Data should be addressed as `entity_id.dict_attribute.sub_attribute`:
 type: custom:mini-graph-card
 entities:
   - entity: sensor.testing_object_data
-    attribute: long_state.value_1
+    attribute: dict_data.value_1
     name: value_1
   - entity: sensor.testing_object_data
-    attribute: long_state.value_2
+    attribute: dict_data.value_2
     name: value_2
     show_state: true
   - entity: sensor.testing_object_data
-    attribute: long_state.value_3
+    attribute: dict_data.value_3
     name: value_3
     show_state: true
 show:
@@ -549,9 +549,9 @@ show:
 ![image](https://github.com/ildar170975/mini-graph-card/assets/71872483/fea71036-1ed6-4286-ae91-346c757e60f3)
 
 
-When data are stored inside a LIST named `long_state`:
+When data are stored inside a LIST named `list_data`:
 ```yaml
-long_state:
+list_data:
   - value_1: 67
     value_2: 65
     value_3: 93
@@ -567,11 +567,11 @@ Data should be addressed as `entity_id.list_attribute.index.sub_attribute`:
 type: custom:mini-graph-card
 entities:
   - entity: sensor.testing_object_data_list
-    attribute: long_state.0.value_1
+    attribute: list_data.0.value_1
     name: 0:value_1
     show_state: true
   - entity: sensor.testing_object_data_list
-    attribute: long_state.1.value_2
+    attribute: list_data.1.value_2
     name: 1:value_2
     show_state: true
 show:
