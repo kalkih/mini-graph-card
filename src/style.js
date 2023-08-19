@@ -315,6 +315,7 @@ const style = css`
   .graph__labels.--secondary {
     right: 0;
     margin-right: 0px;
+    align-items: flex-end;
   }
   .graph__labels {
     align-items: flex-start;

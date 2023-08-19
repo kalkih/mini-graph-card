@@ -5,6 +5,12 @@ lovelace:
       type: module
 
 default_config:
+http: # support devcontainers/codespaces/gitpod
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 127.0.0.1
+  ip_ban_enabled: true
+  login_attempts_threshold: 5
 
 demo:
 
@@ -37,4 +43,8 @@ sensor:
   - platform: random
     name: random_0_1000
     minimum: 0
+    maximum: 1000
+  - platform: random
+    name: random_150_1000
+    minimum: 150
     maximum: 1000

@@ -227,6 +227,14 @@ class MiniGraphCard extends LitElement {
   }
 
   renderIcon() {
+    if (this.config.icon_image !== undefined) {
+      return html`
+        <div class="icon">
+          <img src="${this.config.icon_image}" height="25"/>
+        </div>
+      `;
+    }
+
     const { icon, icon_adaptive_color } = this.config.show;
     return icon ? html`
       <div class="icon" loc=${this.config.align_icon}
@@ -262,12 +270,16 @@ class MiniGraphCard extends LitElement {
       `;
   }
 
+  getObjectAttr(obj, path) {
+    return path.split('.').reduce((res, key) => res && res[key], obj);
+  }
+
   getEntityState(id) {
     const entityConfig = this.config.entities[id];
     if (this.config.show.state === 'last') {
       return this.points[id][this.points[id].length - 1][V];
     } else if (entityConfig.attribute) {
-      return this.entity[id].attributes[entityConfig.attribute];
+      return this.getObjectAttr(this.entity[id].attributes, entityConfig.attribute);
     } else {
       return this.entity[id].state;
     }
@@ -285,7 +297,7 @@ class MiniGraphCard extends LitElement {
           style=${entityConfig.state_adaptive_color ? `color: ${this.computeColor(state, id)};` : ''}>
           ${entityConfig.show_indicator ? this.renderIndicator(state, id) : ''}
           <span class="state__value ellipsis">
-            ${this.computeState(isPrimary && tooltipValue || state)}
+            ${this.computeState((isPrimary && tooltipValue !== undefined) ? tooltipValue : state)}
           </span>
           <span class="state__uom ellipsis">
             ${this.computeUom(isPrimary && entity || id)}
@@ -899,7 +911,7 @@ class MiniGraphCard extends LitElement {
         newStateHistory[0].forEach((item) => {
           if (this.config.entities[index].attribute) {
             // eslint-disable-next-line no-param-reassign
-            item.state = item.attributes[this.config.entities[index].attribute];
+            item.state = this.getObjectAttr(item.attributes, this.config.entities[index].attribute);
             // eslint-disable-next-line no-param-reassign
             delete item.attributes;
           }
@@ -950,7 +962,7 @@ class MiniGraphCard extends LitElement {
     url += `?filter_entity_id=${entityId}`;
     if (end) url += `&end_time=${end.toISOString()}`;
     if (skipInitialState) url += '&skip_initial_state';
-    if (!withAttributes) url += '&minimal_response';
+    if (!withAttributes) url += '&minimal_response&no_attributes';
     if (withAttributes) url += '&significant_changes_only=0';
     return this._hass.callApi('GET', url);
   }

@@ -3,19 +3,15 @@ views:
     cards:
       - type: custom:mini-graph-card
         entities:
-          - sensor.humidity
+          - sensor.outside_humidity
       - type: custom:mini-graph-card
         entities:
-          - sensor.temperature
-      - type: custom:mini-graph-card
-        entities:
-          - sensor.pressure
+          - sensor.outside_temperature
         show:
           extrema: true
       - type: custom:mini-graph-card
         entities:
-          - entity: weather.home
-            attribute: pressure
+          - entity: sensor.outside_temperature
         show:
           extrema: true
       - type: custom:mini-graph-card
@@ -48,17 +44,39 @@ views:
           points: true
         entities:
           - entity: sensor.random_0_1000
-            name: log(0 - 1000) Gradients
+            name: log(150 - 1000) Gradients
             aggregate_func: last
         color_thresholds:
           - value: 0
             color: "#00ff00"
-          - value: 10
+          - value: 200
             color: "#ffff00"
-          - value: 100
+          - value: 350
             color: "#ff9900"
-          - value: 500
+          - value: 600
             color: "#ff0000"
+      - type: custom:mini-graph-card
+        hours_to_show: 1
+        points_per_hour: 120
+        lower_bound: 0
+        upper_bound: 1000
+        # logarithmic: true
+        smoothing: false
+        height: 600
+        show:
+          extrema: true
+        #   points: true
+        entities:
+          - entity: sensor.random_0_1000
+            name: log(150 - 1000) Simple
+            aggregate_func: last
+        color_thresholds:
+          - value: 0
+            color: green
+          - value: 200
+            color: red
+          - value: 1000
+            color: blue
       - type: custom:mini-graph-card
         entities:
           - sensor.non_existant

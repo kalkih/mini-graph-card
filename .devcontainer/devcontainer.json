@@ -31,5 +31,13 @@
       "**/.hg/store/**": true,
       "**/.rpt2_cache/**": true
     }
-  }
+},
+"portsAttributes": {
+	"5000": {
+		"label": "rollup"
+	},
+	"8123": {
+		"label": "HA"
+	}
+}
 }
