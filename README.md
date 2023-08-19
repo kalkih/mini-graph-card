@@ -123,7 +123,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
 | entity ***(required)*** | string |  | Entity id of the sensor.
-| attribute | string | | Retrieves an attribute instead of the state
+| attribute | string | | Retrieves an attribute or [sub-attribute (attr1.attr2)](#accessing-attributes-in-complex-structures) instead of the state
 | name | string |  | Set a custom display name, defaults to entity's friendly_name.
 | color | string |  | Set a custom color, overrides all other color options including thresholds.
 | unit | string |  | Set a custom unit of measurement, overrides `unit` set in base config.
@@ -518,40 +518,33 @@ show:
 ```
 This method may be also used to add a calculated value with it's own `aggregate_func` option.
 
-#### Addressing data in complex structures
+#### Accessing attributes in complex structures
 
-When data are stored inside a DICTIONARY named `dict_data`:
+When using the `attribute` option in the [entities object](#entities-object), you can access data in structured attributes, such as dictionaries and lists.
+
+##### Accessing dictionary attributes
+Suppose you have data stored inside a *dictionary* attribute named `dict_attribute`
 ```yaml
-dict_data:
-  value_1: '53'
-  value_2: '64'
-  value_3: '72'
+dict_attribute:
+  value_1: 53
+  value_2: 64
+  value_3: 72
 ```
-Data should be addressed as `entity_id.dict_attribute.sub_attribute`:
+Such data should be addressed as `dict_attribute.sub_attribute`:
 ```
 type: custom:mini-graph-card
 entities:
   - entity: sensor.testing_object_data
-    attribute: dict_data.value_1
-    name: value_1
-  - entity: sensor.testing_object_data
-    attribute: dict_data.value_2
-    name: value_2
-    show_state: true
-  - entity: sensor.testing_object_data
-    attribute: dict_data.value_3
-    name: value_3
-    show_state: true
-show:
-  name: false
-  icon: false
+    attribute: dict_attribute.value_1
+    name: value_1 from dictionary attribute
 ```
-![image](https://github.com/ildar170975/mini-graph-card/assets/71872483/fea71036-1ed6-4286-ae91-346c757e60f3)
+![image](https://github.com/ildar170975/mini-graph-card/assets/71872483/0549afd5-901e-4e86-a144-edc4cd207440)
 
+##### Accessing list attributes
 
-When data are stored inside a LIST named `list_data`:
+Suppose you have data stored inside a *list* attribute named `list_attribute`:
 ```yaml
-list_data:
+list_attribute:
   - value_1: 67
     value_2: 65
     value_3: 93
@@ -562,23 +555,15 @@ list_data:
     value_2: 195
     value_3: 279
 ```
-Data should be addressed as `entity_id.list_attribute.index.sub_attribute`:
+Such data should be addressed as `list_attribute.index.sub_attribute`:
 ```
 type: custom:mini-graph-card
 entities:
   - entity: sensor.testing_object_data_list
-    attribute: list_data.0.value_1
-    name: 0:value_1
-    show_state: true
-  - entity: sensor.testing_object_data_list
-    attribute: list_data.1.value_2
-    name: 1:value_2
-    show_state: true
-show:
-  name: false
-  icon: false
+    attribute: list_attribute.0.value_1
+    name: value_1 from first element of list attribute
 ```
-![image](https://github.com/ildar170975/mini-graph-card/assets/71872483/7c93fda2-7ded-4991-86e4-96106e0be4be)
+![image](https://github.com/ildar170975/mini-graph-card/assets/71872483/eebd0cea-da93-4bf5-97a1-118edd2a9c5e)
 
 
 ## Development
