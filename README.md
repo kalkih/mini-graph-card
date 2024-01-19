@@ -202,6 +202,10 @@ color_thresholds:
   - value: 4
     color: "#0000ff"
 ```
+i.e. if value is between "0" (including this value) & "1.33333" - color is "#ff0000",
+between "1.33333" (including this value) & "2.666667" - color is "#ffff00",
+between "2.666667" (including this value) & "4" - color is "#00ff00",
+equal to or more than "4" - color is "#0000ff".
 
 As a shorthand, you can just use a color string for the stops that you want interpolated:
 
