@@ -7,7 +7,7 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
 
 ## Install
 
-### HACS (recommended)
+### HACS (recommended) 
 
 This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community Store).
 <small>*HACS is a third party community store and is not included in Home Assistant out of the box.*</small>
@@ -79,6 +79,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | type ***(required)*** | string |  | v0.0.1 | `custom:mini-graph-card`.
 | entities ***(required)*** | list |  | v0.2.0 | One or more sensor entities in a list, see [entities object](#entities-object) for additional entity options.
 | icon | string |  | v0.0.1 | Set a custom icon from any of the available mdi icons.
+| icon_image | string |  | NEXT_VERSION | Override icon with an image url
 | name | string |  | v0.0.1 | Set a custom name which is displayed beside the icon.
 | unit | string |  | v0.0.1 | Set a custom unit of measurement.
 | tap_action | [action object](#action-object-options) |  | v0.7.0 | Action on click/tap.
@@ -123,7 +124,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
 | entity ***(required)*** | string |  | Entity id of the sensor.
-| attribute | string | | Retrieves an attribute instead of the state
+| attribute | string | | Retrieves an attribute or [sub-attribute (attr1.attr2...)](#accessing-attributes-in-complex-structures) instead of the state
 | name | string |  | Set a custom display name, defaults to entity's friendly_name.
 | color | string |  | Set a custom color, overrides all other color options including thresholds.
 | unit | string |  | Set a custom unit of measurement, overrides `unit` set in base config.
@@ -202,6 +203,11 @@ color_thresholds:
   - value: 4
     color: "#0000ff"
 ```
+The example above will result in the following colors of the graph: if value is 
+* between `0` (including this value) and  `1.33333`, the color is `#ff0000`,
+* between `1.33333` (including this value) and `2.666667`, the color is `#ffff00`,
+* between `2.666667` (including this value) and `4`, the color is `#00ff00`,
+* equal to or more than `4`, the color is `#0000ff`.
 
 As a shorthand, you can just use a color string for the stops that you want interpolated:
 
@@ -442,7 +448,7 @@ entities:
   - entity: sensor.outside_temp
     aggregate_func: max
     name: Max
-    color: #e74c3c
+    color: "#e74c3c"
   - entity: sensor.outside_temp
     aggregate_func: min
     name: Min
@@ -518,6 +524,53 @@ show:
 ```
 This method may be also used to add a calculated value with it's own `aggregate_func` option.
 
+#### Accessing attributes in complex structures
+
+When using the `attribute` option in the [entities object](#entities-object), you can access data in structured attributes, such as dictionaries and lists.
+
+##### Accessing dictionary attributes
+Suppose you have data stored inside a *dictionary* attribute named `dict_attribute`
+```yaml
+dict_attribute:
+  value_1: 53
+  value_2: 64
+  value_3: 72
+```
+Such data should be addressed as `dict_attribute.sub_attribute`:
+```
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.testing_object_data
+    attribute: dict_attribute.value_1
+    name: value_1 from dictionary attribute
+```
+![image](https://github.com/ildar170975/mini-graph-card/assets/71872483/0549afd5-901e-4e86-a144-edc4cd207440)
+
+##### Accessing list attributes
+
+Suppose you have data stored inside a *list* attribute named `list_attribute`:
+```yaml
+list_attribute:
+  - value_1: 67
+    value_2: 65
+    value_3: 93
+  - value_1: 134
+    value_2: 130
+    value_3: 186
+  - value_1: 201
+    value_2: 195
+    value_3: 279
+```
+Such data should be addressed as `list_attribute.index.sub_attribute`:
+```
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.testing_object_data_list
+    attribute: list_attribute.0.value_1
+    name: value_1 from first element of list attribute
+```
+![image](https://github.com/ildar170975/mini-graph-card/assets/71872483/eebd0cea-da93-4bf5-97a1-118edd2a9c5e)
+
 
 ## Development
 
@@ -562,7 +615,9 @@ $ npm run watch
 
 *The new `mini-graph-card-bundle.js` will be build and ready inside `/dist`.*
 
-**If you plan to submit a PR, please base it on the `dev` branch.**
+Note that the `dev` branch is the most up-to-date and matches our beta releases.
+
+Please refer to the [Contribution Guidelines](./CONTRIBUTING.md) if you're interested in contributing to the project. (And thanks for considering!)
 
 ## Getting errors?
 Make sure you have `javascript_version: latest` in your `configuration.yaml` under `frontend:`.

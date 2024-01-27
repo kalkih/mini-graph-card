@@ -54,11 +54,6 @@ export default class Graph {
 
     const histGroups = this._history.reduce((res, item) => this._reducer(res, item), []);
 
-    // drop potential out of bound entry's except one
-    if (histGroups[0] && histGroups[0].length) {
-      histGroups[0] = [histGroups[0][histGroups[0].length - 1]];
-    }
-
     // extend length to fill missing history
     const requiredNumOfPoints = Math.ceil(this.hours * this.points);
     histGroups.length = requiredNumOfPoints;
@@ -71,29 +66,32 @@ export default class Graph {
   _reducer(res, item) {
     const age = this._endTime - new Date(item.last_changed).getTime();
     const interval = (age / ONE_HOUR * this.points) - this.hours * this.points;
-    const key = interval < 0 ? Math.floor(Math.abs(interval)) : 0;
-    if (!res[key]) res[key] = [];
-    res[key].push(item);
+    if (interval < 0) {
+      const key = Math.floor(Math.abs(interval));
+      if (!res[key]) res[key] = [];
+      res[key].push(item);
+    } else {
+      res[0] = [item];
+    }
     return res;
   }
 
   _calcPoints(history) {
-    const coords = [];
     let xRatio = this.width / (this.hours * this.points - 1);
     xRatio = Number.isFinite(xRatio) ? xRatio : this.width;
 
-    const first = history.filter(Boolean)[0];
-    let last = [this._calcPoint(first), this._lastValue(first)];
-    const getCoords = (item, i) => {
-      const x = xRatio * i + this.margin[X];
-      if (item)
-        last = [this._calcPoint(item), this._lastValue(item)];
-      return coords.push([x, 0, item ? last[0] : last[1]]);
-    };
-
-    for (let i = 0; i < history.length; i += 1)
-      getCoords(history[i], i);
-
+    const coords = [];
+    let last = history.filter(Boolean)[0];
+    let x;
+    for (let i = 0; i < history.length; i += 1) {
+      x = xRatio * i + this.margin[X];
+      if (history[i]) {
+        last = history[i];
+        coords.push([x, 0, this._calcPoint(last)]);
+      } else {
+        coords.push([x, 0, this._lastValue(last)]);
+      }
+    }
     return coords;
   }
 
@@ -118,17 +116,18 @@ export default class Graph {
       coords[1] = [this.width + this.margin[X], 0, coords[0][V]];
     }
     coords = this._calcY(this.coords);
-    let next; let Z;
-    let last = coords[0];
-    coords.shift();
-    const coords2 = coords.map((point, i) => {
-      next = point;
-      Z = this._smoothing ? this._midPoint(last[X], last[Y], next[X], next[Y]) : next;
-      const sum = this._smoothing ? (next[V] + last[V]) / 2 : next[V];
-      last = next;
-      return [Z[X], Z[Y], sum, i + 1];
-    });
-    return coords2;
+    if (this._smoothing) {
+      let last = coords[0];
+      coords.shift();
+      return coords.map((point, i) => {
+        const Z = this._midPoint(last[X], last[Y], point[X], point[Y]);
+        const sum = (last[V] + point[V]) / 2;
+        last = point;
+        return [Z[X], Z[Y], sum, i + 1];
+      });
+    } else {
+      return coords.map((point, i) => [point[X], point[Y], point[V], i]);
+    }
   }
 
 
