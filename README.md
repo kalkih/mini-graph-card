@@ -615,7 +615,9 @@ $ npm run watch
 
 *The new `mini-graph-card-bundle.js` will be build and ready inside `/dist`.*
 
-**If you plan to submit a PR, please base it on the `dev` branch.**
+Note that the `dev` branch is the most up-to-date and matches our beta releases.
+
+Please refer to the [Contribution Guidelines](./CONTRIBUTING.md) if you're interested in contributing to the project. (And thanks for considering!)
 
 ## Getting errors?
 Make sure you have `javascript_version: latest` in your `configuration.yaml` under `frontend:`.
