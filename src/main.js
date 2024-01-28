@@ -527,27 +527,34 @@ class MiniGraphCard extends LitElement {
 
   setTooltip(entity, index, value, label = null) {
     const {
+      group_by,
       points_per_hour,
       hours_to_show,
       format,
     } = this.config;
-    const offset = hours_to_show < 1 && points_per_hour < 1
-      ? points_per_hour * hours_to_show
-      : 1 / points_per_hour;
 
-    const id = Math.abs(index + 1 - Math.ceil(hours_to_show * points_per_hour));
+    // time units in milliseconds in this function
+    const interval = getMilli(1 / points_per_hour);
+    const n_points = Math.ceil(hours_to_show * points_per_hour);
+
+    // index is 0 (oldest) to n_points-1 (most recent ~= now)
+    // count of intervals from now to end of bin
+    // count is 0 (now) to n_points-1 (oldest)
+    const count = (n_points - 1) - index;
+
+    // offset end by a minute, if grouped by, e.g., date or hour
+    const oneMinute = group_by !== 'interval' ? 60000 : 0;
 
     const now = this.getEndDate();
 
-    const oneMinInHours = 1 / 60;
-    now.setMilliseconds(now.getMilliseconds() - getMilli(offset * id + oneMinInHours));
+    now.setMilliseconds(now.getMilliseconds() - oneMinute - interval * count);
     const end = getTime(now, format, this._hass.language);
-    now.setMilliseconds(now.getMilliseconds() - getMilli(offset - oneMinInHours));
+    now.setMilliseconds(now.getMilliseconds() + oneMinute - interval);
     const start = getTime(now, format, this._hass.language);
 
     this.tooltip = {
       value,
-      id,
+      count,
       entity,
       time: [start, end],
       index,
