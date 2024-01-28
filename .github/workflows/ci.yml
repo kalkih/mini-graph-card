@@ -54,3 +54,9 @@ jobs:
         run: npm ci
       - name: Build the project
         run: npm run build --if-present
+      - name: Archive distribution bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-node${{ matrix.node-version }}
+          path: |
+            dist
