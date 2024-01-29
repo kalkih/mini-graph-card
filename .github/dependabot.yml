@@ -8,5 +8,11 @@ updates:
     target-branch: "develop"
   - package-ecosystem: "github-actions"
     directory: "/"
+    target-branch: "dev"
     schedule:
       interval: "weekly"
+    groups:
+      patch-and-minor:
+        update-types:
+        - "minor"
+        - "patch"
