@@ -427,7 +427,7 @@ class MiniGraphCard extends LitElement {
   }
 
   renderSvgPoints(points, i) {
-    if (!points) return;
+    if (!this.config.show.points) return;
     const color = this.computeColor(this.entity[i].state, i);
     return svg`
       <g class='line--points'
@@ -759,6 +759,7 @@ class MiniGraphCard extends LitElement {
         if (!entity || this.Graph[i].coords.length === 0) return;
         const bound = config.entities[i].y_axis === 'secondary' ? this.boundSecondary : this.bound;
         [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
+        this.points[i] = this.Graph[i].getPoints();
         if (config.show.graph === 'bar') {
           const numVisible = this.visibleEntities.length;
           this.bar[i] = this.Graph[i].getBars(graphPos, numVisible, config.bar_spacing);
@@ -768,9 +769,6 @@ class MiniGraphCard extends LitElement {
           if (config.entities[i].show_line !== false) this.line[i] = line;
           if (config.show.fill
             && config.entities[i].show_fill !== false) this.fill[i] = this.Graph[i].getFill(line);
-          if (config.show.points && (config.entities[i].show_points !== false)) {
-            this.points[i] = this.Graph[i].getPoints();
-          }
           if (config.color_thresholds.length > 0 && !config.entities[i].color)
             this.gradient[i] = this.Graph[i].computeGradient(
               config.color_thresholds, this.config.logarithmic,
