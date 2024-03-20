@@ -12,13 +12,13 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Use Node.js 12.x
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 12.x
       - name: Cache Node.js modules
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
           key: ${{ runner.OS }}-node-12.x-${{ hashFiles('**/package-lock.json') }}
@@ -37,13 +37,13 @@ jobs:
         node-version: [10.x, 12.x]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
       - name: Cache Node.js modules
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
           key: ${{ runner.OS }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
@@ -54,3 +54,9 @@ jobs:
         run: npm ci
       - name: Build the project
         run: npm run build --if-present
+      - name: Archive distribution bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-node${{ matrix.node-version }}
+          path: |
+            dist
