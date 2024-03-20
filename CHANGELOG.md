@@ -1,3 +1,10 @@
+## [0.12.1](https://github.com/kalkih/mini-graph-card/compare/v0.12.0...v0.12.1) (2024-03-20)
+
+
+### Bug Fixes
+
+* tooltip interval start could be after end ([#1065](https://github.com/kalkih/mini-graph-card/issues/1065)) ([930ee39](https://github.com/kalkih/mini-graph-card/commit/930ee39f51744bc11f580f4198f579b5213371ca)), closes [#181](https://github.com/kalkih/mini-graph-card/issues/181)
+
 # [0.12.0](https://github.com/kalkih/mini-graph-card/compare/v0.11.0...v0.12.0) (2024-01-27)
 
 
