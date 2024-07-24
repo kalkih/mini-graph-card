@@ -345,7 +345,7 @@ class MiniGraphCard extends LitElement {
             @click=${e => this.handlePopup(e, this.entity[entity.index])}
             @mouseenter=${() => this.setTooltip(entity.index, -1, this.getEntityState(entity.index), 'Current')}
             @mouseleave=${() => (this.tooltip = {})}>
-            ${this.renderIndicator(this.entity[entity.index].state, entity.index)}
+            ${this.renderIndicator(this.getEntityState(entity.index), entity.index)}
             <span class="ellipsis">${this.computeName(entity.index)}</span>
           </div>
         `)}
