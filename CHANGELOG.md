@@ -1,3 +1,11 @@
+## [0.12.2-dev.1](https://github.com/kalkih/mini-graph-card/compare/v0.12.1...v0.12.2-dev.1) (2024-07-24)
+
+
+### Bug Fixes
+
+* indicator style for the 1st state ([#1105](https://github.com/kalkih/mini-graph-card/issues/1105)) ([c0ad333](https://github.com/kalkih/mini-graph-card/commit/c0ad333ee96998bab7179b23b86684ba74851326))
+* legend indicators respect entity attribute configuration ([#1115](https://github.com/kalkih/mini-graph-card/issues/1115)) ([5fe01d1](https://github.com/kalkih/mini-graph-card/commit/5fe01d15a791d09646fd26cce5c8d7113e0cd4b7))
+
 ## [0.12.1](https://github.com/kalkih/mini-graph-card/compare/v0.12.0...v0.12.1) (2024-03-20)
 
 
