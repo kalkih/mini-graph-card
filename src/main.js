@@ -636,22 +636,19 @@ class MiniGraphCard extends LitElement {
 
     let intColor;
     if (color_thresholds.length > 0) {
-      if (this.config.show.graph === 'bar') {
-        const { color } = color_thresholds.find(ele => ele.value < state)
-          || color_thresholds.slice(-1)[0];
-        intColor = color;
+      const { color } = color_thresholds.find(ele => ele.value < state)
+        || color_thresholds.slice(-1)[0];
+      intColor = color;
+      const index = color_thresholds.findIndex(ele => ele.value < state);
+      const c1 = color_thresholds[index];
+      const c2 = color_thresholds[index - 1];
+      if (c2) {
+        const factor = (c2.value - state) / (c2.value - c1.value);
+        intColor = interpolateRgb(c2.color, c1.color)(factor);
       } else {
-        const index = color_thresholds.findIndex(ele => ele.value < state);
-        const c1 = color_thresholds[index];
-        const c2 = color_thresholds[index - 1];
-        if (c2) {
-          const factor = (c2.value - state) / (c2.value - c1.value);
-          intColor = interpolateRgb(c2.color, c1.color)(factor);
-        } else {
-          intColor = index
-            ? color_thresholds[color_thresholds.length - 1].color
-            : color_thresholds[0].color;
-        }
+        intColor = index
+          ? color_thresholds[color_thresholds.length - 1].color
+          : color_thresholds[0].color;
       }
     }
 
