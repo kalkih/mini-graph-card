@@ -149,7 +149,7 @@ class MiniGraphCard extends LitElement {
 
   shouldUpdate(changedProps) {
     if (UPDATE_PROPS.some(prop => changedProps.has(prop))) {
-      this.color = this.intColor(
+      this.color = this.computeColor(
         this.tooltip.value !== undefined
           ? this.tooltip.value : this.entity[0] && this.entity[0].state,
         this.tooltip.entity || 0,
@@ -356,7 +356,7 @@ class MiniGraphCard extends LitElement {
   renderIndicator(state, index) {
     return svg`
       <svg width='10' height='10'>
-        <rect width='10' height='10' fill=${this.intColor(state, index)} />
+        <rect width='10' height='10' fill=${this.computeColor(state, index)} />
       </svg>
     `;
   }
@@ -475,7 +475,7 @@ class MiniGraphCard extends LitElement {
     if (!fill) return;
     const svgFill = this.gradient[i]
       ? `url(#grad-${this.id}-${i})`
-      : this.intColor(this.entity[i].state, i);
+      : this.computeColor(this.entity[i].state, i);
     return svg`
       <rect class='fill--rect'
         ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== i}
@@ -605,17 +605,6 @@ class MiniGraphCard extends LitElement {
     handleClick(this, this._hass, this.config, this.config.tap_action, entity.entity_id || entity);
   }
 
-  computeColor(inState, i) {
-    const { color_thresholds, line_color } = this.config;
-    const state = Number(inState) || 0;
-    const threshold = {
-      color: line_color[i] || line_color[0],
-      ...color_thresholds.slice(-1)[0],
-      ...color_thresholds.find(ele => ele.value < state),
-    };
-    return this.config.entities[i].color || threshold.color;
-  }
-
   get visibleEntities() {
     return this.config.entities.filter(entity => entity.show_graph !== false);
   }
@@ -641,7 +630,7 @@ class MiniGraphCard extends LitElement {
     return this.secondaryYaxisEntities.map(entity => this.Graph[entity.index]);
   }
 
-  intColor(inState, i) {
+  computeColor(inState, i) {
     const { color_thresholds, line_color } = this.config;
     const state = Number(inState) || 0;
 
