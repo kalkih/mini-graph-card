@@ -1,3 +1,10 @@
+## [0.12.2-dev.2](https://github.com/kalkih/mini-graph-card/compare/v0.12.2-dev.1...v0.12.2-dev.2) (2024-08-07)
+
+
+### Bug Fixes
+
+* use d3 to interpolate colors ([#1118](https://github.com/kalkih/mini-graph-card/issues/1118)) ([b8676f5](https://github.com/kalkih/mini-graph-card/commit/b8676f557107fb5ebda550652a947fa74ab39a9c))
+
 ## [0.12.2-dev.1](https://github.com/kalkih/mini-graph-card/compare/v0.12.1...v0.12.2-dev.1) (2024-07-24)
 
 
