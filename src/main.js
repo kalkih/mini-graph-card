@@ -6,6 +6,7 @@ import Graph from './graph';
 import style from './style';
 import handleClick from './handleClick';
 import buildConfig from './buildConfig';
+import './Editor/editor';
 import './initialize';
 import { version } from '../package.json';
 
@@ -48,6 +49,10 @@ class MiniGraphCard extends LitElement {
     this.stateChanged = false;
     this.initial = true;
     this._md5Config = undefined;
+  }
+
+  static getConfigElement() {
+    return document.createElement('mini-graph-card-editor');
   }
 
   static get styles() {
