@@ -6,7 +6,7 @@ import Graph from './graph';
 import style from './style';
 import handleClick from './handleClick';
 import buildConfig from './buildConfig';
-import './Editor/editor';
+import './editor/editor';
 import './initialize';
 import { version } from '../package.json';
 
