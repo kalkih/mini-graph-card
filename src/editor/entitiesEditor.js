@@ -1,4 +1,4 @@
-import { mdiPencil, mdiClose } from '@mdi/js';
+import { mdiPencil, mdiClose, mdiDrag } from '@mdi/js';
 import { fireEvent } from 'custom-card-helpers';
 import { LitElement, html, css } from 'lit-element';
 
@@ -32,9 +32,13 @@ class EntitiesEditor extends LitElement {
       return;
     }
     return html`
+    <ha-sortable handle-selector=".handle" @item-moved=${this.rowMoved}>
     <div class="entities">
       ${this.entities.map((entity, index) => html`
         <div class="entity">
+          <div class="handle">
+            <ha-svg-icon .path=${mdiDrag}></ha-svg-icon>
+          </div>
           <ha-form
             .hass=${this.hass}
             .data=${entity}
@@ -44,29 +48,30 @@ class EntitiesEditor extends LitElement {
             @value-changed=${this.valueChanged}
           ></ha-form>
           <ha-icon-button
-            .label=${this.hass.localize('editor.actions.remove')}
+            .label=${this.hass.localize('ui.components.entity.entity-picker.clear')}
             .path=${mdiClose}
             .index=${index}
             @click=${this.removeRow}
           ></ha-icon-button>
           <ha-icon-button
-            .label=${this.hass.localize('editor.actions.edit')}
+            .label=${this.hass.localize('ui.components.entity.entity-picker.edit')}
             .path=${mdiPencil}
             .index=${index}
             @click=${this.editRow}
           ></ha-icon-button>
         </div>
       `)}
+      </div>
     </div>
+    </ha-sortable>
     <div class="entity add-item">
-      <ha-form
-        .hass=${this.hass}
-        .data=${this.newEntity}
-        .schema=${SCHEMA}
-        .computeLabel=${this.computeLabel}
-        @value-changed=${this.addEntity}
-      ></ha-form>
-    </div>
+    <ha-form
+      .hass=${this.hass}
+      .data=${this.newEntity}
+      .schema=${SCHEMA}
+      .computeLabel=${this.computeLabel}
+      @value-changed=${this.addEntity}
+    ></ha-form>
     `;
   }
 
@@ -81,6 +86,19 @@ class EntitiesEditor extends LitElement {
     newConfigEntities.splice(index, 1);
 
     fireEvent(this, 'config-changed', newConfigEntities);
+  }
+
+  rowMoved(ev) {
+    ev.stopPropagation();
+    if (!this.entities || !this.hass) {
+      return;
+    }
+    const { oldIndex, newIndex } = ev.detail;
+    const newEntities = this.entities.concat();
+
+    newEntities.splice(newIndex, 0, newEntities.splice(oldIndex, 1)[0]);
+
+    fireEvent(this, 'config-changed', newEntities);
   }
 
   addEntity(ev) {

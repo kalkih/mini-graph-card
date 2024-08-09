@@ -1,7 +1,6 @@
 import { mdiArrowLeft, mdiEye } from '@mdi/js';
 import { fireEvent } from 'custom-card-helpers';
 import { LitElement, html } from 'lit-element';
-import { convertHex2Rgb, convertRgb2Hex } from '../utils';
 import { localize } from '../localize/localize';
 
 const SCHEMA = [
@@ -21,6 +20,10 @@ const SCHEMA = [
   {
     name: 'color',
     selector: { color_rgb: {} },
+  },
+  {
+    name: 'use_color_thresholds',
+    selector: { boolean: {} },
   },
   {
     name: 'state_adaptive_color',
@@ -115,7 +118,6 @@ class EntityEditor extends LitElement {
     return {
       hass: { attribute: false },
       config: { attribute: false },
-      color: {},
     };
   }
 
@@ -132,11 +134,6 @@ class EntityEditor extends LitElement {
     if (!this.config || !this.hass) {
       return html``;
     }
-    this.color = convertHex2Rgb(this.config.color);
-    const data = {
-      ...this.config,
-      color: this.color,
-    };
 
     return html`
       <div class="header">
@@ -149,7 +146,7 @@ class EntityEditor extends LitElement {
       </div>
       <ha-form
         .hass=${this.hass}
-        .data=${data}
+        .data=${this.config}
         .schema=${SCHEMA}
         .computeLabel=${this.computeLabel}
         @value-changed=${this.valueChanged}
@@ -168,11 +165,6 @@ class EntityEditor extends LitElement {
     const target = ev.target || '';
 
     const value = target.checked !== undefined ? target.checked : ev.detail.value;
-    if (value.color.length < 3) {
-      value.color = '#000000';
-    } else {
-      value.color = convertRgb2Hex(value.color);
-    }
 
     fireEvent(this, 'config-changed', value);
   }

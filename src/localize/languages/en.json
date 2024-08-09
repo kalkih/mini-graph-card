@@ -22,6 +22,7 @@
       },
       "entity": {
         "color": "Color",
+        "use_color_thresholds": "Use color thresholds",
         "state_adaptive_color": "State adaptive color",
         "aggregate_func": "Aggregate function",
         "show_state": "Show state",
