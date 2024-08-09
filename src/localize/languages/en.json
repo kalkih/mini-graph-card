@@ -1,0 +1,40 @@
+{
+  "editor": {
+    "form": {
+      "card": {
+        "hour24": "Display time in 24-hour format",
+        "points_per_hour": "Data points per hour",
+        "group_by": "Data grouping",
+        "aggregate_func": "Aggregate function",
+        "align_header": "Header alignment",
+        "align_icon": "Icon alignment",
+        "align_state": "State alignment",
+        "graph": "Graph",
+        "fill": "Fill",
+        "points": "Points",
+        "legend": "Legend",
+        "average": "Average",
+        "extrema": "Extrema",
+        "labels": "Labels",
+        "labels_secondary": "Secondary labels",
+        "name_adaptive_color": "Name adaptive color",
+        "icon_adaptive_color": "Icon adaptive color"
+      },
+      "entity": {
+        "color": "Color",
+        "state_adaptive_color": "State adaptive color",
+        "aggregate_func": "Aggregate function",
+        "show_state": "Show state",
+        "show_indicator": "Show indicator",
+        "show_graph": "Show graph",
+        "show_line": "Show line",
+        "show_fill": "Show fill",
+        "show_points": "Show points",
+        "show_legend": "Show legends",
+        "show_adaptive_color": "Show adaptive color",
+        "smoothing": "Smoothing",
+        "y_axis": "Axis"
+      }
+    }
+  }
+}

@@ -3,6 +3,7 @@ import { LitElement, html } from 'lit-element';
 import './entitiesEditor';
 import './entityEditor';
 import { mdiAlignHorizontalLeft, mdiEye, mdiPalette } from '@mdi/js';
+import { localize } from '../localize/localize';
 
 const SCHEMA = [
   {
@@ -78,7 +79,7 @@ const SCHEMA = [
         name: '',
         type: 'expandable',
         iconPath: mdiAlignHorizontalLeft,
-        title: 'Aligment',
+        title: 'Alignment',
         schema: [
           {
             name: '',
@@ -133,7 +134,7 @@ const SCHEMA = [
         name: 'show',
         type: 'expandable',
         iconPath: mdiEye,
-        title: 'Show',
+        title: 'Display',
         schema: [
           {
             name: '',
@@ -291,7 +292,7 @@ class MiniGraphCardEditor extends LitElement {
   computeLabel(schema) {
     const localized = this.hass.localize(`ui.panel.lovelace.editor.card.generic.${schema.name}`);
     if (localized === '') {
-      return schema.name;
+      return localize(`editor.form.card.${schema.name}`, this.hass);
     } else {
       return localized;
     }

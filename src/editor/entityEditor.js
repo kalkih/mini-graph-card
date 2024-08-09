@@ -1,6 +1,8 @@
-import { mdiArrowLeft } from '@mdi/js';
+import { mdiArrowLeft, mdiEye } from '@mdi/js';
 import { fireEvent } from 'custom-card-helpers';
 import { LitElement, html } from 'lit-element';
+import { convertHex2Rgb, convertRgb2Hex } from '../utils';
+import { localize } from '../localize/localize';
 
 const SCHEMA = [
   {
@@ -18,7 +20,7 @@ const SCHEMA = [
   },
   {
     name: 'color',
-    selector: { text: {} },
+    selector: { color_rgb: {} },
   },
   {
     name: 'state_adaptive_color',
@@ -48,6 +50,8 @@ const SCHEMA = [
   {
     name: '',
     type: 'expandable',
+    iconPath: mdiEye,
+    title: 'Display',
     schema: [
       {
         name: '',
@@ -85,6 +89,10 @@ const SCHEMA = [
             name: 'show_adaptive_color',
             selector: { boolean: {} },
           },
+          {
+            name: 'smoothing',
+            selector: { boolean: {} },
+          },
         ],
       },
     ],
@@ -107,12 +115,27 @@ class EntityEditor extends LitElement {
     return {
       hass: { attribute: false },
       config: { attribute: false },
+      color: {},
     };
   }
 
+  computeLabel(schema) {
+    const localized = this.hass.localize(`ui.panel.lovelace.editor.card.generic.${schema.name}`);
+    if (localized === '') {
+      return localize(`editor.form.entity.${schema.name}`, this.hass);
+    } else {
+      return localized;
+    }
+  }
+
   render() {
+    if (!this.config || !this.hass) {
+      return html``;
+    }
+    this.color = convertHex2Rgb(this.config.color);
     const data = {
       ...this.config,
+      color: this.color,
     };
 
     return html`
@@ -128,6 +151,7 @@ class EntityEditor extends LitElement {
         .hass=${this.hass}
         .data=${data}
         .schema=${SCHEMA}
+        .computeLabel=${this.computeLabel}
         @value-changed=${this.valueChanged}
       ></ha-form>
       `;
@@ -144,6 +168,11 @@ class EntityEditor extends LitElement {
     const target = ev.target || '';
 
     const value = target.checked !== undefined ? target.checked : ev.detail.value;
+    if (value.color.length < 3) {
+      value.color = '#000000';
+    } else {
+      value.color = convertRgb2Hex(value.color);
+    }
 
     fireEvent(this, 'config-changed', value);
   }
