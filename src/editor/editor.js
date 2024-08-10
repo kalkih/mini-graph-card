@@ -1,8 +1,13 @@
 import { fireEvent } from 'custom-card-helpers';
-import { LitElement, html } from 'lit-element';
+import { LitElement, html, css } from 'lit-element';
 import './entitiesEditor';
 import './entityEditor';
-import { mdiAlignHorizontalLeft, mdiEye, mdiPalette } from '@mdi/js';
+import './colorThresholdsEditor';
+import {
+  mdiAlignHorizontalLeft, mdiChevronRight, mdiEye,
+  mdiFormatColorFill,
+  mdiPalette,
+} from '@mdi/js';
 import { localize } from '../localize/localize';
 
 const SCHEMA = [
@@ -305,15 +310,16 @@ class MiniGraphCardEditor extends LitElement {
 
 
     if (this.subElementEditorConfig !== undefined) {
-      return html`
-        <mini-graph-card-entity-editor
-          .hass=${this.hass}
-          .config=${this._entities[this.subElementEditorConfig.index]}
-          @go-back=${this.goBack}
-          @config-changed=${this.subElementChanged}
-        >
-        </mini-graph-card-entity-editor>
-      `;
+      return this.renderSubElement();
+      // return html`
+      //   <mini-graph-card-entity-editor
+      //     .hass=${this.hass}
+      //     .config=${this._entities[this.subElementEditorConfig.index]}
+      //     @go-back=${this.goBack}
+      //     @config-changed=${this.subElementChanged}
+      //   >
+      //   </mini-graph-card-entity-editor>
+      // `;
     }
 
     const data = {
@@ -335,12 +341,52 @@ class MiniGraphCardEditor extends LitElement {
         .computeLabel=${this.computeLabel}
         @value-changed=${this.valueChanged}
       ></ha-form>
+      <div class="subElementLink" @click=${this.editColorThresholds}>
+        <ha-svg-icon .path=${mdiFormatColorFill}></ha-svg-icon>
+        <div class="header">
+          Color thresholds
+        </div>
+        <ha-svg-icon .path=${mdiChevronRight}></ha-svg-icon>
+      </div>
     </div>
     `;
   }
 
   goBack() {
     this.subElementEditorConfig = undefined;
+  }
+
+  editColorThresholds(ev) {
+    ev.stopPropagation();
+    if (!this._config || !this.hass) {
+      return;
+    }
+    this.subElementEditorConfig = { type: 'thresholds', index: 0 };
+  }
+
+  renderSubElement() {
+    switch (this.subElementEditorConfig.type) {
+      case 'entity':
+        return html`
+        <mini-graph-card-entity-editor
+          .hass=${this.hass}
+          .config=${this._entities[this.subElementEditorConfig.index]}
+          @go-back=${this.goBack}
+          @config-changed=${this.subElementChanged}
+        ></mini-graph-card-entity-editor>
+        `;
+      case 'thresholds':
+        return html`
+        <color-thresholds-editor
+          .hass=${this.hass}
+          .config=${this._config.color_thresholds}
+          @go-back=${this.goBack}
+          @config-changed=${this.colorThresholdsChanged}
+        ></color-thresholds-editor>
+        `;
+      default:
+        return html``;
+    }
   }
 
   subElementChanged(ev) {
@@ -356,6 +402,15 @@ class MiniGraphCardEditor extends LitElement {
     }
   }
 
+  colorThresholdsChanged(ev) {
+    ev.stopPropagation();
+    if (!this._config || !this.hass) {
+      return;
+    }
+
+    fireEvent(this, 'config-changed', { config: { ...this._config, color_thresholds: ev.detail } });
+  }
+
   editRow(ev) {
     ev.stopPropagation();
     if (!this._config || !this.hass) {
@@ -363,6 +418,23 @@ class MiniGraphCardEditor extends LitElement {
     }
     const id = ev.detail;
     this.subElementEditorConfig = { type: 'entity', index: id };
+  }
+
+  static get styles() {
+    return css`
+      .subElementLink {
+        display: flex;
+        width: 100%;
+        min-height: 48px;
+        gap: 1rem;
+        align-items: center;
+        cursor: pointer;
+      }
+
+      .subElementLink > .header {
+        flex: 1;
+      }
+    `;
   }
 }
 
