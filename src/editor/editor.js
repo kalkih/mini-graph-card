@@ -78,6 +78,34 @@ const SCHEMA = [
               },
             },
           },
+          {
+            name: 'animate',
+            selector: { boolean: {} },
+          },
+          {
+            name: 'bar_spacing',
+            selector: { number: {} },
+          },
+          {
+            name: 'line_width',
+            selector: { number: {} },
+          },
+          {
+            name: 'color_thresholds_transition',
+            selector: {
+              select: {
+                options: [
+                  { label: 'Smooth', value: 'smooth' },
+                  { label: 'Hard', value: 'hard' },
+                ],
+                mode: 'dropdown',
+              },
+            },
+          },
+          {
+            name: 'logarithmic',
+            selector: { boolean: {} },
+          },
         ],
       },
       {
@@ -341,7 +369,9 @@ class MiniGraphCardEditor extends LitElement {
         .computeLabel=${this.computeLabel}
         @value-changed=${this.valueChanged}
       ></ha-form>
-      <div class="subElementLink" @click=${this.editColorThresholds}>
+      <div class="subElementLink"
+        @click=${this.editColorThresholds}
+       >
         <ha-svg-icon .path=${mdiFormatColorFill}></ha-svg-icon>
         <div class="header">
           Color thresholds
@@ -429,6 +459,7 @@ class MiniGraphCardEditor extends LitElement {
         gap: 1rem;
         align-items: center;
         cursor: pointer;
+        margin-top: 24px;
       }
 
       .subElementLink > .header {

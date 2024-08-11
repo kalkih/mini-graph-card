@@ -16,6 +16,7 @@ import {
   UPDATE_PROPS,
   X, Y, V,
   ONE_HOUR,
+  DEFAULT_SHOW,
 } from './const';
 import {
   getMin, getAvg, getMax,
@@ -135,6 +136,8 @@ class MiniGraphCard extends LitElement {
   static getStubConfig() {
     return {
       entities: [],
+      color_thresholds: [],
+      show: DEFAULT_SHOW,
     };
   }
 
@@ -643,7 +646,10 @@ class MiniGraphCard extends LitElement {
 
   computeColor(inState, i) {
     const { color_thresholds, line_color } = this.config;
-    const useThresholds = this.config.entities[i].use_color_thresholds || false;
+    const entity = this.config.entities[i];
+    const useThresholds = entity
+      ? entity.use_color_thresholds
+      : false;
     const state = Number(inState) || 0;
 
     let intColor;
@@ -665,18 +671,20 @@ class MiniGraphCard extends LitElement {
     }
 
     let hexColor;
-    if (Array.isArray(this.config.entities[i].color)) {
-      if (this.config.entities[i].color.length === 3) {
-        hexColor = convertRgb2Hex(this.config.entities[i].color);
+    if (entity !== undefined) {
+      if (Array.isArray(entity.color)) {
+        if (entity.color.length === 3) {
+          hexColor = convertRgb2Hex(entity.color);
+        }
       }
     }
 
     if (useThresholds) {
       // eslint-disable-next-line max-len
-      return intColor || hexColor || this.config.entities[i].color || intColor || line_color[i] || line_color[0];
+      return intColor || hexColor || entity.color || intColor || line_color[i] || line_color[0];
     } else {
       // eslint-disable-next-line max-len
-      return hexColor || this.config.entities[i].color || intColor || line_color[i] || line_color[0];
+      return hexColor || entity.color || line_color[i] || line_color[0];
     }
   }
 

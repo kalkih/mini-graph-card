@@ -143,8 +143,13 @@ class EntitiesEditor extends LitElement {
         flex-grow: 1;
       }
 
+      .handle {
+        cursor: grab;
+        padding-inline-end: 8px;
+      }
+
       .add-item {
-        margin-bottom: 16px;
+        margin-bottom: 24px;
       }
     `;
   }

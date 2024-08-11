@@ -1,54 +1,61 @@
 import { mdiArrowLeft, mdiEye } from '@mdi/js';
 import { fireEvent } from 'custom-card-helpers';
-import { LitElement, html } from 'lit-element';
+import { LitElement, html, css } from 'lit-element';
 import { localize } from '../localize/localize';
+import './colorSelector';
 
 const SCHEMA = [
   {
-    name: 'entity',
-    selector: { entity: {} },
-  },
-  {
-    name: 'attribute',
-    selector: { attribute: {} },
-    context: { filter_entity: 'entity' },
-  },
-  {
-    name: 'name',
-    selector: { text: {} },
-  },
-  {
-    name: 'color',
-    selector: { color_rgb: {} },
-  },
-  {
-    name: 'use_color_thresholds',
-    selector: { boolean: {} },
-  },
-  {
-    name: 'state_adaptive_color',
-    selector: { boolean: {} },
-  },
-  {
-    name: 'unit',
-    selector: { text: {} },
-  },
-  {
-    name: 'aggregate_func',
-    selector: {
-      select: {
-        options: [
-          { label: 'Average', value: 'avg' },
-          { label: 'Median', value: 'median' },
-          { label: 'Minimum', value: 'min' },
-          { label: 'Maximum', value: 'max' },
-          { label: 'First', value: 'first' },
-          { label: 'Last', value: 'last' },
-          { label: 'Sum', value: 'sum' },
-        ],
-        mode: 'dropdown',
+    name: '',
+    type: 'grid',
+    schema: [
+      {
+        name: 'entity',
+        selector: { entity: {} },
       },
-    },
+      {
+        name: 'attribute',
+        selector: { attribute: {} },
+        context: { filter_entity: 'entity' },
+      },
+      {
+        name: 'name',
+        selector: { text: {} },
+      },
+      {
+        name: 'color',
+        selector: { hex_color: {} },
+      },
+      {
+        name: 'use_color_thresholds',
+        selector: { boolean: {} },
+      },
+      {
+        name: 'state_adaptive_color',
+        selector: { boolean: {} },
+      },
+      {
+        name: 'unit',
+        selector: { text: {} },
+      },
+      {
+        name: 'aggregate_func',
+        selector: {
+          select: {
+            options: [
+              { label: 'Average', value: 'avg' },
+              { label: 'Median', value: 'median' },
+              { label: 'Minimum', value: 'min' },
+              { label: 'Maximum', value: 'max' },
+              { label: 'First', value: 'first' },
+              { label: 'Last', value: 'last' },
+              { label: 'Sum', value: 'sum' },
+            ],
+            mode: 'dropdown',
+          },
+        },
+      },
+    ],
   },
   {
     name: '',
@@ -141,7 +148,8 @@ class EntityEditor extends LitElement {
           <ha-icon-button
             .path=${mdiArrowLeft}
             @click=${this.goBack}
-          ></ha-icon-button
+          ></ha-icon-button>
+          <span>${localize('editor.edit_entity', this.hass)}</span>
         </div>
       </div>
       <ha-form
@@ -167,6 +175,16 @@ class EntityEditor extends LitElement {
     const value = target.checked !== undefined ? target.checked : ev.detail.value;
 
     fireEvent(this, 'config-changed', value);
+  }
+
+  static get styles() {
+    return css`
+      .back-title {
+        display: flex;
+        align-items: center;
+        font-size: 18px;
+      }
+    `;
   }
 }
 

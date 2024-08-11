@@ -1,6 +1,7 @@
 import { css, html, LitElement } from 'lit-element';
 import { mdiArrowLeft, mdiClose, mdiPlus } from '@mdi/js';
 import { fireEvent } from 'custom-card-helpers';
+import { localize } from '../localize/localize';
 import './colorSelector';
 
 const SCHEMA = [
@@ -28,6 +29,10 @@ class ColorThresholdsEditor extends LitElement {
     };
   }
 
+  computeLabel(schema) {
+    return localize(`editor.form.color_thresholds.${schema.name}`, this.hass);
+  }
+
   render() {
     if (!this.hass) {
       return html``;
@@ -41,6 +46,7 @@ class ColorThresholdsEditor extends LitElement {
               .path=${mdiArrowLeft}
               @click=${this.goBack}
           ></ha-icon-button>
+          <span>${localize('editor.edit_color_thresholds', this.hass)}</span>
         </div>
         <ha-icon-button
           .path=${mdiPlus}
@@ -56,6 +62,7 @@ class ColorThresholdsEditor extends LitElement {
             .path=${mdiArrowLeft}
             @click=${this.goBack}
         ></ha-icon-button>
+        <span>${localize('editor.edit_color_thresholds', this.hass)}</span>
       </div>
       <ha-icon-button
         .path=${mdiPlus}
@@ -70,6 +77,7 @@ class ColorThresholdsEditor extends LitElement {
         .schema=${SCHEMA}
         .data=${threshold}
         .index=${index}
+        .computeLabel=${this.computeLabel}
         @value-changed=${this.valueChanged}
       ></ha-form>
       <ha-icon-button
@@ -104,7 +112,8 @@ class ColorThresholdsEditor extends LitElement {
   addRow(ev) {
     ev.stopPropagation();
     const value = { value: 0, color: '#000000' };
-    if (!this.config || !this.hass) {
+    if (!this.config) {
+      fireEvent(this, 'config-changed', [value]);
       return;
     }
     fireEvent(this, 'config-changed', [...this.config, value]);
@@ -131,6 +140,12 @@ class ColorThresholdsEditor extends LitElement {
         align-items: center;
       }
 
+      .back-title {
+        display: flex;
+        align-items: center;
+        font-size: 18px;
+      }
+
       .threshold-header {
         display: flex;
         gap: 10px;
@@ -139,6 +154,7 @@ class ColorThresholdsEditor extends LitElement {
       .threshold {
         display: flex;
         align-items: center;
+        margin-bottom: 8px;
       }
 
       .threshold > ha-form {
