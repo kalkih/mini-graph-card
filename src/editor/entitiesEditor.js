@@ -31,6 +31,7 @@ class EntitiesEditor extends LitElement {
     if (!this.entities || !this.hass) {
       return;
     }
+
     return html`
     <ha-sortable handle-selector=".handle" @item-moved=${this.rowMoved}>
     <div class="entities">
@@ -41,7 +42,7 @@ class EntitiesEditor extends LitElement {
           </div>
           <ha-form
             .hass=${this.hass}
-            .data=${entity}
+            .data=${typeof entity === 'object' ? entity : { entity }}
             .schema=${SCHEMA}
             .index=${index}
             .computeLabel=${this.computeLabel}
@@ -123,10 +124,17 @@ class EntitiesEditor extends LitElement {
     const index = (ev.target).index || 0;
     const newConfigEntities = this.entities.concat();
 
-    newConfigEntities[index] = {
-      ...newConfigEntities[index],
-      entity: value || '',
-    };
+    if (typeof newConfigEntities[index] === 'object') {
+      newConfigEntities[index] = {
+        ...newConfigEntities[index],
+        entity: value || '',
+      };
+    } else {
+      newConfigEntities[index] = {
+        entity: value || '',
+      };
+    }
+
 
     fireEvent(this, 'config-changed', newConfigEntities);
   }

@@ -647,9 +647,6 @@ class MiniGraphCard extends LitElement {
   computeColor(inState, i) {
     const { color_thresholds, line_color } = this.config;
     const entity = this.config.entities[i];
-    const useThresholds = entity
-      ? entity.use_color_thresholds
-      : false;
     const state = Number(inState) || 0;
 
     let intColor;
@@ -679,13 +676,7 @@ class MiniGraphCard extends LitElement {
       }
     }
 
-    if (useThresholds) {
-      // eslint-disable-next-line max-len
-      return intColor || hexColor || entity.color || intColor || line_color[i] || line_color[0];
-    } else {
-      // eslint-disable-next-line max-len
-      return hexColor || entity.color || line_color[i] || line_color[0];
-    }
+    return hexColor || entity.color || intColor || line_color[i] || line_color[0];
   }
 
   computeName(index) {
@@ -797,7 +788,8 @@ class MiniGraphCard extends LitElement {
           if (config.show.points && (config.entities[i].show_points !== false)) {
             this.points[i] = this.Graph[i].getPoints();
           }
-          if (config.color_thresholds.length > 0 && config.entities[i].use_color_thresholds)
+
+          if (config.color_thresholds.length > 0 && !config.entities[i].color)
             this.gradient[i] = this.Graph[i].computeGradient(
               config.color_thresholds, this.config.logarithmic,
             );

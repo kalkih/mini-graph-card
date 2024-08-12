@@ -11,7 +11,7 @@ const SCHEMA = [
     schema: [
       {
         name: 'value',
-        selector: { number: {} },
+        selector: { number: { step: 0.1 } },
       },
       {
         name: 'color',
@@ -72,6 +72,8 @@ class ColorThresholdsEditor extends LitElement {
     <div class="thresholds">
     ${this.config.map((threshold, index) => html`
       <div class="threshold">
+      <ha-expansion-panel outlined>
+      <span slot="header"><span class="circle-color" style="background-color: ${threshold.color}"></span>${threshold.value}</span>
       <ha-form
         .hass=${this.hass}
         .schema=${SCHEMA}
@@ -80,6 +82,7 @@ class ColorThresholdsEditor extends LitElement {
         .computeLabel=${this.computeLabel}
         @value-changed=${this.valueChanged}
       ></ha-form>
+      </ha-expansion-panel>
       <ha-icon-button
         .label=${this.hass.localize('ui.components.entity.entity-picker.clear')}
         .path=${mdiClose}
@@ -157,7 +160,12 @@ class ColorThresholdsEditor extends LitElement {
         margin-bottom: 8px;
       }
 
-      .threshold > ha-form {
+      ha-expansion-panel > span {
+        display: flex;
+        gap: 1rem;
+      }
+
+      .threshold > ha-expansion-panel {
         flex-grow: 1;
       }
 

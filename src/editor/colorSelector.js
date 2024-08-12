@@ -1,3 +1,4 @@
+import { mdiClose } from '@mdi/js';
 import { fireEvent } from 'custom-card-helpers';
 import { css, html, LitElement } from 'lit-element';
 
@@ -17,7 +18,7 @@ export class CustomColorSelector extends LitElement {
 
   render() {
     return html`
-    <div>
+    <div class="color-container">
       <label id="hex" for="color-input">
         <span class="label">${this.label}</span>
         <span class="input-wrapper">
@@ -26,10 +27,18 @@ export class CustomColorSelector extends LitElement {
               id="color-input"
               @input=${this.valueChanged}
               type="color"
-              .value=${this.value}>
+              .value=${this.value ? this.value : '#000000'}>
           </div>
         </span>
-      </label>
+        </label>
+        ${this.selector.hex_color.clearable ? html`
+          <ha-icon-button
+          class="clear-button"
+          .label=${this.hass.localize('ui.common.clear')}
+          .path=${mdiClose}
+          @click=${this.clearValue}
+          ><ha-icon-button>
+        ` : html``}
     </div>
     `;
   }
@@ -39,6 +48,10 @@ export class CustomColorSelector extends LitElement {
     fireEvent(this, 'value-changed', { value });
   }
 
+  clearValue() {
+    fireEvent(this, 'value-changed', { undefined });
+  }
+
   static get styles() {
     return css`
       #hex {
@@ -46,6 +59,7 @@ export class CustomColorSelector extends LitElement {
         align-items: center;
         padding: 0px 16px;
         margin: 4px 0px;
+        flex: 1;
       }
 
       .input-wrapper {
@@ -83,6 +97,16 @@ export class CustomColorSelector extends LitElement {
       #hex input {
         min-width: 200%;
         min-height: 200%;
+      }
+
+      .color-container {
+        display: flex;
+        align-items: center;
+      }
+
+      .clear-button {
+        --mdc-icon-size: 20px;
+        color: var(--input-dropdown-icon-color);
       }
     `;
   }

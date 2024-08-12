@@ -24,11 +24,7 @@ const SCHEMA = [
       },
       {
         name: 'color',
-        selector: { hex_color: {} },
-      },
-      {
-        name: 'use_color_thresholds',
-        selector: { boolean: {} },
+        selector: { hex_color: { clearable: true } },
       },
       {
         name: 'state_adaptive_color',
@@ -142,6 +138,12 @@ class EntityEditor extends LitElement {
       return html``;
     }
 
+    const isObject = typeof this.config === 'object';
+
+    const DATA = {
+      entity: this.config,
+    };
+
     return html`
       <div class="header">
         <div class="back-title">
@@ -154,7 +156,7 @@ class EntityEditor extends LitElement {
       </div>
       <ha-form
         .hass=${this.hass}
-        .data=${this.config}
+        .data=${isObject ? this.config : DATA}
         .schema=${SCHEMA}
         .computeLabel=${this.computeLabel}
         @value-changed=${this.valueChanged}
