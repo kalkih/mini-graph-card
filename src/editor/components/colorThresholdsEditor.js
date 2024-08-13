@@ -1,8 +1,9 @@
 import { css, html, LitElement } from 'lit-element';
-import { mdiArrowLeft, mdiClose, mdiPlus } from '@mdi/js';
+import { mdiClose } from '@mdi/js';
 import { fireEvent } from 'custom-card-helpers';
-import { localize } from '../localize/localize';
+import { localize } from '../../localize/localize';
 import './colorSelector';
+import './subPageHeader';
 
 const SCHEMA = [
   {
@@ -40,35 +41,22 @@ class ColorThresholdsEditor extends LitElement {
 
     if (!this.config) {
       return html`
-      <div class="header">
-        <div class="back-title">
-          <ha-icon-button
-              .path=${mdiArrowLeft}
-              @click=${this.goBack}
-          ></ha-icon-button>
-          <span>${localize('editor.edit_color_thresholds', this.hass)}</span>
-        </div>
-        <ha-icon-button
-          .path=${mdiPlus}
-          @click=${this.addRow}
-        ></ha-icon-button>
-      </div>`;
+      <mini-graph-card-subpage-header
+        adding=true
+        .name=${localize('editor.edit_color_thresholds', this.hass)}
+        @go-back=${this.goBack}
+        @add-row=${this.addRow}
+      ></mini-graph-card-subpage-header>
+      `;
     }
 
     return html`
-    <div class="header">
-      <div class="back-title">
-        <ha-icon-button
-            .path=${mdiArrowLeft}
-            @click=${this.goBack}
-        ></ha-icon-button>
-        <span>${localize('editor.edit_color_thresholds', this.hass)}</span>
-      </div>
-      <ha-icon-button
-        .path=${mdiPlus}
-        @click=${this.addRow}
-      ></ha-icon-button>
-    </div>
+    <mini-graph-card-subpage-header
+      adding=true
+      .name=${localize('editor.edit_color_thresholds', this.hass)}
+      @go-back=${this.goBack}
+      @add-row=${this.addRow}
+    ></mini-graph-card-subpage-header>
     <div class="thresholds">
     ${this.config.map((threshold, index) => html`
       <div class="threshold">
@@ -137,18 +125,6 @@ class ColorThresholdsEditor extends LitElement {
 
   static get styles() {
     return css`
-      .header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .back-title {
-        display: flex;
-        align-items: center;
-        font-size: 18px;
-      }
-
       .threshold-header {
         display: flex;
         gap: 10px;

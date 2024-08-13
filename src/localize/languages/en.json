@@ -2,6 +2,7 @@
   "editor": {
     "edit_entity": "Edit entity",
     "edit_color_thresholds": "Edit color thresholds",
+    "edit_state_map": "Edit state map",
     "form": {
       "card": {
         "hour24": "Display time in 24-hour format",
@@ -25,7 +26,14 @@
         "bar_spacing": "Bar spacing",
         "line_width": "Line width",
         "color_thresholds_transition": "Color thresholds transition",
-        "logarithmic": "Logarithmic"
+        "logarithmic": "Logarithmic",
+        "lower_bound": "Lower bound",
+        "upper_bound": "Upper bound",
+        "min_bound_range": "Min bound range",
+        "lower_bound_secondary": "Secondary lower bound",
+        "upper_bound_secondary": "Secondary upper bound",
+        "min_bound_range_secondary": "Min secondary bound range",
+        "value_factor": "Value factor"
       },
       "entity": {
         "color": "Color",

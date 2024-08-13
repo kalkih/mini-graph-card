@@ -57,7 +57,6 @@ export class CustomColorSelector extends LitElement {
       #hex {
         display: flex;
         align-items: center;
-        padding: 0px 16px;
         margin: 4px 0px;
         flex: 1;
       }
@@ -82,6 +81,7 @@ export class CustomColorSelector extends LitElement {
         line-height: var(--mdc-typography-body2-line-height, 1.25rem);
         font-weight: var(--mdc-typography-body2-font-weight, 400);
         flex-grow: 1;
+        padding-inline-start: 4px;
       }
 
       .overflow {

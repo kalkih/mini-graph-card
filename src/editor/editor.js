@@ -1,13 +1,17 @@
 import { fireEvent } from 'custom-card-helpers';
 import { LitElement, html, css } from 'lit-element';
-import './entitiesEditor';
-import './entityEditor';
-import './colorThresholdsEditor';
+import './components/entitiesEditor';
+import './components/entityEditor';
+import './components/colorThresholdsEditor';
+import './components/subPageLink';
+import './components/stateMapEditor';
 import {
-  mdiAlignHorizontalLeft, mdiChevronRight, mdiEye,
+  mdiAlignHorizontalLeft, mdiArrowExpandVertical, mdiEye,
   mdiFormatColorFill,
   mdiPalette,
+  mdiStateMachine,
 } from '@mdi/js';
+import { DEFAULT_SHOW } from '../const';
 import { localize } from '../localize/localize';
 
 const SCHEMA = [
@@ -39,14 +43,12 @@ const SCHEMA = [
             selector: { boolean: {} },
           },
           {
-            type: 'integer',
             name: 'hours_to_show',
-            default: 24,
+            selector: { number: { min: 1 } },
           },
           {
-            type: 'float',
             name: 'points_per_hour',
-            default: 0.5,
+            selector: { number: { min: 0.1, step: 0.1 } },
           },
           {
             name: 'aggregate_func',
@@ -79,16 +81,16 @@ const SCHEMA = [
             },
           },
           {
-            name: 'animate',
-            selector: { boolean: {} },
+            name: 'value_factor',
+            selector: { number: {} },
           },
           {
             name: 'bar_spacing',
-            selector: { number: {} },
+            selector: { number: { min: 0.1, step: 0.1 } },
           },
           {
             name: 'line_width',
-            selector: { number: {} },
+            selector: { number: { min: 0.1, step: 0.1 } },
           },
           {
             name: 'color_thresholds_transition',
@@ -103,8 +105,56 @@ const SCHEMA = [
             },
           },
           {
+            name: 'animate',
+            selector: { boolean: {} },
+          },
+          {
             name: 'logarithmic',
             selector: { boolean: {} },
+          },
+        ],
+      },
+      {
+        name: '',
+        type: 'expandable',
+        iconPath: mdiArrowExpandVertical,
+        title: 'Bounds',
+        schema: [
+          {
+            name: '',
+            type: 'grid',
+            schema: [
+              {
+                name: 'lower_bound',
+                selector: { text: {} },
+              },
+              {
+                name: 'upper_bound',
+                selector: { text: {} },
+              },
+              {
+                name: 'min_bound_range',
+                selector: { number: { step: 0.1 } },
+              },
+            ],
+          },
+          {
+            name: '',
+            type: 'grid',
+            schema: [
+              {
+                name: 'lower_bound_secondary',
+                selector: { text: {} },
+              },
+              {
+                name: 'upper_bound_secondary',
+                selector: { text: {} },
+              },
+              {
+                name: 'min_bound_range_secondary',
+                selector: { number: { step: 0.1 } },
+              },
+            ],
           },
         ],
       },
@@ -351,6 +401,18 @@ class MiniGraphCardEditor extends LitElement {
     }
 
     const data = {
+      hours_to_show: 24,
+      points_per_hour: 0.5,
+      aggregate_func: 'avg',
+      group_by: 'interval',
+      bar_spacing: 4,
+      line_width: 5,
+      color_thresholds_transition: 'smooth',
+      align_header: 'default',
+      align_icon: 'right',
+      align_state: 'left',
+      smoothing: true,
+      show: DEFAULT_SHOW,
       ...this._config,
     };
 
@@ -369,15 +431,16 @@ class MiniGraphCardEditor extends LitElement {
         .computeLabel=${this.computeLabel}
         @value-changed=${this.valueChanged}
       ></ha-form>
-      <div class="subElementLink"
+      <mini-graph-card-subpage-link
+        .name=${'Color thresholds'}
+        .icon=${mdiFormatColorFill}
         @click=${this.editColorThresholds}
-       >
-        <ha-svg-icon .path=${mdiFormatColorFill}></ha-svg-icon>
-        <div class="header">
-          Color thresholds
-        </div>
-        <ha-svg-icon .path=${mdiChevronRight}></ha-svg-icon>
-      </div>
+      ></mini-graph-card-subpage-link>
+      <mini-graph-card-subpage-link
+        .name=${'State map'}
+        .icon=${mdiStateMachine}
+        @click=${this.editStateMap}
+      ></mini-graph-card-subpage-link>
     </div>
     `;
   }
@@ -392,6 +455,14 @@ class MiniGraphCardEditor extends LitElement {
       return;
     }
     this.subElementEditorConfig = { type: 'thresholds', index: 0 };
+  }
+
+  editStateMap(ev) {
+    ev.stopPropagation();
+    if (!this._config || !this.hass) {
+      return;
+    }
+    this.subElementEditorConfig = { type: 'statemap', index: 0 };
   }
 
   renderSubElement() {
@@ -413,6 +484,15 @@ class MiniGraphCardEditor extends LitElement {
           @go-back=${this.goBack}
           @config-changed=${this.colorThresholdsChanged}
         ></color-thresholds-editor>
+        `;
+      case 'statemap':
+        return html`
+        <state-map-editor
+          .hass=${this.hass}
+          .config=${this._config.state_map}
+          @go-back=${this.goBack}
+          @config-changed=${this.stateMapChanged}
+        ></state-map-editor>
         `;
       default:
         return html``;
@@ -439,6 +519,15 @@ class MiniGraphCardEditor extends LitElement {
     }
 
     fireEvent(this, 'config-changed', { config: { ...this._config, color_thresholds: ev.detail } });
+  }
+
+  stateMapChanged(ev) {
+    ev.stopPropagation();
+    if (!this._config || !this.hass) {
+      return;
+    }
+
+    fireEvent(this, 'config-changed', { config: { ...this._config, state_map: ev.detail } });
   }
 
   editRow(ev) {
