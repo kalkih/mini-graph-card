@@ -13,39 +13,6 @@ const getMax = (arr, val) => arr.reduce((max, p) => (
 const getTime = (date, extra, locale = 'en-US') => date.toLocaleString(locale, { hour: 'numeric', minute: 'numeric', ...extra });
 const getMilli = hours => hours * 60 ** 2 * 10 ** 3;
 
-const interpolateColor = (a, b, factor) => {
-  const ah = +a.replace('#', '0x');
-  const ar = ah >> 16;
-  const ag = (ah >> 8) & 0xff;
-  const ab = ah & 0xff;
-  const bh = +b.replace('#', '0x');
-  const br = bh >> 16;
-  const bg = (bh >> 8) & 0xff;
-  const bb = bh & 0xff;
-  const rr = ar + factor * (br - ar);
-  const rg = ag + factor * (bg - ag);
-  const rb = ab + factor * (bb - ab);
-
-  return `#${(((1 << 24) + (rr << 16) + (rg << 8) + rb) | 0).toString(16).slice(1)}`;
-};
-
-const rgb_hex = (component) => {
-  const hex = Math.round(Math.min(Math.max(component, 0), 255)).toString(16);
-  return hex.length === 1 ? `0${hex}` : hex;
-};
-
-const convertHex2Rgb = (hex) => {
-  const hexstring = hex.replace('#', '');
-
-  return [
-    parseInt(hexstring.substring(0, 2), 16),
-    parseInt(hexstring.substring(2, 4), 16),
-    parseInt(hexstring.substring(4, 6), 16),
-  ];
-};
-
-const convertRgb2Hex = rgb => `#${rgb_hex(rgb[0])}${rgb_hex(rgb[1])}${rgb_hex(rgb[2])}`;
-
 const compress = data => lzStringCompress(JSON.stringify(data));
 
 const decompress = data => (typeof data === 'string' ? JSON.parse(lzStringDecompress(data)) : data);
@@ -61,7 +28,7 @@ const log = (message) => {
 };
 
 export {
-  getMin, getAvg, getMax, getTime, getMilli, interpolateColor, compress, decompress, log,
+  getMin, getAvg, getMax, getTime, getMilli, compress, decompress, log,
   getFirstDefinedItem,
   compareArray,
   convertHex2Rgb, convertRgb2Hex,
