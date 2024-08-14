@@ -14,6 +14,11 @@ class SubPageLink extends LitElement {
     return html`
     <div class="subElementLink"
       @click=${this.openPage}
+      @keydown=${this.openPage}
+      @focus=${this.focusChanged}
+      @blur=${this.focusChanged}
+      tabindex="0"
+      role="button"
       >
       <ha-svg-icon .path=${this.icon}></ha-svg-icon>
       <div class="header">
@@ -22,6 +27,13 @@ class SubPageLink extends LitElement {
       <ha-svg-icon .path=${mdiChevronRight}></ha-svg-icon>
     </div>
     `;
+  }
+
+  focusChanged(ev) {
+    this.shadowRoot.querySelector('.subElementLink').classList.toggle(
+      'focused',
+      ev.type === 'focus',
+    );
   }
 
   openPage() {
@@ -38,6 +50,11 @@ class SubPageLink extends LitElement {
         align-items: center;
         cursor: pointer;
         margin-top: 24px;
+      }
+
+      .subElementLink ha-svg-icon {
+        color: var(--secondary-text-color);
+        margin-left: 1rem;
       }
 
       .subElementLink > .header {

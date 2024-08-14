@@ -23,7 +23,7 @@ export class CustomColorSelector extends LitElement {
         <span class="label">${this.label}</span>
         <span class="input-wrapper">
           <div class="overflow">
-            <input
+            <input class=${this.value ? '' : 'empty'}
               id="color-input"
               @input=${this.valueChanged}
               type="color"
@@ -97,6 +97,18 @@ export class CustomColorSelector extends LitElement {
       #hex input {
         min-width: 200%;
         min-height: 200%;
+      }
+
+      #hex .empty::before {
+        background:
+          repeating-conic-gradient(
+           var(--secondary-background-color) 0 90deg,
+          var(--disabled-text-color) 0 180deg)
+          0 0/40px 40px round;
+        content: '';
+        min-width: 200%;
+        min-height: 200%;
+        display: block;
       }
 
       .color-container {
