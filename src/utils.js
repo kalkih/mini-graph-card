@@ -13,23 +13,6 @@ const getMax = (arr, val) => arr.reduce((max, p) => (
 const getTime = (date, extra, locale = 'en-US') => date.toLocaleString(locale, { hour: 'numeric', minute: 'numeric', ...extra });
 const getMilli = hours => hours * 60 ** 2 * 10 ** 3;
 
-const rgb_hex = (component) => {
-  const hex = Math.round(Math.min(Math.max(component, 0), 255)).toString(16);
-  return hex.length === 1 ? `0${hex}` : hex;
-};
-
-const convertHex2Rgb = (hex) => {
-  const hexstring = hex.replace('#', '');
-
-  return [
-    parseInt(hexstring.substring(0, 2), 16),
-    parseInt(hexstring.substring(2, 4), 16),
-    parseInt(hexstring.substring(4, 6), 16),
-  ];
-};
-
-const convertRgb2Hex = rgb => `#${rgb_hex(rgb[0])}${rgb_hex(rgb[1])}${rgb_hex(rgb[2])}`;
-
 const compress = data => lzStringCompress(JSON.stringify(data));
 
 const decompress = data => (typeof data === 'string' ? JSON.parse(lzStringDecompress(data)) : data);
@@ -48,5 +31,4 @@ export {
   getMin, getAvg, getMax, getTime, getMilli, compress, decompress, log,
   getFirstDefinedItem,
   compareArray,
-  convertHex2Rgb, convertRgb2Hex,
 };

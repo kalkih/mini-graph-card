@@ -24,7 +24,7 @@ import {
   compress, decompress,
   getFirstDefinedItem,
   compareArray,
-  log, convertRgb2Hex,
+  log,
 } from './utils';
 
 class MiniGraphCard extends LitElement {
@@ -646,7 +646,6 @@ class MiniGraphCard extends LitElement {
 
   computeColor(inState, i) {
     const { color_thresholds, line_color } = this.config;
-    const entity = this.config.entities[i];
     const state = Number(inState) || 0;
 
     let intColor;
@@ -667,16 +666,7 @@ class MiniGraphCard extends LitElement {
       }
     }
 
-    let hexColor;
-    if (entity !== undefined) {
-      if (Array.isArray(entity.color)) {
-        if (entity.color.length === 3) {
-          hexColor = convertRgb2Hex(entity.color);
-        }
-      }
-    }
-
-    return hexColor || entity.color || intColor || line_color[i] || line_color[0];
+    return this.config.entities[i].color || intColor || line_color[i] || line_color[0];
   }
 
   computeName(index) {
