@@ -1,4 +1,4 @@
-import { mdiPencil, mdiClose, mdiDrag } from '@mdi/js';
+import { mdiPencil, mdiDrag } from '@mdi/js';
 import { fireEvent } from 'custom-card-helpers';
 import { LitElement, html, css } from 'lit-element';
 
@@ -49,12 +49,6 @@ class EntitiesEditor extends LitElement {
             @value-changed=${this.valueChanged}
           ></ha-form>
           <ha-icon-button
-            .label=${this.hass.localize('ui.components.entity.entity-picker.clear')}
-            .path=${mdiClose}
-            .index=${index}
-            @click=${this.removeRow}
-          ></ha-icon-button>
-          <ha-icon-button
             .label=${this.hass.localize('ui.components.entity.entity-picker.edit')}
             .path=${mdiPencil}
             .index=${index}
@@ -74,19 +68,6 @@ class EntitiesEditor extends LitElement {
       @value-changed=${this.addEntity}
     ></ha-form>
     `;
-  }
-
-  removeRow(ev) {
-    ev.stopPropagation();
-    if (!this.entities || !this.hass) {
-      return;
-    }
-    const index = (ev.currentTarget).index || '';
-    const newConfigEntities = this.entities.concat();
-
-    newConfigEntities.splice(index, 1);
-
-    fireEvent(this, 'config-changed', newConfigEntities);
   }
 
   rowMoved(ev) {
@@ -124,7 +105,9 @@ class EntitiesEditor extends LitElement {
     const index = (ev.target).index || 0;
     const newConfigEntities = this.entities.concat();
 
-    if (typeof newConfigEntities[index] === 'object') {
+    if (value === '' || value === undefined) {
+      newConfigEntities.splice(index, 1);
+    } else if (typeof newConfigEntities[index] === 'object') {
       newConfigEntities[index] = {
         ...newConfigEntities[index],
         entity: value || '',
@@ -134,7 +117,6 @@ class EntitiesEditor extends LitElement {
         entity: value || '',
       };
     }
-
 
     fireEvent(this, 'config-changed', newConfigEntities);
   }
