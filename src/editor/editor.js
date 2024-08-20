@@ -412,8 +412,8 @@ class MiniGraphCardEditor extends LitElement {
       align_icon: 'right',
       align_state: 'left',
       smoothing: true,
-      show: DEFAULT_SHOW,
       ...this._config,
+      show: { ...DEFAULT_SHOW, ...this._config.show },
     };
 
     return html`
