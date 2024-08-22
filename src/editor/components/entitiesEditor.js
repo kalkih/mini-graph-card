@@ -27,6 +27,13 @@ class EntitiesEditor extends LitElement {
     return this.hass.localize(`ui.panel.lovelace.editor.card.generic.${schema.name}`);
   }
 
+  computeHelper(schema, data) {
+    if (schema.selector.entity) {
+      return data.entity;
+    }
+    return '';
+  }
+
   render() {
     if (!this.entities || !this.hass) {
       return;
@@ -46,9 +53,10 @@ class EntitiesEditor extends LitElement {
             .schema=${SCHEMA}
             .index=${index}
             .computeLabel=${this.computeLabel}
+            .computeHelper=${schema => this.computeHelper(schema, typeof entity === 'object' ? entity : { entity })}
             @value-changed=${this.valueChanged}
           ></ha-form>
-          <ha-icon-button
+          <ha-icon-button class="edit-entity"
             .label=${this.hass.localize('ui.components.entity.entity-picker.edit')}
             .path=${mdiPencil}
             .index=${index}
@@ -136,10 +144,17 @@ class EntitiesEditor extends LitElement {
       .handle {
         cursor: grab;
         padding-inline-end: 8px;
+        align-self: flex-start;
+        margin: 16px 0;
       }
 
       .add-item {
         margin-bottom: 24px;
+      }
+
+      .edit-entity {
+        align-self: flex-start;
+        margin: 4px 0px;
       }
     `;
   }

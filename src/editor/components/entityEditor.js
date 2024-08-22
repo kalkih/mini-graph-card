@@ -134,6 +134,13 @@ class EntityEditor extends LitElement {
     }
   }
 
+  computeHelper(schema, data) {
+    if (schema.name === 'entity') {
+      return data.entity;
+    }
+    return '';
+  }
+
   render() {
     if (!this.config || !this.hass) {
       return html``;
@@ -155,6 +162,7 @@ class EntityEditor extends LitElement {
         .data=${isObject ? this.config : DATA}
         .schema=${SCHEMA}
         .computeLabel=${this.computeLabel}
+        .computeHelper=${schema => this.computeHelper(schema, isObject ? this.config : DATA)}
         @value-changed=${this.valueChanged}
       ></ha-form>
       `;
