@@ -1,4 +1,6 @@
 extends: airbnb-base
+env:
+  es2020: true
 rules:
   no-else-return: 0
   no-underscore-dangle: 0
