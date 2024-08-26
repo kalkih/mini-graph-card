@@ -244,7 +244,7 @@ class MiniGraphCard extends LitElement {
     const name = this.tooltip.entity !== undefined
       ? this.computeName(this.tooltip.entity)
       : this.config.name || this.computeName(0);
-    const color = this.config.show.name_adaptive_color ? `opacity: 1; color: ${this.computeColor(this.tooltip.value !== undefined ? this.tooltip.value : this.getEntityState(0), this.tooltip.entity || 0)}};` : '';
+    const color = this.config.show.name_adaptive_color ? `opacity: 1; color: ${this.computeColor(this.tooltip.value !== undefined ? this.tooltip.value : this.getEntityState(0), this.tooltip.entity || 0)};` : '';
 
     return html`
       <div class="name flex">
