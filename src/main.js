@@ -819,10 +819,16 @@ class MiniGraphCard extends LitElement {
 
       // Doesn't matter if minBoundRange is NaN because this will be false if so
       if (diff > 0) {
-        boundary = [
-          boundary[0] - diff / 2,
-          boundary[1] + diff / 2,
-        ];
+        if (min !== undefined && max === undefined) {
+          boundary[1] += diff;
+        } else if (max !== undefined && min === undefined) {
+          boundary[0] -= diff;
+        } else {
+          boundary = [
+            boundary[0] - diff / 2,
+            boundary[1] + diff / 2,
+          ];
+        }
       }
     }
 
