@@ -821,7 +821,7 @@ class MiniGraphCard extends LitElement {
       if (diff > 0) {
         const weights = [
           min !== undefined && min[0] !== '~' || max === undefined ? 0 : 1,
-          max !== undefined && max[0] !== '~' ? 0 : (min === undefined ? 0 : 1),
+          max !== undefined && max[0] !== '~' || min === undefined ? 0 : 1,
         ];
         const sum = weights[0] + weights[1];
         if (sum > 0) {
