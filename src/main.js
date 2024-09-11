@@ -820,7 +820,7 @@ class MiniGraphCard extends LitElement {
       // Doesn't matter if minBoundRange is NaN because this will be false if so
       if (diff > 0) {
         const weights = [
-          min !== undefined && min[0] !== '~' ? 0 : (max === undefined ? 0 : 1),
+          min !== undefined && min[0] !== '~' || max === undefined ? 0 : 1,
           max !== undefined && max[0] !== '~' ? 0 : (min === undefined ? 0 : 1),
         ];
         const sum = weights[0] + weights[1];
