@@ -48,6 +48,9 @@ class MiniGraphCard extends LitElement {
     this.stateChanged = false;
     this.initial = true;
     this._md5Config = undefined;
+    this.sections = this.checkSections();
+    this.graphHeight = 100;
+    this.graphWidth = 500;
   }
 
   static get styles() {
@@ -105,12 +108,17 @@ class MiniGraphCard extends LitElement {
     this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
     const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
 
+    const layout = this.getCurrentLayout();
+
+    this.graphWidth = this.sections ? layout.grid_columns * 120 : 500;
+    this.graphHeight = this.sections ? this.getGraphHeightSections() * 56 : this.config.height;
+
     if (!this.Graph || entitiesChanged) {
       if (this._hass) this.hass = this._hass;
       this.Graph = this.config.entities.map(
         entity => new Graph(
-          500,
-          this.config.height,
+          this.graphWidth,
+          this.graphHeight,
           [this.config.show.fill ? 0 : this.config.line_width, this.config.line_width],
           this.config.hours_to_show,
           this.config.points_per_hour,
@@ -125,6 +133,68 @@ class MiniGraphCard extends LitElement {
         ),
       );
     }
+  }
+
+  checkSections() {
+    let root = document.querySelector('home-assistant');
+    root = root && root.shadowRoot;
+    root = root && root.querySelector('home-assistant-main');
+    root = root && root.shadowRoot;
+    root = root && root.querySelector('ha-drawer');
+    root = root && root.querySelector('partial-panel-resolver');
+    root = root && root.shadowRoot || root;
+    root = root && root.querySelector('ha-panel-lovelace');
+    root = root && root.shadowRoot;
+    root = root && root.querySelector('hui-root');
+    if (root) {
+      const ll = root.lovelace;
+      ll.current_view = root.___curView;
+      const panelType = ll.rawConfig.views[ll.current_view].type;
+      return panelType === 'sections';
+    }
+    return false;
+  }
+
+  getCurrentLayout() {
+    const layout = this.getLayoutOptions();
+    const layoutConfigured = this.config.layout_options !== undefined;
+    const columns = Math.max(layoutConfigured
+      ? this.config.layout_options.grid_columns : layout.grid_columns, layout.grid_min_columns);
+    const rows = Math.max(layoutConfigured
+      ? this.config.layout_options.grid_rows : layout.grid_rows, layout.grid_min_rows);
+    return { grid_columns: columns, grid_rows: rows };
+  }
+
+  getLayoutSize(layout) {
+    if (!this.sections) {
+      return '';
+    }
+    if (layout.grid_rows === 2) {
+      return 'small';
+    }
+    return '';
+  }
+
+  getGraphHeightSections() {
+    const layout = this.getCurrentLayout();
+    if (!this.config.show.name
+      && !this.config.show.state
+      && !this.config.show.icon
+      && this.config.show.extrema) {
+      return Math.max(layout.grid_rows - 1, 1);
+    }
+    if (!this.config.show.name
+      && !this.config.show.state
+      && !this.config.show.icon) {
+      return layout.grid_rows;
+    }
+    if (this.config.show.extrema) {
+      return Math.max(layout.grid_rows - 3, 1);
+    }
+    if (layout.grid_rows >= 3) {
+      return Math.max(layout.grid_rows - 2, 1);
+    }
+    return Math.max(layout.grid_rows - 1, 1);
   }
 
   connectedCallback() {
@@ -181,9 +251,10 @@ class MiniGraphCard extends LitElement {
     if (this.config.entities.some((_, index) => this.entity[index] === undefined)) {
       return this.renderWarnings();
     }
+    const layout = this.getCurrentLayout();
     return html`
       <ha-card
-        class="flex"
+        class="flex ${this.sections ? 'sections' : ''} ${this.getLayoutSize(layout)}"
         ?group=${config.group}
         ?fill=${config.show.graph && config.show.fill}
         ?points=${config.show.points === 'hover'}
@@ -509,7 +580,7 @@ class MiniGraphCard extends LitElement {
   renderSvg() {
     const { height } = this.config;
     return svg`
-      <svg width='100%' height=${height !== 0 ? '100%' : 0} viewBox='0 0 500 ${height}'
+      <svg width='100%' height=${height !== 0 && this.sections ? '100%' : 0} viewBox='0 0 ${this.graphWidth} ${this.graphHeight}'
         @click=${e => e.stopPropagation()}>
         <g>
           <defs>
@@ -1012,6 +1083,62 @@ class MiniGraphCard extends LitElement {
         if (!this.updating) this.updateData();
       }, interval * ONE_HOUR);
     }
+  }
+
+  getLayoutOptions() {
+    if (!this.config.show.state
+      && this.config.show.extrema) {
+      return {
+        grid_rows: 2,
+        grid_columns: 2,
+        grid_min_rows: 3,
+        grid_min_columns: 2,
+      };
+    }
+    if (!this.config.show.name
+      && !this.config.show.state
+      && !this.config.show.icon) {
+      return {
+        grid_rows: 2,
+        grid_columns: 2,
+        grid_min_rows: 1,
+        grid_min_columns: 2,
+      };
+    }
+    if (!this.config.show.name
+      && !this.config.show.state
+      && !this.config.show.icon
+      && this.config.show.extrema) {
+      return {
+        grid_rows: 2,
+        grid_columns: 2,
+        grid_min_rows: 2,
+        grid_min_columns: 2,
+      };
+    }
+    if (this.config.show.extrema
+      && !this.config.show.fill) {
+      return {
+        grid_rows: 5,
+        grid_columns: 2,
+        grid_min_rows: 5,
+        grid_min_columns: 2,
+      };
+    }
+    if (this.config.show.extrema) {
+      return {
+        grid_rows: 4,
+        grid_columns: 2,
+        grid_min_rows: 4,
+        grid_min_columns: 2,
+      };
+    }
+    return {
+      grid_rows: 2,
+      grid_columns: 2,
+      grid_min_rows: 2,
+      grid_min_columns: 2,
+    };
   }
 
   getCardSize() {

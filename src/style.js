@@ -12,6 +12,10 @@ const style = css`
     position: relative;
     overflow: hidden;
   }
+  ha-card.sections {
+    min-height: calc((var(--row-size, 1)*(var(--row-height) + var(--row-gap))) - var(--row-gap));
+    max-height: calc((var(--row-size, 1)*(var(--row-height) + var(--row-gap))) - var(--row-gap));
+  }
   ha-card > div {
     padding: 0px 16px 16px 16px;
   }
@@ -48,6 +52,9 @@ const style = css`
   ha-card[fill] .graph__legend {
     order: -1;
     padding: 0 16px 8px 16px;
+  }
+  ha-card[fill].sections .graph__legend {
+    padding: 0 16px 0px 16px;
   }
   ha-card[fill] .info {
     padding-bottom: 16px;
@@ -119,6 +126,12 @@ const style = css`
     font-weight: 300;
     justify-content: space-between;
     flex-wrap: nowrap;
+  }
+  .sections.small .states {
+    padding: 0px 16px 0px 16px;
+  }
+  .sections.small .header {
+    padding: 0px 16px 0px 16px;
   }
   .states .icon {
     align-self: center;
@@ -238,6 +251,10 @@ const style = css`
     margin-top: auto;
     width: 100%;
   }
+  .sections .graph {
+    position: absolute;
+    bottom: 0;
+  }
   .graph__container {
     display: flex;
     flex-direction: row;
@@ -348,12 +365,18 @@ const style = css`
     padding-top: 16px;
     flex-wrap: wrap;
   }
+  .sections .graph__legend {
+    padding-top: 8px;
+  }
   .graph__legend__item {
     cursor: pointer;
     display: flex;
     min-width: 0;
     margin: .4em;
     align-items: center
+  }
+  .sections .graph__legend__item {
+    margin: .4em .4em 0px .4em;
   }
   .graph__legend__item span {
     opacity: .75;
