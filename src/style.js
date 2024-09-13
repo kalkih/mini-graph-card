@@ -243,6 +243,9 @@ const style = css`
     left: initial;
     right: 0;
   }
+  .sections.small .state__time {
+    display: none;
+  }
   .graph {
     align-self: flex-end;
     box-sizing: border-box;
