@@ -580,7 +580,7 @@ class MiniGraphCard extends LitElement {
   renderSvg() {
     const { height } = this.config;
     return svg`
-      <svg width='100%' height=${height !== 0 && this.sections ? '100%' : 0} viewBox='0 0 ${this.graphWidth} ${this.graphHeight}'
+      <svg width='100%' height=${height !== 0 || this.sections ? '100%' : 0} viewBox='0 0 ${this.graphWidth} ${this.graphHeight}'
         @click=${e => e.stopPropagation()}>
         <g>
           <defs>
