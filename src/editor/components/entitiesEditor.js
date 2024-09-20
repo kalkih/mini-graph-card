@@ -35,8 +35,18 @@ class EntitiesEditor extends LitElement {
   }
 
   render() {
-    if (!this.entities || !this.hass) {
-      return;
+    if (!this.entities) {
+      return html`
+      <div class="entity add-item">
+      <ha-form
+        .hass=${this.hass}
+        .data=${this.newEntity}
+        .schema=${SCHEMA}
+        .computeLabel=${this.computeLabel}
+        @value-changed=${this.addEntity}
+      ></ha-form>
+      </div>
+      `;
     }
 
     return html`
@@ -75,6 +85,7 @@ class EntitiesEditor extends LitElement {
       .computeLabel=${this.computeLabel}
       @value-changed=${this.addEntity}
     ></ha-form>
+    </div>
     `;
   }
 
@@ -94,6 +105,10 @@ class EntitiesEditor extends LitElement {
   addEntity(ev) {
     ev.stopPropagation();
     const value = ev.detail.value || '';
+    if (this.entities === undefined) {
+      fireEvent(this, 'config-changed', [value]);
+      return;
+    }
     if (value === '' || value.entity === undefined) {
       return;
     }

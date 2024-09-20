@@ -1,6 +1,7 @@
 import { mdiClose } from '@mdi/js';
 import { fireEvent } from 'custom-card-helpers';
 import { css, html, LitElement } from 'lit-element';
+import { isValidHex, convertColorNameToHex } from '../editorUtils';
 
 export const colorSelector = {
   hex_color: {},
@@ -17,6 +18,8 @@ export class CustomColorSelector extends LitElement {
   }
 
   render() {
+    const isHex = isValidHex(this.value);
+    const colorValue = isHex ? this.value : convertColorNameToHex(this.value);
     return html`
     <div class="color-container">
       <label id="hex" for="color-input">
@@ -27,7 +30,7 @@ export class CustomColorSelector extends LitElement {
               id="color-input"
               @input=${this.valueChanged}
               type="color"
-              .value=${this.value ? this.value : '#000000'}>
+              .value=${colorValue || '#000000'}>
           </div>
         </span>
         </label>

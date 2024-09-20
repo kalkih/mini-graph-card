@@ -1,121 +1,8 @@
-import { mdiEye } from '@mdi/js';
 import { fireEvent } from 'custom-card-helpers';
 import { LitElement, html } from 'lit-element';
-import { localize } from '../../localize/localize';
+import { ENTITYSCHEMA } from '../editorConst';
 import './colorSelector';
 import './subPageHeader';
-
-const SCHEMA = [
-  {
-    name: '',
-    type: 'grid',
-    schema: [
-      {
-        name: 'entity',
-        selector: { entity: {} },
-      },
-      {
-        name: 'attribute',
-        selector: { attribute: {} },
-        context: { filter_entity: 'entity' },
-      },
-      {
-        name: 'name',
-        selector: { text: {} },
-      },
-      {
-        name: 'unit',
-        selector: { text: {} },
-      },
-      {
-        name: 'color',
-        selector: { hex_color: { clearable: true } },
-      },
-      {
-        name: 'state_adaptive_color',
-        selector: { boolean: {} },
-      },
-      {
-        name: 'aggregate_func',
-        selector: {
-          select: {
-            options: [
-              { label: 'Average', value: 'avg' },
-              { label: 'Median', value: 'median' },
-              { label: 'Minimum', value: 'min' },
-              { label: 'Maximum', value: 'max' },
-              { label: 'First', value: 'first' },
-              { label: 'Last', value: 'last' },
-              { label: 'Sum', value: 'sum' },
-            ],
-            mode: 'dropdown',
-          },
-        },
-      },
-    ],
-  },
-  {
-    name: '',
-    type: 'expandable',
-    iconPath: mdiEye,
-    title: 'Display',
-    schema: [
-      {
-        name: '',
-        type: 'grid',
-        schema: [
-          {
-            name: 'show_state',
-            selector: { boolean: {} },
-          },
-          {
-            name: 'show_indicator',
-            selector: { boolean: {} },
-          },
-          {
-            name: 'show_graph',
-            selector: { boolean: {} },
-          },
-          {
-            name: 'show_line',
-            selector: { boolean: {} },
-          },
-          {
-            name: 'show_fill',
-            selector: { boolean: {} },
-          },
-          {
-            name: 'show_points',
-            selector: { boolean: {} },
-          },
-          {
-            name: 'show_legend',
-            selector: { boolean: {} },
-          },
-          {
-            name: 'show_adaptive_color',
-            selector: { boolean: {} },
-          },
-          {
-            name: 'smoothing',
-            selector: { boolean: {} },
-          },
-        ],
-      },
-    ],
-  },
-  {
-    name: 'y_axis',
-    selector: {
-      select: {
-        options: [
-          { label: 'Primary', value: 'primary' },
-          { label: 'Secondary', value: 'secondary' },
-        ],
-      },
-    },
-  },
-];
 
 class EntityEditor extends LitElement {
   static get properties() {
@@ -127,11 +14,10 @@ class EntityEditor extends LitElement {
 
   computeLabel(schema) {
     const localized = this.hass.localize(`ui.panel.lovelace.editor.card.generic.${schema.name}`);
-    if (localized === '') {
-      return localize(`editor.form.entity.${schema.name}`, this.hass);
-    } else {
+    if (localized !== '') {
       return localized;
     }
+    return this.hass.localize(`ui.panel.lovelace.editor.card.mgc.${schema.name}`);
   }
 
   computeHelper(schema, data) {
@@ -154,13 +40,13 @@ class EntityEditor extends LitElement {
 
     return html`
       <mini-graph-card-subpage-header
-        .name=${localize('editor.edit_entity', this.hass)}
+        .name=${this.hass.localize('ui.panel.lovelace.editor.card.mgc.edit_entity')}
         @go-back=${this.goBack}
       ></mini-graph-card-subpage-header>
       <ha-form
         .hass=${this.hass}
         .data=${isObject ? this.config : DATA}
-        .schema=${SCHEMA}
+        .schema=${ENTITYSCHEMA}
         .computeLabel=${this.computeLabel}
         .computeHelper=${schema => this.computeHelper(schema, isObject ? this.config : DATA)}
         @value-changed=${this.valueChanged}

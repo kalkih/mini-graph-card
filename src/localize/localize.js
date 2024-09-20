@@ -6,22 +6,17 @@ const languages = {
 
 const DEFAULT_LANG = 'en';
 
-function getTranslatedString(key, lang) {
-  try {
-    return key.split('.').reduce((o, i) => o[i], languages[lang]);
-  } catch (_) {
-    return undefined;
-  }
-}
-
-export default function localize(key, hass) {
+export default function setupTranslations(hass) {
   const lang = hass.locale.language || DEFAULT_LANG;
+  const hassObject = hass;
+  const resources = hassObject.resources[hass.locale.language];
+  const languageObject = languages[lang] || languages[DEFAULT_LANG];
 
-  let translated = getTranslatedString(key, lang);
-  if (!translated) {
-    translated = getTranslatedString(key, DEFAULT_LANG);
-  }
-  return translated || key;
+  Object.entries(languageObject).forEach(([key, value]) => {
+    if (key !== 'default') {
+      resources[`ui.panel.lovelace.editor.card.mgc.${key}`] = value;
+    }
+  });
 }
 
-export { localize };
+export { setupTranslations };

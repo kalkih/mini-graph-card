@@ -16,7 +16,6 @@ import {
   UPDATE_PROPS,
   X, Y, V,
   ONE_HOUR,
-  DEFAULT_SHOW,
 } from './const';
 import {
   getMin, getAvg, getMax,
@@ -131,14 +130,6 @@ class MiniGraphCard extends LitElement {
         ),
       );
     }
-  }
-
-  static getStubConfig() {
-    return {
-      entities: [],
-      color_thresholds: [],
-      show: DEFAULT_SHOW,
-    };
   }
 
   connectedCallback() {
@@ -778,7 +769,6 @@ class MiniGraphCard extends LitElement {
           if (config.show.points && (config.entities[i].show_points !== false)) {
             this.points[i] = this.Graph[i].getPoints();
           }
-
           if (config.color_thresholds.length > 0 && !config.entities[i].color)
             this.gradient[i] = this.Graph[i].computeGradient(
               config.color_thresholds, this.config.logarithmic,
