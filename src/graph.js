@@ -45,6 +45,10 @@ export default class Graph {
 
   set history(data) { this._history = data; }
 
+  setHeight(newHeight) { this.height = newHeight - this.margin[Y] * 4; }
+
+  setWidth(newWidth) { this.width = newWidth - this.margin[X] * 2; }
+
   update(history = undefined) {
     if (history) {
       this._history = history;

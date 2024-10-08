@@ -4,6 +4,7 @@ const style = css`
   :host {
     display: flex;
     flex-direction: column;
+    height: 100%;
   }
   ha-card {
     flex-direction: column;
@@ -13,8 +14,6 @@ const style = css`
     overflow: hidden;
   }
   ha-card.sections {
-    min-height: calc((var(--row-size, 1)*(var(--row-height) + var(--row-gap))) - var(--row-gap));
-    max-height: calc((var(--row-size, 1)*(var(--row-height) + var(--row-gap))) - var(--row-gap));
   }
   ha-card > div {
     padding: 0px 16px 16px 16px;
@@ -52,9 +51,6 @@ const style = css`
   ha-card[fill] .graph__legend {
     order: -1;
     padding: 0 16px 8px 16px;
-  }
-  ha-card[fill].sections .graph__legend {
-    padding: 0 16px 0px 16px;
   }
   ha-card[fill] .info {
     padding-bottom: 16px;
