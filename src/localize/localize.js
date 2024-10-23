@@ -2,6 +2,7 @@ import * as en from './languages/en.json';
 
 const languages = {
   en,
+  de,
 };
 
 const DEFAULT_LANG = 'en';
