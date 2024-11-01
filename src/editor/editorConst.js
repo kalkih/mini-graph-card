@@ -7,10 +7,10 @@ import {
 
 const MAINSCHEMA = [
   {
-    name: '',
+    name: 'appearance',
     type: 'expandable',
     iconPath: mdiPalette,
-    title: 'Appearance',
+    flatten: true,
     schema: [
       {
         name: '',
@@ -53,8 +53,11 @@ const MAINSCHEMA = [
                   { label: 'First', value: 'first' },
                   { label: 'Last', value: 'last' },
                   { label: 'Sum', value: 'sum' },
+                  { label: 'Delta', value: 'delta' },
+                  { label: 'Diff', value: 'diff' },
                 ],
                 mode: 'dropdown',
+                translation_key: 'aggregate_func',
               },
             },
           },
@@ -68,6 +71,7 @@ const MAINSCHEMA = [
                   { label: 'Hour', value: 'hour' },
                 ],
                 mode: 'dropdown',
+                translation_key: 'group_by',
               },
             },
           },
@@ -92,6 +96,7 @@ const MAINSCHEMA = [
                   { label: 'Hard', value: 'hard' },
                 ],
                 mode: 'dropdown',
+                translation_key: 'transition',
               },
             },
           },
@@ -106,10 +111,10 @@ const MAINSCHEMA = [
         ],
       },
       {
-        name: '',
+        name: 'bounds',
         type: 'expandable',
         iconPath: mdiArrowExpandVertical,
-        title: 'Bounds',
+        flatten: true,
         schema: [
           {
             name: '',
@@ -150,10 +155,10 @@ const MAINSCHEMA = [
         ],
       },
       {
-        name: '',
+        name: 'alignment',
         type: 'expandable',
         iconPath: mdiAlignHorizontalLeft,
-        title: 'Alignment',
+        flatten: true,
         schema: [
           {
             name: '',
@@ -170,6 +175,7 @@ const MAINSCHEMA = [
                       { label: 'Center', value: 'center' },
                     ],
                     mode: 'dropdown',
+                    translation_key: 'alignment',
                   },
                 },
               },
@@ -183,6 +189,7 @@ const MAINSCHEMA = [
                       { label: 'State', value: 'state' },
                     ],
                     mode: 'dropdown',
+                    translation_key: 'alignment',
                   },
                 },
               },
@@ -196,6 +203,7 @@ const MAINSCHEMA = [
                       { label: 'Center', value: 'center' },
                     ],
                     mode: 'dropdown',
+                    translation_key: 'alignment',
                   },
                 },
               },
@@ -207,7 +215,6 @@ const MAINSCHEMA = [
         name: 'show',
         type: 'expandable',
         iconPath: mdiEye,
-        title: 'Display',
         schema: [
           {
             name: '',
@@ -233,6 +240,7 @@ const MAINSCHEMA = [
                       { label: 'Last', value: 'last' },
                     ],
                     mode: 'dropdown',
+                    translation_key: 'state',
                   },
                 },
               },
@@ -246,6 +254,7 @@ const MAINSCHEMA = [
                       { label: 'Hide', value: 'hide' },
                     ],
                     mode: 'dropdown',
+                    translation_key: 'graph',
                   },
                 },
               },
@@ -259,6 +268,7 @@ const MAINSCHEMA = [
                       { label: 'Fade', value: 'fade' },
                     ],
                     mode: 'dropdown',
+                    translation_key: 'fill',
                   },
                 },
               },
@@ -272,6 +282,7 @@ const MAINSCHEMA = [
                       { label: 'Hover', value: 'hover' },
                     ],
                     mode: 'dropdown',
+                    translation_key: 'points',
                   },
                 },
               },
@@ -285,12 +296,12 @@ const MAINSCHEMA = [
                       { label: 'Hover', value: 'hover' },
                     ],
                     mode: 'dropdown',
+                    translation_key: 'labels',
                   },
                 },
               },
               {
                 name: 'labels_secondary',
-                default: 'burba',
                 selector: {
                   select: {
                     options: [
@@ -299,6 +310,7 @@ const MAINSCHEMA = [
                       { label: 'Hover', value: 'hover' },
                     ],
                     mode: 'dropdown',
+                    translation_key: 'labels',
                   },
                 },
               },
@@ -436,18 +448,21 @@ const ENTITYSCHEMA = [
               { label: 'First', value: 'first' },
               { label: 'Last', value: 'last' },
               { label: 'Sum', value: 'sum' },
+              { label: 'Delta', value: 'delta' },
+              { label: 'Diff', value: 'diff' },
             ],
             mode: 'dropdown',
+            translation_key: 'aggregate_func',
           },
         },
       },
     ],
   },
   {
-    name: '',
+    name: 'show',
     type: 'expandable',
     iconPath: mdiEye,
-    title: 'Display',
+    flatten: true,
     schema: [
       {
         name: '',
@@ -508,6 +523,7 @@ const ENTITYSCHEMA = [
           { label: 'Primary', value: 'primary' },
           { label: 'Secondary', value: 'secondary' },
         ],
+        translation_key: 'y_axis',
       },
     },
   },

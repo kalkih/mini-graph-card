@@ -45,5 +45,87 @@
   "show_legend": "Show legends",
   "show_adaptive_color": "Show adaptive color",
   "smoothing": "Smoothing",
-  "y_axis": "Axis"
+  "y_axis": "Axis",
+  "appearance": "Appearance",
+  "bounds": "Bounds",
+  "alignment": "Alignment",
+  "show": "Display",
+  "values": {
+    "aggregate_func": {
+      "options": {
+        "avg": "Average",
+        "median": "Median",
+        "min": "Minimum",
+        "max": "Maximum",
+        "first": "First",
+        "last": "Last",
+        "sum": "Sum",
+        "delta": "Delta",
+        "diff": "Diff"
+      }
+    },
+    "group_by": {
+      "options": {
+        "interval": "Interval",
+        "date": "Date",
+        "hour": "Hour"
+      }
+    },
+    "transition": {
+      "options": {
+        "smooth": "Smooth",
+        "hard": "Hard"
+      }
+    },
+    "alignment": {
+      "options": {
+        "default": "Default",
+        "left": "Left",
+        "right": "Right",
+        "center": "Center",
+        "state": "State"
+      }
+    },
+    "state": {
+      "options": {
+        "show": "Show",
+        "hide": "Hide",
+        "last": "Last"
+      }
+    },
+    "graph": {
+      "options": {
+        "line": "Line",
+        "bar": "Bar",
+        "hide": "Hide"
+      }
+    },
+    "fill": {
+      "options": {
+        "show": "Show",
+        "hide": "Hide",
+        "fade": "Fade"
+      }
+    },
+    "points": {
+      "options": {
+        "show": "Show",
+        "hide": "Hide",
+        "hover": "Hover"
+      }
+    },
+    "labels": {
+      "options": {
+        "show": "Show",
+        "hide": "Hide",
+        "hover": "Hover"
+      }
+    },
+    "y_axis": {
+      "options":{
+        "primary": "Primary",
+        "secondary": "Secondary"
+      }
+    }
+  }
 }

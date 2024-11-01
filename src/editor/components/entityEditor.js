@@ -20,6 +20,14 @@ class EntityEditor extends LitElement {
     return this.hass.localize(`ui.panel.lovelace.editor.card.mgc.${schema.name}`);
   }
 
+  localizeValue(key) {
+    const localized = this.hass.localize(`ui.panel.lovelace.editor.card.mgc.values.${key}`);
+    if (localized !== '') {
+      return localized;
+    }
+    return key;
+  }
+
   computeHelper(schema, data) {
     if (schema.name === 'entity') {
       return data.entity;
@@ -49,6 +57,7 @@ class EntityEditor extends LitElement {
         .schema=${ENTITYSCHEMA}
         .computeLabel=${this.computeLabel}
         .computeHelper=${schema => this.computeHelper(schema, isObject ? this.config : DATA)}
+        .localizeValue=${this.localizeValue}
         @value-changed=${this.valueChanged}
       ></ha-form>
       `;

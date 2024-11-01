@@ -72,11 +72,23 @@ class MiniGraphCardEditor extends LitElement {
   }
 
   computeLabel(schema) {
-    const localized = this.hass.localize(`ui.panel.lovelace.editor.card.generic.${schema.name}`);
+    let localized = this.hass.localize(`ui.panel.lovelace.editor.card.generic.${schema.name}`);
     if (localized !== '') {
       return localized;
     }
-    return this.hass.localize(`ui.panel.lovelace.editor.card.mgc.${schema.name}`);
+    localized = this.hass.localize(`ui.panel.lovelace.editor.card.mgc.${schema.name}`);
+    if (localized !== '') {
+      return localized;
+    }
+    return schema.name;
+  }
+
+  localizeValue(key) {
+    const localized = this.hass.localize(`ui.panel.lovelace.editor.card.mgc.values.${key}`);
+    if (localized !== '') {
+      return localized;
+    }
+    return key;
   }
 
   render() {
@@ -107,6 +119,7 @@ class MiniGraphCardEditor extends LitElement {
         .data=${DATA}
         .schema=${MAINSCHEMA}
         .computeLabel=${this.computeLabel}
+        .localizeValue=${this.localizeValue}
         @value-changed=${this.valueChanged}
       ></ha-form>
     </div>
