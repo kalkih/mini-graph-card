@@ -166,6 +166,8 @@ export default class Graph {
       } else if (stop.value < this._min && arr[index - 1]) {
         const factor = (arr[index - 1].value - this._min) / (arr[index - 1].value - stop.value);
         color = interpolateColor(arr[index - 1].color, stop.color, factor);
+      } else {
+        color = stop.color;
       }
       let offset;
       if (scale <= 0) {
