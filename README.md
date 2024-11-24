@@ -105,9 +105,9 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | align_header | string | `default` | v0.2.0 | Set the alignment of the header, `left`, `right`, `center` or `default`.
 | align_icon | string | `right` | v0.2.0 | Set the alignment of the icon, `left`, `right` or `state`.
 | align_state | string | `left` | v0.2.0 | Set the alignment of the current state, `left`, `right` or `center`.
-| lower_bound | number *or* string |  | v0.2.3 | Set a fixed lower bound for the graph Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
-| upper_bound | number *or* string |  | v0.2.3 | Set a fixed upper bound for the graph Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
-| min_bound_range | number |  | v0.x.x | Applied after everything, makes sure there's a minimum range that the Y-axis will have. Useful for not making small changes look large because of scale.
+| lower_bound | number *or* string |  | v0.2.3 | Set a fixed lower bound for the graph X-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
+| upper_bound | number *or* string |  | v0.2.3 | Set a fixed upper bound for the graph X-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
+| min_bound_range | number |  | v0.x.x | Applied after everything, makes sure there's a minimum range that the X-axis will have. Useful for not making small changes look large because of scale.
 | lower_bound_secondary | number *or* string |  | v0.5.0 | Set a fixed lower bound for the graph secondary Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
 | upper_bound_secondary | number *or* string |  | v0.5.0 | Set a fixed upper bound for the graph secondary Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
 | min_bound_range_secondary | number |  | v0.x.x | Applied after everything, makes sure there's a minimum range that the secondary Y-axis will have. Useful for not making small changes look large because of scale.
@@ -164,7 +164,7 @@ All properties are optional.
 | legend | `true` | `true` / `false` | Display the graph legend (only shown when graph contains multiple entities).
 | average | `false` | `true` / `false` | Display average information.
 | extrema | `false` | `true` / `false` | Display max/min information.
-| labels | `hover` | `true` / `false` / `hover` | Display Y-axis labels.
+| labels | `hover` | `true` / `false` / `hover` | Display X-axis labels.
 | labels_secondary | `hover` | `true` / `false` / `hover` | Display secondary Y-axis labels.
 | name_adaptive_color | `false` | `true` / `false` | Make the name color adapt with the primary entity color.
 | icon_adaptive_color | `false` | `true` / `false` | Make the icon color adapt with the primary entity color.
