@@ -2,6 +2,7 @@ import { LitElement, html, svg } from 'lit-element';
 import localForage from 'localforage/src/localforage';
 import { stateIcon } from 'custom-card-helpers';
 import SparkMD5 from 'spark-md5';
+import { interpolateRgb } from 'd3-interpolate';
 import Graph from './graph';
 import style from './style';
 import handleClick from './handleClick';
@@ -18,7 +19,6 @@ import {
 import {
   getMin, getAvg, getMax,
   getTime, getMilli,
-  interpolateColor,
   compress, decompress,
   getFirstDefinedItem,
   compareArray,
@@ -149,9 +149,9 @@ class MiniGraphCard extends LitElement {
 
   shouldUpdate(changedProps) {
     if (UPDATE_PROPS.some(prop => changedProps.has(prop))) {
-      this.color = this.intColor(
+      this.color = this.computeColor(
         this.tooltip.value !== undefined
-          ? this.tooltip.value : this.entity[0] && this.entity[0].state,
+          ? this.tooltip.value : this.getEntityState(0),
         this.tooltip.entity || 0,
       );
       return true;
@@ -360,7 +360,7 @@ class MiniGraphCard extends LitElement {
               @click=${e => this.handlePopup(e, this.entity[entity.index])}
               @mouseenter=${() => this.setTooltip(entity.index, -1, this.getEntityState(entity.index), 'Current')}
               @mouseleave=${() => (this.tooltip = {})}>
-              ${this.renderIndicator(this.entity[entity.index].state, entity.index)}
+              ${this.renderIndicator(this.getEntityState(entity.index), entity.index)}
               <span class="ellipsis">${legend}</span>
             </div>
           `;
@@ -372,7 +372,7 @@ class MiniGraphCard extends LitElement {
   renderIndicator(state, index) {
     return svg`
       <svg width='10' height='10'>
-        <rect width='10' height='10' fill=${this.intColor(state, index)} />
+        <rect width='10' height='10' fill=${this.computeColor(state, index)} />
       </svg>
     `;
   }
@@ -491,7 +491,7 @@ class MiniGraphCard extends LitElement {
     if (!fill) return;
     const svgFill = this.gradient[i]
       ? `url(#grad-${this.id}-${i})`
-      : this.intColor(this.entity[i].state, i);
+      : this.computeColor(this.entity[i].state, i);
     return svg`
       <rect class='fill--rect'
         ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== i}
@@ -543,27 +543,34 @@ class MiniGraphCard extends LitElement {
 
   setTooltip(entity, index, value, label = null) {
     const {
+      group_by,
       points_per_hour,
       hours_to_show,
       format,
     } = this.config;
-    const offset = hours_to_show < 1 && points_per_hour < 1
-      ? points_per_hour * hours_to_show
-      : 1 / points_per_hour;
 
-    const id = Math.abs(index + 1 - Math.ceil(hours_to_show * points_per_hour));
+    // time units in milliseconds in this function
+    const interval = getMilli(1 / points_per_hour);
+    const n_points = Math.ceil(hours_to_show * points_per_hour);
+
+    // index is 0 (oldest) to n_points-1 (most recent ~= now)
+    // count of intervals from now to end of bin
+    // count is 0 (now) to n_points-1 (oldest)
+    const count = (n_points - 1) - index;
+
+    // offset end by a minute, if grouped by, e.g., date or hour
+    const oneMinute = group_by !== 'interval' ? 60000 : 0;
 
     const now = this.getEndDate();
 
-    const oneMinInHours = 1 / 60;
-    now.setMilliseconds(now.getMilliseconds() - getMilli(offset * id + oneMinInHours));
+    now.setMilliseconds(now.getMilliseconds() - oneMinute - interval * count);
     const end = getTime(now, format, this._hass.language);
-    now.setMilliseconds(now.getMilliseconds() - getMilli(offset - oneMinInHours));
+    now.setMilliseconds(now.getMilliseconds() + oneMinute - interval);
     const start = getTime(now, format, this._hass.language);
 
     this.tooltip = {
       value,
-      id,
+      count,
       entity,
       time: [start, end],
       index,
@@ -614,17 +621,6 @@ class MiniGraphCard extends LitElement {
     handleClick(this, this._hass, this.config, this.config.tap_action, entity.entity_id || entity);
   }
 
-  computeColor(inState, i) {
-    const { color_thresholds, line_color } = this.config;
-    const state = Number(inState) || 0;
-    const threshold = {
-      color: line_color[i] || line_color[0],
-      ...color_thresholds.slice(-1)[0],
-      ...color_thresholds.find(ele => ele.value < state),
-    };
-    return this.config.entities[i].color || threshold.color;
-  }
-
   get visibleEntities() {
     return this.config.entities.filter(entity => entity.show_graph !== false);
   }
@@ -650,28 +646,25 @@ class MiniGraphCard extends LitElement {
     return this.secondaryYaxisEntities.map(entity => this.Graph[entity.index]);
   }
 
-  intColor(inState, i) {
+  computeColor(inState, i) {
     const { color_thresholds, line_color } = this.config;
     const state = Number(inState) || 0;
 
     let intColor;
     if (color_thresholds.length > 0) {
-      if (this.config.show.graph === 'bar') {
-        const { color } = color_thresholds.find(ele => ele.value < state)
-          || color_thresholds.slice(-1)[0];
-        intColor = color;
+      const { color } = color_thresholds.find(ele => ele.value < state)
+        || color_thresholds.slice(-1)[0];
+      intColor = color;
+      const index = color_thresholds.findIndex(ele => ele.value < state);
+      const c1 = color_thresholds[index];
+      const c2 = color_thresholds[index - 1];
+      if (c2) {
+        const factor = (c2.value - state) / (c2.value - c1.value);
+        intColor = interpolateRgb(c2.color, c1.color)(factor);
       } else {
-        const index = color_thresholds.findIndex(ele => ele.value < state);
-        const c1 = color_thresholds[index];
-        const c2 = color_thresholds[index - 1];
-        if (c2) {
-          const factor = (c2.value - inState) / (c2.value - c1.value);
-          intColor = interpolateColor(c2.color, c1.color, factor);
-        } else {
-          intColor = index
-            ? color_thresholds[color_thresholds.length - 1].color
-            : color_thresholds[0].color;
-        }
+        intColor = index
+          ? color_thresholds[color_thresholds.length - 1].color
+          : color_thresholds[0].color;
       }
     }
 

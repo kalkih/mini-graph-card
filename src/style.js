@@ -168,6 +168,10 @@ const style = css`
     max-width: 100%;
     min-width: 0;
   }
+  .state > svg {
+    align-self: center;
+    border-radius: 100%;
+  }
   .state--small {
     font-size: .6em;
     margin-bottom: .6rem;

@@ -1,3 +1,25 @@
+## [0.12.2-dev.2](https://github.com/kalkih/mini-graph-card/compare/v0.12.2-dev.1...v0.12.2-dev.2) (2024-08-07)
+
+
+### Bug Fixes
+
+* use d3 to interpolate colors ([#1118](https://github.com/kalkih/mini-graph-card/issues/1118)) ([b8676f5](https://github.com/kalkih/mini-graph-card/commit/b8676f557107fb5ebda550652a947fa74ab39a9c))
+
+## [0.12.2-dev.1](https://github.com/kalkih/mini-graph-card/compare/v0.12.1...v0.12.2-dev.1) (2024-07-24)
+
+
+### Bug Fixes
+
+* indicator style for the 1st state ([#1105](https://github.com/kalkih/mini-graph-card/issues/1105)) ([c0ad333](https://github.com/kalkih/mini-graph-card/commit/c0ad333ee96998bab7179b23b86684ba74851326))
+* legend indicators respect entity attribute configuration ([#1115](https://github.com/kalkih/mini-graph-card/issues/1115)) ([5fe01d1](https://github.com/kalkih/mini-graph-card/commit/5fe01d15a791d09646fd26cce5c8d7113e0cd4b7))
+
+## [0.12.1](https://github.com/kalkih/mini-graph-card/compare/v0.12.0...v0.12.1) (2024-03-20)
+
+
+### Bug Fixes
+
+* tooltip interval start could be after end ([#1065](https://github.com/kalkih/mini-graph-card/issues/1065)) ([930ee39](https://github.com/kalkih/mini-graph-card/commit/930ee39f51744bc11f580f4198f579b5213371ca)), closes [#181](https://github.com/kalkih/mini-graph-card/issues/181)
+
 # [0.12.0](https://github.com/kalkih/mini-graph-card/compare/v0.11.0...v0.12.0) (2024-01-27)
 
 
