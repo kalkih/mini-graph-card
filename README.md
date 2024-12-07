@@ -130,7 +130,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | unit | string |         | Set a custom unit of measurement, overrides `unit` set in base config.
 | aggregate_func | string |         | Override for aggregate function used to calculate point on the graph, `avg`, `median`, `min`, `max`, `first`, `last`, `sum`.
 | show_state | boolean |         | Display the current state.
-| show_legend_state | boolean |  false  | Display the current state with the legend.
+| show_legend_state | boolean |  false  | Display the current state as part of the legend.
 | show_indicator | boolean |         | Display a color indicator next to the state, (only when more than two states are visible).
 | show_graph | boolean |         | Set to false to completely hide the entity in the graph.
 | show_line | boolean |         | Set to false to hide the line.
