@@ -336,7 +336,7 @@ class MiniGraphCard extends LitElement {
       </div>` : '';
   }
 
-  generateLegend(entity, index) {
+  generateLegend(index) {
     let legend = this.computeName(index);
     const state = this.getEntityState(index);
     const show_legend_state = this.config.entities[index];
@@ -354,7 +354,7 @@ class MiniGraphCard extends LitElement {
     return html`
       <div class="graph__legend">
         ${this.visibleLegends.map((entity) => {
-    const legend = this.generateLegend(entity, entity.index);
+    const legend = this.generateLegend(entity.index);
     return html`
             <div class="graph__legend__item"
               @click=${e => this.handlePopup(e, this.entity[entity.index])}
