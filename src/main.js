@@ -352,11 +352,12 @@ class MiniGraphCard extends LitElement {
   renderLegend() {
     if (this.visibleLegends.length <= 1 || !this.config.show.legend) return;
 
+    /* eslint-disable indent */
     return html`
       <div class="graph__legend">
         ${this.visibleLegends.map((entity) => {
-    const legend = this.computeLegend(entity.index);
-    return html`
+          const legend = this.computeLegend(entity.index);
+          return html`
             <div class="graph__legend__item"
               @click=${e => this.handlePopup(e, this.entity[entity.index])}
               @mouseenter=${() => this.setTooltip(entity.index, -1, this.getEntityState(entity.index), 'Current')}
@@ -365,9 +366,10 @@ class MiniGraphCard extends LitElement {
               <span class="ellipsis">${legend}</span>
             </div>
           `;
-  })}
+        })}
       </div>
     `;
+    /* eslint-enable indent */
   }
 
   renderIndicator(state, index) {
