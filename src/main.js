@@ -336,11 +336,11 @@ class MiniGraphCard extends LitElement {
       </div>` : '';
   }
 
-  generateLegend(index) {
+  computeLegend(index) {
     let legend = this.computeName(index);
     const state = this.getEntityState(index);
 
-    const show_legend_state = this.config.entities[index].show_legend_state ?? false;
+    const { show_legend_state = false } = this.config.entities[index];
 
     if (show_legend_state) {
       legend += ` (${this.computeState(state)} ${this.computeUom(index)})`;
@@ -355,7 +355,7 @@ class MiniGraphCard extends LitElement {
     return html`
       <div class="graph__legend">
         ${this.visibleLegends.map((entity) => {
-    const legend = this.generateLegend(entity.index);
+    const legend = this.computeLegend(entity.index);
     return html`
             <div class="graph__legend__item"
               @click=${e => this.handlePopup(e, this.entity[entity.index])}
