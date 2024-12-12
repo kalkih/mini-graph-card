@@ -507,11 +507,12 @@ class MiniGraphCard extends LitElement {
   }
 
   renderSvg() {
-    const { height } = this.config;
+    const { height, grid_line_type = false } = this.config;
     return svg`
       <svg width='100%' height=${height !== 0 ? '100%' : 0} viewBox='0 0 500 ${height}'
         @click=${e => e.stopPropagation()}>
         <g>
+          ${grid_line_type ? this.renderGridLines() : ''}
           <defs>
             ${this.renderSvgGradient(this.gradient)}
           </defs>
@@ -523,6 +524,40 @@ class MiniGraphCard extends LitElement {
         </g>
         ${this.points.map((points, i) => this.renderSvgPoints(points, i))}
       </svg>`;
+  }
+
+  renderGridLines() {
+    const {
+      height, hours_to_show, grid_line_type, line_width,
+    } = this.config;
+
+    const containerWidth = 500;
+    let numLines;
+    let xRatio;
+
+    switch (grid_line_type) {
+      case 'hour':
+      default:
+        numLines = hours_to_show;
+        xRatio = containerWidth / numLines;
+        break;
+      case 'day':
+        numLines = Math.round(hours_to_show / 24);
+        xRatio = (containerWidth / numLines);
+        break;
+      case 'week':
+        numLines = Math.round(hours_to_show / 168);
+        xRatio = containerWidth / numLines;
+        break;
+    }
+    const lines = [];
+
+    for (let i = 0.5; i < numLines; i += 1) {
+      const x = xRatio * i;
+      lines.push(svg`<line x1=${x} y1="0" x2=${x} y2=${height} stroke="lightgray" stroke-width=${line_width}/>`);
+    }
+
+    return lines;
   }
 
   setTooltip(entity, index, value, label = null) {
