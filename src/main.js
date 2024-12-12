@@ -528,7 +528,7 @@ class MiniGraphCard extends LitElement {
 
   renderGridLines() {
     const {
-      height, hours_to_show, grid_line_type, line_width,
+      height, hours_to_show, grid_line_type,
     } = this.config;
 
     const containerWidth = 500;
@@ -552,9 +552,13 @@ class MiniGraphCard extends LitElement {
     }
     const lines = [];
 
-    for (let i = 0.5; i < numLines; i += 1) {
-      const x = xRatio * i;
-      lines.push(svg`<line x1=${x} y1="0" x2=${x} y2=${height} stroke="lightgray" stroke-width=${line_width}/>`);
+    for (let i = 0; i < numLines; i += 1) {
+      const x = xRatio * (i + 0.5);
+      if (i % 2 === 0) {
+        lines.push(svg`<line x1=${x} y1="0" x2=${x} y2=${height} stroke="lightgray" stroke-width="0.5" opacity="0.5"/>`);
+      } else {
+        lines.push(svg`<line x1=${x} y1="0" x2=${x} y2=${height} stroke="lightgray" stroke-width="0.5" opacity="1"/>`);
+      }
     }
 
     return lines;
