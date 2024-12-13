@@ -508,12 +508,12 @@ class MiniGraphCard extends LitElement {
 
   renderSvg() {
     const { height, show } = this.config;
-    const grid_line_type = show.grid_line_type ? show.grid_line_type : false;
+    const grid_lines_type = show.grid_lines_type ? show.grid_lines_type : false;
     return svg`
       <svg width='100%' height=${height !== 0 ? '100%' : 0} viewBox='0 0 500 ${height}'
         @click=${e => e.stopPropagation()}>
         <g>
-          ${grid_line_type ? this.renderGridLines() : ''}
+          ${grid_lines_type ? this.renderGridLines() : ''}
           <defs>
             ${this.renderSvgGradient(this.gradient)}
           </defs>
@@ -531,8 +531,10 @@ class MiniGraphCard extends LitElement {
     const {
       height, hours_to_show, show,
     } = this.config;
-    const grid_line_type = show.grid_line_type ? show.grid_line_type : false;
-    const grid_line_frequency = show.grid_line_frequency ? show.grid_line_frequency : 2;
+    const grid_lines_type = show.grid_lines_type ? show.grid_lines_type : false;
+    const grid_lines_ratio = (show.grid_lines_ratio && Number.isInteger(show.grid_lines_ratio))
+      ? show.grid_lines_ratio
+      : 2;
 
     const containerWidth = 500;
     let numLines;
@@ -540,7 +542,7 @@ class MiniGraphCard extends LitElement {
     let rounded_hours_to_show = Math.round(hours_to_show);
     if (rounded_hours_to_show < 1) rounded_hours_to_show = 1;
 
-    switch (grid_line_type) {
+    switch (grid_lines_type) {
       case '5minute':
         numLines = rounded_hours_to_show * 12;
         break;
@@ -560,7 +562,7 @@ class MiniGraphCard extends LitElement {
 
     for (let i = 0; i < numLines; i += 1) {
       const x = xRatio * (i + 0.5);
-      if (i % grid_line_frequency > 0) {
+      if (i % grid_lines_ratio > 0) {
         lines.push(svg`<line x1=${x} y1="0" x2=${x} y2=${height} stroke="var(--divider-color)" stroke-width="0.5"/>`);
       } else {
         lines.push(svg`<line x1=${x} y1="0" x2=${x} y2=${height} stroke="rgb(from var(--divider-color) R G B /0.5)" stroke-width="0.5"/>`);
