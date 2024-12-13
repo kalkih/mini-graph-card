@@ -115,8 +115,6 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert (order matters as position becomes a value on the graph).
 | value_factor | number | 0 | v0.9.4 | Scale value by order of magnitude (e.g. convert Watts to kilo Watts), use negative value to scale down.
 | logarithmic | boolean | `false` | v0.10.0 | Use a Logarithmic scale for the graph
-| grid_line_type | string |  | v0.12.x | Show grids lines using `hour` / `day` / `week` and the value of hours_to_show
-
 
 #### Entities object
 Entities may be listed directly (as per `sensor.temperature` in the example below), or defined using
@@ -169,6 +167,7 @@ All properties are optional.
 | labels_secondary | `hover` | `true` / `false` / `hover` | Display secondary Y-axis labels.
 | name_adaptive_color | `false` | `true` / `false` | Make the name color adapt with the primary entity color.
 | icon_adaptive_color | `false` | `true` / `false` | Make the icon color adapt with the primary entity color.
+| grid_line_type | string |  | v0.12.x | Show grids lines using `5minute` / `hour` / `day` / `week` and the value of hours_to_show
 
 #### Line color object
 See [dynamic line color](#dynamic-line-color) for example usage.

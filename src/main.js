@@ -507,7 +507,8 @@ class MiniGraphCard extends LitElement {
   }
 
   renderSvg() {
-    const { height, grid_line_type = false } = this.config;
+    const { height, show } = this.config;
+    const grid_line_type = show.grid_line_type ? show.grid_line_type : false;
     return svg`
       <svg width='100%' height=${height !== 0 ? '100%' : 0} viewBox='0 0 500 ${height}'
         @click=${e => e.stopPropagation()}>
@@ -528,28 +529,32 @@ class MiniGraphCard extends LitElement {
 
   renderGridLines() {
     const {
-      height, hours_to_show, grid_line_type,
+      height, hours_to_show, show,
     } = this.config;
+    const grid_line_type = show.grid_line_type ? show.grid_line_type : false;
 
     const containerWidth = 500;
     let numLines;
-    let xRatio;
+
+    let rounded_hours_to_show = Math.round(hours_to_show);
+    if (rounded_hours_to_show < 1) rounded_hours_to_show = 1;
 
     switch (grid_line_type) {
+      case '5minute':
+        numLines = rounded_hours_to_show * 12;
+        break;
       case 'hour':
       default:
-        numLines = hours_to_show;
-        xRatio = containerWidth / numLines;
+        numLines = rounded_hours_to_show;
         break;
       case 'day':
-        numLines = Math.round(hours_to_show / 24);
-        xRatio = (containerWidth / numLines);
+        numLines = Math.round(rounded_hours_to_show / 24);
         break;
       case 'week':
-        numLines = Math.round(hours_to_show / 168);
-        xRatio = containerWidth / numLines;
+        numLines = Math.round(rounded_hours_to_show / 168);
         break;
     }
+    const xRatio = containerWidth / numLines;
     const lines = [];
 
     for (let i = 0; i < numLines; i += 1) {
