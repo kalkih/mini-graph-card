@@ -167,7 +167,8 @@ All properties are optional.
 | labels_secondary | `hover` | `true` / `false` / `hover` | Display secondary Y-axis labels.
 | name_adaptive_color | `false` | `true` / `false` | Make the name color adapt with the primary entity color.
 | icon_adaptive_color | `false` | `true` / `false` | Make the icon color adapt with the primary entity color.
-| grid_line_type | string |  | v0.12.x | Show grids lines using `5minute` / `hour` / `day` / `week` and the value of hours_to_show
+| grid_line_type | `hour` | `5minute` / `hour` / `day` / `week` | Show grids lines using  and the value of hours_to_show.
+| grid_line_frequency | 2 |  | Define the frequecy of thin / thick lines you want.
 
 #### Line color object
 See [dynamic line color](#dynamic-line-color) for example usage.

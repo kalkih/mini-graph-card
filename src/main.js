@@ -532,6 +532,7 @@ class MiniGraphCard extends LitElement {
       height, hours_to_show, show,
     } = this.config;
     const grid_line_type = show.grid_line_type ? show.grid_line_type : false;
+    const grid_line_frequency = show.grid_line_frequency ? show.grid_line_frequency : 2;
 
     const containerWidth = 500;
     let numLines;
@@ -559,10 +560,10 @@ class MiniGraphCard extends LitElement {
 
     for (let i = 0; i < numLines; i += 1) {
       const x = xRatio * (i + 0.5);
-      if (i % 2 === 0) {
-        lines.push(svg`<line x1=${x} y1="0" x2=${x} y2=${height} stroke="lightgray" stroke-width="0.5" opacity="0.5"/>`);
+      if (i % grid_line_frequency > 0) {
+        lines.push(svg`<line x1=${x} y1="0" x2=${x} y2=${height} stroke="var(--divider-color)" stroke-width="0.5" opacity="0.5"/>`);
       } else {
-        lines.push(svg`<line x1=${x} y1="0" x2=${x} y2=${height} stroke="lightgray" stroke-width="0.5" opacity="1"/>`);
+        lines.push(svg`<line x1=${x} y1="0" x2=${x} y2=${height} stroke="rgb(from var(--divider-color) R G B /0.5)" stroke-width="0.5" opacity="1"/>`);
       }
     }
 
