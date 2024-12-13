@@ -168,7 +168,7 @@ All properties are optional.
 | name_adaptive_color | `false` | `true` / `false` | Make the name color adapt with the primary entity color.
 | icon_adaptive_color | `false` | `true` / `false` | Make the icon color adapt with the primary entity color.
 | grid_lines_type | `hour` | `5minute` / `hour` / `day` / `week` | Show grid lines dependently on `hours_to_show` value.
-| grid_lines_ratio | 2 |  | Grid lines: thin / thick lines amount ratio
+| grid_lines_ratio | 2 |  | Grid lines: thin / thick lines amount ratio (0 - no thin lines)
 
 #### Line color object
 See [dynamic line color](#dynamic-line-color) for example usage.
@@ -260,6 +260,8 @@ The following theme variables can be set in your HA theme to customize the appea
 |------|:-------:|-------------|
 | mcg-title-letter-spacing |  | Letter spacing of the card title (`name` option).
 | mcg-title-font-weight | 500 | Font weight of the card title.
+| mcg-grid-line-thick-color | rgb(from var(--divider-color) R G B /0.5) | Grid "thick" line color.
+| mcg-grid-line-thin-color | var(--divider-color) | Grid "thin" line color.
 
 ### Example usage
 
