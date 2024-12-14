@@ -565,11 +565,13 @@ class MiniGraphCard extends LitElement {
       const x = containerWidth - thinPart * (i + 1);
       // const timeLabel = hours_to_show / numLines * (i + 1);
 
+      let stroke;
       if ((i + 1) % (grid_lines_ratio + 1) > 0) {
-        lines.push(svg`<line x1=${x} y1="0" x2=${x} y2=${height} stroke="var(--mcg-grid-line-thin-color, var(--divider-color))" stroke-width="0.5"/>`);
+        stroke = 'var(--mcg-grid-line-thin-color, var(--divider-color))';
       } else {
-        lines.push(svg`<line x1=${x} y1="0" x2=${x} y2=${height} stroke="var(--mcg-grid-line-thick-color, rgb(from var(--divider-color) R G B /0.5))" stroke-width="0.5"/>`);
+        stroke = 'var(--mcg-grid-line-thick-color, rgb(from var(--divider-color) R G B /0.5))';
       }
+      lines.push(svg`<line x1=${x} y1="0" x2=${x} y2=${height} stroke="${stroke}" stroke-width="0.5"/>`);
     }
 
     return lines;
