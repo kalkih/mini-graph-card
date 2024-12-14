@@ -558,7 +558,7 @@ class MiniGraphCard extends LitElement {
     const spanFactor = Math.ceil(hours_to_show / spanInHours) / (hours_to_show / spanInHours);
     const thickPart = containerWidth * spanFactor / Math.ceil(numLines);
     const thinPart = thickPart / (grid_lines_ratio + 1);
-    numLines = numLines * (grid_lines_ratio + 1);
+    numLines *= (grid_lines_ratio + 1);
 
     const lines = [];
     for (let i = 0; i < numLines - 1; i += 1) {
