@@ -537,32 +537,35 @@ class MiniGraphCard extends LitElement {
       : 2;
 
     const containerWidth = 500;
-    let numLines;
-
-    let rounded_hours_to_show = Math.round(hours_to_show);
-    if (rounded_hours_to_show < 1) rounded_hours_to_show = 1;
+    let spanInHours;
 
     switch (grid_lines_type) {
       case '5minute':
-        numLines = rounded_hours_to_show * 12;
+        spanInHours = 1 / 12;
         break;
       case 'hour':
       default:
-        numLines = rounded_hours_to_show;
+        spanInHours = 1;
         break;
       case 'day':
-        numLines = Math.round(rounded_hours_to_show / 24);
+        spanInHours = 24;
         break;
       case 'week':
-        numLines = Math.round(rounded_hours_to_show / 168);
-        break;
+        spanInHours = 168;
     }
-    const xRatio = containerWidth / numLines;
-    const lines = [];
 
-    for (let i = 0; i < numLines; i += 1) {
-      const x = xRatio * (i + 0.5);
-      if (i % grid_lines_ratio > 0) {
+    let numLines = hours_to_show / spanInHours;
+    const spanFactor = Math.ceil(hours_to_show / spanInHours) / (hours_to_show / spanInHours);
+    const thickPart = containerWidth * spanFactor / Math.ceil(numLines);
+    const thinPart = thickPart / (grid_lines_ratio + 1);
+    numLines = numLines * (grid_lines_ratio + 1);
+
+    const lines = [];
+    for (let i = 0; i < numLines - 1; i += 1) {
+      const x = containerWidth - thinPart * (i + 1);
+      // const timeLabel = hours_to_show / numLines * (i + 1);
+
+      if ((i + 1) % (grid_lines_ratio + 1) > 0) {
         lines.push(svg`<line x1=${x} y1="0" x2=${x} y2=${height} stroke="var(--mcg-grid-line-thin-color, var(--divider-color))" stroke-width="0.5"/>`);
       } else {
         lines.push(svg`<line x1=${x} y1="0" x2=${x} y2=${height} stroke="var(--mcg-grid-line-thick-color, rgb(from var(--divider-color) R G B /0.5))" stroke-width="0.5"/>`);
