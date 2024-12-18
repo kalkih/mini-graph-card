@@ -324,16 +324,22 @@ class MiniGraphCard extends LitElement {
 
   renderLoader() {
     const { height } = this.config;
+    const numberOfBars = 20;
     return svg`
-        <div style="align-items: center; justify-content: center; display: flex;">
+        <div style="align-items: center; justify-content: center; display: flex; transform: rotate(180deg);">
             <svg width="100%" height="100%" viewBox="0 0 500 ${height}">
-                <circle cx="50%" cy="50%" r="0" fill="var(--secondary-text-color)">
-                    <animate attributeName="r" calcMode="spline" dur="1.2s" values="10;20" keySplines=".52,.6,.25,.99" repeatCount="indefinite"/>
-                    <animate attributeName="opacity" calcMode="spline" dur="1.2s" values="1;0" keySplines=".52,.6,.25,.99" repeatCount="indefinite"/>
-                </circle>
+                ${Array.from({ length: numberOfBars }, (_, i) => i).map(i => svg`
+                    <rect x="${(i * (numberOfBars + 3)) + 25}" y="10" width="10" height="${this.getLoaderBarHeight(height, i)}" fill="var(--secondary-text-color)">
+                        <animate attributeName="opacity" calcMode="spline" dur="2s" values="0;1;0" keyTimes="0;0.5;1" keySplines="0.42,0,0.58,1;0.42,0,0.58,1" repeatCount="indefinite"/>
+                    </rect>
+                `)}
             </svg>
         </div>
     `;
+  }
+
+  getLoaderBarHeight(height, i) {
+    return (Math.abs(Math.sin(i / 2 + 1) * height / 1.5) % height) + 10;
   }
 
   renderGraph() {
