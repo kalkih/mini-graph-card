@@ -512,8 +512,8 @@ class MiniGraphCard extends LitElement {
     return svg`
       <svg width='100%' height=${height !== 0 ? '100%' : 0} viewBox='0 0 500 ${height}'
         @click=${e => e.stopPropagation()}>
+        ${grid_lines_type ? this.renderGridLines() : ''}
         <g>
-          ${grid_lines_type ? this.renderGridLines() : ''}
           <defs>
             ${this.renderSvgGradient(this.gradient)}
           </defs>
@@ -574,7 +574,7 @@ class MiniGraphCard extends LitElement {
       lines.push(svg`<line x1=${x} y1="0" x2=${x} y2=${height} stroke="${stroke}" stroke-width="0.5"/>`);
     }
 
-    return lines;
+    return svg`<g>${lines}</g>`;
   }
 
   setTooltip(entity, index, value, label = null) {
