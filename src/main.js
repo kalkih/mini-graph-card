@@ -574,7 +574,7 @@ class MiniGraphCard extends LitElement {
       lines.push(svg`<line x1=${x} y1="0" x2=${x} y2=${height} stroke="${stroke}" stroke-width="0.5"/>`);
     }
 
-    return svg`<g class="grid-lines">${lines}</g>`;
+    return svg`<g class="grid--lines">${lines}</g>`;
   }
 
   setTooltip(entity, index, value, label = null) {
