@@ -332,7 +332,7 @@ class MiniGraphCard extends LitElement {
               ${this.renderLabels()}
               ${this.renderLabelsSecondary()}
               <div class="graph__container__svg">
-                this.renderSvg()
+                ${this.renderSvg()}
               </div>
             </div>
             ${this.renderLegend()}
