@@ -322,14 +322,6 @@ class MiniGraphCard extends LitElement {
     `;
   }
 
-  renderLoader() {
-    return html`
-        <div style="display: flex;">
-             <ha-circular-progress indeterminate style="margin: auto;"></ha-circular-progress>
-        </div>
-    `;
-  }
-
   renderGraph() {
     const ready = this.entity[0] && this.Graph[0]._history !== undefined;
 
@@ -340,11 +332,13 @@ class MiniGraphCard extends LitElement {
               ${this.renderLabels()}
               ${this.renderLabelsSecondary()}
               <div class="graph__container__svg">
-                ${ready ? this.renderSvg() : this.renderLoader()}
+                this.renderSvg()
               </div>
             </div>
             ${this.renderLegend()}
-        ` : this.renderLoader()}
+        ` : html`
+          <ha-circular-progress indeterminate></ha-circular-progress>
+        `}
       </div>` : '';
   }
 
