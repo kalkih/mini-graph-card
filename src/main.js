@@ -336,21 +336,40 @@ class MiniGraphCard extends LitElement {
       </div>` : '';
   }
 
+  computeLegend(index) {
+    let legend = this.computeName(index);
+    const state = this.getEntityState(index);
+
+    const { show_legend_state = false } = this.config.entities[index];
+
+    if (show_legend_state) {
+      legend += ` (${this.computeState(state)} ${this.computeUom(index)})`;
+    }
+
+    return legend;
+  }
+
   renderLegend() {
     if (this.visibleLegends.length <= 1 || !this.config.show.legend) return;
+
+    /* eslint-disable indent */
     return html`
       <div class="graph__legend">
-        ${this.visibleLegends.map(entity => html`
-          <div class="graph__legend__item"
-            @click=${e => this.handlePopup(e, this.entity[entity.index])}
-            @mouseenter=${() => this.setTooltip(entity.index, -1, this.getEntityState(entity.index), 'Current')}
-            @mouseleave=${() => (this.tooltip = {})}>
-            ${this.renderIndicator(this.getEntityState(entity.index), entity.index)}
-            <span class="ellipsis">${this.computeName(entity.index)}</span>
-          </div>
-        `)}
+        ${this.visibleLegends.map((entity) => {
+          const legend = this.computeLegend(entity.index);
+          return html`
+            <div class="graph__legend__item"
+              @click=${e => this.handlePopup(e, this.entity[entity.index])}
+              @mouseenter=${() => this.setTooltip(entity.index, -1, this.getEntityState(entity.index), 'Current')}
+              @mouseleave=${() => (this.tooltip = {})}>
+              ${this.renderIndicator(this.getEntityState(entity.index), entity.index)}
+              <span class="ellipsis">${legend}</span>
+            </div>
+          `;
+        })}
       </div>
     `;
+    /* eslint-enable indent */
   }
 
   renderIndicator(state, index) {
