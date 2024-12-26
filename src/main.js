@@ -351,8 +351,7 @@ class MiniGraphCard extends LitElement {
     if (show_legend_state) {
       if (this.computeUom(index) === '%') {
         legend += ` (${this.computeState(state)}${this.computeUom(index)})`;
-      }
-      else {
+      } else {
         legend += ` (${this.computeState(state)} ${this.computeUom(index)})`;
       }
     }
