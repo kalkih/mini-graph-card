@@ -349,12 +349,11 @@ class MiniGraphCard extends LitElement {
     const { show_legend_state = false } = this.config.entities[index];
 
     if (show_legend_state) {
-      let uom = this.computeUom(index);
-      if (uom === '%') {
-        legend += ` (${this.computeState(state)}${uom})`;
+      if (this.computeUom(index) === '%') {
+        legend += ` (${this.computeState(state)}${this.computeUom(index)})`;
       }
       else {
-        legend += ` (${this.computeState(state)} ${uom})`;
+        legend += ` (${this.computeState(state)} ${this.computeUom(index)})`;
       }
     }
 
