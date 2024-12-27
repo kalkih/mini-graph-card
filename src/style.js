@@ -1,17 +1,13 @@
 import { css } from 'lit-element';
 
 const style = css`
-  :host {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
   ha-card {
     flex-direction: column;
     flex: 1;
     padding: 16px 0;
     position: relative;
     overflow: hidden;
+    height: 100%;
   }
   ha-card.sections {
   }
