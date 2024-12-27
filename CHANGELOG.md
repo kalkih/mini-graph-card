@@ -1,3 +1,16 @@
+# [0.13.0-dev.1](https://github.com/kalkih/mini-graph-card/compare/v0.12.2-dev.2...v0.13.0-dev.1) (2024-12-21)
+
+
+### Bug Fixes
+
+* name and icon color respect attribute choice ([#1131](https://github.com/kalkih/mini-graph-card/issues/1131)) ([cbfba7a](https://github.com/kalkih/mini-graph-card/commit/cbfba7a6a4a02e944d82d83fca69f61148cbcd34))
+
+
+### Features
+
+* Add loader ([#1180](https://github.com/kalkih/mini-graph-card/issues/1180)) ([30c5263](https://github.com/kalkih/mini-graph-card/commit/30c5263a30dfd2ebde6b4d1a4969696073c20482))
+* add show_legend_state ([#1173](https://github.com/kalkih/mini-graph-card/issues/1173)) ([3b1c827](https://github.com/kalkih/mini-graph-card/commit/3b1c82793a01baf613dfae4ad4bfa981a29b999f))
+
 ## [0.12.2-dev.2](https://github.com/kalkih/mini-graph-card/compare/v0.12.2-dev.1...v0.12.2-dev.2) (2024-08-07)
 
 
