@@ -820,8 +820,8 @@ class MiniGraphCard extends LitElement {
 
   getBoundaries(series, min, max, fallback, minRange) {
     let boundary = [
-      this.getBoundary('min', series, min, fallback[0], minRange),
-      this.getBoundary('max', series, max, fallback[1], minRange),
+      this.getBoundary('min', series, min, fallback[0]),
+      this.getBoundary('max', series, max, fallback[1]),
     ];
 
     if (minRange) {
