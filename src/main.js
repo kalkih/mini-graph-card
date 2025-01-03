@@ -357,19 +357,6 @@ class MiniGraphCard extends LitElement {
   renderGraph() {
     const ready = this.entity[0] && this.Graph[0]._history !== undefined;
 
-    if (this.sections) {
-      const layout = this.getCurrentLayout();
-      const graphRows = this.getGraphHeightSections();
-
-      this.graphWidth = layout.grid_columns * 120 + 8;
-      this.graphHeight = graphRows * 56 + 8;
-
-      this.Graph.forEach((_, index) => {
-        this.Graph[index].setWidth(this.graphWidth);
-        this.Graph[index].setHeight(this.graphHeight);
-      });
-    }
-
     return this.config.show.graph ? html`
       <div class="graph">
         ${ready ? html`
@@ -483,16 +470,27 @@ class MiniGraphCard extends LitElement {
   renderSvgPoint(point, i) {
     const color = this.gradient[i] ? this.computeColor(point[V], i) : 'inherit';
     return svg`
-      <circle
-        class='line--point'
-        ?inactive=${this.tooltip.index !== point[3]}
-        style=${`--mcg-hover: ${color};`}
-        stroke=${color}
-        fill=${color}
-        cx=${point[X]} cy=${point[Y]} r=${this.config.line_width}
-        @mouseover=${() => this.setTooltip(i, point[3], point[V])}
-        @mouseout=${() => (this.tooltip = {})}
+    <g
+      class='line--point--group'
+      ?inactive=${this.tooltip.index !== point[3]}
+      style=${`--mcg-hover: ${color};`}
+      @mouseover=${() => this.setTooltip(i, point[3], point[V])}
+      @mouseout=${() => (this.tooltip = {})}
+    >
+      <line
+        class='line--point--border'
+        x1=${point[X]} y1=${point[Y]} x2=${point[X]} y2=${point[Y]}
+        stroke-linecap="round" stroke-width=${this.config.line_width * 2}
+        stroke=${color} vector-effect="non-scaling-stroke"
       />
+      <line
+        class='line--point'
+        style="stroke: var(--primary-background-color, white);"
+        x1=${point[X]} y1=${point[Y]} x2=${point[X]} y2=${point[Y]}
+        stroke-linecap="round" stroke-width=${this.config.line_width}
+        vector-effect="non-scaling-stroke"
+      />
+    </g>
     `;
   }
 
@@ -579,7 +577,9 @@ class MiniGraphCard extends LitElement {
   renderSvg() {
     const { height } = this.config;
     return svg`
-      <svg width='100%' height=${height !== 0 || this.sections ? '100%' : 0} viewBox='0 0 ${this.graphWidth} ${this.graphHeight}'
+      <svg width='100%' height=${height !== 0 || this.sections ? '100%' : 0}
+        viewBox='0 0 ${this.graphWidth} ${this.graphHeight}'
+        preserveAspectRatio='none'
         @click=${e => e.stopPropagation()}>
         <g>
           <defs>
@@ -1085,7 +1085,9 @@ class MiniGraphCard extends LitElement {
   }
 
   getHeaderRows() {
-    return ((this.config.show.name || this.config.show.icon || this.config.show.state) ? 1 : 0)
+    return 0
+      + ((this.config.show.name || this.config.show.icon) ? 1 : 0)
+      + ((this.config.show.state) ? 1 : 0)
       + ((this.config.show.extrema || this.config.show.average) ? 1 : 0);
   }
 

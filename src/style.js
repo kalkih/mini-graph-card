@@ -242,6 +242,7 @@ const style = css`
     display: none;
   }
   .graph {
+    flex: auto;
     align-self: flex-end;
     box-sizing: border-box;
     display: flex;
@@ -249,18 +250,18 @@ const style = css`
     margin-top: auto;
     width: 100%;
   }
-  .sections .graph {
-    position: absolute;
-    bottom: 0;
-  }
   .graph__container {
     display: flex;
     flex-direction: row;
     position: relative;
+    height: 100%;
   }
   .graph__container__svg {
     cursor: default;
-    flex: 1;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
   }
   svg {
     overflow: hidden;
@@ -276,6 +277,15 @@ const style = css`
   .fill[anim="false"][type="fade"] {
     animation: reveal-2 .25s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   }
+  .line {
+    vector-effect: non-scaling-stroke;
+  }
+  .line--point--group:hover .line--point {
+    visibility: hidden;
+  }
+  .line--point--group {
+    cursor: pointer;
+  }
   .line--points[anim="false"],
   .line[anim="false"] {
     animation: pop .25s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
@@ -287,13 +297,11 @@ const style = css`
     animation: none !important;
     transition: all .15s !important;
   }
-  .line--points[tooltip] .line--point[inactive] {
+  .line--points[tooltip] .line--point--group[inactive] {
     opacity: 0;
   }
   .line--point {
-    cursor: pointer;
     fill: var(--primary-background-color, white);
-    stroke-width: inherit;
   }
   .line--point:hover {
     fill: var(--mcg-hover, inherit) !important;
@@ -348,6 +356,7 @@ const style = css`
     pointer-events: none;
     top: 0; bottom: 0;
     opacity: .75;
+    z-index: 1;
   }
   .graph__labels > span {
     cursor: pointer;
