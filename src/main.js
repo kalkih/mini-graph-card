@@ -429,7 +429,6 @@ class MiniGraphCard extends LitElement {
         stroke-dasharray=${this.length[i] || 'none'} stroke-dashoffset=${this.length[i] || 'none'}
         stroke=${'white'}
         stroke-width=${this.config.line_width}
-        vector-effect='non-scaling-stroke'
         d=${this.line[i]}
       />`;
 
@@ -443,16 +442,24 @@ class MiniGraphCard extends LitElement {
   renderSvgPoint(point, i) {
     const color = this.gradient[i] ? this.computeColor(point[V], i) : 'inherit';
     return svg`
-      <circle
-        class='line--point'
-        ?inactive=${this.tooltip.index !== point[3]}
-        style=${`--mcg-hover: ${color};`}
+    <g
+      class='line--point--group'
+      ?inactive=${this.tooltip.index !== point[3]}
+      @mouseover=${() => this.setTooltip(i, point[3], point[V])}
+      @mouseout=${() => (this.tooltip = {})}
+    >
+      <line
+        class='line--point--border'
+        x1=${point[X]} y1=${point[Y]} x2=${point[X]} y2=${point[Y]}
+        stroke-linecap="round" stroke-width=${this.config.line_width * 2}
         stroke=${color}
-        fill=${color}
-        cx=${point[X]} cy=${point[Y]} r=${this.config.line_width}
-        @mouseover=${() => this.setTooltip(i, point[3], point[V])}
-        @mouseout=${() => (this.tooltip = {})}
       />
+      <line
+        class='line--point--fill'
+        x1=${point[X]} y1=${point[Y]} x2=${point[X]} y2=${point[Y]}
+        stroke-linecap="round" stroke-width=${this.config.line_width}
+      />
+    </g>
     `;
   }
 

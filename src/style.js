@@ -273,6 +273,22 @@ const style = css`
   .line[anim="false"] {
     animation: pop .25s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   }
+  .line {
+    vector-effect: non-scaling-stroke;
+  }
+  .line--point--group {
+    cursor: pointer;
+  }
+  .line--point--border {
+    vector-effect: non-scaling-stroke;
+  }
+  .line--point--fill {
+    stroke: var(--primary-background-color, white);
+    vector-effect: non-scaling-stroke;
+  }
+  .line--point--group:hover .line--point--fill {
+    visibility: hidden;
+  }
   .line--points[inactive],
   .line--rect[inactive],
   .fill--rect[inactive] {
@@ -280,16 +296,8 @@ const style = css`
     animation: none !important;
     transition: all .15s !important;
   }
-  .line--points[tooltip] .line--point[inactive] {
+  .line--points[tooltip] .line--point--group[inactive] {
     opacity: 0;
-  }
-  .line--point {
-    cursor: pointer;
-    fill: var(--primary-background-color, white);
-    stroke-width: inherit;
-  }
-  .line--point:hover {
-    fill: var(--mcg-hover, inherit) !important;
   }
   .bars {
     animation: pop .25s cubic-bezier(0.215, 0.61, 0.355, 1);
@@ -304,8 +312,9 @@ const style = css`
     opacity: .5;
     cursor: pointer;
   }
-  ha-card[gradient] .line--point:hover {
-    fill: var(--primary-text-color, white);
+  ha-card[gradient] .line--point--group:hover .line--point--fill {
+    visibility: unset;
+    stroke: var(--primary-text-color, white);
   }
   path,
   .line--points,
