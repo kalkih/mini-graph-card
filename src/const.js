@@ -43,6 +43,7 @@ const DEFAULT_SHOW = {
   legend: true,
   fill: true,
   points: 'hover',
+  loading_indicator: true,
 };
 
 const X = 0;
