@@ -327,8 +327,8 @@ class MiniGraphCard extends LitElement {
                    && !this.Graph.some(
                       element,
                       (index) =>
-                        element._history === undefined &&
-                        this.config.entities[index].show_graph !== false,
+                      element._history === undefined &&
+                      this.config.entities[index].show_graph !== false,
                     )
                   )
                   || this.config.show.loading_indicator !== true;
