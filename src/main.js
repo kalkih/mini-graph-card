@@ -429,6 +429,7 @@ class MiniGraphCard extends LitElement {
         stroke-dasharray=${this.length[i] || 'none'} stroke-dashoffset=${this.length[i] || 'none'}
         stroke=${'white'}
         stroke-width=${this.config.line_width}
+        vector-effect='non-scaling-stroke'
         d=${this.line[i]}
       />`;
 
