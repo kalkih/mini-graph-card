@@ -329,11 +329,11 @@ class MiniGraphCard extends LitElement {
       <div class="graph">
         ${ready ? html`
             <div class="graph__container">
-              ${this.renderLabels()}
-              ${this.renderLabelsSecondary()}
               <div class="graph__container__svg">
                 ${this.renderSvg()}
               </div>
+              ${this.renderLabels()}
+              ${this.renderLabelsSecondary()}
             </div>
             ${this.renderLegend()}
         ` : html`
@@ -539,6 +539,7 @@ class MiniGraphCard extends LitElement {
     const { height } = this.config;
     return svg`
       <svg width='100%' height=${height !== 0 ? '100%' : 0} viewBox='0 0 500 ${height}'
+        preserveAspectRatio='none'
         @click=${e => e.stopPropagation()}>
         <g>
           <defs>
