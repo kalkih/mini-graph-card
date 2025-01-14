@@ -232,6 +232,7 @@ const style = css`
   }
   .graph {
     flex: auto;
+    min-height: 0;
     align-self: flex-end;
     box-sizing: border-box;
     display: flex;
