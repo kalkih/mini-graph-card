@@ -92,7 +92,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | cache | boolean | `true` | v0.9.0 | Enable/disable local caching of history data.
 | show | list |  | v0.2.0 | List of UI elements to display/hide, for available items see [available show options](#available-show-options).
 | animate | boolean | `false` | v0.2.0 | Add a reveal animation to the graph.
-| height | number | `150` | v0.0.1 | Set a custom height of the graph. Disregarded, if the card has a fixed size already, e.g. in sections/grid view.
+| height | number | `150` | v0.0.1 | Set a custom height of the graph. Disregarded, if the card has a fixed size already, e.g. in sections view or grid/horizontal-stack card.
 | bar_spacing | number | `4` | v0.9.0 | Set the spacing between bars in bar graph.
 | line_width | number | `5` | v0.0.1 | Set the thickness of the line.
 | line_color | string/list | `var(--accent-color)` | v0.0.1 | Set a custom color for the graph line, provide a list of colors for multiple graph entries.
