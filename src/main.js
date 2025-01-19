@@ -313,7 +313,7 @@ class MiniGraphCard extends LitElement {
     return html`
       <div class="state__time">
         ${this.tooltip.label ? html`
-          <span>${this.tooltip.label}</span>
+          <span class="tooltip--label">${this.tooltip.label}</span>
         ` : html`
           <span>${this.tooltip.time[0]}</span> -
           <span>${this.tooltip.time[1]}</span>
