@@ -122,6 +122,7 @@ class MiniGraphCard extends LitElement {
             !entity.entity.startsWith('binary_sensor.'), // turn off for binary sensor by default
           ),
           this.config.logarithmic,
+          this.config.fill_threshold,
         ),
       );
     }

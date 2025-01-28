@@ -5,7 +5,7 @@ import {
 } from './const';
 
 export default class Graph {
-  constructor(width, height, margin, hours = 24, points = 1, aggregateFuncName = 'avg', groupBy = 'interval', smoothing = true, logarithmic = false) {
+  constructor(width, height, margin, hours = 24, points = 1, aggregateFuncName = 'avg', groupBy = 'interval', smoothing = true, logarithmic = false, fillThreshold) {
     const aggregateFuncMap = {
       avg: this._average,
       median: this._median,
@@ -33,6 +33,7 @@ export default class Graph {
     this._logarithmic = logarithmic;
     this._groupBy = groupBy;
     this._endTime = 0;
+    this.fillThreshold = fillThreshold;
   }
 
   get max() { return this._max; }
@@ -185,7 +186,11 @@ export default class Graph {
   }
 
   getFill(path) {
-    const height = this.height + this.margin[Y] * 4;
+    let height = this.height + this.margin[Y] * 4;
+    if (typeof this.fillThreshold === 'number' && !Number.isNaN(this.fillThreshold)) {
+      const [threshold] = this._calcY([[0, 0, this.fillThreshold]]);
+      [, height] = threshold;
+    }
     let fill = path;
     fill += ` L ${this.width - this.margin[X] * 2}, ${height}`;
     fill += ` L ${this.coords[0][X]}, ${height} z`;
