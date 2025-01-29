@@ -185,10 +185,13 @@ export default class Graph {
     });
   }
 
-  getFill(path) {
+  getFill(path, entityFillThreshold) {
     let height = this.height + this.margin[Y] * 4;
-    if (typeof this.fillThreshold === 'number' && !Number.isNaN(this.fillThreshold)) {
-      const [threshold] = this._calcY([[0, 0, this.fillThreshold]]);
+    const customThreshold = [this.fillThreshold, entityFillThreshold]
+      .filter(t => typeof t === 'number' && !Number.isNaN(t))
+      .pop();
+    if (customThreshold !== undefined) {
+      const [threshold] = this._calcY([[0, 0, customThreshold]]);
       [, height] = threshold;
     }
     let fill = path;
