@@ -313,7 +313,7 @@ class MiniGraphCard extends LitElement {
     return html`
       <div class="state__time">
         ${this.tooltip.label ? html`
-          <span>${this.tooltip.label}</span>
+          <span class="tooltip--label">${this.tooltip.label}</span>
         ` : html`
           <span>${this.tooltip.time[0]}</span> -
           <span>${this.tooltip.time[1]}</span>
@@ -323,34 +323,66 @@ class MiniGraphCard extends LitElement {
   }
 
   renderGraph() {
+    const ready = (this.entity[0] && !this.Graph.some(
+      (element, index) => element._history === undefined
+      && this.config.entities[index].show_graph !== false,
+    ))
+    || this.config.show.loading_indicator === false;
     return this.config.show.graph ? html`
       <div class="graph">
-        <div class="graph__container">
-          ${this.renderLabels()}
-          ${this.renderLabelsSecondary()}
-          <div class="graph__container__svg">
-            ${this.renderSvg()}
-          </div>
-        </div>
-        ${this.renderLegend()}
+        ${ready ? html`
+            <div class="graph__container">
+              ${this.renderLabels()}
+              ${this.renderLabelsSecondary()}
+              <div class="graph__container__svg">
+                ${this.renderSvg()}
+              </div>
+            </div>
+            ${this.renderLegend()}
+        ` : html`
+          <ha-circular-progress indeterminate></ha-circular-progress>
+        `}
       </div>` : '';
+  }
+
+  computeLegend(index) {
+    let legend = this.computeName(index);
+    const state = this.getEntityState(index);
+
+    const { show_legend_state = false } = this.config.entities[index];
+
+    if (show_legend_state) {
+      if (this.computeUom(index) === '%') {
+        legend += ` (${this.computeState(state)}${this.computeUom(index)})`;
+      } else {
+        legend += ` (${this.computeState(state)} ${this.computeUom(index)})`;
+      }
+    }
+
+    return legend;
   }
 
   renderLegend() {
     if (this.visibleLegends.length <= 1 || !this.config.show.legend) return;
+
+    /* eslint-disable indent */
     return html`
       <div class="graph__legend">
-        ${this.visibleLegends.map(entity => html`
-          <div class="graph__legend__item"
-            @click=${e => this.handlePopup(e, this.entity[entity.index])}
-            @mouseenter=${() => this.setTooltip(entity.index, -1, this.getEntityState(entity.index), 'Current')}
-            @mouseleave=${() => (this.tooltip = {})}>
-            ${this.renderIndicator(this.getEntityState(entity.index), entity.index)}
-            <span class="ellipsis">${this.computeName(entity.index)}</span>
-          </div>
-        `)}
+        ${this.visibleLegends.map((entity) => {
+          const legend = this.computeLegend(entity.index);
+          return html`
+            <div class="graph__legend__item"
+              @click=${e => this.handlePopup(e, this.entity[entity.index])}
+              @mouseenter=${() => this.setTooltip(entity.index, -1, this.getEntityState(entity.index), 'Current')}
+              @mouseleave=${() => (this.tooltip = {})}>
+              ${this.renderIndicator(this.getEntityState(entity.index), entity.index)}
+              <span class="ellipsis">${legend}</span>
+            </div>
+          `;
+        })}
       </div>
     `;
+    /* eslint-enable indent */
   }
 
   renderIndicator(state, index) {
@@ -847,8 +879,8 @@ class MiniGraphCard extends LitElement {
 
   getBoundaries(series, min, max, fallback, minRange) {
     let boundary = [
-      this.getBoundary('min', series, min, fallback[0], minRange),
-      this.getBoundary('max', series, max, fallback[1], minRange),
+      this.getBoundary('min', series, min, fallback[0]),
+      this.getBoundary('max', series, max, fallback[1]),
     ];
 
     if (minRange) {
@@ -857,10 +889,22 @@ class MiniGraphCard extends LitElement {
 
       // Doesn't matter if minBoundRange is NaN because this will be false if so
       if (diff > 0) {
-        boundary = [
-          boundary[0] - diff / 2,
-          boundary[1] + diff / 2,
+        const weights = [
+          min !== undefined && min[0] !== '~' || max === undefined ? 0 : 1,
+          max !== undefined && max[0] !== '~' || min === undefined ? 0 : 1,
         ];
+        const sum = weights[0] + weights[1];
+        if (sum > 0) {
+          boundary = [
+            boundary[0] - diff * weights[0] / sum,
+            boundary[1] + diff * weights[1] / sum,
+          ];
+        } else {
+          boundary = [
+            boundary[0] - diff / 2,
+            boundary[1] + diff / 2,
+          ];
+        }
       }
     }
 
