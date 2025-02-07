@@ -559,11 +559,10 @@ class MiniGraphCard extends LitElement {
           if (diffInMinutes > 0 && diffInMinutes < minutesInGraph) {
             const startDate = new Date(startTime);
             const x = graphWidth - graphWidth / minutesInGraph * diffInMinutes;
-            lines.push(svg`<line x1=${x} y1="0" x2=${x} y2=${height - 12} 
-              stroke="grey" 
-              stroke-width=${this.isMidnight(hour, minutes) ? '2' : '1'} 
-              stroke-dasharray=${this.isMidnight(hour, minutes) ? '0' : '10,5'}
-              /><text x=${x} y=${height - 2} font-size="10" fill="grey" text-anchor="middle">
+            lines.push(svg`<line class="line-${time.replace(':', '-')}" x1=${x} y1="0" x2=${x} y2=${height - 12} 
+              stroke="grey" stroke-width="2" />
+              <text class="text-${time.replace(':', '-')}" x=${x} y=${height - 2} 
+              font-size="10" fill="grey" text-anchor="middle">
               ${this.isMidnight(hour, minutes)
     ? `${this.zeroPad(startDate.getDate())}-${this.zeroPad(startDate.getMonth() + 1)}`
     : time}</text>`);
