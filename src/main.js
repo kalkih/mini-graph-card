@@ -286,21 +286,24 @@ class MiniGraphCard extends LitElement {
   }
 
   renderState(entityConfig, id) {
-    const isPrimary = id === 0;
+    const isPrimary = id === 0; // rendering main state element?
     if (isPrimary || entityConfig.show_state) {
-      const { entity, value: tooltipValue } = this.tooltip;
       const state = this.getEntityState(id);
+      // use tooltip data for main state element, if tooltip is active
+      const { entity: tooltipEntity, value: tooltipValue } = this.tooltip;
+      const value = isPrimary && tooltipEntity ? tooltipValue : state;
+      const entity = isPrimary && tooltipEntity ? tooltipEntity : id;
       return html`
         <div
           class="state ${!isPrimary && 'state--small'}"
           @click=${e => this.handlePopup(e, this.entity[id])}
-          style=${entityConfig.state_adaptive_color ? `color: ${this.computeColor((isPrimary && tooltipValue !== undefined) ? tooltipValue : state, id)};` : ''}>
-          ${entityConfig.show_indicator ? this.renderIndicator(state, id) : ''}
+          style=${entityConfig.state_adaptive_color ? `color: ${this.computeColor(value, entity)}` : ''}>
+          ${entityConfig.show_indicator ? this.renderIndicator(value, entity) : ''}
           <span class="state__value ellipsis">
-            ${this.computeState((isPrimary && tooltipValue !== undefined) ? tooltipValue : state)}
+            ${this.computeState(value)}
           </span>
           <span class="state__uom ellipsis">
-            ${this.computeUom(isPrimary && entity || id)}
+            ${this.computeUom(entity)}
           </span>
           ${isPrimary && this.renderStateTime() || ''}
         </div>
