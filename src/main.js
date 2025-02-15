@@ -291,8 +291,8 @@ class MiniGraphCard extends LitElement {
       const state = this.getEntityState(id);
       // use tooltip data for main state element, if tooltip is active
       const { entity: tooltipEntity, value: tooltipValue } = this.tooltip;
-      const value = isPrimary && tooltipEntity ? tooltipValue : state;
-      const entity = isPrimary && tooltipEntity ? tooltipEntity : id;
+      const value = isPrimary && tooltipEntity !== undefined ? tooltipValue : state;
+      const entity = isPrimary && tooltipEntity !== undefined ? tooltipEntity : id;
       return html`
         <div
           class="state ${!isPrimary && 'state--small'}"
