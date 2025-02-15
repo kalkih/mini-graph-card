@@ -1,3 +1,19 @@
+# [0.13.0-dev.2](https://github.com/kalkih/mini-graph-card/compare/v0.13.0-dev.1...v0.13.0-dev.2) (2025-02-15)
+
+
+### Bug Fixes
+
+* adapt state color to tooltip properties ([#1214](https://github.com/kalkih/mini-graph-card/issues/1214)) ([1142f25](https://github.com/kalkih/mini-graph-card/commit/1142f259b168ddc936e7060c6cffabc4e89dc8bf))
+* hide graph loading indicator when appropriate ([#1197](https://github.com/kalkih/mini-graph-card/issues/1197)) ([d708d6a](https://github.com/kalkih/mini-graph-card/commit/d708d6a22f1531681855a1b852f2f7ee7cfc07ba))
+* legend unit percent w/o whitespace ([#1191](https://github.com/kalkih/mini-graph-card/issues/1191)) ([9f5cfd9](https://github.com/kalkih/mini-graph-card/commit/9f5cfd9c86e1d05bbaa14691fbaa77bceb63144a))
+* more intuitive min_bound_range behavior ([#1136](https://github.com/kalkih/mini-graph-card/issues/1136)) ([54d9875](https://github.com/kalkih/mini-graph-card/commit/54d987568b850451e0b6009d3d002526bb1f5b13))
+* remove unused argument from getBoundary ([#1193](https://github.com/kalkih/mini-graph-card/issues/1193)) ([f5261d9](https://github.com/kalkih/mini-graph-card/commit/f5261d92c37b93f2fd8c7f8da01fe8af4a5a18e8))
+
+
+### Features
+
+* add "tooltip--label" class ([#1202](https://github.com/kalkih/mini-graph-card/issues/1202)) ([0d3c184](https://github.com/kalkih/mini-graph-card/commit/0d3c184dc19c43dd2c0797f3f7d25b6aaac014e4))
+
 # [0.13.0-dev.1](https://github.com/kalkih/mini-graph-card/compare/v0.12.2-dev.2...v0.13.0-dev.1) (2024-12-21)
 
 
