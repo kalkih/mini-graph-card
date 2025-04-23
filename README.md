@@ -25,7 +25,7 @@ This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community St
 
 2. Grab `mini-graph-card-bundle.js`:
 
-  ```
+  ```console
   $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.12.1/mini-graph-card-bundle.js
   ```
 
@@ -502,7 +502,7 @@ state_map:
 
 It is possible to show a state without displaying a graph for a sensor.
 Imagine there are two CO-2 sensors & one humidity sensor; graphs are displayed for the CO-2 only, and the humidity is shown as a state only.
-```
+```yaml
 type: custom:mini-graph-card
 entities:
   - entity: sensor.xiaomi_cg_1_humidity
@@ -540,7 +540,7 @@ dict_attribute:
   value_3: 72
 ```
 Such data should be addressed as `dict_attribute.sub_attribute`:
-```
+```yaml
 type: custom:mini-graph-card
 entities:
   - entity: sensor.testing_object_data
@@ -565,7 +565,7 @@ list_attribute:
     value_3: 279
 ```
 Such data should be addressed as `list_attribute.index.sub_attribute`:
-```
+```yaml
 type: custom:mini-graph-card
 entities:
   - entity: sensor.testing_object_data_list
@@ -579,7 +579,7 @@ entities:
 
 1. Clone this repository into your `config/www` folder using git:
 
-```
+```console
 $ git clone https://github.com/kalkih/mini-graph-card.git
 ```
 
