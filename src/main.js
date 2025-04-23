@@ -300,7 +300,7 @@ class MiniGraphCard extends LitElement {
           style=${entityConfig.state_adaptive_color ? `color: ${this.computeColor(value, entity)}` : ''}>
           ${entityConfig.show_indicator ? this.renderIndicator(value, entity) : ''}
           <span class="state__value ellipsis">
-            ${this.computeState(value)}
+            ${this.computeState(value, entity)}
           </span>
           <span class="state__uom ellipsis">
             ${this.computeUom(entity)}
@@ -356,9 +356,9 @@ class MiniGraphCard extends LitElement {
 
     if (show_legend_state) {
       if (this.computeUom(index) === '%') {
-        legend += ` (${this.computeState(state)}${this.computeUom(index)})`;
+        legend += ` (${this.computeState(state, index)}${this.computeUom(index)})`;
       } else {
-        legend += ` (${this.computeState(state)} ${this.computeUom(index)})`;
+        legend += ` (${this.computeState(state, index)} ${this.computeUom(index)})`;
       }
     }
 
@@ -611,8 +611,8 @@ class MiniGraphCard extends LitElement {
     if (!this.config.show.labels_secondary || this.secondaryYaxisSeries.length === 0) return;
     return html`
       <div class="graph__labels --secondary flex">
-        <span class="label--max">${this.computeState(this.boundSecondary[1])}</span>
-        <span class="label--min">${this.computeState(this.boundSecondary[0])}</span>
+        <span class="label--max">${this.computeState(this.boundSecondary[1], -1)}</span>
+        <span class="label--min">${this.computeState(this.boundSecondary[0], -1)}</span>
       </div>
     `;
   }
@@ -624,7 +624,7 @@ class MiniGraphCard extends LitElement {
           <div class="info__item">
             <span class="info__item__type">${entry.type}</span>
             <span class="info__item__value">
-              ${this.computeState(entry.state)} ${this.computeUom(0)}
+              ${this.computeState(entry.state, 0)} ${this.computeUom(0)}
             </span>
             <span class="info__item__time">
               ${entry.type !== 'avg' ? getTime(new Date(entry.last_changed), this.config.format, this._hass.language) : ''}
@@ -712,7 +712,7 @@ class MiniGraphCard extends LitElement {
     );
   }
 
-  computeState(inState) {
+  computeState(inState, index) {
     if (this.config.state_map.length > 0) {
       const stateMap = Number.isInteger(inState)
         ? this.config.state_map[inState]
@@ -731,7 +731,20 @@ class MiniGraphCard extends LitElement {
     } else {
       state = Number(inState);
     }
-    const dec = this.config.decimals;
+
+    let dec;
+    if (index === undefined) {
+      dec = this.config.decimals;
+    } else if (index === -1) {
+      dec = this.config.decimals_secondary !== undefined
+        ? this.config.decimals_secondary
+        : this.config.decimals;
+    } else {
+      dec = this.config.entities[index].decimals !== undefined
+        ? this.config.entities[index].decimals
+        : this.config.decimals;
+    }
+
     const value_factor = 10 ** this.config.value_factor;
 
     if (dec === undefined || Number.isNaN(dec) || Number.isNaN(state)) {
