@@ -98,7 +98,8 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | line_color | string/list | `var(--accent-color)` | v0.0.1 | Set a custom color for the graph line, provide a list of colors for multiple graph entries.
 | color_thresholds | list |  | v0.2.3 | Set thresholds for dynamic graph colors, see [Line color object](#line-color-object).
 | color_thresholds_transition | string | `smooth` | v0.4.3 | Color threshold transition, `smooth` or `hard`.
-| decimals | integer |  | v0.0.9 | Specify the exact number of decimals to show for states.
+| decimals | integer |  | v0.0.9 | Specify the exact number of decimals to show for number values, see [Number format](#number-format).
+| decimals_secondary | integer |  | v0.13.0 | Specify the exact number of decimals to show for secondary Y-axis labels, see [Number format](#number-format).
 | hour24 | boolean | `false` | v0.2.1 | Set to `true` to display times in 24-hour format.
 | font_size | number | `100` | v0.0.3 | Adjust the font size of the state, as percentage of the original size.
 | font_size_header | number | `14` | v0.3.1 | Adjust the font size of the header, size in pixels.
@@ -129,6 +130,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | color | string |         | Set a custom color, overrides all other color options including thresholds.
 | unit | string |         | Set a custom unit of measurement, overrides `unit` set in base config.
 | aggregate_func | string |         | Override for aggregate function used to calculate point on the graph, `avg`, `median`, `min`, `max`, `first`, `last`, `sum`.
+| decimals | integer |    | Override the exact number of decimals to show for number values, see [Number format](#number-format).
 | show_state | boolean |         | Display the current state.
 | show_legend_state | boolean |  false  | Display the current state as part of the legend.
 | show_indicator | boolean |         | Display a color indicator next to the state, (only when more than two states are visible).
@@ -138,7 +140,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | show_points | boolean |         | Set to false to hide the points.
 | show_legend | boolean |         | Set to false to turn hide from the legend.
 | state_adaptive_color | boolean |         | Make the color of the state adapt to the entity color.
-| y_axis | string |         | If 'secondary', displays using the secondary y-axis on the right.
+| y_axis | string |         | If 'secondary', displays using the secondary Y-axis on the right.
 | fixed_value | boolean |         | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 | smoothing | boolean |         | Override for a flag indicating whether to make graph line smooth.
 
@@ -254,6 +256,26 @@ These buckets are converted later to single point/bar on the graph. Aggregate fu
 | `sum` | v0.9.2 |
 | `delta` | v0.9.4 | Calculates difference between max and min value
 | `diff` | v0.11.0 | Calculates difference between first and last value
+
+### Number format
+
+Options `decimals` defined "card-wide" and/or for some entity are used to set an exact number of decimals according to the following rules:
+1. For states:
+- if none `decimals` option is defined - a default presentation is used;
+- if "card-wide" `decimals` is defined - this value is used;
+- if `decimals` for some entity is defined - this value is used for this entity.
+2. For extrema & average values:
+- if none `decimals` option is defined - a default presentation is used;
+- if "card-wide" `decimals` is defined - this value is used;
+- if `decimals` is defined for the 1st entity - this value is used.
+3. For primary Y-axis labels:
+- if "card-wide" `decimals` option is not defined - a default presentation is used;
+- otherwise - this value is used.
+4. For secondary Y-axis labels:
+- if "card-wide" `decimals` & `decimals_secondary` option are not defined - a default presentation is used;
+- if "card-wide" `decimals` option is defined - this value is used;
+- if "card-wide" `decimals_secondary` option is defined - this value is used.
+  
 
 ### Theme variables
 The following theme variables can be set in your HA theme to customize the appearance of the card.
@@ -393,11 +415,11 @@ color_thresholds:
     color: "#c0392b"
 ```
 
-#### Alternate y-axis
-Have one or more series plot on a separate y-axis, which appears on the right side of the graph. This example also
+#### Alternate Y-axis
+Have one or more series plot on a separate Y-axis, which appears on the right side of the graph. This example also
 shows turning off the line, points and legend.
 
-![Alternate y-axis](https://user-images.githubusercontent.com/373079/60764115-63cf2780-a0c6-11e9-8b9a-97fc47161180.png)
+![Alternate Y-axis](https://user-images.githubusercontent.com/373079/60764115-63cf2780-a0c6-11e9-8b9a-97fc47161180.png)
 
 ```yaml
 type: custom:mini-graph-card
@@ -495,6 +517,7 @@ state_map:
   - value: "on"
     label: Detected
 ```
+
 
 #### Showing additional info on the card
 
