@@ -100,6 +100,14 @@ class MiniGraphCard extends LitElement {
     };
   }
 
+  getMaxLineWidth() {
+    const arr = this.config.entities.map((entityConfig) => entityConfig.line_width);
+    return Math.max(
+      this.config.line_width,
+      ...arr,
+    );
+  }
+  
   setConfig(config) {
     this.config = buildConfig(config, this.config);
     this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
@@ -107,11 +115,12 @@ class MiniGraphCard extends LitElement {
 
     if (!this.Graph || entitiesChanged) {
       if (this._hass) this.hass = this._hass;
+      const max_line_width = this.getMaxLineWidth();
       this.Graph = this.config.entities.map(
         entity => new Graph(
           500,
           this.config.height,
-          [this.config.show.fill ? 0 : this.config.line_width, this.config.line_width],
+          [this.config.show.fill ? 0 : max_line_width, max_line_width],
           this.config.hours_to_show,
           this.config.points_per_hour,
           entity.aggregate_func || this.config.aggregate_func,
