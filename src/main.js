@@ -112,7 +112,7 @@ class MiniGraphCard extends LitElement {
       max: Math.max(
         this.config.line_width,
         ...arr,
-      )
+      ),
     });
   }
 
