@@ -691,7 +691,9 @@ class MiniGraphCard extends LitElement {
   }
 
   computeName(index) {
-    return this.config.entities[index].name || this.entity[index].attributes.friendly_name;
+    return this.config.entities[index].name
+      || this.entity[index].attributes.friendly_name
+      || this.entity[index].entity_id;
   }
 
   computeIcon(entity) {
@@ -705,10 +707,17 @@ class MiniGraphCard extends LitElement {
 
   computeUom(index) {
     return (
-      this.config.entities[index].unit
-      || this.config.unit
-      || this.entity[index].attributes.unit_of_measurement
-      || ''
+      this.config.entities[index].unit !== undefined
+        ? this.config.entities[index].unit
+        : (
+          this.config.unit !== undefined
+            ? this.config.unit
+            : (
+              !this.config.entities[index].attribute
+                ? (this.entity[index].attributes.unit_of_measurement || '')
+                : ''
+            )
+        )
     );
   }
 
