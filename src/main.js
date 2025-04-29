@@ -356,7 +356,7 @@ class MiniGraphCard extends LitElement {
 
     if (show_legend_state) {
       legend += ` (${this.computeState(state)}`;
-      if (state !== 'unavailable') {
+      if (!(['unavailable'].include(state))) {
         const uom = this.computeUom(index);
         if (!(['%', ''].includes(uom)))
           legend += ' ';
