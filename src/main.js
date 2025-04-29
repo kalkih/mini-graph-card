@@ -438,7 +438,7 @@ class MiniGraphCard extends LitElement {
         fill='none'
         stroke-dasharray=${this.length[i] || 'none'} stroke-dashoffset=${this.length[i] || 'none'}
         stroke=${'white'}
-        stroke-width=${this.config.line_width}
+        stroke-width=${this.config.entities[i].line_width || this.config.line_width}
         d=${this.line[i]}
       />`;
 
@@ -458,7 +458,7 @@ class MiniGraphCard extends LitElement {
         style=${`--mcg-hover: ${color};`}
         stroke=${color}
         fill=${color}
-        cx=${point[X]} cy=${point[Y]} r=${this.config.line_width}
+        cx=${point[X]} cy=${point[Y]} r=${this.config.entities[i].line_width || this.config.line_width}
         @mouseover=${() => this.setTooltip(i, point[3], point[V])}
         @mouseout=${() => (this.tooltip = {})}
       />
@@ -477,7 +477,7 @@ class MiniGraphCard extends LitElement {
         style="animation-delay: ${this.config.animate ? `${i * 0.5 + 0.5}s` : '0s'}"
         fill=${color}
         stroke=${color}
-        stroke-width=${this.config.line_width / 2}>
+        stroke-width=${(this.config.entities[i].line_width || this.config.line_width) / 2}>
         ${points.map(point => this.renderSvgPoint(point, i))}
       </g>`;
   }
