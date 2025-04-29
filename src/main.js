@@ -705,10 +705,17 @@ class MiniGraphCard extends LitElement {
 
   computeUom(index) {
     return (
-      this.config.entities[index].unit
-      || this.config.unit
-      || this.entity[index].attributes.unit_of_measurement
-      || ''
+      this.config.entities[index].unit !== undefined
+        ? this.config.entities[index].unit
+        : (
+          this.config.unit !== undefined
+            ? this.config.unit
+            : (
+              !this.config.entities[index].attribute
+                ? (this.entity[index].attributes.unit_of_measurement || '')
+                : ''
+            )
+        )
     );
   }
 
