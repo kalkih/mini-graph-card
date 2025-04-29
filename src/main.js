@@ -123,8 +123,8 @@ class MiniGraphCard extends LitElement {
 
     if (!this.Graph || entitiesChanged) {
       if (this._hass) this.hass = this._hass;
-      const min_line_width = this.getMaxLineWidth().min;
-      const max_line_width = this.getMaxLineWidth().max;
+      const min_line_width = this.getMinMaxLineWidth().min;
+      const max_line_width = this.getMinMaxLineWidth().max;
       this.Graph = this.config.entities.map(
         entity => new Graph(
           500,
