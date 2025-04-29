@@ -81,7 +81,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | icon | string |  | v0.0.1 | Set a custom icon from any of the available mdi icons.
 | icon_image | string |  | v0.12.0 | Override icon with an image url
 | name | string |  | v0.0.1 | Set a custom name which is displayed beside the icon.
-| unit | string |  | v0.0.1 | Set a custom unit of measurement.
+| unit | string |  | v0.0.1 | Set a custom unit of measurement (`''` value for an empty unit).
 | tap_action | [action object](#action-object-options) |  | v0.7.0 | Action on click/tap.
 | group | boolean | `false` | v0.2.0 | Disable paddings and box-shadow, useful when nesting the card.
 | hours_to_show | integer | `24` | v0.0.2 | Specify how many hours of history the graph should present.
@@ -127,7 +127,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | attribute | string |         | Retrieves an attribute or [sub-attribute (attr1.attr2...)](#accessing-attributes-in-complex-structures) instead of the state
 | name | string |         | Set a custom display name, defaults to entity's friendly_name.
 | color | string |         | Set a custom color, overrides all other color options including thresholds.
-| unit | string |         | Set a custom unit of measurement, overrides `unit` set in base config.
+| unit | string |         | Set a custom unit of measurement, overrides `unit` set in base config (`''` value for an empty unit).
 | aggregate_func | string |         | Override for aggregate function used to calculate point on the graph, `avg`, `median`, `min`, `max`, `first`, `last`, `sum`.
 | show_state | boolean |         | Display the current state.
 | show_legend_state | boolean |  false  | Display the current state as part of the legend.
