@@ -259,12 +259,11 @@ class MiniGraphCard extends LitElement {
   }
 
   renderStates() {
-    const [firstEntityConfig] = this.config.entities;
     if (this.config.show.state)
       return html`
         <div class="states flex" loc=${this.config.align_state}>
-          ${this.renderState(firstEntityConfig, 0)}
-          <div class="states--secondary">${this.config.entities.map((entityConfig, i) => i > 0 && this.renderState(entityConfig, i) || '')}</div>
+          ${this.renderState(0)}
+          <div class="states--secondary">${this.config.entities.map((entityConfig, i) => i > 0 && this.renderState(i) || '')}</div>
           ${this.config.align_icon === 'state' ? this.renderIcon() : ''}
         </div>
       `;
@@ -285,14 +284,16 @@ class MiniGraphCard extends LitElement {
     }
   }
 
-  renderState(entityConfig, id) {
+  renderState(id) {
     const isPrimary = id === 0; // rendering main state element?
-    if (isPrimary || entityConfig.show_state) {
+    if (isPrimary || this.config.entities[id].show_state) {
       const state = this.getEntityState(id);
       // use tooltip data for main state element, if tooltip is active
       const { entity: tooltipEntity, value: tooltipValue } = this.tooltip;
-      const value = isPrimary && tooltipEntity !== undefined ? tooltipValue : state;
-      const entity = isPrimary && tooltipEntity !== undefined ? tooltipEntity : id;
+      const isTooltip = isPrimary && tooltipEntity !== undefined;
+      const value = isTooltip ? tooltipValue : state;
+      const entity = isTooltip ? tooltipEntity : id;
+      const entityConfig = this.config.entities[entity];
       return html`
         <div
           class="state ${!isPrimary && 'state--small'}"
@@ -355,11 +356,14 @@ class MiniGraphCard extends LitElement {
     const { show_legend_state = false } = this.config.entities[index];
 
     if (show_legend_state) {
-      if (this.computeUom(index) === '%') {
-        legend += ` (${this.computeState(state, index)}${this.computeUom(index)})`;
-      } else {
-        legend += ` (${this.computeState(state, index)} ${this.computeUom(index)})`;
+      legend += ` (${this.computeState(state, index)}`;
+      if (!(['unavailable'].includes(state))) {
+        const uom = this.computeUom(index);
+        if (!(['%', ''].includes(uom)))
+          legend += ' ';
+        legend += `${uom}`;
       }
+      legend += ')';
     }
 
     return legend;
