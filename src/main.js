@@ -691,7 +691,9 @@ class MiniGraphCard extends LitElement {
   }
 
   computeName(index) {
-    return this.config.entities[index].name || this.entity[index].attributes.friendly_name;
+    return this.config.entities[index].name
+      || this.entity[index].attributes.friendly_name
+      || this.entity[index].entity_id;
   }
 
   computeIcon(entity) {
