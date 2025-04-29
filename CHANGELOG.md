@@ -1,3 +1,13 @@
+# [0.13.0-dev.3](https://github.com/kalkih/mini-graph-card/compare/v0.13.0-dev.2...v0.13.0-dev.3) (2025-04-29)
+
+
+### Bug Fixes
+
+* computeUom() for attribute & empty unit ([#1236](https://github.com/kalkih/mini-graph-card/issues/1236)) ([436b9a9](https://github.com/kalkih/mini-graph-card/commit/436b9a94f3b16f60fa39bcce5163ee07038c7e22))
+* padding fill ([#1238](https://github.com/kalkih/mini-graph-card/issues/1238)) ([f930fa6](https://github.com/kalkih/mini-graph-card/commit/f930fa60dfce7b1003b2ebb64c9ce1673b160c60))
+* process absent UoM in computeLegend() ([#1237](https://github.com/kalkih/mini-graph-card/issues/1237)) ([5724cfd](https://github.com/kalkih/mini-graph-card/commit/5724cfdd8e73316659d4bd38ee351628f247ae85))
+* use a proper config in renderState() ([#1217](https://github.com/kalkih/mini-graph-card/issues/1217)) ([c980460](https://github.com/kalkih/mini-graph-card/commit/c9804600989bd9d3c5868e0312479a26330ac7f2))
+
 # [0.13.0-dev.2](https://github.com/kalkih/mini-graph-card/compare/v0.13.0-dev.1...v0.13.0-dev.2) (2025-02-15)
 
 

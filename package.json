@@ -1,6 +1,6 @@
 {
   "name": "mini-graph-card",
-  "version": "0.13.0-dev.2",
+  "version": "0.13.0-dev.3",
   "description": "A minimalistic and customizable graph card for Home Assistant Lovelace UI",
   "keywords": [
     "home-assistant",
