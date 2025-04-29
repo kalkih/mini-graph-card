@@ -355,13 +355,13 @@ class MiniGraphCard extends LitElement {
     const { show_legend_state = false } = this.config.entities[index];
 
     if (show_legend_state) {
-      legend += ' (' + this.computeState(state);
+      legend += ` (${this.computeState(state)}`;
       if (state !== 'unavailable') {
         const uom = this.computeUom(index);
         if (uom !== '%' && uom !== '')
           legend += ' ';
         else
-          legend += uom;
+          legend += `${uom}`;
       }
       legend += ')';
     }
