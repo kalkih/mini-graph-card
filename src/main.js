@@ -100,14 +100,20 @@ class MiniGraphCard extends LitElement {
     };
   }
 
-  getMaxLineWidth() {
+  getMinMaxLineWidth() {
     const arr = this.config.entities
       .map(entityConfig => entityConfig.line_width)
       .filter(line_width => line_width !== undefined && !Number.isNaN(line_width));
-    return Math.max(
-      this.config.line_width,
-      ...arr,
-    );
+    return ({
+      min: Math.min(
+        this.config.line_width,
+        ...arr,
+      ),
+      max: Math.max(
+        this.config.line_width,
+        ...arr,
+      )
+    });
   }
 
   setConfig(config) {
@@ -117,12 +123,13 @@ class MiniGraphCard extends LitElement {
 
     if (!this.Graph || entitiesChanged) {
       if (this._hass) this.hass = this._hass;
-      const max_line_width = this.getMaxLineWidth();
+      const min_line_width = this.getMaxLineWidth().min;
+      const max_line_width = this.getMaxLineWidth().max;
       this.Graph = this.config.entities.map(
         entity => new Graph(
           500,
           this.config.height,
-          [this.config.show.fill ? 0 : max_line_width, max_line_width],
+          [this.config.show.fill ? 0 : min_line_width, max_line_width],
           this.config.hours_to_show,
           this.config.points_per_hour,
           entity.aggregate_func || this.config.aggregate_func,
