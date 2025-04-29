@@ -101,13 +101,13 @@ class MiniGraphCard extends LitElement {
   }
 
   getMaxLineWidth() {
-    const arr = this.config.entities.map((entityConfig) => entityConfig.line_width);
+    const arr = this.config.entities.map(entityConfig => entityConfig.line_width);
     return Math.max(
       this.config.line_width,
       ...arr,
     );
   }
-  
+
   setConfig(config) {
     this.config = buildConfig(config, this.config);
     this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
