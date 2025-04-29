@@ -707,8 +707,11 @@ class MiniGraphCard extends LitElement {
     return (
       this.config.entities[index].unit
       || this.config.unit
-      || this.entity[index].attributes.unit_of_measurement
-      || ''
+      || (
+        !this.config.entities[index].attribute
+          ? (this.entity[index].attributes.unit_of_measurement || '')
+          : ''
+      )
     );
   }
 
