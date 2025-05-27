@@ -10,7 +10,10 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
 ### HACS (recommended) 
 
 This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community Store).
+
 <small>*HACS is a third party community store and is not included in Home Assistant out of the box.*</small>
+
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=kalkih&repository=mini-graph-card)
 
 ### Manual install
 
