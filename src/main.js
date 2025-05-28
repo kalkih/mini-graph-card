@@ -23,6 +23,7 @@ import {
   getFirstDefinedItem,
   compareArray,
   log,
+  isPre2025_5,
 } from './utils';
 
 class MiniGraphCard extends LitElement {
@@ -332,6 +333,9 @@ class MiniGraphCard extends LitElement {
       && this.config.entities[index].show_graph !== false,
     ))
     || this.config.show.loading_indicator === false;
+    const loadingElement = isPre2025_5(this._hass)
+      ? html`<ha-circular-progress indeterminate></ha-circular-progress>`
+      : html`<ha-spinner aria-label="Loading" size="small"></ha-spinner>`;
     return this.config.show.graph ? html`
       <div class="graph">
         ${ready ? html`
@@ -343,9 +347,7 @@ class MiniGraphCard extends LitElement {
               </div>
             </div>
             ${this.renderLegend()}
-        ` : html`
-          <ha-spinner aria-label="Loading" size="small"></ha-spinner>
-        `}
+        ` : loadingElement}
       </div>` : '';
   }
 
