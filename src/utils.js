@@ -28,7 +28,7 @@ const log = (message) => {
 };
 
 const isPre2025_5 = hass => hass &&
-  Number(hass.config.version.split('.')[0]) <= '2025' &&
+  Number(hass.config.version.split('.')[0]) <= 2025 &&
   Number(hass.config.version.split('.')[1]) < 5;
 
 export {
