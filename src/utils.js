@@ -27,7 +27,7 @@ const log = (message) => {
   console.warn('mini-graph-card: ', message);
 };
 
-const isPre2025_5 = (hass) => hass && hass.config.version.split(".")[0] === "2025" && Number(hass.config.version.split(".")[1]) < 5;
+const isPre2025_5 = (hass) => hass && hass.config.version.split('.')[0] === '2025' && Number(hass.config.version.split('.')[1]) < 5;
 
 export {
   getMin, getAvg, getMax, getTime, getMilli, compress, decompress, log,
