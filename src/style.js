@@ -62,8 +62,8 @@ const style = css`
   ha-card[hover] {
     cursor: pointer;
   }
-  ha-circular-progress {
-    margin: auto;
+  ha-spinner {
+    margin: 4px auto;
   }
   .flex {
     display: flex;
