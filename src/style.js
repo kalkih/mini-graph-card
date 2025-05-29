@@ -62,9 +62,6 @@ const style = css`
   ha-card[hover] {
     cursor: pointer;
   }
-  ha-circular-progress {
-    margin: auto; /*pre 2025.5*/
-  }
   ha-spinner {
     margin: 4px auto;
   }
