@@ -8,7 +8,7 @@ const style = css`
   ha-card {
     flex-direction: column;
     flex: 1;
-    padding: 16px 0;
+    padding: 16px 0 0 0;
     position: relative;
     overflow: hidden;
   }
@@ -17,6 +17,10 @@ const style = css`
   }
   ha-card > div:last-child {
     padding-bottom: 0;
+  }
+  ha-card .graph {
+    padding: 0;
+    order: 10;
   }
   ha-card[points] .line--points,
   ha-card[labels] .graph__labels.--primary {
@@ -34,26 +38,17 @@ const style = css`
   ha-card:hover .graph__labels.--secondary {
       opacity: 1;
   }
-  ha-card[fill] {
-    padding-bottom: 0;
-  }
-  ha-card[fill] .graph {
-    padding: 0;
-    order: 10;
-  }
   ha-card[fill] path {
     stroke-linecap: initial;
     stroke-linejoin: initial;
   }
-  ha-card[fill] .graph__legend {
+  ha-card .graph__legend {
     order: -1;
     padding: 0 16px 8px 16px;
   }
-  ha-card[fill] .info {
-    padding-bottom: 16px;
-  }
   ha-card[group] {
     box-shadow: none;
+    border: none;
     padding: 0;
   }
   ha-card[group] > div {
@@ -66,6 +61,9 @@ const style = css`
   }
   ha-card[hover] {
     cursor: pointer;
+  }
+  ha-spinner {
+    margin: 4px auto;
   }
   .flex {
     display: flex;
@@ -97,7 +95,7 @@ const style = css`
     opacity: .65;
   }
   .icon {
-    color: var(--paper-item-icon-color, #44739e);
+    color: var(--state-icon-color, #44739e);
     display: inline-block;
     flex: 0 0 1.7em;
     text-align: center;
@@ -167,6 +165,10 @@ const style = css`
     flex-wrap: nowrap;
     max-width: 100%;
     min-width: 0;
+  }
+  .state > svg {
+    align-self: center;
+    border-radius: 100%;
   }
   .state--small {
     font-size: .6em;

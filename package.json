@@ -1,6 +1,6 @@
 {
   "name": "mini-graph-card",
-  "version": "0.12.1",
+  "version": "0.13.0-dev.3",
   "description": "A minimalistic and customizable graph card for Home Assistant Lovelace UI",
   "keywords": [
     "home-assistant",
@@ -21,6 +21,7 @@
   "dependencies": {
     "@kalkih/lz-string": "^1.4.5",
     "custom-card-helpers": "^1.6.6",
+    "d3-interpolate": "^3.0.1",
     "lit-element": "^2.2.1",
     "localforage": "^1.7.3",
     "spark-md5": "^3.0.1"
