@@ -66,9 +66,7 @@ const style = css`
     margin: auto; /*pre 2025.5*/
   }
   ha-spinner {
-    display: block;
     margin: 4px auto;
-    text-align: center;
   }
   .flex {
     display: flex;
