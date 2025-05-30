@@ -27,8 +27,28 @@ const log = (message) => {
   console.warn('mini-graph-card: ', message);
 };
 
+const getHour24 = (locale) => {
+  const TimeFormat = {
+    language: 'language',
+    system: 'system',
+    am_pm: '12',
+    twenty_four: '24',
+  };
+  if ([TimeFormat.language, TimeFormat.system].includes(locale.time_format)) {
+    const testLanguage = locale.time_format === TimeFormat.language
+      ? locale.language
+      : undefined;
+    const test = new Date('January 1, 2020 22:00:00').toLocaleString(testLanguage);
+    return !test.includes('10');
+  }
+  return locale.time_format === TimeFormat.twenty_four;
+};
+
+const getHourFormat = hour24 => (hour24 ? { hourCycle: 'h23' } : { hour12: true });
+
 export {
   getMin, getAvg, getMax, getTime, getMilli, compress, decompress, log,
   getFirstDefinedItem,
   compareArray,
+  getHourFormat, getHour24,
 };

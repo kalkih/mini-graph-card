@@ -1,4 +1,4 @@
-import { log } from './utils';
+import { log, getHourFormat } from './utils';
 import {
   URL_DOCS,
   FONT_SIZE,
@@ -7,6 +7,7 @@ import {
   DEFAULT_COLORS,
   DEFAULT_SHOW,
 } from './const';
+
 
 /**
  * Starting from the given index, increment the index until an array element with a
@@ -156,7 +157,7 @@ export default (config) => {
     conf.color_thresholds_transition,
   );
   const additional = conf.hours_to_show > 24 ? { day: 'numeric', weekday: 'short' } : {};
-  const hourFormat = conf.hour24 ? { hourCycle: 'h23' } : { hour12: true };
+  const hourFormat = getHourFormat(conf.hour24);
   conf.format = { ...hourFormat, ...additional };
 
   // override points per hour to mach group_by function

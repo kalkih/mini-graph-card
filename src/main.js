@@ -23,6 +23,7 @@ import {
   getFirstDefinedItem,
   compareArray,
   log,
+  getHourFormat, getHour24,
 } from './utils';
 
 class MiniGraphCard extends LitElement {
@@ -48,6 +49,7 @@ class MiniGraphCard extends LitElement {
     this.stateChanged = false;
     this.initial = true;
     this._md5Config = undefined;
+    this.updateHour24 = true;
   }
 
   static get styles() {
@@ -104,6 +106,7 @@ class MiniGraphCard extends LitElement {
     this.config = buildConfig(config, this.config);
     this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
     const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
+    this.updateHour24 = config.hour24 === undefined;
 
     if (!this.Graph || entitiesChanged) {
       if (this._hass) this.hass = this._hass;
@@ -124,6 +127,18 @@ class MiniGraphCard extends LitElement {
           this.config.logarithmic,
         ),
       );
+    }
+  }
+
+  updateOptionsFromLocale() {
+    if (this.updateHour24) {
+      let hour24;
+      if (this._hass)
+        hour24 = getHour24(this._hass.locale);
+      else
+        hour24 = false;
+      this.config.hour24 = hour24;
+      this.config.format = getHourFormat(hour24);
     }
   }
 
@@ -181,6 +196,7 @@ class MiniGraphCard extends LitElement {
     if (this.config.entities.some((_, index) => this.entity[index] === undefined)) {
       return this.renderWarnings();
     }
+    this.updateOptionsFromLocale();
     return html`
       <ha-card
         class="flex"
