@@ -119,7 +119,6 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | value_factor | number | 0 | v0.9.4 | Scale value by order of magnitude (e.g. convert Watts to kilo Watts), use negative value to scale down.
 | logarithmic | boolean | `false` | v0.10.0 | Use a Logarithmic scale for the graph
 
-
 #### Entities object
 Entities may be listed directly (as per `sensor.temperature` in the example below), or defined using
 properties of the Entity object detailed in the following table (as per `sensor.pressure` in the example below).
@@ -173,6 +172,8 @@ All properties are optional.
 | name_adaptive_color | `false` | `true` / `false` | Make the name color adapt with the primary entity color.
 | icon_adaptive_color | `false` | `true` / `false` | Make the icon color adapt with the primary entity color.
 | loading_indicator | `true` | `true` / `false` | Show loading indicator while attempting to retrieve a history.
+| grid_lines_type | `hour` | `5minute` / `hour` / `day` / `week` | Show grid lines dependently on `hours_to_show` value.
+| grid_lines_ratio | 2 |  | Grid lines: thin / thick lines amount ratio (0 - no thin lines)
 
 
 #### Line color object
@@ -265,6 +266,8 @@ The following theme variables can be set in your HA theme to customize the appea
 |------|:-------:|-------------|
 | mcg-title-letter-spacing |  | Letter spacing of the card title (`name` option).
 | mcg-title-font-weight | 500 | Font weight of the card title.
+| mcg-grid-line-thick-color | rgb(from var(--divider-color) R G B /0.5) | Grid "thick" line color.
+| mcg-grid-line-thin-color | var(--divider-color) | Grid "thin" line color.
 
 ### Example usage
 
