@@ -22,6 +22,18 @@ const getFirstDefinedItem = (...collection) => collection.find(item => typeof it
 // eslint-disable-next-line max-len
 const compareArray = (a, b) => a.length === b.length && a.every((value, index) => value === b[index]);
 
+const isAssumingCssVar = value => (typeof value === 'string' && value.trim().startsWith('var(--'));
+
+const convertCssVarToValue = (cssVar) => {
+  const name = cssVar.trim().replace('var(', '').replace(')', '');
+  let element = document.querySelector('ha-card'); // eslint-disable-line no-undef
+  if (!element)
+    element = document.body; // eslint-disable-line no-undef
+  return window
+    ? window.getComputedStyle(element).getPropertyValue(name)
+    : '#000000';
+};
+
 const log = (message) => {
   // eslint-disable-next-line no-console
   console.warn('mini-graph-card: ', message);
@@ -31,4 +43,5 @@ export {
   getMin, getAvg, getMax, getTime, getMilli, compress, decompress, log,
   getFirstDefinedItem,
   compareArray,
+  isAssumingCssVar, convertCssVarToValue,
 };
