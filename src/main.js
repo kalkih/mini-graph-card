@@ -544,10 +544,12 @@ class MiniGraphCard extends LitElement {
   }
 
   renderSvg() {
-    const { height } = this.config;
+    const { height, show } = this.config;
+    const grid_lines_type = show.grid_lines_type ? show.grid_lines_type : false;
     return svg`
       <svg width='100%' height=${height !== 0 ? '100%' : 0} viewBox='0 0 500 ${height}'
         @click=${e => e.stopPropagation()}>
+        ${grid_lines_type ? this.renderGridLines() : ''}
         <g>
           <defs>
             ${this.renderSvgGradient(this.gradient)}
@@ -560,6 +562,56 @@ class MiniGraphCard extends LitElement {
         </g>
         ${this.points.map((points, i) => this.renderSvgPoints(points, i))}
       </svg>`;
+  }
+
+  renderGridLines() {
+    const {
+      height, hours_to_show, show,
+    } = this.config;
+    const grid_lines_type = show.grid_lines_type ? show.grid_lines_type : false;
+    const grid_lines_ratio = (show.grid_lines_ratio && Number.isInteger(show.grid_lines_ratio))
+      ? show.grid_lines_ratio
+      : 2;
+
+    const containerWidth = 500;
+    let spanInHours;
+
+    switch (grid_lines_type) {
+      case '5minute':
+        spanInHours = 1 / 12;
+        break;
+      case 'hour':
+      default:
+        spanInHours = 1;
+        break;
+      case 'day':
+        spanInHours = 24;
+        break;
+      case 'week':
+        spanInHours = 168;
+    }
+
+    let numLines = hours_to_show / spanInHours;
+    const spanFactor = Math.ceil(hours_to_show / spanInHours) / (hours_to_show / spanInHours);
+    const thickPart = containerWidth * spanFactor / Math.ceil(numLines);
+    const thinPart = thickPart / (grid_lines_ratio + 1);
+    numLines *= (grid_lines_ratio + 1);
+
+    const lines = [];
+    for (let i = 0; i < numLines - 1; i += 1) {
+      const x = containerWidth - thinPart * (i + 1);
+      // const timeLabel = hours_to_show / numLines * (i + 1);
+
+      let stroke;
+      if ((i + 1) % (grid_lines_ratio + 1) > 0) {
+        stroke = 'var(--mcg-grid-line-thin-color, var(--divider-color))';
+      } else {
+        stroke = 'var(--mcg-grid-line-thick-color, rgb(from var(--divider-color) R G B /0.5))';
+      }
+      lines.push(svg`<line x1=${x} y1="0" x2=${x} y2=${height} stroke="${stroke}" stroke-width="0.5"/>`);
+    }
+
+    return svg`<g class="grid--lines">${lines}</g>`;
   }
 
   setTooltip(entity, index, value, label = null) {
