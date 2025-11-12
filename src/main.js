@@ -543,11 +543,63 @@ class MiniGraphCard extends LitElement {
     return svg`<g class='bars' ?anim=${this.config.animate}>${items}</g>`;
   }
 
+  renderTimeLines() {
+    const { height, hours_to_show, show } = this.config;
+
+    if (!show.time_line) return;
+    const graphWidth = 500;
+    const minutesInGraph = hours_to_show * 60;
+
+    const timeRegex = /^\d{1,2}:\d{2}$/;
+    const lines = [];
+    const endTime = new Date();
+    show.time_line.forEach((time) => {
+      if (timeRegex.test(time)) {
+        const [hour, minutes] = time.split(':');
+        let diffInMinutes = 0;
+        let day = 0;
+        while (diffInMinutes < minutesInGraph) {
+          const startTime = this.createStartTime(day, hour, minutes);
+          diffInMinutes = Math.floor((endTime - startTime) / 1000 / 60);
+          if (diffInMinutes > 0 && diffInMinutes < minutesInGraph) {
+            const startDate = new Date(startTime);
+            const x = graphWidth - graphWidth / minutesInGraph * diffInMinutes;
+            lines.push(svg`<line class="line-${time.replace(':', '-')}" x1=${x} y1="0" x2=${x} y2=${height - 12} 
+              stroke="grey" stroke-width="2" />
+              <text class="text-${time.replace(':', '-')}" x=${x} y=${height - 2} 
+              font-size="10" fill="grey" text-anchor="middle">
+              ${this.isMidnight(hour, minutes)
+    ? `${this.zeroPad(startDate.getDate())}-${this.zeroPad(startDate.getMonth() + 1)}`
+    : time}</text>`);
+          }
+          day += 1;
+        }
+      }
+    });
+
+    return svg`<g>${lines}</g>`;
+  }
+
+  zeroPad(value) {
+    return String(value).padStart(2, '0');
+  }
+
+  isMidnight(hour, minutes) {
+    return (hour === '0' || hour === '00') && minutes === '00';
+  }
+
+  createStartTime(day, hour, minute) {
+    const userTime = new Date();
+    userTime.setDate(userTime.getDate() - day);
+    return userTime.setHours(hour, minute);
+  }
+
   renderSvg() {
     const { height } = this.config;
     return svg`
       <svg width='100%' height=${height !== 0 ? '100%' : 0} viewBox='0 0 500 ${height}'
         @click=${e => e.stopPropagation()}>
+        ${this.renderTimeLines()}
         <g>
           <defs>
             ${this.renderSvgGradient(this.gradient)}
