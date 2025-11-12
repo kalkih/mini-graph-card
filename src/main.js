@@ -23,6 +23,8 @@ import {
   getFirstDefinedItem,
   compareArray,
   log,
+  subscribeEntity,
+  fetchHistoryWebSocket,
 } from './utils';
 
 class MiniGraphCard extends LitElement {
@@ -48,6 +50,8 @@ class MiniGraphCard extends LitElement {
     this.stateChanged = false;
     this.initial = true;
     this._md5Config = undefined;
+    this._subscriptions = [];
+    this._useWebSocket = true;
   }
 
   static get styles() {
@@ -55,9 +59,17 @@ class MiniGraphCard extends LitElement {
   }
 
   set hass(hass) {
+    const oldHass = this._hass;
     this._hass = hass;
     let updated = false;
     const queue = [];
+
+    // Check if we need to set up WebSocket subscriptions
+    if (hass && hass.connection && (!oldHass || !oldHass.connection)) {
+      // Connection became available, set up subscriptions
+      this.setupWebSocketSubscriptions();
+    }
+
     this.config.entities.forEach((entity, index) => {
       this.config.entities[index].index = index; // Required for filtered views
       const entityState = hass && hass.states[entity.entity] || undefined;
@@ -138,13 +150,74 @@ class MiniGraphCard extends LitElement {
         this.config.update_interval * 1000,
       );
     }
+    // Set up WebSocket subscriptions for real-time updates
+    this.setupWebSocketSubscriptions();
   }
 
   disconnectedCallback() {
     if (this.interval) {
       clearInterval(this.interval);
     }
+    // Clean up WebSocket subscriptions
+    this.cleanupWebSocketSubscriptions();
     super.disconnectedCallback();
+  }
+
+  async setupWebSocketSubscriptions() {
+    if (!this._hass || !this._hass.connection || !this.config || !this.config.entities) {
+      return;
+    }
+
+    // Clean up existing subscriptions first
+    this.cleanupWebSocketSubscriptions();
+
+    // Subscribe to each entity for real-time state changes
+    const subscriptionPromises = this.config.entities.map(async (entityConfig, index) => {
+      try {
+        const unsubscribe = await subscribeEntity(
+          this._hass,
+          entityConfig.entity,
+          (newState) => {
+            // Update entity state when we receive updates via WebSocket
+            if (newState && this.entity[index] !== newState) {
+              this.entity[index] = newState;
+              this.updateQueue.push(`${newState.entity_id}-${index}`);
+              this.stateChanged = true;
+              this.entity = [...this.entity];
+
+              // Trigger update if not already updating
+              if (!this.config.update_interval && !this.updating) {
+                setTimeout(() => this.updateData(), 100);
+              }
+            }
+          },
+        );
+
+        if (unsubscribe) {
+          this._subscriptions.push(unsubscribe);
+        }
+      } catch (err) {
+        log(`Failed to subscribe to ${entityConfig.entity}: ${err}`);
+      }
+    });
+
+    await Promise.all(subscriptionPromises);
+  }
+
+  cleanupWebSocketSubscriptions() {
+    // Unsubscribe from all active subscriptions
+    if (this._subscriptions && this._subscriptions.length > 0) {
+      this._subscriptions.forEach((unsubscribe) => {
+        if (typeof unsubscribe === 'function') {
+          try {
+            unsubscribe();
+          } catch (err) {
+            log(`Error unsubscribing: ${err}`);
+          }
+        }
+      });
+      this._subscriptions = [];
+    }
   }
 
   shouldUpdate(changedProps) {
@@ -1008,6 +1081,26 @@ class MiniGraphCard extends LitElement {
   }
 
   async fetchRecent(entityId, start, end, skipInitialState, withAttributes) {
+    // Try WebSocket first if available
+    if (this._useWebSocket && this._hass.connection) {
+      try {
+        const wsResult = await fetchHistoryWebSocket(
+          this._hass,
+          entityId,
+          start,
+          end,
+          skipInitialState,
+          withAttributes,
+        );
+        if (wsResult) {
+          return wsResult;
+        }
+      } catch (err) {
+        log(`WebSocket fetch failed, falling back to REST API: ${err}`);
+      }
+    }
+
+    // Fall back to REST API
     let url = 'history/period';
     if (start) url += `/${start.toISOString()}`;
     url += `?filter_entity_id=${entityId}`;
