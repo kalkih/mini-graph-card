@@ -1,16 +1,15 @@
 import { css } from 'lit-element';
 
 const style = css`
-  :host {
-    display: flex;
-    flex-direction: column;
-  }
   ha-card {
     flex-direction: column;
     flex: 1;
     padding: 16px 0 0 0;
     position: relative;
     overflow: hidden;
+    height: 100%;
+  }
+  ha-card.sections {
   }
   ha-card > div {
     padding: 0px 16px 16px 16px;
@@ -117,6 +116,12 @@ const style = css`
     font-weight: 300;
     justify-content: space-between;
     flex-wrap: nowrap;
+  }
+  .sections.small .states {
+    padding: 0px 16px 0px 16px;
+  }
+  .sections.small .header {
+    padding: 0px 16px 0px 16px;
   }
   .states .icon {
     align-self: center;
@@ -228,7 +233,11 @@ const style = css`
     left: initial;
     right: 0;
   }
+  .sections.small .state__time {
+    display: none;
+  }
   .graph {
+    flex: auto;
     align-self: flex-end;
     box-sizing: border-box;
     display: flex;
@@ -240,10 +249,14 @@ const style = css`
     display: flex;
     flex-direction: row;
     position: relative;
+    height: 100%;
   }
   .graph__container__svg {
     cursor: default;
-    flex: 1;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
   }
   svg {
     overflow: hidden;
@@ -259,6 +272,15 @@ const style = css`
   .fill[anim="false"][type="fade"] {
     animation: reveal-2 .25s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   }
+  .line {
+    vector-effect: non-scaling-stroke;
+  }
+  .line--point--group:hover .line--point {
+    visibility: hidden;
+  }
+  .line--point--group {
+    cursor: pointer;
+  }
   .line--points[anim="false"],
   .line[anim="false"] {
     animation: pop .25s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
@@ -270,13 +292,11 @@ const style = css`
     animation: none !important;
     transition: all .15s !important;
   }
-  .line--points[tooltip] .line--point[inactive] {
+  .line--points[tooltip] .line--point--group[inactive] {
     opacity: 0;
   }
   .line--point {
-    cursor: pointer;
     fill: var(--primary-background-color, white);
-    stroke-width: inherit;
   }
   .line--point:hover {
     fill: var(--mcg-hover, inherit) !important;
@@ -331,6 +351,7 @@ const style = css`
     pointer-events: none;
     top: 0; bottom: 0;
     opacity: .75;
+    z-index: 1;
   }
   .graph__labels > span {
     cursor: pointer;
@@ -346,12 +367,18 @@ const style = css`
     padding-top: 16px;
     flex-wrap: wrap;
   }
+  .sections .graph__legend {
+    padding-top: 8px;
+  }
   .graph__legend__item {
     cursor: pointer;
     display: flex;
     min-width: 0;
     margin: .4em;
     align-items: center
+  }
+  .sections .graph__legend__item {
+    margin: .4em .4em 0px .4em;
   }
   .graph__legend__item span {
     opacity: .75;

@@ -48,6 +48,9 @@ class MiniGraphCard extends LitElement {
     this.stateChanged = false;
     this.initial = true;
     this._md5Config = undefined;
+    this.sections = false;
+    this.graphHeight = 100;
+    this.graphWidth = 500;
   }
 
   static get styles() {
@@ -105,12 +108,14 @@ class MiniGraphCard extends LitElement {
     this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
     const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
 
+    this.graphHeight = this.config.height;
+
     if (!this.Graph || entitiesChanged) {
       if (this._hass) this.hass = this._hass;
       this.Graph = this.config.entities.map(
         entity => new Graph(
-          500,
-          this.config.height,
+          this.graphWidth,
+          this.graphHeight,
           [this.config.show.fill ? 0 : this.config.line_width, this.config.line_width],
           this.config.hours_to_show,
           this.config.points_per_hour,
@@ -125,6 +130,31 @@ class MiniGraphCard extends LitElement {
         ),
       );
     }
+  }
+
+  checkSections() {
+    return this.layout === 'grid';
+  }
+
+  getCurrentLayout() {
+    const layout = this.getLayoutOptions();
+    const layoutConfigured = this.config.layout_options !== undefined;
+    const columns = Math.max(layoutConfigured
+      ? this.config.layout_options.grid_columns : layout.grid_columns, layout.grid_min_columns);
+    const rows = Math.max(layoutConfigured
+      ? this.config.layout_options.grid_rows : layout.grid_rows, layout.grid_min_rows);
+    return { grid_columns: columns, grid_rows: rows };
+  }
+
+  getLayoutSize(layout) {
+    return this.sections && layout.grid_rows <= 3 ? 'small' : '';
+  }
+
+  getGraphHeightSections() {
+    const layout = this.getCurrentLayout();
+    const headerRows = this.getHeaderRows() + (this.getLayoutSize(layout) === '' ? 1 : 0);
+
+    return Math.max(layout.grid_rows - headerRows, 1);
   }
 
   connectedCallback() {
@@ -181,9 +211,11 @@ class MiniGraphCard extends LitElement {
     if (this.config.entities.some((_, index) => this.entity[index] === undefined)) {
       return this.renderWarnings();
     }
+    const layout = this.getCurrentLayout();
+    this.sections = this.checkSections();
     return html`
       <ha-card
-        class="flex"
+        class="flex ${this.sections ? 'sections' : ''} ${this.getLayoutSize(layout)}"
         ?group=${config.group}
         ?fill=${config.show.graph && config.show.fill}
         ?points=${config.show.points === 'hover'}
@@ -450,16 +482,27 @@ class MiniGraphCard extends LitElement {
   renderSvgPoint(point, i) {
     const color = this.gradient[i] ? this.computeColor(point[V], i) : 'inherit';
     return svg`
-      <circle
-        class='line--point'
-        ?inactive=${this.tooltip.index !== point[3]}
-        style=${`--mcg-hover: ${color};`}
-        stroke=${color}
-        fill=${color}
-        cx=${point[X]} cy=${point[Y]} r=${this.config.line_width}
-        @mouseover=${() => this.setTooltip(i, point[3], point[V])}
-        @mouseout=${() => (this.tooltip = {})}
+    <g
+      class='line--point--group'
+      ?inactive=${this.tooltip.index !== point[3]}
+      style=${`--mcg-hover: ${color};`}
+      @mouseover=${() => this.setTooltip(i, point[3], point[V])}
+      @mouseout=${() => (this.tooltip = {})}
+    >
+      <line
+        class='line--point--border'
+        x1=${point[X]} y1=${point[Y]} x2=${point[X]} y2=${point[Y]}
+        stroke-linecap="round" stroke-width=${this.config.line_width * 2}
+        stroke=${color} vector-effect="non-scaling-stroke"
       />
+      <line
+        class='line--point'
+        style="stroke: var(--primary-background-color, white);"
+        x1=${point[X]} y1=${point[Y]} x2=${point[X]} y2=${point[Y]}
+        stroke-linecap="round" stroke-width=${this.config.line_width}
+        vector-effect="non-scaling-stroke"
+      />
+    </g>
     `;
   }
 
@@ -546,7 +589,9 @@ class MiniGraphCard extends LitElement {
   renderSvg() {
     const { height } = this.config;
     return svg`
-      <svg width='100%' height=${height !== 0 ? '100%' : 0} viewBox='0 0 500 ${height}'
+      <svg width='100%' height=${height !== 0 || this.sections ? '100%' : 0}
+        viewBox='0 0 ${this.graphWidth} ${this.graphHeight}'
+        preserveAspectRatio='none'
         @click=${e => e.stopPropagation()}>
         <g>
           <defs>
@@ -1070,6 +1115,22 @@ class MiniGraphCard extends LitElement {
         if (!this.updating) this.updateData();
       }, interval * ONE_HOUR);
     }
+  }
+
+  getHeaderRows() {
+    return 0
+      + ((this.config.show.name || this.config.show.icon) ? 1 : 0)
+      + ((this.config.show.state) ? 1 : 0)
+      + ((this.config.show.extrema || this.config.show.average) ? 1 : 0);
+  }
+
+  getLayoutOptions() {
+    return {
+      grid_rows: 1 + this.getHeaderRows(),
+      grid_columns: 2,
+      grid_min_rows: 1 + this.getHeaderRows(),
+      grid_min_columns: 2,
+    };
   }
 
   getCardSize() {
