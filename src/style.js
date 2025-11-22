@@ -1,16 +1,13 @@
 import { css } from 'lit-element';
 
 const style = css`
-  :host {
-    display: flex;
-    flex-direction: column;
-  }
   ha-card {
     flex-direction: column;
     flex: 1;
     padding: 16px 0 0 0;
     position: relative;
     overflow: hidden;
+    height: 100%;
   }
   ha-card > div {
     padding: 0px 16px 16px 16px;
@@ -229,6 +226,8 @@ const style = css`
     right: 0;
   }
   .graph {
+    flex: auto;
+    min-height: 0;
     align-self: flex-end;
     box-sizing: border-box;
     display: flex;
@@ -240,10 +239,13 @@ const style = css`
     display: flex;
     flex-direction: row;
     position: relative;
+    height: 100%;
   }
   .graph__container__svg {
     cursor: default;
-    flex: 1;
+    position: relative;
+    width: 100%;
+    height: 100%;
   }
   svg {
     overflow: hidden;
@@ -263,6 +265,22 @@ const style = css`
   .line[anim="false"] {
     animation: pop .25s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   }
+  .line {
+    vector-effect: non-scaling-stroke;
+  }
+  .line--point--group {
+    cursor: pointer;
+  }
+  .line--point--border {
+    vector-effect: non-scaling-stroke;
+  }
+  .line--point--fill {
+    stroke: var(--primary-background-color, white);
+    vector-effect: non-scaling-stroke;
+  }
+  .line--point--group:hover .line--point--fill {
+    visibility: hidden;
+  }
   .line--points[inactive],
   .line--rect[inactive],
   .fill--rect[inactive] {
@@ -270,16 +288,8 @@ const style = css`
     animation: none !important;
     transition: all .15s !important;
   }
-  .line--points[tooltip] .line--point[inactive] {
+  .line--points[tooltip] .line--point--group[inactive] {
     opacity: 0;
-  }
-  .line--point {
-    cursor: pointer;
-    fill: var(--primary-background-color, white);
-    stroke-width: inherit;
-  }
-  .line--point:hover {
-    fill: var(--mcg-hover, inherit) !important;
   }
   .bars {
     animation: pop .25s cubic-bezier(0.215, 0.61, 0.355, 1);
@@ -294,8 +304,9 @@ const style = css`
     opacity: .5;
     cursor: pointer;
   }
-  ha-card[gradient] .line--point:hover {
-    fill: var(--primary-text-color, white);
+  ha-card[gradient] .line--point--group:hover .line--point--fill {
+    visibility: unset;
+    stroke: var(--primary-text-color, white);
   }
   path,
   .line--points,
