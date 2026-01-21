@@ -746,20 +746,71 @@ class MiniGraphCard extends LitElement {
     const value_factor = 10 ** this.config.value_factor;
 
     if (dec === undefined || Number.isNaN(dec) || Number.isNaN(state)) {
-      return this.numberFormat(Math.round(state * value_factor * 100) / 100, this._hass.language);
+      return this.numberFormat(Math.round(state * value_factor * 100) / 100);
     }
 
     const x = 10 ** dec;
-    return this.numberFormat(
-      (Math.round(state * value_factor * x) / x).toFixed(dec),
-      this._hass.language, dec,
-    );
+    return this.numberFormat(Math.round(state * value_factor * x) / x, dec);
   }
 
-  numberFormat(num, language, dec) {
-    if (!Number.isNaN(Number(num)) && Intl)
-      return new Intl.NumberFormat(language, { minimumFractionDigits: dec }).format(Number(num));
-    return num.toString();
+  numberFormat(num, dec) {
+    const value = Number(num);
+
+    if (Number.isNaN(value)) {
+      return num;
+    }
+
+    const localeSettings = this._hass && this._hass.locale;
+    const fallbackValue = dec !== undefined ? value.toFixed(dec) : String(value);
+
+    if (!localeSettings) {
+      return fallbackValue;
+    }
+
+    const { number_format: format, language } = localeSettings;
+
+    if (format === 'none') {
+      return fallbackValue;
+    }
+
+    const options = dec !== undefined
+      ? { minimumFractionDigits: dec, maximumFractionDigits: dec }
+      : undefined;
+
+    const tryFormat = (locale) => {
+      try {
+        return new Intl.NumberFormat(locale, options).format(value);
+      } catch (_err) {
+        return null;
+      }
+    };
+
+    if (format === 'system') {
+      return tryFormat(undefined) || fallbackValue;
+    }
+
+    if (format === 'language' || !format) {
+      return (language && tryFormat(language)) || fallbackValue;
+    }
+
+    // For explicit formats, start with en-US and transform
+    const formatted = tryFormat('en-US');
+    if (!formatted) {
+      return fallbackValue;
+    }
+
+    switch (format) {
+      case 'comma_decimal':
+        return formatted;
+      case 'decimal_comma':
+        return formatted.replace(/,/g, '#').replace(/\./g, ',').replace(/#/g, '.');
+      case 'space_comma':
+        return formatted.replace(/,/g, ' ').replace(/\./g, ',');
+      case 'quote_decimal':
+        return formatted.replace(/,/g, "'");
+      default:
+        return formatted;
+    }
   }
 
   updateOnInterval() {
