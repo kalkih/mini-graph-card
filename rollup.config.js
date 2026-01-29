@@ -4,8 +4,9 @@ import serve from 'rollup-plugin-serve';
 import commonjs from '@rollup/plugin-commonjs';
 
 const dev = process.env.ROLLUP_WATCH;
+const preview = process.env.PREVIEW;
 const serveopts = {
-  contentBase: ['./dist'],
+  contentBase: preview ? ['./preview', './dist'] : ['./dist'],
   host: '0.0.0.0',
   port: 5000,
   allowCrossOrigin: true,

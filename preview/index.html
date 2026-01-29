@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini Graph Card - Preview</title>
+  <style>
+    :root {
+      --primary-color: #03a9f4;
+      --accent-color: #ff9800;
+      --primary-text-color: #212121;
+      --secondary-text-color: #727272;
+      --disabled-text-color: #bdbdbd;
+      --divider-color: #e0e0e0;
+      --paper-card-background-color: #fff;
+      --card-background-color: #fff;
+      --ha-card-background: #fff;
+      --ha-card-border-radius: 12px;
+      --ha-card-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    [data-theme="dark"] {
+      --primary-text-color: #e1e1e1;
+      --secondary-text-color: #9e9e9e;
+      --disabled-text-color: #6e6e6e;
+      --divider-color: #3e3e3e;
+      --paper-card-background-color: #1c1c1c;
+      --card-background-color: #1c1c1c;
+      --ha-card-background: #1c1c1c;
+      background-color: #111;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+      min-height: 100vh;
+    }
+
+    [data-theme="dark"] body {
+      background: #111;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 0 10px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+      color: var(--primary-text-color);
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .controls button, .controls select {
+      padding: 8px 16px;
+      border: 1px solid var(--divider-color);
+      border-radius: 6px;
+      background: var(--card-background-color);
+      color: var(--primary-text-color);
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .controls button:hover {
+      background: var(--divider-color);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      padding: 10px;
+    }
+
+    .card-wrapper {
+      min-width: 0;
+    }
+
+    .card-label {
+      font-size: 12px;
+      color: var(--secondary-text-color);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    /* Mock ha-card styles */
+    ha-card {
+      display: block;
+      background: var(--ha-card-background);
+      border-radius: var(--ha-card-border-radius);
+      box-shadow: var(--ha-card-box-shadow);
+      overflow: hidden;
+    }
+
+    /* Mock ha-icon styles */
+    ha-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+    }
+
+    ha-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+
+    /* Mock hui-warning styles */
+    hui-warning {
+      display: block;
+      padding: 16px;
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 8px;
+      color: #856404;
+    }
+
+    /* Mock ha-spinner styles */
+    ha-spinner {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    ha-spinner::before {
+      content: '';
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--divider-color);
+      border-top-color: var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Config panel */
+    .config-panel {
+      position: fixed;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 400px;
+      background: var(--card-background-color);
+      box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .config-panel.open {
+      transform: translateX(0);
+    }
+
+    .config-panel-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--divider-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .config-panel-header h3 {
+      margin: 0;
+      color: var(--primary-text-color);
+    }
+
+    .config-panel-content {
+      flex: 1;
+      overflow: auto;
+      padding: 16px;
+    }
+
+    .config-panel textarea {
+      width: 100%;
+      height: 300px;
+      font-family: monospace;
+      font-size: 12px;
+      border: 1px solid var(--divider-color);
+      border-radius: 6px;
+      padding: 10px;
+      resize: vertical;
+      background: var(--card-background-color);
+      color: var(--primary-text-color);
+    }
+
+    .config-panel button {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
+    .config-panel button:hover {
+      opacity: 0.9;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease;
+      z-index: 999;
+    }
+
+    .overlay.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .error-message {
+      color: #c62828;
+      font-size: 12px;
+      margin-top: 8px;
+      padding: 8px;
+      background: #ffebee;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Mini Graph Card Preview</h1>
+    <div class="controls">
+      <select id="theme-select">
+        <option value="light">Light Theme</option>
+        <option value="dark">Dark Theme</option>
+      </select>
+      <button id="refresh-btn">Refresh Data</button>
+      <button id="config-btn">Edit Config</button>
+    </div>
+  </div>
+
+  <div class="grid" id="cards-container"></div>
+
+  <div class="overlay" id="overlay"></div>
+  <div class="config-panel" id="config-panel">
+    <div class="config-panel-header">
+      <h3>Card Configuration</h3>
+      <button id="close-panel" style="width: auto; margin: 0; padding: 4px 12px;">Close</button>
+    </div>
+    <div class="config-panel-content">
+      <p style="font-size: 12px; color: var(--secondary-text-color);">Edit the card configurations below (JSON format):</p>
+      <textarea id="config-editor"></textarea>
+      <div id="config-error" class="error-message" style="display: none;"></div>
+      <button id="apply-config">Apply Configuration</button>
+    </div>
+  </div>
+
+  <!-- Load the bundled card -->
+  <script src="/mini-graph-card-bundle.js"></script>
+
+  <script>
+    // Mock icons SVG paths
+    const ICON_PATHS = {
+      'hass:thermometer': 'M15 13V5A3 3 0 0 0 9 5V13A5 5 0 1 0 15 13M12 4A1 1 0 0 1 13 5V8H11V5A1 1 0 0 1 12 4Z',
+      'hass:water-percent': 'M12 3.25C12 3.25 6 10 6 14C6 17.32 8.69 20 12 20S18 17.32 18 14C18 10 12 3.25 12 3.25M14.47 9.97L15.53 11.03L9.53 17.03L8.47 15.97L14.47 9.97M9.75 10A1.25 1.25 0 1 1 8.5 11.25A1.25 1.25 0 0 1 9.75 10M14.25 14.5A1.25 1.25 0 1 1 13 15.75A1.25 1.25 0 0 1 14.25 14.5Z',
+      'hass:flash': 'M11 15H6L13 1V9H18L11 23V15Z',
+      'hass:gauge': 'M12 2A10 10 0 1 0 22 12A10 10 0 0 0 12 2M12 4A8 8 0 1 1 4 12A8 8 0 0 1 12 4M12 6A6 6 0 1 0 18 12A6 6 0 0 0 12 6M12 8A4 4 0 0 1 15.65 14H8.35A4 4 0 0 1 12 8Z',
+      'hass:battery': 'M16 20H8V6H16M16.67 4H15V2H9V4H7.33C6.6 4 6 4.6 6 5.33V20.67C6 21.4 6.6 22 7.33 22H16.67C17.4 22 18 21.4 18 20.67V5.33C18 4.6 17.4 4 16.67 4Z',
+      'mdi:home': 'M10 20V14H14V20H19V12H22L12 3L2 12H5V20H10Z',
+      'mdi:lightbulb': 'M12 2A7 7 0 0 0 5 9C5 11.38 6.19 13.47 8 14.74V17A1 1 0 0 0 9 18H15A1 1 0 0 0 16 17V14.74C17.81 13.47 19 11.38 19 9A7 7 0 0 0 12 2M9 21A1 1 0 0 0 10 22H14A1 1 0 0 0 15 21V20H9V21Z',
+    };
+
+    // Mock ha-icon custom element
+    class MockHaIcon extends HTMLElement {
+      static get observedAttributes() { return ['icon']; }
+
+      connectedCallback() { this.render(); }
+      attributeChangedCallback() { this.render(); }
+
+      set icon(value) {
+        this._icon = value;
+        this.render();
+      }
+
+      get icon() { return this._icon; }
+
+      render() {
+        const iconName = this._icon || this.getAttribute('icon') || 'mdi:home';
+        const path = ICON_PATHS[iconName] || ICON_PATHS['mdi:home'];
+        this.innerHTML = `<svg viewBox="0 0 24 24"><path d="${path}"/></svg>`;
+      }
+    }
+
+    if (!customElements.get('ha-icon')) {
+      customElements.define('ha-icon', MockHaIcon);
+    }
+
+    // Generate realistic sensor history data
+    function generateHistory(baseValue, variance, hours, pointsPerHour = 2) {
+      const history = [];
+      const now = Date.now();
+      const msPerPoint = (1000 * 3600) / pointsPerHour;
+      const totalPoints = hours * pointsPerHour;
+
+      let currentValue = baseValue;
+
+      for (let i = totalPoints; i >= 0; i--) {
+        const time = new Date(now - (i * msPerPoint));
+        // Add some realistic variation with trends
+        const trend = Math.sin(i / (totalPoints / 4)) * (variance * 0.3);
+        const noise = (Math.random() - 0.5) * variance;
+        currentValue = baseValue + trend + noise;
+        currentValue = Math.round(currentValue * 10) / 10;
+
+        history.push({
+          last_changed: time.toISOString(),
+          last_updated: time.toISOString(),
+          state: String(currentValue),
+          attributes: {}
+        });
+      }
+
+      return history;
+    }
+
+    // Mock entity states
+    const mockStates = {
+      'sensor.temperature': {
+        entity_id: 'sensor.temperature',
+        state: '21.5',
+        attributes: {
+          unit_of_measurement: '\u00b0C',
+          friendly_name: 'Living Room Temperature',
+          icon: 'hass:thermometer',
+          device_class: 'temperature'
+        }
+      },
+      'sensor.humidity': {
+        entity_id: 'sensor.humidity',
+        state: '45',
+        attributes: {
+          unit_of_measurement: '%',
+          friendly_name: 'Living Room Humidity',
+          icon: 'hass:water-percent',
+          device_class: 'humidity'
+        }
+      },
+      'sensor.power': {
+        entity_id: 'sensor.power',
+        state: '156',
+        attributes: {
+          unit_of_measurement: 'W',
+          friendly_name: 'Power Consumption',
+          icon: 'hass:flash',
+          device_class: 'power'
+        }
+      },
+      'sensor.pressure': {
+        entity_id: 'sensor.pressure',
+        state: '1013',
+        attributes: {
+          unit_of_measurement: 'hPa',
+          friendly_name: 'Atmospheric Pressure',
+          icon: 'hass:gauge',
+          device_class: 'pressure'
+        }
+      },
+      'sensor.battery': {
+        entity_id: 'sensor.battery',
+        state: '78',
+        attributes: {
+          unit_of_measurement: '%',
+          friendly_name: 'Device Battery',
+          icon: 'hass:battery',
+          device_class: 'battery'
+        }
+      },
+      'sensor.outdoor_temp': {
+        entity_id: 'sensor.outdoor_temp',
+        state: '15.2',
+        attributes: {
+          unit_of_measurement: '\u00b0C',
+          friendly_name: 'Outdoor Temperature',
+          icon: 'hass:thermometer',
+          device_class: 'temperature'
+        }
+      }
+    };
+
+    // Generate history data for each sensor
+    const historyData = {
+      'sensor.temperature': generateHistory(21.5, 2, 24),
+      'sensor.humidity': generateHistory(45, 10, 24),
+      'sensor.power': generateHistory(150, 100, 24),
+      'sensor.pressure': generateHistory(1013, 5, 24),
+      'sensor.battery': generateHistory(78, 5, 24),
+      'sensor.outdoor_temp': generateHistory(15, 8, 24)
+    };
+
+    // Mock Home Assistant object
+    const mockHass = {
+      states: mockStates,
+      language: 'en',
+
+      callApi: async function(method, url) {
+        // Parse the entity ID from the URL
+        const match = url.match(/filter_entity_id=([^&]+)/);
+        if (match) {
+          const entityId = match[1];
+          // Return history data wrapped in array
+          await new Promise(r => setTimeout(r, 100)); // Simulate network delay
+          return [historyData[entityId] || []];
+        }
+        return [[]];
+      }
+    };
+
+    // Default card configurations
+    let cardConfigs = [
+      {
+        label: 'Basic Line Graph',
+        config: {
+          type: 'custom:mini-graph-card',
+          entities: ['sensor.temperature'],
+          name: 'Temperature'
+        }
+      },
+      {
+        label: 'Multiple Entities',
+        config: {
+          type: 'custom:mini-graph-card',
+          entities: [
+            { entity: 'sensor.temperature', name: 'Indoor' },
+            { entity: 'sensor.outdoor_temp', name: 'Outdoor' }
+          ],
+          name: 'Temperature Comparison',
+          show: { legend: true }
+        }
+      },
+      {
+        label: 'With Fill',
+        config: {
+          type: 'custom:mini-graph-card',
+          entities: ['sensor.humidity'],
+          name: 'Humidity',
+          show: { fill: 'fade' },
+          line_color: '#3498db'
+        }
+      },
+      {
+        label: 'Bar Graph',
+        config: {
+          type: 'custom:mini-graph-card',
+          entities: ['sensor.power'],
+          name: 'Power Usage',
+          show: { graph: 'bar' },
+          hours_to_show: 24,
+          group_by: 'hour'
+        }
+      },
+      {
+        label: 'Color Thresholds',
+        config: {
+          type: 'custom:mini-graph-card',
+          entities: ['sensor.battery'],
+          name: 'Battery Level',
+          color_thresholds: [
+            { value: 20, color: '#e74c3c' },
+            { value: 50, color: '#f39c12' },
+            { value: 80, color: '#2ecc71' }
+          ],
+          show: { fill: true }
+        }
+      },
+      {
+        label: 'With Extrema',
+        config: {
+          type: 'custom:mini-graph-card',
+          entities: ['sensor.pressure'],
+          name: 'Pressure',
+          show: {
+            extrema: true,
+            average: true,
+            labels: true
+          },
+          line_color: '#9b59b6'
+        }
+      },
+      {
+        label: 'Minimal Style',
+        config: {
+          type: 'custom:mini-graph-card',
+          entities: ['sensor.temperature'],
+          name: 'Minimal',
+          show: {
+            icon: false,
+            name: false,
+            state: true,
+            graph: 'line',
+            fill: false,
+            points: false,
+            labels: false
+          },
+          height: 50
+        }
+      },
+      {
+        label: 'Points on Hover',
+        config: {
+          type: 'custom:mini-graph-card',
+          entities: ['sensor.humidity'],
+          name: 'Hover Points',
+          show: {
+            points: 'hover',
+            labels: 'hover'
+          },
+          line_width: 3
+        }
+      }
+    ];
+
+    // Create and render cards
+    function renderCards() {
+      const container = document.getElementById('cards-container');
+      container.innerHTML = '';
+
+      cardConfigs.forEach((item, index) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'card-wrapper';
+
+        const label = document.createElement('div');
+        label.className = 'card-label';
+        label.textContent = item.label;
+
+        const card = document.createElement('mini-graph-card');
+
+        try {
+          card.setConfig(item.config);
+          card.hass = mockHass;
+        } catch (e) {
+          console.error(`Error setting up card "${item.label}":`, e);
+        }
+
+        wrapper.appendChild(label);
+        wrapper.appendChild(card);
+        container.appendChild(wrapper);
+      });
+    }
+
+    // Refresh entity data
+    function refreshData() {
+      // Update current state values with slight variation
+      Object.keys(mockStates).forEach(entityId => {
+        const state = mockStates[entityId];
+        const currentVal = parseFloat(state.state);
+        const newVal = currentVal + (Math.random() - 0.5) * 2;
+        state.state = String(Math.round(newVal * 10) / 10);
+      });
+
+      // Re-assign hass to trigger updates
+      document.querySelectorAll('mini-graph-card').forEach(card => {
+        card.hass = { ...mockHass };
+      });
+    }
+
+    // Theme switching
+    document.getElementById('theme-select').addEventListener('change', (e) => {
+      document.documentElement.setAttribute('data-theme', e.target.value);
+    });
+
+    // Refresh button
+    document.getElementById('refresh-btn').addEventListener('click', refreshData);
+
+    // Config panel
+    const configPanel = document.getElementById('config-panel');
+    const overlay = document.getElementById('overlay');
+    const configEditor = document.getElementById('config-editor');
+    const configError = document.getElementById('config-error');
+
+    document.getElementById('config-btn').addEventListener('click', () => {
+      configEditor.value = JSON.stringify(cardConfigs, null, 2);
+      configPanel.classList.add('open');
+      overlay.classList.add('open');
+    });
+
+    function closePanel() {
+      configPanel.classList.remove('open');
+      overlay.classList.remove('open');
+      configError.style.display = 'none';
+    }
+
+    document.getElementById('close-panel').addEventListener('click', closePanel);
+    overlay.addEventListener('click', closePanel);
+
+    document.getElementById('apply-config').addEventListener('click', () => {
+      try {
+        const newConfigs = JSON.parse(configEditor.value);
+        cardConfigs = newConfigs;
+        renderCards();
+        closePanel();
+      } catch (e) {
+        configError.textContent = `Invalid JSON: ${e.message}`;
+        configError.style.display = 'block';
+      }
+    });
+
+    // Initial render
+    renderCards();
+
+    // Auto-refresh every 30 seconds
+    setInterval(refreshData, 30000);
+
+    console.log('Mini Graph Card Preview loaded successfully!');
+    console.log('Available mock entities:', Object.keys(mockStates));
+  </script>
+</body>
+</html>
