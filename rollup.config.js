@@ -5,15 +5,18 @@ import commonjs from '@rollup/plugin-commonjs';
 
 const dev = process.env.ROLLUP_WATCH;
 const preview = process.env.PREVIEW;
-const serveopts = {
-  contentBase: preview ? ['./preview', './dist'] : ['./dist'],
-  host: '0.0.0.0',
-  port: 5000,
-  allowCrossOrigin: true,
-  headers: {
-    'Access-Control-Allow-Origin': '*',
-  },
-};
+
+function getServeOptions() {
+  return {
+    contentBase: preview ? ['./preview', './dist'] : ['./dist'],
+    host: '0.0.0.0',
+    port: 5000,
+    allowCrossOrigin: true,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
+  };
+}
 
 export default {
   input: 'src/main.js',
@@ -30,6 +33,6 @@ export default {
       preferConst: true,
     }),
     resolve(),
-    dev && serve(serveopts),
+    dev && serve(getServeOptions()),
   ],
 };
