@@ -117,7 +117,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | smoothing | boolean | `true` | v0.8.0 | Whether to make graph line smooth.
 | state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert (order matters as position becomes a value on the graph).
 | value_factor | number | 0 | v0.9.4 | Scale value by order of magnitude (e.g. convert Watts to kilo Watts), use negative value to scale down.
-| logarithmic | boolean | `false` | v0.10.0 | Use a Logarithmic scale for the graph
+| logarithmic | boolean | `false` | v0.10.0 | Use a logarithmic scale for the graph.
 
 
 #### Entities object
@@ -144,6 +144,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | y_axis | string |         | If 'secondary', displays using the secondary y-axis on the right.
 | fixed_value | boolean |         | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 | smoothing | boolean |         | Override for a flag indicating whether to make graph line smooth.
+| logarithmic | boolean |         | Override logarithmic scaling for this entity only.
 
 ```yaml
 entities:

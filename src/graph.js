@@ -43,6 +43,10 @@ export default class Graph {
 
   set min(min) { this._min = min; }
 
+  get logarithmic() { return this._logarithmic; }
+
+  set logarithmic(logarithmic) { this._logarithmic = logarithmic; }
+
   set history(data) { this._history = data; }
 
   update(history = undefined) {
@@ -153,8 +157,8 @@ export default class Graph {
     return path;
   }
 
-  computeGradient(thresholds, logarithmic) {
-    const scale = logarithmic
+  computeGradient(thresholds) {
+    const scale = this._logarithmic
       ? Math.log10(Math.max(1, this._max)) - Math.log10(Math.max(1, this._min))
       : this._max - this._min;
 
@@ -170,7 +174,7 @@ export default class Graph {
       let offset;
       if (scale <= 0) {
         offset = 0;
-      } else if (logarithmic) {
+      } else if (this._logarithmic) {
         offset = (Math.log10(Math.max(1, this._max))
           - Math.log10(Math.max(1, stop.value)))
           * (100 / scale);
