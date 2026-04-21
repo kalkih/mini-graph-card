@@ -177,6 +177,9 @@ export default class Graph {
       } else {
         offset = (this._max - stop.value) * (100 / scale);
       }
+      // Update position of gradient by accounting the margin into the offset
+      offset = (this.margin[Y] * 2 * 100 + offset * this.height)
+        / (this.height + this.margin[Y] * 4);
       return {
         color: color || stop.color,
         offset,
