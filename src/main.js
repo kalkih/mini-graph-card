@@ -108,8 +108,8 @@ class MiniGraphCard extends LitElement {
   getMinMaxLineWidth() {
     const arr = this.config.entities
       .filter(entityConfig => entityConfig.show_graph !== false)
-      .map(entityConfig => {
-        let value = entityConfig.line_width;
+      .map((entityConfig) => {
+        const value = entityConfig.line_width;
         return (typeof value === 'number' && !Number.isNaN(value))
           ? value : this.config.line_width;
       });
