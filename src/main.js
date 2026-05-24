@@ -110,7 +110,9 @@ class MiniGraphCard extends LitElement {
       .filter(entityConfig => entityConfig.show_graph !== false)
       .map((entityConfig) => {
         const value = entityConfig.line_width;
-        return (typeof value === 'number' && !Number.isNaN(value))
+        return (this.config.show.graph !== 'bar'
+          && typeof value === 'number'
+          && !Number.isNaN(value))
           ? value : this.config.line_width;
       });
     return ({
