@@ -7,7 +7,7 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
 
 ## Install
 
-### HACS (recommended) 
+### HACS (recommended)
 
 This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community Store).
 
@@ -117,7 +117,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | smoothing | boolean | `true` | v0.8.0 | Whether to make graph line smooth.
 | state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert (order matters as position becomes a value on the graph).
 | value_factor | number | 0 | v0.9.4 | Scale value by order of magnitude (e.g. convert Watts to kilo Watts), use negative value to scale down.
-| logarithmic | boolean | `false` | v0.10.0 | Use a Logarithmic scale for the graph
+| logarithmic | boolean | `false` | v0.10.0 | Use a logarithmic scale for the graph.
 
 
 #### Entities object
@@ -144,6 +144,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | y_axis | string |         | If 'secondary', displays using the secondary y-axis on the right.
 | fixed_value | boolean |         | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 | smoothing | boolean |         | Override for a flag indicating whether to make graph line smooth.
+| logarithmic | boolean |         | Override logarithmic scaling for this entity only.
 
 ```yaml
 entities:
@@ -209,7 +210,7 @@ color_thresholds:
   - value: 4
     color: "#0000ff"
 ```
-The example above will result in the following colors of the graph: if value is 
+The example above will result in the following colors of the graph: if value is
 * between `0` (including this value) and  `1.33333`, the color is `#ff0000`,
 * between `1.33333` (including this value) and `2.666667`, the color is `#ffff00`,
 * between `2.666667` (including this value) and `4`, the color is `#00ff00`,
@@ -257,6 +258,12 @@ These buckets are converted later to single point/bar on the graph. Aggregate fu
 | `sum` | v0.9.2 |
 | `delta` | v0.9.4 | Calculates difference between max and min value
 | `diff` | v0.11.0 | Calculates difference between first and last value
+
+### Logarithmic options
+
+Normally gaps between numbers on the graph are equal; the gap between 1 and 2 on the graph is the same as the gap between 100 and 101. The `logarithmic` option applies a [logarithmic transformation](https://en.wikipedia.org/wiki/Log_transformation_(statistics)) to the graph. With `logarithmic`, the graph is scaled by powers of 10, so the gap between 1, 10, 100, etc are equal. This is useful when your values span a wide range. Illuminance, for example, can swing from 1 to 5000 over the course of a day, and without a transformation it's hard to read the smaller values on the graph.
+
+Note that this option rounds up the input to 1 so negative numbers or numbers less than 1 are rendered as 0; this is different from the formal definition of logarithm, where `log(x) == 0` when `x<1` and $\infty$ when `x<0`.
 
 ### Theme variables
 The following theme variables can be set in your HA theme to customize the appearance of the card.
