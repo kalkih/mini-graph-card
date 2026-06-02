@@ -126,8 +126,9 @@ properties of the Entity object detailed in the following table (as per `sensor.
 
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
-| entity ***(required)*** | string |         | Entity id of the sensor.
-| attribute | string |         | Retrieves an attribute or [sub-attribute (attr1.attr2...)](#accessing-attributes-in-complex-structures) instead of the state
+| entity | string |         | Entity id of the sensor. Either `entity` or `static_value` must be defined.
+| attribute | string |         | Retrieves an attribute or [sub-attribute (attr1.attr2...)](#accessing-attributes-in-complex-structures) instead of the state.
+| static_value | number |         | Set a static value for a (preset line)](#preset-lines). Either `entity` or `static_value` must be defined.
 | name | string |         | Set a custom display name, defaults to entity's friendly_name.
 | color | string |         | Set a custom color, overrides all other color options including thresholds.
 | unit | string |         | Set a custom unit of measurement, overrides `unit` set in base config (`''` value for an empty unit).
@@ -576,6 +577,21 @@ entities:
     name: value_1 from first element of list attribute
 ```
 ![image](https://github.com/ildar170975/mini-graph-card/assets/71872483/eebd0cea-da93-4bf5-97a1-118edd2a9c5e)
+
+#### Preset lines
+
+A preset horizontal line is drawn for a user-defined static value.
+Can be used in various applcations like drawing a threshold line or a zeroth X-axis.
+Like a dynamic graph for an entity (defined by an `entity` option), a preset line (defined by a `static_value` option) can use other applicable options: `name`, `color`, `unit`, `show_...`, `state_adaptive_color`, `y_axis`.
+
+Example with a threshold line (with a fill) with displaying a threshold's value:
+```
+```
+
+Example with a zeroth X-axis:
+```
+```
+
 
 
 ## Development
