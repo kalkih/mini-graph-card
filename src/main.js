@@ -1086,4 +1086,21 @@ window.customCards.push({
   name: 'Mini Graph Card',
   preview: false,
   description: 'The Mini Graph card is a minimalistic and customizable graph card',
+  getEntitySuggestion: (hass, entityId) => {
+    const PRESUMABLY_NUMERICAL_DOMAINS = [
+      'counter',
+      'input_number',
+      'sensor',
+      'zone',
+    ];
+    if (!PRESUMABLY_NUMERICAL_DOMAINS.includes(entityId.split(".")[0])) {
+      return null;
+    }
+    return {
+      config: {
+        type: "custom:mini-graph-card",
+        entities: [{ entity: entityId }],
+      },
+    };
+  },
 });
