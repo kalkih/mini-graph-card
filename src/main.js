@@ -1093,12 +1093,12 @@ window.customCards.push({
       'sensor',
       'zone',
     ];
-    if (!PRESUMABLY_NUMERICAL_DOMAINS.includes(entityId.split(".")[0])) {
+    if (!PRESUMABLY_NUMERICAL_DOMAINS.includes(entityId.split('.')[0])) {
       return null;
     }
     return {
       config: {
-        type: "custom:mini-graph-card",
+        type: 'custom:mini-graph-card',
         entities: [{ entity: entityId }],
       },
     };
