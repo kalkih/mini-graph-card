@@ -128,7 +128,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 |------|:----:|:-------:|-------------|
 | entity | string |         | Entity id of the sensor. Either `entity` or `static_value` must be defined.
 | attribute | string |         | Retrieves an attribute or [sub-attribute (attr1.attr2...)](#accessing-attributes-in-complex-structures) instead of the state.
-| static_value | number |         | Set a static value for a (preset line)](#preset-lines). Either `entity` or `static_value` must be defined.
+| static_value | number |         | Set a static value for a [preset line](#preset-lines). Either `entity` or `static_value` must be defined.
 | name | string |         | Set a custom display name, defaults to entity's friendly_name.
 | color | string |         | Set a custom color, overrides all other color options including thresholds.
 | unit | string |         | Set a custom unit of measurement, overrides `unit` set in base config (`''` value for an empty unit).
