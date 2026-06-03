@@ -60,7 +60,7 @@ class MiniGraphCard extends LitElement {
     const queue = [];
     this.config.entities.forEach((entity, index) => {
       this.config.entities[index].index = index; // Required for filtered views
-      const entityState = hass && hass.states[entity.entity] || undefined;
+      const entityState = hass && entity.entity && hass.states[entity.entity] || undefined;
       if (entityState && this.entity[index] !== entityState) {
         this.entity[index] = entityState;
         queue.push(`${entityState.entity_id}-${index}`);
@@ -178,7 +178,9 @@ class MiniGraphCard extends LitElement {
   render({ config } = this) {
     if (!config || !this.entity || !this._hass)
       return html``;
-    if (this.config.entities.some((_, index) => this.entity[index] === undefined)) {
+    if (this.config.entities.some(
+      (_, index) => this.entity[index] === undefined && !this.isStaticValue(index)
+    )) {
       return this.renderWarnings();
     }
     return html`
@@ -203,11 +205,12 @@ class MiniGraphCard extends LitElement {
     return html`
       <hui-warning>
         <div>mini-graph-card</div>
-        ${this.config.entities.map((_, index) => (!this.entity[index] ? html`
-          <div>
-            Entity not available: ${this.config.entities[index].entity}
-          </div>
-        ` : html``))}
+        ${this.config.entities.map(
+          (_, index) => (!this.entity[index] && !this.isStaticValue(index)
+            ? html`<div>
+                Entity not available: ${this.config.entities[index].entity}
+              </div>`
+            : html``))}
       </hui-warning>
     `;
   }
@@ -269,6 +272,16 @@ class MiniGraphCard extends LitElement {
       `;
   }
 
+  /**
+   * Check if an entity config contains a valid `static_value` option
+   * @param {number} index Index of an entity in config.entities
+   * @returns `true` if a valid `static_value` option defined
+   */
+  isStaticValue(index) {
+    const entity = this.config.entities[index];
+    return typeof entity.static_value === 'number' && !Number.isNaN(entity.static_value);
+  }
+
   getObjectAttr(obj, path) {
     return path.split('.').reduce((res, key) => res && res[key], obj);
   }
@@ -279,6 +292,8 @@ class MiniGraphCard extends LitElement {
       return this.points[id][this.points[id].length - 1][V];
     } else if (entityConfig.attribute) {
       return this.getObjectAttr(this.entity[id].attributes, entityConfig.attribute);
+    } else if (this.isStaticValue(id)) {
+      return this.config.entities[id].static_value;
     } else {
       return this.entity[id].state;
     }
@@ -294,6 +309,7 @@ class MiniGraphCard extends LitElement {
       const value = isTooltip ? tooltipValue : state;
       const entity = isTooltip ? tooltipEntity : id;
       const entityConfig = this.config.entities[entity];
+      // ??? account preset line
       return html`
         <div
           class="state ${!isPrimary && 'state--small'}"
@@ -465,7 +481,7 @@ class MiniGraphCard extends LitElement {
 
   renderSvgPoints(points, i) {
     if (!points) return;
-    const color = this.computeColor(this.entity[i].state, i);
+    const color = this.computeColor(this.entity[i].state, i); // ?? preset line
     return svg`
       <g class='line--points'
         ?tooltip=${this.tooltip.entity === i}
@@ -498,7 +514,7 @@ class MiniGraphCard extends LitElement {
     if (!line) return;
     const fill = this.gradient[i]
       ? `url(#grad-${this.id}-${i})`
-      : this.computeColor(this.entity[i].state, i);
+      : this.computeColor(this.entity[i].state, i); // ??? preset line
     return svg`
       <rect class='line--rect'
         ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== i}
@@ -512,7 +528,7 @@ class MiniGraphCard extends LitElement {
     if (!fill) return;
     const svgFill = this.gradient[i]
       ? `url(#grad-${this.id}-${i})`
-      : this.computeColor(this.entity[i].state, i);
+      : this.computeColor(this.entity[i].state, i); // ??? preset line
     return svg`
       <rect class='fill--rect'
         ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== i}
@@ -638,8 +654,10 @@ class MiniGraphCard extends LitElement {
   }
 
   handlePopup(e, entity) {
-    e.stopPropagation();
-    handleClick(this, this._hass, this.config, this.config.tap_action, entity.entity_id || entity);
+    if (entity) {
+      e.stopPropagation();
+      handleClick(this, this._hass, this.config, this.config.tap_action, entity.entity_id || entity);
+    }
   }
 
   get visibleEntities() {
@@ -695,7 +713,8 @@ class MiniGraphCard extends LitElement {
   computeName(index) {
     return this.config.entities[index].name
       || this.entity[index].attributes.friendly_name
-      || this.entity[index].entity_id;
+      || this.entity[index].entity_id
+      || (this.isStaticValue(index) && '');
   }
 
   computeIcon(entity) {
@@ -787,6 +806,7 @@ class MiniGraphCard extends LitElement {
     if (config.show.graph) {
       this.entity.forEach((entity, i) => {
         if (entity) this.Graph[i].update();
+        // ???? preset line
       });
     }
 
@@ -795,6 +815,7 @@ class MiniGraphCard extends LitElement {
     if (config.show.graph) {
       let graphPos = 0;
       this.entity.forEach((entity, i) => {
+        // ???? preset line
         if (!entity || this.Graph[i].coords.length === 0) return;
         const bound = config.entities[i].y_axis === 'secondary' ? this.boundSecondary : this.bound;
         [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
