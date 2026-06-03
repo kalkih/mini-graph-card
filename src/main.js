@@ -1079,6 +1079,18 @@ class MiniGraphCard extends LitElement {
 
 customElements.define('mini-graph-card', MiniGraphCard);
 
+const NUMERIC_DOMAINS = ['counter', 'input_number', 'number'];
+
+const isNumericEntity = (hass, entityId) => {
+  const domain = entityId.split('.')[0];
+  if (NUMERIC_DOMAINS.includes(domain)) return true;
+  if (domain !== 'sensor') return false;
+
+  const stateObj = hass.states[entityId];
+  if (!stateObj) return false;
+  return !!stateObj.attributes.unit_of_measurement || !!stateObj.attributes.state_class;
+};
+
 // Configure the preview in the Lovelace card picker
 window.customCards = window.customCards || [];
 window.customCards.push({
@@ -1087,18 +1099,12 @@ window.customCards.push({
   preview: false,
   description: 'The Mini Graph card is a minimalistic and customizable graph card',
   getEntitySuggestion: (hass, entityId) => {
-    if (entityId.split('.')[0] !== 'sensor') return null;
-
-    const stateObj = hass.states[entityId];
-    if (!stateObj) return null;
-
-    const { state_class: stateClass, unit_of_measurement: unit } = stateObj.attributes;
-    if (!unit && !stateClass) return null;
+    if (!isNumericEntity(hass, entityId)) return null;
 
     return {
       config: {
         type: 'custom:mini-graph-card',
-        entities: [entityId],
+        entities: [{ entity: entityId }],
       },
     };
   },
