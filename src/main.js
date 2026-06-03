@@ -1086,4 +1086,20 @@ window.customCards.push({
   name: 'Mini Graph Card',
   preview: false,
   description: 'The Mini Graph card is a minimalistic and customizable graph card',
+  getEntitySuggestion: (hass, entityId) => {
+    if (entityId.split('.')[0] !== 'sensor') return null;
+
+    const stateObj = hass.states[entityId];
+    if (!stateObj) return null;
+
+    const { state_class: stateClass, unit_of_measurement: unit } = stateObj.attributes;
+    if (!unit && !stateClass) return null;
+
+    return {
+      config: {
+        type: 'custom:mini-graph-card',
+        entities: [entityId],
+      },
+    };
+  },
 });
