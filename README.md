@@ -102,7 +102,8 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | color_thresholds | list |  | v0.2.3 | Set thresholds for dynamic graph colors, see [Line color object](#line-color-object).
 | color_thresholds_transition | string | `smooth` | v0.4.3 | Color threshold transition, `smooth` or `hard`.
 | decimals | integer |  | v0.0.9 | Specify the exact number of decimals to show for states.
-| hour24 | boolean | `false` | v0.2.1 | Set to `true` to display times in 24-hour format.
+| hour24 | boolean |  | v0.2.1 | Set to `true` to display times in 24-hour format. See more details [here](#custom-format-for-datetime-values).
+| datetime_format | string | | v.0.14.0 | Set a custom [format](#custom-format-for-datetime-values) for datetime values.
 | font_size | number | `100` | v0.0.3 | Adjust the font size of the state, as percentage of the original size.
 | font_size_header | number | `14` | v0.3.1 | Adjust the font size of the header, size in pixels.
 | align_header | string | `default` | v0.2.0 | Set the alignment of the header, `left`, `right`, `center` or `default`.
@@ -259,6 +260,24 @@ These buckets are converted later to single point/bar on the graph. Aggregate fu
 | `sum` | v0.9.2 |
 | `delta` | v0.9.4 | Calculates difference between max and min value
 | `diff` | v0.11.0 | Calculates difference between first and last value
+
+### Custom format for datetime values
+By default, the card uses global HA Frontend settings for date & time values. An explicitly defined `datetime_format` option overrides the default format.
+
+Note that the same approach is applied to `hour24` option: if the option is not defined, default settings are used. An explicitly defined `hour24` option overrides the default format.
+
+Here are possible values for the `datetime_format` option:
+```
+DD/MM/YYYY HH:mm  DD.MM.YYYY HH:mm  DD-MM-YYYY HH:mm
+MM/DD/YYYY HH:mm  MM.DD.YYYY HH:mm  MM-DD-YYYY HH:mm
+YYYY/MM/DD HH:mm  YYYY.MM.DD HH:mm  YYYY-MM-DD HH:mm
+```
+where can be used `YYYY` or `YY`, `MM` or `M`, `DD` or `D`, `HH` or `H`.
+A singular whitespace must be used to separate date & time formats. Letter case does matter.
+
+Any values which do not match the pattern - lead to a fallback to a "day weekday" format (used as the only and default format till v.0.13).
+For clarity, it is recommended to explicitly define a `day_weekday` value in case the legacy "day weekday" format is needed.
+
 
 ### Theme variables
 The following theme variables can be set in your HA theme to customize the appearance of the card.
