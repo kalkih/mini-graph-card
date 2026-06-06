@@ -10,7 +10,7 @@ const getAvg = (arr, val) => arr.reduce((sum, p) => (
 const getMax = (arr, val) => arr.reduce((max, p) => (
   Number(p[val]) > Number(max[val]) ? p : max
 ), arr[0]);
-const getTime = (date, extra, locale = 'en-US') => date.toLocaleString(locale, { hour: 'numeric', minute: 'numeric', ...extra });
+
 const getMilli = hours => hours * 60 ** 2 * 10 ** 3;
 
 const compress = data => lzStringCompress(JSON.stringify(data));
@@ -28,7 +28,7 @@ const log = (message) => {
 };
 
 export {
-  getMin, getAvg, getMax, getTime, getMilli, compress, decompress, log,
+  getMin, getAvg, getMax, getMilli, compress, decompress, log,
   getFirstDefinedItem,
   compareArray,
 };
