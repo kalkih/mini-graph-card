@@ -104,7 +104,8 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | decimals | integer |  | v0.0.9 | Specify the exact number of decimals to show for number values, see [Number format](#number-format).
 | decimals_primary_labels | integer |  | v0.14.0 | Specify the exact number of decimals to show for primary Y-axis labels, see [Number format](#number-format).
 | decimals_secondary_labels | integer |  | v0.14.0 | Specify the exact number of decimals to show for secondary Y-axis labels, see [Number format](#number-format).
-| hour24 | boolean | `false` | v0.2.1 | Set to `true` to display times in 24-hour format.
+| hour24 | boolean |  | v0.2.1 | Set to `true` to display times in 24-hour format. See more details [here](#custom-format-for-datetime-values).
+| datetime_format | string | | v.0.14.0 | Set a custom [format](#custom-format-for-datetime-values) for datetime values.
 | font_size | number | `100` | v0.0.3 | Adjust the font size of the state, as percentage of the original size.
 | font_size_header | number | `14` | v0.3.1 | Adjust the font size of the header, size in pixels.
 | align_header | string | `default` | v0.2.0 | Set the alignment of the header, `left`, `right`, `center` or `default`.
@@ -141,12 +142,14 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | show_graph | boolean |         | Set to false to completely hide the entity in the graph.
 | show_line | boolean |         | Set to false to hide the line.
 | show_fill | boolean |         | Set to false to hide the fill.
-| show_points | boolean |         | Set to false to hide the points.
+| show_points | boolean |         | Set to false to hide the points (see a note below).
 | show_legend | boolean |         | Set to false to turn hide from the legend.
 | state_adaptive_color | boolean |         | Make the color of the state adapt to the entity color.
 | y_axis | string |         | If 'secondary', displays using the secondary Y-axis on the right.
 | fixed_value | boolean |         | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 | smoothing | boolean |         | Override for a flag indicating whether to make graph line smooth.
+
+Note: the "points" term is only applicable to a "line" graph, not to a "bar" graph.
 
 ```yaml
 entities:
@@ -164,13 +167,13 @@ All properties are optional.
 |------|:-------:|:-------:|-------------|
 | name | `true` | `true` / `false` | Display name.
 | icon | `true` | `true` / `false` | Display icon.
-| state | `true` | `true` / `false` / `last` | Display current state. `last` will show the last graph point's value.
+| state | `true` | `true` / `false` / `last` | Display current state. `last` will show the last graph point's or bar's value (fallback to `true` if points are not shown for a line graph).
 | graph | `line` | `line` / `bar` / `false` | Display option for the graph. If set to `bar` a maximum of `96` bars will be displayed.
 | fill | `true` | `true` / `false` / `fade` | Display the line graph fill.
-| points | `hover` | `true` / `false` / `hover` | Display graph data points.
-| legend | `true` | `true` / `false` | Display the graph legend (only shown when graph contains multiple entities).
-| average | `false` | `true` / `false` | Display average information.
-| extrema | `false` | `true` / `false` | Display max/min information.
+| points | `hover` | `true` / `false` / `hover` | Display graph data points (for a line graph only).
+| legend | `true` | `true` / `false` / `below` | Display the graph legend (only shown when graph contains multiple entities); `below` - place below a graph.
+| average | `false` | `true` / `false` / `below` | Display average information; `below` - place below a graph.
+| extrema | `false` | `true` / `false` / `below` | Display max/min information; `below` - place below a graph.
 | labels | `hover` | `true` / `false` / `hover` | Display Y-axis labels.
 | labels_secondary | `hover` | `true` / `false` / `hover` | Display secondary Y-axis labels.
 | name_adaptive_color | `false` | `true` / `false` | Make the name color adapt with the primary entity color.
@@ -230,10 +233,17 @@ As a shorthand, you can just use a color string for the stops that you want inte
 ```
 
 #### Action object options
+
+All card's area - except a graph part - supports processing of actions.
+By default, tapping on an element opens a `more-info` dialog:
+1. For "state" elements - the dialog is opened for a corresponding graph entity.
+2. For "legend" elements - same as above.
+3. For other card's areas (except a graph part) - the dialog is opened for the 1st graph entity.
+
 | Name | Type | Default | Options | Description |
 |------|:----:|:-------:|:-----------:|-------------|
 | action | string | `more-info` | `more-info` / `navigate` / `call-service`  / `url` / `none` | Action to perform.
-| entity | string |  | Any entity id | Override default entity of `more-info`, when  `action` is defined as `more-info`.
+| entity | string |  | Any entity id | Override default entity of `more-info`, when  `action` is defined as `more-info`.<br>Note that this override is not applied when a "state" or a "legend" elements are tapped - in these cases always a corresponding graph entity is processed.
 | service | string |  | Any service | Service to call (e.g. `media_player.toggle`) when `action` is defined as `call-service`.
 | service_data | object |  | Any service data | Service data to include with the service call (e.g. `entity_id: media_player.office`).
 | navigation_path | string |  | Any path | Path to navigate to (e.g. `/lovelace/0/`) when `action` is defined as `navigate`.
@@ -286,6 +296,26 @@ A "default presentation" refers to a default look in HA:
 2. For an attribute value (also for extrema & average): default HA settings are used (for template sensors - a user-defined accuracy set in jinja templates is used).
 3. For Y-axis labels: "maximum 2 decimals" accuracy is used.
 And for all values, HA number format settings (like `xxxx.xx` or `x xxx.x` or `x,xxx.x`) are used.
+
+
+### Custom format for datetime values
+
+By default, the card uses global HA Frontend settings for date & time values. An explicitly defined `datetime_format` option overrides the default format.
+
+Note that the same approach is applied to `hour24` option: if the option is not defined, default settings are used. An explicitly defined `hour24` option overrides the default format.
+
+Here are possible values for the `datetime_format` option:
+```
+DD/MM/YYYY HH:mm  DD.MM.YYYY HH:mm  DD-MM-YYYY HH:mm
+MM/DD/YYYY HH:mm  MM.DD.YYYY HH:mm  MM-DD-YYYY HH:mm
+YYYY/MM/DD HH:mm  YYYY.MM.DD HH:mm  YYYY-MM-DD HH:mm
+```
+where can be used `YYYY` or `YY`, `MM` or `M`, `DD` or `D`, `HH` or `H`.
+A singular whitespace must be used to separate date & time formats. Letter case does matter.
+
+Any values which do not match the pattern - lead to a fallback to a "day weekday" format (used as the only and default format till v.0.13).
+For clarity, it is recommended to explicitly define a `day_weekday` value in case the legacy "day weekday" format is needed.
+
 
 ### Theme variables
 The following theme variables can be set in your HA theme to customize the appearance of the card.
