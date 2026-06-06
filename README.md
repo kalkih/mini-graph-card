@@ -87,7 +87,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | unit | string |  | v0.0.1 | Set a custom unit of measurement (`''` value for an empty unit).
 | tap_action | [action object](#action-object-options) |  | v0.7.0 | Action on click/tap.
 | group | boolean | `false` | v0.2.0 | Disable paddings and box-shadow, useful when nesting the card.
-| hours_to_show | integer | `24` | v0.0.2 | Specify how many hours of history the graph should present.
+| hours_to_show | number | `24` | v0.0.2 | Specify how many hours of history the graph should present.
 | points_per_hour | number | `0.5` | v0.2.0 | Specify amount of data points the graph should display for each hour, *(basically the detail/accuracy/smoothing of the graph)*.
 | aggregate_func | string | `avg` | v0.8.0 | Specify [aggregate function](#aggregate-functions) used to calculate point/bar in the graph.
 | group_by | string | `interval` | v0.8.0 | Specify type of grouping of data, dynamic `interval`, `date` or `hour`.
@@ -138,12 +138,14 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | show_graph | boolean |         | Set to false to completely hide the entity in the graph.
 | show_line | boolean |         | Set to false to hide the line.
 | show_fill | boolean |         | Set to false to hide the fill.
-| show_points | boolean |         | Set to false to hide the points.
+| show_points | boolean |         | Set to false to hide the points (see a note below).
 | show_legend | boolean |         | Set to false to turn hide from the legend.
 | state_adaptive_color | boolean |         | Make the color of the state adapt to the entity color.
 | y_axis | string |         | If 'secondary', displays using the secondary y-axis on the right.
 | fixed_value | boolean |         | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 | smoothing | boolean |         | Override for a flag indicating whether to make graph line smooth.
+
+Note: the "points" term is only applicable to a "line" graph, not to a "bar" graph.
 
 ```yaml
 entities:
@@ -161,10 +163,10 @@ All properties are optional.
 |------|:-------:|:-------:|-------------|
 | name | `true` | `true` / `false` | Display name.
 | icon | `true` | `true` / `false` | Display icon.
-| state | `true` | `true` / `false` / `last` | Display current state. `last` will show the last graph point's value.
+| state | `true` | `true` / `false` / `last` | Display current state. `last` will show the last graph point's or bar's value (fallback to `true` if points are not shown for a line graph).
 | graph | `line` | `line` / `bar` / `false` | Display option for the graph. If set to `bar` a maximum of `96` bars will be displayed.
 | fill | `true` | `true` / `false` / `fade` | Display the line graph fill.
-| points | `hover` | `true` / `false` / `hover` | Display graph data points.
+| points | `hover` | `true` / `false` / `hover` | Display graph data points (for a line graph only).
 | legend | `true` | `true` / `false` | Display the graph legend (only shown when graph contains multiple entities).
 | average | `false` | `true` / `false` | Display average information.
 | extrema | `false` | `true` / `false` | Display max/min information.

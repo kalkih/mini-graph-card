@@ -109,6 +109,9 @@ const style = css`
     margin-right: .6em;
     margin-left: 0;
   }
+  .icon[loc="right"] {
+    margin-left: auto;
+  }
   .icon[loc="state"] {
     align-self: center;
   }
