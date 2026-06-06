@@ -1,4 +1,3 @@
-/* eslint-disable no-bitwise */
 import { compress as lzStringCompress, decompress as lzStringDecompress } from '@kalkih/lz-string';
 
 const getMin = (arr, val) => arr.reduce((min, p) => (

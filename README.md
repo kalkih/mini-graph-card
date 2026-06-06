@@ -101,7 +101,9 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | line_color | string/list | `var(--accent-color)` | v0.0.1 | Set a custom color for the graph line, provide a list of colors for multiple graph entries.
 | color_thresholds | list |  | v0.2.3 | Set thresholds for dynamic graph colors, see [Line color object](#line-color-object).
 | color_thresholds_transition | string | `smooth` | v0.4.3 | Color threshold transition, `smooth` or `hard`.
-| decimals | integer |  | v0.0.9 | Specify the exact number of decimals to show for states.
+| decimals | integer |  | v0.0.9 | Specify the exact number of decimals to show for number values, see [Number format](#number-format).
+| decimals_primary_labels | integer |  | v0.14.0 | Specify the exact number of decimals to show for primary Y-axis labels, see [Number format](#number-format).
+| decimals_secondary_labels | integer |  | v0.14.0 | Specify the exact number of decimals to show for secondary Y-axis labels, see [Number format](#number-format).
 | hour24 | boolean |  | v0.2.1 | Set to `true` to display times in 24-hour format. See more details [here](#custom-format-for-datetime-values).
 | datetime_format | string | | v.0.14.0 | Set a custom [format](#custom-format-for-datetime-values) for datetime values.
 | font_size | number | `100` | v0.0.3 | Adjust the font size of the state, as percentage of the original size.
@@ -133,6 +135,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | color | string |         | Set a custom color, overrides all other color options including thresholds.
 | unit | string |         | Set a custom unit of measurement, overrides `unit` set in base config (`''` value for an empty unit).
 | aggregate_func | string |         | Override for aggregate function used to calculate point on the graph, `avg`, `median`, `min`, `max`, `first`, `last`, `sum`.
+| decimals | integer |    | Override the exact number of decimals to show for number values, see [Number format](#number-format).
 | show_state | boolean |         | Display the current state.
 | show_legend_state | boolean |  false  | Display the current state as part of the legend.
 | show_indicator | boolean |         | Display a color indicator next to the state, (only when more than two states are visible).
@@ -142,7 +145,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | show_points | boolean |         | Set to false to hide the points (see a note below).
 | show_legend | boolean |         | Set to false to turn hide from the legend.
 | state_adaptive_color | boolean |         | Make the color of the state adapt to the entity color.
-| y_axis | string |         | If 'secondary', displays using the secondary y-axis on the right.
+| y_axis | string |         | If 'secondary', displays using the secondary Y-axis on the right.
 | fixed_value | boolean |         | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 | smoothing | boolean |         | Override for a flag indicating whether to make graph line smooth.
 
@@ -268,7 +271,35 @@ These buckets are converted later to single point/bar on the graph. Aggregate fu
 | `delta` | v0.9.4 | Calculates difference between max and min value
 | `diff` | v0.11.0 | Calculates difference between first and last value
 
+### Number format
+
+Options `decimals` defined "card-wide" and/or for some entity are used to set an exact number of decimals according to the following rules:
+1. For state & attribute values:
+- if none `decimals` option is defined - a default presentation (see a note below) is used;
+- if "card-wide" `decimals` is defined - this value is used;
+- if `decimals` for some entity is defined - this value is used for this entity.
+2. For extrema & average values (supported for the 1st entity only):
+- if none `decimals` option is defined - a default presentation is used;
+- if "card-wide" `decimals` is defined - this value is used;
+- if `decimals` is defined for the 1st entity - this value is used.
+3. For primary Y-axis labels:
+- if "card-wide" `decimals` & `decimals_primary_labels` options are not defined - a default presentation is used;
+- if "card-wide" `decimals` option is defined - this value is used;
+- if "card-wide" `decimals_primary_labels` option is defined - this value is used.
+4. For secondary Y-axis labels:
+- if "card-wide" `decimals` & `decimals_secondary_labels` options are not defined - a default presentation is used;
+- if "card-wide" `decimals` option is defined - this value is used;
+- if "card-wide" `decimals_secondary_labels` option is defined - this value is used.
+  
+A "default presentation" refers to a default look in HA:
+1. For a state value (also for extrema & average): if accuracy settings are defined for an entity - these settings are used, otherwise some default HA settings (depend on many factors incl. a `device_class`; for template sensors - a user-defined accuracy set in jinja templates is used).
+2. For an attribute value (also for extrema & average): default HA settings are used (for template sensors - a user-defined accuracy set in jinja templates is used).
+3. For Y-axis labels: "maximum 2 decimals" accuracy is used.
+And for all values, HA number format settings (like `xxxx.xx` or `x xxx.x` or `x,xxx.x`) are used.
+
+
 ### Custom format for datetime values
+
 By default, the card uses global HA Frontend settings for date & time values. An explicitly defined `datetime_format` option overrides the default format.
 
 Note that the same approach is applied to `hour24` option: if the option is not defined, default settings are used. An explicitly defined `hour24` option overrides the default format.
@@ -424,11 +455,11 @@ color_thresholds:
     color: "#c0392b"
 ```
 
-#### Alternate y-axis
-Have one or more series plot on a separate y-axis, which appears on the right side of the graph. This example also
+#### Alternate Y-axis
+Have one or more series plot on a separate Y-axis, which appears on the right side of the graph. This example also
 shows turning off the line, points and legend.
 
-![Alternate y-axis](https://user-images.githubusercontent.com/373079/60764115-63cf2780-a0c6-11e9-8b9a-97fc47161180.png)
+![Alternate Y-axis](https://user-images.githubusercontent.com/373079/60764115-63cf2780-a0c6-11e9-8b9a-97fc47161180.png)
 
 ```yaml
 type: custom:mini-graph-card
@@ -526,6 +557,7 @@ state_map:
   - value: "on"
     label: Detected
 ```
+
 
 #### Showing additional info on the card
 

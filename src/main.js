@@ -7,6 +7,9 @@ import Graph from './graph';
 import style from './style';
 import handleClick from './handleClick';
 import buildConfig from './buildConfig';
+import {
+  formatNumber,
+} from './locale';
 import './initialize';
 import {
   formatDateTime,
@@ -27,6 +30,8 @@ import {
   compareArray,
   log,
 } from './utils';
+
+const isUnavailableState = value => ['unavailable', 'unknown'].includes(value);
 
 class MiniGraphCard extends LitElement {
   constructor() {
@@ -322,6 +327,14 @@ class MiniGraphCard extends LitElement {
   }
 
   /**
+  * Check if an attribute represents an object (dictionary or list)
+  * @returns {boolean} True if an attribute is an object, false - otherwise
+  * @param path Attribute defined as either a singular attribute or a tree-like path
+  */
+  isObjectAttr(path) {
+    return path.includes('.');
+  }
+
   * Returns a state/attrubute value
   * @returns {any} value of a state/attribute
   * @param {number} index Index of an entity in config.entities
@@ -370,7 +383,7 @@ class MiniGraphCard extends LitElement {
         >
           ${entityConfig.show_indicator ? this.renderIndicator(value, entityIndex) : ''}
           <span class="state__value ellipsis">
-            ${this.computeState(value)}
+            ${this.computeState(value, entity)}
           </span>
           <span class="state__uom ellipsis">
             ${this.computeUom(entityIndex)}
@@ -433,7 +446,7 @@ class MiniGraphCard extends LitElement {
     const { show_legend_state = false } = this.config.entities[index];
 
     if (show_legend_state) {
-      legend += ` (${this.computeState(state)}`;
+      legend += ` (${this.computeState(state, index)}`;
       if (!(['unavailable'].includes(state))) {
         const uom = this.computeUom(index);
         if (!(['%', ''].includes(uom)))
@@ -694,6 +707,7 @@ class MiniGraphCard extends LitElement {
   */
   renderLabels() {
     if (!this.config.show.labels || this.primaryYaxisSeries.length === 0) return;
+    // index is not passed into computeState() for a primary axis
     return html`
       <div class="graph__labels --primary flex">
         <span class="label--max">${this.computeState(this.bound[1])}</span>
@@ -708,10 +722,11 @@ class MiniGraphCard extends LitElement {
   */
   renderLabelsSecondary() {
     if (!this.config.show.labels_secondary || this.secondaryYaxisSeries.length === 0) return;
+    // index "-1" is passed into computeState() for a secondary axis
     return html`
       <div class="graph__labels --secondary flex">
-        <span class="label--max">${this.computeState(this.boundSecondary[1])}</span>
-        <span class="label--min">${this.computeState(this.boundSecondary[0])}</span>
+        <span class="label--max">${this.computeState(this.boundSecondary[1], -1)}</span>
+        <span class="label--min">${this.computeState(this.boundSecondary[0], -1)}</span>
       </div>
     `;
   }
@@ -723,13 +738,14 @@ class MiniGraphCard extends LitElement {
   renderInfo() {
     const { extrema, average } = this.config.show;
     const location = (extrema === 'below' || average === 'below') ? 'below' : 'above';
+    // index "0" is passed into computeState() since "info" is shown for the 1st entity
     return this.abs.length > 0 ? html`
       <div class="info flex" loc=${location}>
         ${this.abs.map(entry => html`
           <div class="info__item">
             <span class="info__item__type">${entry.type}</span>
             <span class="info__item__value">
-              ${this.computeState(entry.state)} ${this.computeUom(0)}
+              ${this.computeState(entry.state, 0)} ${this.computeUom(0)}
             </span>
             <span class="info__item__time">
               ${entry.type !== 'avg' ? formatDateTime(new Date(entry.last_changed), this.config, this._hass) : ''}
@@ -852,7 +868,15 @@ class MiniGraphCard extends LitElement {
     );
   }
 
-  computeState(inState) {
+  /**
+  * Returns a string value for a state/attrubute:
+  * localized, following locale settings,
+  * accounting possible individual accuracy settings & possible "decimals" options
+  * @returns {string} value of a state/attribute
+  * @param {number|string} inState Value of a state/attribute ("unformatted")
+  * @param {number} index Index of an entity in config.entities
+  */
+  computeState(inState, index) {
     if (this.config.state_map.length > 0) {
       const stateMap = Number.isInteger(inState)
         ? this.config.state_map[inState]
@@ -866,22 +890,89 @@ class MiniGraphCard extends LitElement {
     }
 
     let state;
-    if (typeof inState === 'string') {
+    if (isUnavailableState(inState)) {
+      // as is
+      state = inState;
+    } else if (typeof inState === 'string') {
+      // attempt to fix an unexpected number format
       state = parseFloat(inState.replace(/,/g, '.'));
     } else {
+      // as is presented as a number
       state = Number(inState);
     }
-    const dec = this.config.decimals;
     const value_factor = 10 ** this.config.value_factor;
+    // safely process with a value_factor
+    state = Number.isNaN(Number(state)) ? state : state * value_factor;
 
-    if (dec === undefined || Number.isNaN(dec) || Number.isNaN(state)) {
-      return this.numberFormat(Math.round(state * value_factor * 100) / 100, this._hass.language);
+    let dec;
+    // attempting to get "decimals" settings
+    if (index === undefined) {
+      // for a primary Y-axis
+      dec = this.config.decimals_primary_labels !== undefined
+        ? this.config.decimals_primary_labels
+        : this.config.decimals;
+    } else if (index === -1) {
+      // for a secondary Y-axis
+      dec = this.config.decimals_secondary_labels !== undefined
+        ? this.config.decimals_secondary_labels
+        : this.config.decimals;
+    } else {
+      // for a state or attribute value
+      dec = this.config.entities[index].decimals !== undefined
+        ? this.config.entities[index].decimals
+        : this.config.decimals;
     }
 
-    const x = 10 ** dec;
-    return this.numberFormat(
-      (Math.round(state * value_factor * x) / x).toFixed(dec),
-      this._hass.language, dec,
+    let value;
+
+    if (dec === undefined || Number.isNaN(Number(dec)) || Number.isNaN(Number(state))) {
+      // no valid "decimals" settings defined, use a default accuracy
+      if (index >= 0) {
+        // formatting a state or attribute
+        const entityId = this.config.entities[index].entity;
+        const { attribute } = this.config.entities[index];
+        const stateObj = this._hass.states[entityId];
+        if (attribute && !this.isObjectAttr(attribute)) {
+          // formatting not-object attribute
+          const attrParts = this._hass.formatEntityAttributeValueToParts(
+            stateObj,
+            attribute,
+            state,
+          );
+          const partValue = attrParts.find(part => part.type === 'value');
+          value = partValue && partValue.value;
+          return value;
+        } else if (attribute && this.isObjectAttr(attribute)) {
+          // formatting object attribute - similar to Y-axis labels
+          return formatNumber(
+            state,
+            this._hass.locale,
+          );
+        } else {
+          // formatting state
+          const stateParts = this._hass.formatEntityStateToParts(
+            stateObj,
+            state,
+          );
+          const partValue = stateParts.find(part => part.type === 'value');
+          value = partValue && partValue.value;
+          return value;
+        }
+      } else {
+        // formatting Y-axis (primary, secondary) labels
+        // use a default hard-coded accuracy
+        return formatNumber(
+          state,
+          this._hass.locale,
+        );
+      }
+    }
+
+    // use an acuracy defined by "dec" variable
+    return formatNumber(
+      state,
+      this._hass.locale,
+      { minimumFractionDigits: dec, maximumFractionDigits: dec },
     );
   }
 
