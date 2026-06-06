@@ -269,18 +269,36 @@ class MiniGraphCard extends LitElement {
       `;
   }
 
+  /**
+  * Returns an object attrubute value
+  * @returns {any} Value of an attribute/subattribute
+  * @param obj stateObj.attributes
+  * @param path Attribute defined as either a singular attribute or a tree-like path
+  */
   getObjectAttr(obj, path) {
     return path.split('.').reduce((res, key) => res && res[key], obj);
   }
 
-  getEntityState(id) {
-    const entityConfig = this.config.entities[id];
-    if (this.config.show.state === 'last') {
-      return this.points[id][this.points[id].length - 1][V];
+  /**
+  * Returns a state/attrubute value
+  * @returns {any} value of a state/attribute
+  * @param {number} index Index of an entity in config.entities
+  */
+  getEntityState(index) {
+    const entityConfig = this.config.entities[index];
+    if (this.config.show.state === 'last' && this.config.show.graph === 'bar') {
+      // last "bar" value
+      return this.bar[index][this.bar[index].length - 1].value;
+    } else if (this.config.show.state === 'last' && this.points[index] && this.points[index].length) {
+      // last "point" value
+      // only if "points" exist (show_points: true)
+      return this.points[index][this.points[index].length - 1][V];
     } else if (entityConfig.attribute) {
-      return this.getObjectAttr(this.entity[id].attributes, entityConfig.attribute);
+      // current attribute value
+      return this.getObjectAttr(this.entity[index].attributes, entityConfig.attribute);
     } else {
-      return this.entity[id].state;
+      // current state value
+      return this.entity[index].state;
     }
   }
 
