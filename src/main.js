@@ -333,7 +333,7 @@ class MiniGraphCard extends LitElement {
     return path.includes('.');
   }
 
-  * Returns a state/attrubute value
+  /** Returns a state/attrubute value
   * @returns {any} value of a state/attribute
   * @param {number} index Index of an entity in config.entities
   */
