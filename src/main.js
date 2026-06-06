@@ -295,18 +295,36 @@ class MiniGraphCard extends LitElement {
       `;
   }
 
+  /**
+  * Returns an object attrubute value
+  * @returns {any} Value of an attribute/subattribute
+  * @param obj stateObj.attributes
+  * @param path Attribute defined as either a singular attribute or a tree-like path
+  */
   getObjectAttr(obj, path) {
     return path.split('.').reduce((res, key) => res && res[key], obj);
   }
 
-  getEntityState(id) {
-    const entityConfig = this.config.entities[id];
-    if (this.config.show.state === 'last') {
-      return this.points[id][this.points[id].length - 1][V];
+  /**
+  * Returns a state/attrubute value
+  * @returns {any} value of a state/attribute
+  * @param {number} index Index of an entity in config.entities
+  */
+  getEntityState(index) {
+    const entityConfig = this.config.entities[index];
+    if (this.config.show.state === 'last' && this.config.show.graph === 'bar') {
+      // last "bar" value
+      return this.bar[index][this.bar[index].length - 1].value;
+    } else if (this.config.show.state === 'last' && this.points[index] && this.points[index].length) {
+      // last "point" value
+      // only if "points" exist (show_points: true)
+      return this.points[index][this.points[index].length - 1][V];
     } else if (entityConfig.attribute) {
-      return this.getObjectAttr(this.entity[id].attributes, entityConfig.attribute);
+      // current attribute value
+      return this.getObjectAttr(this.entity[index].attributes, entityConfig.attribute);
     } else {
-      return this.entity[id].state;
+      // current state value
+      return this.entity[index].state;
     }
   }
 
@@ -322,7 +340,7 @@ class MiniGraphCard extends LitElement {
       const entityConfig = this.config.entities[entity];
       return html`
         <div
-          class="state ${!isPrimary && 'state--small'}"
+          class="state ${!isPrimary ? 'state--small' : ''}"
           @click=${e => this.handlePopup(e, this.entity[id])}
           style=${entityConfig.state_adaptive_color ? `color: ${this.computeColor(value, entity)}` : ''}>
           ${entityConfig.show_indicator ? this.renderIndicator(value, entity) : ''}
@@ -395,10 +413,10 @@ class MiniGraphCard extends LitElement {
 
   renderLegend() {
     if (this.visibleLegends.length <= 1 || !this.config.show.legend) return;
-
+    const location = this.config.show.legend === 'below' ? 'below' : 'above';
     /* eslint-disable indent */
     return html`
-      <div class="graph__legend">
+      <div class="graph__legend" loc=${location}>
         ${this.visibleLegends.map((entity) => {
           const legend = this.computeLegend(entity.index);
           return html`
@@ -645,8 +663,10 @@ class MiniGraphCard extends LitElement {
   }
 
   renderInfo() {
+    const { extrema, average } = this.config.show;
+    const location = (extrema === 'below' || average === 'below') ? 'below' : 'above';
     return this.abs.length > 0 ? html`
-      <div class="info flex">
+      <div class="info flex" loc=${location}>
         ${this.abs.map(entry => html`
           <div class="info__item">
             <span class="info__item__type">${entry.type}</span>
@@ -1104,6 +1124,18 @@ class MiniGraphCard extends LitElement {
 
 customElements.define('mini-graph-card', MiniGraphCard);
 
+const NUMERIC_DOMAINS = ['counter', 'input_number', 'number'];
+
+const isNumericEntity = (hass, entityId) => {
+  const domain = entityId.split('.')[0];
+  if (NUMERIC_DOMAINS.includes(domain)) return true;
+  if (domain !== 'sensor') return false;
+
+  const stateObj = hass.states[entityId];
+  if (!stateObj) return false;
+  return !!stateObj.attributes.unit_of_measurement || !!stateObj.attributes.state_class;
+};
+
 // Configure the preview in the Lovelace card picker
 window.customCards = window.customCards || [];
 window.customCards.push({
@@ -1111,4 +1143,14 @@ window.customCards.push({
   name: 'Mini Graph Card',
   preview: false,
   description: 'The Mini Graph card is a minimalistic and customizable graph card',
+  getEntitySuggestion: (hass, entityId) => {
+    if (!isNumericEntity(hass, entityId)) return null;
+
+    return {
+      config: {
+        type: 'custom:mini-graph-card',
+        entities: [{ entity: entityId }],
+      },
+    };
+  },
 });
