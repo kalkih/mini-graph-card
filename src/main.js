@@ -381,7 +381,7 @@ class MiniGraphCard extends LitElement {
         >
           ${entityConfig.show_indicator ? this.renderIndicator(value, entityIndex) : ''}
           <span class="state__value ellipsis">
-            ${this.computeState(value, entity)}
+            ${this.computeState(value, entityIndex)}
           </span>
           <span class="state__uom ellipsis">
             ${this.computeUom(entityIndex)}
