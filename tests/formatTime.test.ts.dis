@@ -1,0 +1,464 @@
+/**
+ * Tests for formatDateTime().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ *
+ * Note that tests for "TimeFormat.system" & "DateFormat.system" are commmented out:
+ * with these settings a "system locale" is supposed to be used - and it seems to depend on
+ * how these tests are executed: for instance, with vitest in a devcontainer in VSCode a system
+ * locale seems to be fixed to "en", and I do not know (yet) how to programmatically change
+ * it in tests.
+ */
+
+import { assert, describe, it } from 'vitest';
+import {
+  getDateFormat,
+  getTimeFormat,
+  parseDateTimeFormat,
+  formatDateTime,
+  TimeFormat,
+  DateFormat,
+  TimeZone,
+} from '../src/locale';
+
+// Set UTC time if your vitest is configired for UTC or has a default config;
+// also, set UTC for HASS_TIME_ZONE
+// const dateObj = new Date('2023-03-01T04:05:00Z');
+
+// Set any time zone if your vitest is configured to some particular TZ.
+// Here: "+03:00" stands for "Europe/Moscow",
+// and same TZ should be set for vitest & for HASS_TIME_ZONE
+const dateObj = new Date('2023-03-01T04:05:00+03:00');
+
+const HASS_TIME_ZONE = 'Europe/Moscow';
+
+// custom DD.MM.YYYY HH:mm -like formats
+const runCustomFormat: boolean = true;
+// const runCustomFormat: boolean = false;
+
+// similar to above but with customized multiplicity (like "YY instead of YYYY")
+const runCustomFormatAdditional: boolean = true;
+// const runCustomFormatAdditional: boolean = false;
+
+// custom unsupported formats which lead to fallback to a standard "day weekday" format
+const runCustomFormatFaulty: boolean = true;
+// const runCustomFormatFaulty: boolean = false;
+
+const runStandardPresets: boolean = true;
+// const runStandardPresets: boolean = false;
+
+// add more languages here, would be great to test & probably foind errors;
+// also, update WEEKDAYS (see below) correspondingly
+const LANGUAGES: string[] = [
+  'en',
+  'en-GB',
+  'ru-RU',
+  'it',
+];
+
+const TIME_FORMATS: string[] = [
+  TimeFormat.language,
+  // TimeFormat.system,
+  TimeFormat.am_pm,
+  TimeFormat.twenty_four,
+];
+
+const DATE_FORMATS: string[] = [
+  DateFormat.language,
+  // DateFormat.system,
+  DateFormat.DMY,
+  DateFormat.MDY,
+  DateFormat.YMD,
+];
+
+const TIME_ZONES: string[] = [
+  TimeZone.local,
+  TimeZone.server,
+];
+
+const HOURS_TO_SHOW: (number | undefined)[] = [
+  undefined,
+  23.9,
+  24.1,
+];
+
+const HOUR24: (boolean | undefined)[] = [
+  undefined,
+  true,
+  false,
+];
+
+// used in "day weekday" tests
+const WEEKDAYS: Record<string, string> = {
+  'en': 'Wed',
+  'en-GB': 'Wed',
+  'ru-RU': 'ср,',
+  'it': 'mer',
+};
+
+interface ConfigType {
+  entities: (string | any)[];
+  hours_to_show?: number;
+  datetime_format?: string;
+  hour24?: boolean;
+  time_format?: Intl.DateTimeFormatOptions;
+  date_format?: Intl.DateTimeFormatOptions;
+  datetimeFormatParsed: any;
+};
+
+const getConfig = (
+  hass: any,
+  datetime_format?: string | undefined,
+  hours_to_show?: number | undefined,
+  hour24?: boolean | undefined,
+) => {
+  let config: ConfigType = {
+    entities: ['sun.sun'],
+  };
+  if (datetime_format) {
+    config = { ...config, datetime_format };
+  }
+  if (hours_to_show) {
+    config = { ...config, hours_to_show };
+  }
+  if (hour24 !== undefined) {
+    config = { ...config, hour24 };
+  }
+
+  config.datetimeFormatParsed = parseDateTimeFormat(datetime_format!);
+  config.date_format = getDateFormat(config, hass);
+  config.time_format = getTimeFormat(config, hass);
+
+  return config;
+};
+
+// Tests do not bother a bout a difference in "normal vs NNBSP" whitespaces & "AM vs am",
+// it's a complicated & confusing logic in Intl
+const standardizeAmPm = (result: string) => result.replace('\u202f', ' ').replace('am', 'AM');
+
+const requiredAmPm = (
+  hour24: boolean | undefined,
+  time_format: string,
+  language: string,
+) => (hour24 === undefined
+    && time_format !== TimeFormat.twenty_four
+    && (['en'].includes(language) || time_format === TimeFormat.am_pm)
+  )
+  || hour24 === false;
+
+const getExpectedValue = (
+  value: string,
+  hours_to_show: number | undefined,
+  hour24: boolean | undefined,
+  language: string,
+  time_format: string,
+) => {
+  let newValue = value;
+  if (hours_to_show === undefined || hours_to_show <= 24) {
+    newValue = value.includes('04:05') ? '04:05' : '4:05'; // keep only a time part
+  }
+  if (requiredAmPm(hour24, time_format, language)) {
+    newValue += ` AM`;
+  }
+  return newValue;
+};
+
+const composeTestName = (
+  name: string,
+  date_format: string,
+  time_format: string,
+  time_zone: string,
+  language: string,
+  hour24: boolean | undefined,
+  hours_to_show: number | undefined,
+) => `${name} (date_format: ${date_format}, time_format: ${time_format}, \
+  time_zone: ${time_zone}, language: ${language}, \
+  hour24: ${hour24 !== undefined ? hour24 : 'default'}, \
+  hours_to_show: ${hours_to_show !== undefined ? hours_to_show : 'default'})`;
+
+describe("formatDateTime", () => {
+
+  DATE_FORMATS.forEach((date_format) => {
+    TIME_FORMATS.forEach((time_format) => {
+      TIME_ZONES.forEach((time_zone) => {
+        LANGUAGES.forEach((language) => {
+          const hass = {
+            config: {
+              time_zone: HASS_TIME_ZONE,
+            },
+            locale: {
+              language: language,
+              time_format: time_format,
+              date_format: date_format,
+              time_zone: time_zone,
+            },
+          };
+
+          HOUR24.forEach((hour24) => {
+
+            if (runCustomFormat) {
+              HOURS_TO_SHOW.forEach((hours_to_show) => {
+                it(composeTestName(
+                  'Check normal patterns',
+                  date_format, time_format, time_zone, language, hour24, hours_to_show
+                ), () => {
+                  patternsOK.forEach((pattern) => {
+                    const config = getConfig(hass, pattern.pattern, hours_to_show, hour24);
+                    const value = getExpectedValue(
+                      pattern.value, hours_to_show, hour24, language, time_format
+                    );
+                    assert.strictEqual(
+                      standardizeAmPm(formatDateTime(dateObj, config, hass)),
+                      value,
+                    );
+                  });
+                })
+              });
+            } // runCustomFormat
+
+            //////////////////////////////////////////////////////////////////////
+
+            if (runCustomFormatAdditional) {
+              HOURS_TO_SHOW.forEach((hours_to_show) => {
+                it(composeTestName(
+                  "Check normal patterns with 'H:mm'",
+                  date_format, time_format, time_zone, language, hour24, hours_to_show
+                ), () => {
+                  patternsOK.forEach((pattern) => {
+                    const newPattern = pattern.pattern.replace('HH', 'H');
+                    const config = getConfig(hass, newPattern, hours_to_show, hour24);
+                    const value = getExpectedValue(
+                      pattern.value, hours_to_show, hour24, language, time_format
+                    );
+                    assert.strictEqual(
+                      standardizeAmPm(formatDateTime(dateObj, config, hass)),
+                      value.replace('04:05', '4:05'),
+                    );
+                  });
+                })
+              });
+
+              HOURS_TO_SHOW.forEach((hours_to_show) => {
+                it(composeTestName(
+                  "Check normal patterns with 'YY'",
+                  date_format, time_format, time_zone, language, hour24, hours_to_show
+                ), () => {
+                  patternsOK.forEach((pattern) => {
+                    const newPattern = pattern.pattern.replace('YYYY', 'YY');
+                    const config = getConfig(hass, newPattern, hours_to_show, hour24);
+                    const value = getExpectedValue(
+                      pattern.value, hours_to_show, hour24, language, time_format
+                    );
+                    assert.strictEqual(
+                      standardizeAmPm(formatDateTime(dateObj, config, hass)),
+                      value.replace('2023', '23'),
+                    );
+                  });
+                })
+              });
+
+              HOURS_TO_SHOW.forEach((hours_to_show) => {
+                it(composeTestName(
+                  "Check normal patterns with 'M'",
+                  date_format, time_format, time_zone, language, hour24, hours_to_show
+                ), () => {
+                  patternsOK.forEach((pattern) => {
+                    const newPattern = pattern.pattern.replace('MM', 'M');
+                    const config = getConfig(hass, newPattern, hours_to_show, hour24);
+                    const value = getExpectedValue(
+                      pattern.value, hours_to_show, hour24, language, time_format
+                    );
+                    assert.strictEqual(
+                      standardizeAmPm(formatDateTime(dateObj, config, hass)),
+                      value.replace('03', '3'),
+                    );
+                  });
+                })
+              });
+
+              HOURS_TO_SHOW.forEach((hours_to_show) => {
+                it(composeTestName(
+                  "Check normal patterns with 'D'",
+                  date_format, time_format, time_zone, language, hour24, hours_to_show
+                ), () => {
+                  patternsOK.forEach((pattern) => {
+                    const newPattern = pattern.pattern.replace('DD', 'D');
+                    const config = getConfig(hass, newPattern, hours_to_show, hour24);
+                    const value = getExpectedValue(
+                      pattern.value, hours_to_show, hour24, language, time_format
+                    );
+                    assert.strictEqual(
+                      standardizeAmPm(formatDateTime(dateObj, config, hass)),
+                      value.replace('01', '1')
+                    );
+                  });
+                })
+              });
+            } // runCustomFormatAdditional
+
+            //////////////////////////////////////////////////////////////////////
+
+            if (runCustomFormatFaulty) {
+              HOURS_TO_SHOW.forEach((hours_to_show) => {
+                it(composeTestName(
+                  "Check faulty patterns",
+                  date_format, time_format, time_zone, language, hour24, hours_to_show
+                ), () => {
+                  patternsFaulty.forEach((pattern) => {
+                    const config = getConfig(hass, pattern.pattern, hours_to_show, hour24);
+                    const weekdayLocalized = WEEKDAYS[language];
+                    const order = language !== 'en';
+                    let valueLocalized = pattern.value(weekdayLocalized, order);
+                    if (requiredAmPm(hour24, time_format, language)) {
+                      valueLocalized = valueLocalized.replace('04', '4');
+                    }
+                    const value = getExpectedValue(
+                      valueLocalized, hours_to_show, hour24, language, time_format
+                    );
+                    assert.strictEqual(
+                      standardizeAmPm(formatDateTime(dateObj, config, hass)),
+                      value,
+                    );
+                  });
+                })
+              });
+            } // runCustomFormatFaulty
+
+          }); // HOUR24
+        }); // LANGUAGES
+      }); // TIME_ZONES
+    }); // TIMEE_FORMAT
+  }); // DATE_FORMAT
+
+  if (runStandardPresets) {
+    // testing standard presets
+    TIME_ZONES.forEach((time_zone) => {
+      HOUR24.forEach((hour24) => {
+        HOURS_TO_SHOW.forEach((hours_to_show) => {
+          patternsStandard.forEach((pattern) => {
+            const hass = {
+              config: {
+                time_zone: HASS_TIME_ZONE,
+              },
+              locale: {
+                language: pattern.language,
+                time_format: pattern.time_format,
+                date_format: pattern.date_format,
+                time_zone: time_zone,
+              },
+            };
+            it(composeTestName(
+              "Check standard presets",
+              pattern.date_format,
+              pattern.time_format,
+              time_zone,
+              pattern.language,
+              hour24,
+              hours_to_show,
+            ), () => {
+              const config = getConfig(hass, undefined, hours_to_show, hour24);
+              const result = formatDateTime(dateObj, config, hass);
+              let newValue = pattern.value;
+              if (
+                (hour24 === undefined
+                  && String(pattern.time_format) !== TimeFormat.twenty_four
+                  && (['en'].includes(pattern.language) || String(pattern.time_format) === TimeFormat.am_pm)
+                  )
+                || hour24 === false) {
+                newValue = newValue.replace('04', '4');
+              }
+              const value = getExpectedValue(
+                newValue,
+                hours_to_show,
+                hour24,
+                pattern.language,
+                pattern.time_format
+              );
+              assert.strictEqual(
+                result.replace('am', 'AM'),
+                value.replace('am', 'AM')
+              );
+            })
+          });
+        });
+      });
+    });
+  } // runStandardPresets
+});
+
+// wrongly defined patterns which lead to a fallback to "day weekday" format
+const patternsFaulty = [
+  {
+    pattern: 'DD/MM/YYYY hh:mm',
+    value: (weekday: string, order: boolean) => {
+      const date = order ? `${weekday} 1` : `1 ${weekday}`;
+      return `${date}, 04:05`;
+    },
+  },
+];
+
+// properly defined patterns
+const patternsOK = [
+  { pattern: 'DD/MM/YYYY HH:mm', value: '01/03/2023, 04:05' },
+  { pattern: 'DD.MM.YYYY HH:mm', value: '01.03.2023, 04:05' },
+  { pattern: 'DD-MM-YYYY HH:mm', value: '01-03-2023, 04:05' },
+  { pattern: 'MM/DD/YYYY HH:mm', value: '03/01/2023, 04:05' },
+  { pattern: 'MM.DD.YYYY HH:mm', value: '03.01.2023, 04:05' },
+  { pattern: 'MM-DD-YYYY HH:mm', value: '03-01-2023, 04:05' },
+  { pattern: 'YYYY/MM/DD HH:mm', value: '2023/03/01, 04:05' },
+  { pattern: 'YYYY.MM.DD HH:mm', value: '2023.03.01, 04:05' },
+  { pattern: 'YYYY-MM-DD HH:mm', value: '2023-03-01, 04:05' },
+];
+
+// Patterns using standard presets from HA Frontend.
+// Note that ".system" patterns are commented out, read an explanation on the top
+const patternsStandard = [
+  { language: 'en-GB', time_format: TimeFormat.language, date_format: DateFormat.language, value: '01/03/2023, 04:05' },
+  // { language: 'en-GB', time_format: TimeFormat.language, date_format: DateFormat.system,   value: '01.03.2023, 04:05' },
+  { language: 'en-GB', time_format: TimeFormat.language, date_format: DateFormat.DMY,      value: '01/03/2023, 04:05' },
+  { language: 'en-GB', time_format: TimeFormat.language, date_format: DateFormat.MDY,      value: '03/01/2023, 04:05' },
+  { language: 'en-GB', time_format: TimeFormat.language, date_format: DateFormat.YMD,      value: '2023/03/01, 04:05' },
+
+  // { language: 'en-GB', time_format: TimeFormat.system, date_format: DateFormat.language, value: '01/03/2023, 04:05' },
+  // { language: 'en-GB', time_format: TimeFormat.system, date_format: DateFormat.system,   value: '01.03.2023, 04:05' },
+  // { language: 'en-GB', time_format: TimeFormat.system, date_format: DateFormat.DMY,      value: '01/03/2023, 04:05' },
+  // { language: 'en-GB', time_format: TimeFormat.system, date_format: DateFormat.MDY,      value: '03/01/2023, 04:05' },
+  // { language: 'en-GB', time_format: TimeFormat.system, date_format: DateFormat.YMD,      value: '2023/03/01, 04:05' },
+
+  { language: 'en-GB', time_format: TimeFormat.am_pm, date_format: DateFormat.language, value: '01/03/2023, 04:05' },
+  // { language: 'en-GB', time_format: TimeFormat.am_pm, date_format: DateFormat.system,   value: '01.03.2023, 04:05' },
+  { language: 'en-GB', time_format: TimeFormat.am_pm, date_format: DateFormat.DMY,      value: '01/03/2023, 04:05' },
+  { language: 'en-GB', time_format: TimeFormat.am_pm, date_format: DateFormat.MDY,      value: '03/01/2023, 04:05' },
+  { language: 'en-GB', time_format: TimeFormat.am_pm, date_format: DateFormat.YMD,      value: '2023/03/01, 04:05' },
+
+  { language: 'en-GB', time_format: TimeFormat.twenty_four, date_format: DateFormat.language, value: '01/03/2023, 04:05' },
+  // { language: 'en-GB', time_format: TimeFormat.twenty_four, date_format: DateFormat.system,   value: '01.03.2023, 04:05' },
+  { language: 'en-GB', time_format: TimeFormat.twenty_four, date_format: DateFormat.DMY,      value: '01/03/2023, 04:05' },
+  { language: 'en-GB', time_format: TimeFormat.twenty_four, date_format: DateFormat.MDY,      value: '03/01/2023, 04:05' },
+  { language: 'en-GB', time_format: TimeFormat.twenty_four, date_format: DateFormat.YMD,      value: '2023/03/01, 04:05' },
+  ////////////
+  { language: 'en', time_format: TimeFormat.language, date_format: DateFormat.language, value: '3/1/2023, 04:05'   },
+  // { language: 'en', time_format: TimeFormat.language, date_format: DateFormat.system,   value: '01.03.2023, 04:05' },
+  { language: 'en', time_format: TimeFormat.language, date_format: DateFormat.DMY,      value: '1/3/2023, 04:05' },
+  { language: 'en', time_format: TimeFormat.language, date_format: DateFormat.MDY,      value: '3/1/2023, 04:05' },
+  { language: 'en', time_format: TimeFormat.language, date_format: DateFormat.YMD,      value: '2023/3/1, 04:05' },
+
+  // { language: 'en', time_format: TimeFormat.system, date_format: DateFormat.language, value: '3/1/2023, 04:05'   },
+  // { language: 'en', time_format: TimeFormat.system, date_format: DateFormat.system,   value: '01.03.2023, 04:05' },
+  // { language: 'en', time_format: TimeFormat.system, date_format: DateFormat.DMY,      value: '1/3/2023, 04:05' },
+  // { language: 'en', time_format: TimeFormat.system, date_format: DateFormat.MDY,      value: '3/1/2023, 04:05' },
+  // { language: 'en', time_format: TimeFormat.system, date_format: DateFormat.YMD,      value: '2023/3/1, 04:05' },
+
+  { language: 'en', time_format: TimeFormat.am_pm, date_format: DateFormat.language, value: '3/1/2023, 04:05'   },
+  // { language: 'en', time_format: TimeFormat.am_pm, date_format: DateFormat.system,   value: '01.03.2023, 04:05' },
+  { language: 'en', time_format: TimeFormat.am_pm, date_format: DateFormat.DMY,      value: '1/3/2023, 04:05' },
+  { language: 'en', time_format: TimeFormat.am_pm, date_format: DateFormat.MDY,      value: '3/1/2023, 04:05' },
+  { language: 'en', time_format: TimeFormat.am_pm, date_format: DateFormat.YMD,      value: '2023/3/1, 04:05' },
+
+  { language: 'en', time_format: TimeFormat.twenty_four, date_format: DateFormat.language, value: '3/1/2023, 04:05'   },
+  // { language: 'en', time_format: TimeFormat.twenty_four, date_format: DateFormat.system,   value: '01.03.2023, 04:05' },
+  { language: 'en', time_format: TimeFormat.twenty_four, date_format: DateFormat.DMY,      value: '1/3/2023, 04:05' },
+  { language: 'en', time_format: TimeFormat.twenty_four, date_format: DateFormat.MDY,      value: '3/1/2023, 04:05' },
+  { language: 'en', time_format: TimeFormat.twenty_four, date_format: DateFormat.YMD,      value: '2023/3/1, 04:05' },
+];
