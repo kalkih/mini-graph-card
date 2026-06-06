@@ -639,7 +639,7 @@ class MiniGraphCard extends LitElement {
 
   renderInfo() {
     const { extrema, average } = this.config.show;
-    const location = extrema === 'below' || average === 'below' ? 'below' : 'above';
+    const location = (extrema === 'below' || average === 'below') ? 'below' : 'above';
     return this.abs.length > 0 ? html`
       <div class="info flex" loc=${location}>
         ${this.abs.map(entry => html`
