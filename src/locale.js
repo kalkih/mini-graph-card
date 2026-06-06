@@ -553,8 +553,8 @@ const formatNumber = (
   localeOptions,
   options,
 ) => formatNumberToParts(num, localeOptions, options)
-    .map(part => part.value)
-    .join('');
+  .map(part => part.value)
+  .join('');
 
 /**
  * Checks if a whitespace is needed before a "%" unit dependently on a locale
