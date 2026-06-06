@@ -138,12 +138,14 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | show_graph | boolean |         | Set to false to completely hide the entity in the graph.
 | show_line | boolean |         | Set to false to hide the line.
 | show_fill | boolean |         | Set to false to hide the fill.
-| show_points | boolean |         | Set to false to hide the points.
+| show_points | boolean |         | Set to false to hide the points (see a note below).
 | show_legend | boolean |         | Set to false to turn hide from the legend.
 | state_adaptive_color | boolean |         | Make the color of the state adapt to the entity color.
 | y_axis | string |         | If 'secondary', displays using the secondary y-axis on the right.
 | fixed_value | boolean |         | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 | smoothing | boolean |         | Override for a flag indicating whether to make graph line smooth.
+
+Note: the "points" term is only applicable to a "line" graph, not to a "bar" graph.
 
 ```yaml
 entities:
@@ -161,10 +163,10 @@ All properties are optional.
 |------|:-------:|:-------:|-------------|
 | name | `true` | `true` / `false` | Display name.
 | icon | `true` | `true` / `false` | Display icon.
-| state | `true` | `true` / `false` / `last` | Display current state. `last` will show the last graph point's value.
+| state | `true` | `true` / `false` / `last` | Display current state. `last` will show the last graph point's or bar's value (fallback to `true` if points are not shown for a line graph).
 | graph | `line` | `line` / `bar` / `false` | Display option for the graph. If set to `bar` a maximum of `96` bars will be displayed.
 | fill | `true` | `true` / `false` / `fade` | Display the line graph fill.
-| points | `hover` | `true` / `false` / `hover` | Display graph data points.
+| points | `hover` | `true` / `false` / `hover` | Display graph data points (for a line graph only).
 | legend | `true` | `true` / `false` | Display the graph legend (only shown when graph contains multiple entities).
 | average | `false` | `true` / `false` | Display average information.
 | extrema | `false` | `true` / `false` | Display max/min information.
