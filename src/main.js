@@ -9,12 +9,10 @@ import handleClick from './handleClick';
 import buildConfig from './buildConfig';
 import {
   formatNumber,
-} from './locale';
-import './initialize';
-import {
   formatDateTime,
   getDateFormat, getTimeFormat,
 } from './locale';
+import './initialize';
 import { version } from '../package.json';
 import {
   ICONS,
