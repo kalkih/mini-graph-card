@@ -230,10 +230,17 @@ As a shorthand, you can just use a color string for the stops that you want inte
 ```
 
 #### Action object options
+
+All card's area - except a graph part - supports processing of actions.
+By default, tapping on an element opens a `more-info` dialog:
+1. For "state" elements - the dialog is opened for a corresponding graph entity.
+2. For "legend" elements - same as above.
+3. For other card's areas (except a graph part) - the dialog is opened for the 1st graph entity.
+
 | Name | Type | Default | Options | Description |
 |------|:----:|:-------:|:-----------:|-------------|
 | action | string | `more-info` | `more-info` / `navigate` / `call-service`  / `url` / `none` | Action to perform.
-| entity | string |  | Any entity id | Override default entity of `more-info`, when  `action` is defined as `more-info`.
+| entity | string |  | Any entity id | Override default entity of `more-info`, when  `action` is defined as `more-info`.<br>Note that this override is not applied when a "state" or a "legend" elements are tapped - in these cases always a corresponding graph entity is processed.
 | service | string |  | Any service | Service to call (e.g. `media_player.toggle`) when `action` is defined as `call-service`.
 | service_data | object |  | Any service data | Service data to include with the service call (e.g. `entity_id: media_player.office`).
 | navigation_path | string |  | Any path | Path to navigate to (e.g. `/lovelace/0/`) when `action` is defined as `navigate`.
