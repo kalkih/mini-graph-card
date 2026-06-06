@@ -1105,7 +1105,8 @@ class MiniGraphCard extends LitElement {
         [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
         if (config.show.graph === 'bar') {
           const numVisible = this.visibleEntities.length;
-          this.bar[i] = this.Graph[i].getBars(graphPos, numVisible, config.bar_spacing);
+          this.bar[i] = this.Graph[i]
+            .getBars(graphPos, numVisible, config.bar_spacing, config.bar_spacing_group);
           graphPos += 1;
         } else {
           const line = this.Graph[i].getPath();
