@@ -167,9 +167,9 @@ All properties are optional.
 | graph | `line` | `line` / `bar` / `false` | Display option for the graph. If set to `bar` a maximum of `96` bars will be displayed.
 | fill | `true` | `true` / `false` / `fade` | Display the line graph fill.
 | points | `hover` | `true` / `false` / `hover` | Display graph data points (for a line graph only).
-| legend | `true` | `true` / `false` | Display the graph legend (only shown when graph contains multiple entities).
-| average | `false` | `true` / `false` | Display average information.
-| extrema | `false` | `true` / `false` | Display max/min information.
+| legend | `true` | `true` / `false` / `below` | Display the graph legend (only shown when graph contains multiple entities); `below` - place below a graph.
+| average | `false` | `true` / `false` / `below` | Display average information; `below` - place below a graph.
+| extrema | `false` | `true` / `false` / `below` | Display max/min information; `below` - place below a graph.
 | labels | `hover` | `true` / `false` / `hover` | Display Y-axis labels.
 | labels_secondary | `hover` | `true` / `false` / `hover` | Display secondary Y-axis labels.
 | name_adaptive_color | `false` | `true` / `false` | Make the name color adapt with the primary entity color.

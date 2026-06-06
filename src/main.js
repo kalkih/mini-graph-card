@@ -387,10 +387,10 @@ class MiniGraphCard extends LitElement {
 
   renderLegend() {
     if (this.visibleLegends.length <= 1 || !this.config.show.legend) return;
-
+    const location = this.config.show.legend === 'below' ? 'below' : 'above';
     /* eslint-disable indent */
     return html`
-      <div class="graph__legend">
+      <div class="graph__legend" loc=${location}>
         ${this.visibleLegends.map((entity) => {
           const legend = this.computeLegend(entity.index);
           return html`
@@ -638,8 +638,10 @@ class MiniGraphCard extends LitElement {
   }
 
   renderInfo() {
+    const { extrema, average } = this.config.show;
+    const location = (extrema === 'below' || average === 'below') ? 'below' : 'above';
     return this.abs.length > 0 ? html`
-      <div class="info flex">
+      <div class="info flex" loc=${location}>
         ${this.abs.map(entry => html`
           <div class="info__item">
             <span class="info__item__type">${entry.type}</span>

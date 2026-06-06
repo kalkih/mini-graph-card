@@ -42,9 +42,13 @@ const style = css`
     stroke-linecap: initial;
     stroke-linejoin: initial;
   }
-  ha-card .graph__legend {
+  .graph__legend {
     order: -1;
     padding: 0 16px 8px 16px;
+  }
+  .graph__legend[loc="below"] {
+    order: 9;
+    padding: 4px 16px;
   }
   ha-card[group] {
     box-shadow: none;
@@ -346,7 +350,6 @@ const style = css`
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
-    padding-top: 16px;
     flex-wrap: wrap;
   }
   .graph__legend__item {
@@ -367,6 +370,11 @@ const style = css`
   .info {
     justify-content: space-between;
     align-items: middle;
+  }
+  .info[loc="below"] {
+    order: 99;
+    padding-top: 4px;
+    padding-bottom: 4px;
   }
   .info__item {
     display: flex;
