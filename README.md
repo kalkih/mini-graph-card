@@ -82,7 +82,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | type ***(required)*** | string |  | v0.0.1 | `custom:mini-graph-card`.
 | entities ***(required)*** | list |  | v0.2.0 | One or more sensor entities in a list, see [entities object](#entities-object) for additional entity options.
 | icon | string |  | v0.0.1 | Set a custom icon from any of the available mdi icons.
-| icon_image | string |  | v0.12.0 | Override icon with an image url
+| icon_image | string |  | v0.12.0 | Override icon with an image url.
 | name | string |  | v0.0.1 | Set a custom name which is displayed beside the icon.
 | unit | string |  | v0.0.1 | Set a custom unit of measurement (`''` value for an empty unit).
 | tap_action | [action object](#action-object-options) |  | v0.7.0 | Action on click/tap.
@@ -120,7 +120,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | smoothing | boolean | `true` | v0.8.0 | Whether to make graph line smooth.
 | state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert (order matters as position becomes a value on the graph).
 | value_factor | number | 0 | v0.9.4 | Scale value by order of magnitude (e.g. convert Watts to kilo Watts), use negative value to scale down.
-| logarithmic | boolean | `false` | v0.10.0 | Use a Logarithmic scale for the graph
+| logarithmic | boolean | `false` | v0.10.0 | Use a Logarithmic scale for the graph.
 
 
 #### Entities object
@@ -174,6 +174,7 @@ All properties are optional.
 | legend | `true` | `true` / `false` / `below` | Display the graph legend (only shown when graph contains multiple entities); `below` - place below a graph.
 | average | `false` | `true` / `false` / `below` | Display average information; `below` - place below a graph.
 | extrema | `false` | `true` / `false` / `below` | Display max/min information; `below` - place below a graph.
+| info_hide_unit | `false` | `true` / `false` | Do not show a unit for the average & max/min information.
 | labels | `hover` | `true` / `false` / `hover` | Display Y-axis labels.
 | labels_secondary | `hover` | `true` / `false` / `hover` | Display secondary Y-axis labels.
 | name_adaptive_color | `false` | `true` / `false` | Make the name color adapt with the primary entity color.

@@ -172,6 +172,7 @@ const style = css`
     flex-wrap: nowrap;
     max-width: 100%;
     min-width: 0;
+    gap: .25rem;
   }
   .state > svg {
     align-self: center;
@@ -204,8 +205,10 @@ const style = css`
   .state__value {
     display: inline-block;
     font-size: 2.4em;
-    margin-right: .25rem;
     line-height: 1.2em;
+  }
+  .state[reversed="true"] .state__value {
+    order: 5;
   }
   .state__uom {
     flex: 1;

@@ -8,6 +8,7 @@ import style from './style';
 import handleClick from './handleClick';
 import buildConfig from './buildConfig';
 import {
+  blankBeforePercent,
   formatNumber,
   formatDateTime,
   getDateFormat, getTimeFormat,
@@ -440,20 +441,10 @@ class MiniGraphCard extends LitElement {
   computeLegend(index) {
     let legend = this.computeName(index);
     const state = this.getEntityState(index);
-
     const { show_legend_state = false } = this.config.entities[index];
-
     if (show_legend_state) {
-      legend += ` (${this.computeState(state, index)}`;
-      if (!(['unavailable'].includes(state))) {
-        const uom = this.computeUom(index);
-        if (!(['%', ''].includes(uom)))
-          legend += ' ';
-        legend += `${uom}`;
-      }
-      legend += ')';
+      legend += ` (${this.computeStateWithUom(state, index)})`;
     }
-
     return legend;
   }
 
@@ -734,6 +725,7 @@ class MiniGraphCard extends LitElement {
   * @returns HTML element
   */
   renderInfo() {
+    const hideUnit = this.config.show.info_hide_unit;
     const { extrema, average } = this.config.show;
     const location = (extrema === 'below' || average === 'below') ? 'below' : 'above';
     // index "0" is passed into computeState() since "info" is shown for the 1st entity
@@ -743,7 +735,7 @@ class MiniGraphCard extends LitElement {
           <div class="info__item">
             <span class="info__item__type">${entry.type}</span>
             <span class="info__item__value">
-              ${this.computeState(entry.state, 0)} ${this.computeUom(0)}
+              ${this.computeStateWithUom(entry.state, 0, hideUnit)}
             </span>
             <span class="info__item__time">
               ${entry.type !== 'avg' ? formatDateTime(new Date(entry.last_changed), this.config, this._hass) : ''}
@@ -851,19 +843,41 @@ class MiniGraphCard extends LitElement {
   * @param {number} index Index of an entity in config.entities
   */
   computeUom(index) {
-    return (
-      this.config.entities[index].unit !== undefined
-        ? this.config.entities[index].unit
-        : (
-          this.config.unit !== undefined
-            ? this.config.unit
-            : (
-              !this.config.entities[index].attribute
-                ? (this.entity[index].attributes.unit_of_measurement || '')
-                : ''
-            )
-        )
-    );
+    const entityId = this.entity[index].entity_id;
+    const stateObj = this._hass.states[entityId];
+    let unit;
+    if (!stateObj || isUnavailableState(stateObj.state)) {
+      unit = '';
+    } else if (this.config.entities[index].unit !== undefined) {
+      // eslint-disable-next-line prefer-destructuring
+      unit = this.config.entities[index].unit;
+    } else if (this.config.unit !== undefined) {
+      // eslint-disable-next-line prefer-destructuring
+      unit = this.config.unit;
+    } else {
+      // retrieving a native unit
+      const { attribute } = this.config.entities[index];
+      if (!attribute || !this.isObjectAttr(attribute)) {
+        // any cases except an object attribute
+        let parts;
+        if (attribute) {
+          parts = this._hass.formatEntityAttributeValueToParts(
+            stateObj,
+            attribute,
+          );
+        } else {
+          parts = this._hass.formatEntityStateToParts(
+            stateObj,
+          );
+        }
+        const unitPart = parts.find(part => part.type === 'unit');
+        unit = unitPart && unitPart.value;
+      } else {
+        // object attribute - considered as unitless
+        unit = '';
+      }
+    }
+    return (unit || '');
   }
 
   /**
@@ -985,6 +999,79 @@ class MiniGraphCard extends LitElement {
       this.stateChanged = false;
       this.updateData();
     }
+  }
+
+  /**
+  * Returns settings defining an order of a state/attrubute value presentation
+  * @returns {Object}
+  * directOrder - true: "value literal unit", false: "unit literal value";
+  *
+  * delimiter - an optional literal separator between value & unit
+  * @param index Index of an entity in config.entities
+  */
+  computeStateOrder(index) {
+    const entityId = this.config.entities[index].entity;
+    const { attribute } = this.config.entities[index];
+    if (!attribute || !this.isObjectAttr(attribute)) {
+      // any cases except an object attribute
+      const stateObj = this._hass.states[entityId];
+      let parts;
+      if (attribute) {
+        parts = this._hass.formatEntityAttributeValueToParts(
+          stateObj,
+          attribute,
+        );
+      } else {
+        parts = this._hass.formatEntityStateToParts(stateObj);
+      }
+      const indexUnit = parts.findIndex(part => part.type === 'unit');
+      const indexValue = parts.findIndex(part => part.type === 'value');
+      const directOrder = indexUnit === -1 || indexUnit > indexValue;
+      const delimiterPart = parts.find(part => part.type === 'literal');
+      const delimiter = delimiterPart && delimiterPart.value;
+      return { directOrder, delimiter: delimiter || '' };
+    } else {
+      // object attribute
+      return { directOrder: true, delimiter: ' ' };
+    }
+  }
+
+  /**
+  * Returns a string state/attrubute value presentation
+  * @returns {string} State/attrubute value presentation
+  * @param {number|string} inState Value of a state/attribute
+  * @param {number} index Index of an entity in config.entities
+  * @param {boolean} [hideUnit] Do not show a unit for a value
+  */
+  computeStateWithUom(inState, index, hideUnit) {
+    // get a state/attribute value
+    const state = this.computeState(inState, index);
+
+    // get a unit
+    const unit = hideUnit ? '' : this.computeUom(index);
+
+    // get native order & delimiter
+    const { directOrder, delimiter: nativeDelimiter } = this.computeStateOrder(index);
+
+    let delimiter;
+    if (unit === '') {
+      delimiter = '';
+    } else if (directOrder
+      && !delimiter
+      && (this.config.unit || this.config.entities[index].unit)
+      && (unit !== '%'
+        || blankBeforePercent(this._hass.locale) === ' ')) {
+      // add a delimiter for a user-defined unit (except for "%" for some locales)
+      delimiter = ' ';
+    } else {
+      delimiter = nativeDelimiter;
+    }
+
+    // compose a string
+    const composed = directOrder
+      ? `${state}${delimiter}${unit}`
+      : `${unit}${delimiter}${state}`;
+    return composed;
   }
 
   async updateData({ config } = this) {
