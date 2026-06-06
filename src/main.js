@@ -296,7 +296,7 @@ class MiniGraphCard extends LitElement {
       const entityConfig = this.config.entities[entity];
       return html`
         <div
-          class="state ${!isPrimary && 'state--small'}"
+          class="state ${!isPrimary ? 'state--small' : ''}"
           @click=${e => this.handlePopup(e, this.entity[id])}
           style=${entityConfig.state_adaptive_color ? `color: ${this.computeColor(value, entity)}` : ''}>
           ${entityConfig.show_indicator ? this.renderIndicator(value, entity) : ''}
