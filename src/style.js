@@ -208,7 +208,7 @@ const style = css`
     line-height: 1.2em;
   }
   .state[reversed="true"] .state__value {
-    order: 5;
+    order: 9;
   }
   .state__uom {
     flex: 1;
