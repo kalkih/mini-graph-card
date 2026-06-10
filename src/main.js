@@ -374,8 +374,11 @@ class MiniGraphCard extends LitElement {
       const value = isTooltip ? tooltipValue : state;
       const entityIndex = isTooltip ? tooltipEntityIndex : index;
       const entityConfig = this.config.entities[entityIndex];
+      // check if a unit should precend a value
+      const { directOrder } = this.computeStateOrder(entityIndex);
       return html`
         <div
+          reversed=${!directOrder}
           class="state ${!isPrimary ? 'state--small' : ''}"
           @click=${e => this.handlePopup(e, this.entity[index])}
           style=${entityConfig.state_adaptive_color ? `color: ${this.computeColor(value, entityIndex)}` : ''}
