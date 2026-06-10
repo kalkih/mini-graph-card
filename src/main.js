@@ -991,12 +991,6 @@ class MiniGraphCard extends LitElement {
     );
   }
 
-  numberFormat(num, language, dec) {
-    if (!Number.isNaN(Number(num)) && Intl)
-      return new Intl.NumberFormat(language, { minimumFractionDigits: dec }).format(Number(num));
-    return num.toString();
-  }
-
   updateOnInterval() {
     if (this.stateChanged && !this.updating) {
       this.stateChanged = false;
