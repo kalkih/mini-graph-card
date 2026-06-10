@@ -112,6 +112,27 @@ class MiniGraphCard extends LitElement {
     };
   }
 
+  /**
+  * Returns min & max "line_width" values defined globally for a card &
+  * for all entities individually
+  * @returns {object} min & max "line_width" values
+  */
+  getMinMaxLineWidth() {
+    const arr = this.config.entities
+      .filter(entityConfig => entityConfig.show_graph !== false)
+      .map((entityConfig) => {
+        const value = entityConfig.line_width;
+        return (this.config.show.graph !== 'bar'
+          && typeof value === 'number'
+          && !Number.isNaN(value))
+          ? value : this.config.line_width;
+      });
+    return ({
+      min: Math.min(...arr),
+      max: Math.max(...arr),
+    });
+  }
+
   setConfig(config) {
     this.config = buildConfig(config);
     this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
@@ -123,11 +144,13 @@ class MiniGraphCard extends LitElement {
 
     if (!this.Graph || entitiesChanged) {
       if (this._hass) this.hass = this._hass;
+      const min_line_width = this.getMinMaxLineWidth().min;
+      const max_line_width = this.getMinMaxLineWidth().max;
       this.Graph = this.config.entities.map(
         entity => new Graph(
           500,
           this.config.height,
-          [this.config.show.fill ? 0 : this.config.line_width, this.config.line_width],
+          [this.config.show.fill ? 0 : min_line_width, max_line_width],
           this.config.hours_to_show,
           this.config.points_per_hour,
           entity.aggregate_func || this.config.aggregate_func,
@@ -531,7 +554,7 @@ class MiniGraphCard extends LitElement {
         fill='none'
         stroke-dasharray=${this.length[i] || 'none'} stroke-dashoffset=${this.length[i] || 'none'}
         stroke=${'white'}
-        stroke-width=${this.config.line_width}
+        stroke-width=${this.config.entities[i].line_width || this.config.line_width}
         d=${this.line[i]}
       />`;
 
@@ -551,7 +574,7 @@ class MiniGraphCard extends LitElement {
         style=${`--mcg-hover: ${color};`}
         stroke=${color}
         fill=${color}
-        cx=${point[X]} cy=${point[Y]} r=${this.config.line_width}
+        cx=${point[X]} cy=${point[Y]} r=${this.config.entities[i].line_width || this.config.line_width}
         @mouseover=${() => this.setTooltip(i, point[3], point[V])}
         @mouseout=${() => (this.tooltip = {})}
       />
@@ -570,7 +593,7 @@ class MiniGraphCard extends LitElement {
         style="animation-delay: ${this.config.animate ? `${i * 0.5 + 0.5}s` : '0s'}"
         fill=${color}
         stroke=${color}
-        stroke-width=${this.config.line_width / 2}>
+        stroke-width=${(this.config.entities[i].line_width || this.config.line_width) / 2}>
         ${points.map(point => this.renderSvgPoint(point, i))}
       </g>`;
   }
