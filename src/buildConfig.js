@@ -128,7 +128,6 @@ export default (config) => {
     smoothing: true,
     state_map: [],
     cache: true,
-    value_factor: 0,
     tap_action: {
       action: 'more-info',
     },

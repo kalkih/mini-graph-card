@@ -21,6 +21,7 @@ import {
   X, Y, V,
   ONE_HOUR,
 } from './const';
+import { getFactor } from './others';
 import {
   getMin, getAvg, getMax,
   getMilli,
@@ -915,9 +916,9 @@ class MiniGraphCard extends LitElement {
       // as is presented as a number
       state = Number(inState);
     }
-    const value_factor = 10 ** this.config.value_factor;
-    // safely process with a value_factor
-    state = Number.isNaN(Number(state)) ? state : state * value_factor;
+    const factor = getFactor(this.config, index);
+    // safely process with a factor
+    state = Number.isNaN(Number(state)) ? state : state * factor;
 
     let dec;
     // attempting to get "decimals" settings
