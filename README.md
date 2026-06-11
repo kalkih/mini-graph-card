@@ -122,7 +122,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | value_factor | number or object |   | v0.9.4<br>v0.14.0 | Scale a value, see [Value factor](#value-factor).
 | value_factor_secondary | number or object |   | v0.14.0 | Scale a value, see [Value factor](#value-factor).
 | logarithmic | boolean | `false` | v0.10.0 | Use a Logarithmic scale for the graph.
-
+| order_reversed | boolean | `false` | v0.14.0 | Display graphs in a reversed order: graphs for entities with smaller indexes will be displayed on a top (i.e. the 1st entity will be topmost).
 
 #### Entities object
 Entities may be listed directly (as per `sensor.temperature` in the example below), or defined using
