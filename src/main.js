@@ -2,7 +2,7 @@ import { LitElement, html, svg } from 'lit-element';
 import localForage from 'localforage/src/localforage';
 import { stateIcon } from 'custom-card-helpers';
 import SparkMD5 from 'spark-md5';
-import { interpolateRgb } from 'd3-interpolate';
+import interpolateRgb from './interpolateRgb';
 import Graph from './graph';
 import style from './style';
 import handleClick from './handleClick';
@@ -801,7 +801,7 @@ class MiniGraphCard extends LitElement {
       const c2 = color_thresholds[indexThreshold - 1];
       if (c2) {
         const factor = (c2.value - state) / (c2.value - c1.value);
-        intColor = interpolateRgb(c2.color, c1.color)(factor);
+        intColor = interpolateRgb(c2.color, c1.color, factor);
       } else {
         intColor = indexThreshold
           ? color_thresholds[color_thresholds.length - 1].color
