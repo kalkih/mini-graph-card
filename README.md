@@ -357,6 +357,7 @@ By default, graphs are shown in the following order:
 Within each category, parts are shown in the following order:
 1. First, a part for the 1st entity in the `entities` list is processed.
 2. Last, a part for the last entity in the `entities` list is processed.
+
 I.e. the last entity's graph will be shown as topmost.
 
 This can be altered by setting a `graph_order` option: `direct` (default) stands for the described default order, `reversed` stands for `1st entity's graph is topmost`.
