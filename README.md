@@ -181,6 +181,7 @@ All properties are optional.
 | name_adaptive_color | `false` | `true` / `false` | Make the name color adapt with the primary entity color.
 | icon_adaptive_color | `false` | `true` / `false` | Make the icon color adapt with the primary entity color.
 | loading_indicator | `true` | `true` / `false` | Show loading indicator while attempting to retrieve a history.
+| graphs_order | `direct` | `direct` / `reverse` | Define an on order of displaying graphs (see [Graphs order](#graphs-order)).
 
 
 #### Line color object
@@ -341,6 +342,25 @@ A singular whitespace must be used to separate date & time formats. Letter case 
 
 Any values which do not match the pattern - lead to a fallback to a "day weekday" format (used as the only and default format till v.0.13).
 For clarity, it is recommended to explicitly define a `day_weekday` value in case the legacy "day weekday" format is needed.
+
+### Graphs order
+
+Note: this section applies to `line` graphs only.
+
+For each entity, a `line` graph consists of 3 basic parts: a "line" part (curve), a "fill" part (if displaying a fill is configured), a "points" part (if displaying points is configured).
+
+By default, graphs are shown in the following order:
+1. All "fill" parts are shown (if configured).
+2. All "line" parts are shown.
+3. All "points" parts are shown (if configured).
+Within each category, parts are shown in the following order:
+1. First, a part for the 1st entity in the `entities` list is processed.
+2. Last, a part for the last entity in the `entities` list is processed.
+I.e. the last entity's graph will be shown as topmost.
+
+This can be altered by setting a `graph_order` option: `direct` (default) stands for the described default order, `reversed` stands for `1st entity's graph is topmost`.
+
+
 
 
 ### Theme variables
