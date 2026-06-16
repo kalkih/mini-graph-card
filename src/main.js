@@ -639,8 +639,38 @@ class MiniGraphCard extends LitElement {
     return svg`<g class='bars' ?anim=${this.config.animate}>${items}</g>`;
   }
 
+  /** Returns a rendered SVG part (fill, line, bars, points)
+   * in a direct or a reversed order
+  * @returns {any} SVG part
+  * @param {any[]} data Array of data to render an SVG part
+  * @param {()} renderFunc Function to render an SVG part
+  * @param {boolean} reversed True if a reversed order
+  */
+  renderSvgPart(data, renderFunc, reversed) {
+    renderFunc = renderFunc.bind(this);
+    const len = data.length;
+    const result = new Array(len);
+    // "for" loop is used to avoid issues caused by
+    // how JS processes arrays with empty elements un "map()"
+    // (also for a higher performance)
+    if (reversed) {
+      for (let i = len - 1; i >= 0; i--) {
+        result[len - 1 - i] = renderFunc(data[i], i);
+      }
+    } else {
+      for (let i = 0; i < len; i++) {
+        result[i] = renderFunc(data[i], i);
+      }
+    }
+    return result;
+  }
+
+  /** Returns all rendered SVG parts (fill, line, bars, points)
+  * @returns {any} SVG
+  */
   renderSvg() {
-    const { height } = this.config;
+    const { height, show } = this.config;
+    const reversed = show.graph_order === 'reversed';
     return svg`
       <svg width='100%' height=${height !== 0 ? '100%' : 0} viewBox='0 0 500 ${height}'
         @click=${e => e.stopPropagation()}>
@@ -648,13 +678,13 @@ class MiniGraphCard extends LitElement {
           <defs>
             ${this.renderSvgGradient(this.gradient)}
           </defs>
-          ${this.fill.map((fill, i) => this.renderSvgFill(fill, i))}
-          ${this.fill.map((fill, i) => this.renderSvgFillRect(fill, i))}
-          ${this.line.map((line, i) => this.renderSvgLine(line, i))}
-          ${this.line.map((line, i) => this.renderSvgLineRect(line, i))}
+          ${this.renderSvgPart(this.fill, this.renderSvgFill, reversed)}
+          ${this.renderSvgPart(this.fill, this.renderSvgFillRect, reversed)}
+          ${this.renderSvgPart(this.line, this.renderSvgLine, reversed)}
+          ${this.renderSvgPart(this.line, this.renderSvgLineRect, reversed)}
           ${this.bar.map((bars, i) => this.renderSvgBars(bars, i))}
         </g>
-        ${this.points.map((points, i) => this.renderSvgPoints(points, i))}
+        ${this.renderSvgPart(this.points, this.renderSvgPoints, reversed)}
       </svg>`;
   }
 
