@@ -181,7 +181,7 @@ All properties are optional.
 | name_adaptive_color | `false` | `true` / `false` | Make the name color adapt with the primary entity color.
 | icon_adaptive_color | `false` | `true` / `false` | Make the icon color adapt with the primary entity color.
 | loading_indicator | `true` | `true` / `false` | Show loading indicator while attempting to retrieve a history.
-| graphs_order | `direct` | `direct` / `reverse` | Define an on order of displaying graphs (see [Graphs order](#graphs-order)).
+| graphs_order | `direct` | `direct` / `reverse` | Define an order of displaying graphs (see [Graphs order](#graphs-order)).
 
 
 #### Line color object
@@ -353,6 +353,7 @@ By default, graphs are shown in the following order:
 1. All "fill" parts are shown (if configured).
 2. All "line" parts are shown.
 3. All "points" parts are shown (if configured).
+
 Within each category, parts are shown in the following order:
 1. First, a part for the 1st entity in the `entities` list is processed.
 2. Last, a part for the last entity in the `entities` list is processed.
