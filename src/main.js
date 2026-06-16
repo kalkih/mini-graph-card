@@ -654,10 +654,12 @@ class MiniGraphCard extends LitElement {
     // how JS processes arrays with empty elements un "map()"
     // (also for a higher performance)
     if (reversed) {
+      /* eslint-disable-next-line no-plusplus */
       for (let i = len - 1; i >= 0; i--) {
         result[len - 1 - i] = renderFunc(data[i], i);
       }
     } else {
+      /* eslint-disable-next-line no-plusplus */
       for (let i = 0; i < len; i++) {
         result[i] = renderFunc(data[i], i);
       }
