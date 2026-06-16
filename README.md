@@ -181,7 +181,7 @@ All properties are optional.
 | name_adaptive_color | `false` | `true` / `false` | Make the name color adapt with the primary entity color.
 | icon_adaptive_color | `false` | `true` / `false` | Make the icon color adapt with the primary entity color.
 | loading_indicator | `true` | `true` / `false` | Show loading indicator while attempting to retrieve a history.
-| graphs_order | `direct` | `direct` / `reverse` | Define an order of displaying graphs (see [Graphs order](#graphs-order)).
+| graphs_order | `direct` | `direct` / `reversed` | Define an order of displaying graphs (see [Graphs order](#graphs-order)).
 
 
 #### Line color object
