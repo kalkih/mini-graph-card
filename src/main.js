@@ -114,6 +114,26 @@ class MiniGraphCard extends LitElement {
     };
   }
 
+/**
+  * Returns min & max "line_width" values defined globally for a card
+  * & for all entities individually
+  * @returns {object} min & max "line_width" values
+  */
+  getMinMaxLineWidth() {
+    const arr = this.config.entities
+      .filter(entityConfig => entityConfig.show_graph !== false)
+      .map(entityConfig => {
+        let value = entityConfig.line_width;
+        return (typeof value === 'number'
+          && !Number.isNaN(value))
+          ? value : this.config.line_width;
+      });
+    return ({
+      min: Math.min(...arr),
+      max: Math.max(...arr),
+    });
+  }
+
   setConfig(config) {
     this.config = buildConfig(config);
     this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
