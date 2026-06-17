@@ -7,6 +7,7 @@ import {
   MAX_BARS,
   DEFAULT_COLORS,
   DEFAULT_SHOW,
+  DEFAULT_MARGIN,
 } from './const';
 
 /**
@@ -122,7 +123,7 @@ export default (config) => {
     line_color: [...DEFAULT_COLORS],
     color_thresholds: [],
     color_thresholds_transition: 'smooth',
-    line_width: 5,
+    line_width: DEFAULT_MARGIN,
     bar_spacing: 4,
     compress: true,
     smoothing: true,
