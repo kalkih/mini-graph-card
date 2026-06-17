@@ -42,9 +42,13 @@ const style = css`
     stroke-linecap: initial;
     stroke-linejoin: initial;
   }
-  ha-card .graph__legend {
+  .graph__legend {
     order: -1;
     padding: 0 16px 8px 16px;
+  }
+  .graph__legend[loc="below"] {
+    order: 9;
+    padding: 4px 16px;
   }
   ha-card[group] {
     box-shadow: none;
@@ -109,6 +113,9 @@ const style = css`
     margin-right: .6em;
     margin-left: 0;
   }
+  .icon[loc="right"] {
+    margin-left: auto;
+  }
   .icon[loc="state"] {
     align-self: center;
   }
@@ -165,8 +172,10 @@ const style = css`
     flex-wrap: nowrap;
     max-width: 100%;
     min-width: 0;
+    gap: .25rem;
   }
-  .state > svg {
+  .state > svg,
+  .states--secondary > div:only-child svg {
     align-self: center;
     border-radius: 100%;
   }
@@ -175,7 +184,7 @@ const style = css`
     margin-bottom: .6rem;
     flex-wrap: nowrap;
   }
-  .state--small > svg {
+  .states--secondary > :not(div:only-child) svg {
     position: absolute;
     left: -1.6em;
     align-self: center;
@@ -187,18 +196,17 @@ const style = css`
   .state--small:last-child {
     margin-bottom: 0;
   }
-  .states--secondary > :only-child {
+  .states--secondary > div:only-child {
     font-size: 1em;
     margin-bottom: 0;
-  }
-  .states--secondary > :only-child svg {
-    display: none;
   }
   .state__value {
     display: inline-block;
     font-size: 2.4em;
-    margin-right: .25rem;
     line-height: 1.2em;
+  }
+  .state[reversed="true"] .state__value {
+    order: 9;
   }
   .state__uom {
     flex: 1;
@@ -343,7 +351,6 @@ const style = css`
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
-    padding-top: 16px;
     flex-wrap: wrap;
   }
   .graph__legend__item {
@@ -364,6 +371,11 @@ const style = css`
   .info {
     justify-content: space-between;
     align-items: middle;
+  }
+  .info[loc="below"] {
+    order: 99;
+    padding-top: 4px;
+    padding-bottom: 4px;
   }
   .info__item {
     display: flex;

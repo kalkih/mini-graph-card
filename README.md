@@ -7,7 +7,7 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
 
 ## Install
 
-### HACS (recommended) 
+### HACS (recommended)
 
 This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community Store).
 
@@ -82,7 +82,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | type ***(required)*** | string |  | v0.0.1 | `custom:mini-graph-card`.
 | entities ***(required)*** | list |  | v0.2.0 | One or more sensor entities in a list, see [entities object](#entities-object) for additional entity options.
 | icon | string |  | v0.0.1 | Set a custom icon from any of the available mdi icons.
-| icon_image | string |  | v0.12.0 | Override icon with an image url
+| icon_image | string |  | v0.12.0 | Override icon with an image url.
 | name | string |  | v0.0.1 | Set a custom name which is displayed beside the icon.
 | unit | string |  | v0.0.1 | Set a custom unit of measurement (`''` value for an empty unit).
 | tap_action | [action object](#action-object-options) |  | v0.7.0 | Action on click/tap.
@@ -98,11 +98,15 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | height | number | `150` | v0.0.1 | Set a custom height of the line graph.
 | bar_spacing | number | `4` | v0.9.0 | Set the spacing between bars in bar graph.
 | line_width | number | `5` | v0.0.1 | Set the thickness of the line.
+| line_style | string |  | v0.14.0 | Set the style of the line (see [Line styles](#line-styles)).
 | line_color | string/list | `var(--accent-color)` | v0.0.1 | Set a custom color for the graph line, provide a list of colors for multiple graph entries.
 | color_thresholds | list |  | v0.2.3 | Set thresholds for dynamic graph colors, see [Line color object](#line-color-object).
 | color_thresholds_transition | string | `smooth` | v0.4.3 | Color threshold transition, `smooth` or `hard`.
-| decimals | integer |  | v0.0.9 | Specify the exact number of decimals to show for states.
-| hour24 | boolean | `false` | v0.2.1 | Set to `true` to display times in 24-hour format.
+| decimals | integer |  | v0.0.9 | Specify the exact number of decimals to show for number values, see [Number format](#number-format).
+| decimals_primary_labels | integer |  | v0.14.0 | Specify the exact number of decimals to show for primary Y-axis labels, see [Number format](#number-format).
+| decimals_secondary_labels | integer |  | v0.14.0 | Specify the exact number of decimals to show for secondary Y-axis labels, see [Number format](#number-format).
+| hour24 | boolean |  | v0.2.1 | Set to `true` to display times in 24-hour format. See more details [here](#custom-format-for-datetime-values).
+| datetime_format | string | | v.0.14.0 | Set a custom [format](#custom-format-for-datetime-values) for datetime values.
 | font_size | number | `100` | v0.0.3 | Adjust the font size of the state, as percentage of the original size.
 | font_size_header | number | `14` | v0.3.1 | Adjust the font size of the header, size in pixels.
 | align_header | string | `default` | v0.2.0 | Set the alignment of the header, `left`, `right`, `center` or `default`.
@@ -116,8 +120,10 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | min_bound_range_secondary | number |  | v0.x.x | Applied after everything, makes sure there's a minimum range that the secondary Y-axis will have. Useful for not making small changes look large because of scale.
 | smoothing | boolean | `true` | v0.8.0 | Whether to make graph line smooth.
 | state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert (order matters as position becomes a value on the graph).
-| value_factor | number | 0 | v0.9.4 | Scale value by order of magnitude (e.g. convert Watts to kilo Watts), use negative value to scale down.
-| logarithmic | boolean | `false` | v0.10.0 | Use a Logarithmic scale for the graph
+| value_factor | number or object |   | v0.9.4<br>v0.14.0 | Scale a value, see [Value factor](#value-factor).
+| value_factor_secondary | number or object |   | v0.14.0 | Scale a value, see [Value factor](#value-factor).
+| logarithmic | boolean | `false` | v0.10.0 | Use a logarithmic scale for the graph (see [Logarithmic options](#logarithmic-options)).
+
 
 
 #### Entities object
@@ -133,18 +139,23 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | color | string |         | Set a custom color, overrides all other color options including thresholds.
 | unit | string |         | Set a custom unit of measurement, overrides `unit` set in base config (`''` value for an empty unit).
 | aggregate_func | string |         | Override for aggregate function used to calculate point on the graph, `avg`, `median`, `min`, `max`, `first`, `last`, `sum`.
+| decimals | integer |    | Override the exact number of decimals to show for number values, see [Number format](#number-format).
+| line_style | string |   | Override the style of the line (see [Line styles](#line-styles)).
 | show_state | boolean |         | Display the current state.
 | show_legend_state | boolean |  false  | Display the current state as part of the legend.
 | show_indicator | boolean |         | Display a color indicator next to the state.
 | show_graph | boolean |         | Set to false to completely hide the entity in the graph.
 | show_line | boolean |         | Set to false to hide the line.
 | show_fill | boolean |         | Set to false to hide the fill.
-| show_points | boolean |         | Set to false to hide the points.
+| show_points | boolean |         | Set to false to hide the points (see a note below).
 | show_legend | boolean |         | Set to false to turn hide from the legend.
 | state_adaptive_color | boolean |         | Make the color of the state adapt to the entity color.
-| y_axis | string |         | If 'secondary', displays using the secondary y-axis on the right.
+| y_axis | string |         | If 'secondary', displays using the secondary Y-axis on the right.
 | fixed_value | boolean |         | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 | smoothing | boolean |         | Override for a flag indicating whether to make graph line smooth.
+| logarithmic | boolean |         | Override logarithmic scaling for this entity only (see [Logarithmic options](#logarithmic-options)).
+
+Note: the "points" term is only applicable to a "line" graph, not to a "bar" graph.
 
 ```yaml
 entities:
@@ -162,18 +173,20 @@ All properties are optional.
 |------|:-------:|:-------:|-------------|
 | name | `true` | `true` / `false` | Display name.
 | icon | `true` | `true` / `false` | Display icon.
-| state | `true` | `true` / `false` / `last` | Display current state. `last` will show the last graph point's value.
+| state | `true` | `true` / `false` / `last` | Display current state. `last` will show the last graph point's or bar's value (fallback to `true` if points are not shown for a line graph).
 | graph | `line` | `line` / `bar` / `false` | Display option for the graph. If set to `bar` a maximum of `96` bars will be displayed.
 | fill | `true` | `true` / `false` / `fade` | Display the line graph fill.
-| points | `hover` | `true` / `false` / `hover` | Display graph data points.
-| legend | `true` | `true` / `false` | Display the graph legend (only shown when graph contains multiple entities).
-| average | `false` | `true` / `false` | Display average information.
-| extrema | `false` | `true` / `false` | Display max/min information.
+| points | `hover` | `true` / `false` / `hover` | Display graph data points (for a line graph only).
+| legend | `true` | `true` / `false` / `below` | Display the graph legend (only shown when graph contains multiple entities); `below` - place below a graph.
+| average | `false` | `true` / `false` / `below` | Display average information; `below` - place below a graph.
+| extrema | `false` | `true` / `false` / `below` | Display max/min information; `below` - place below a graph.
+| info_hide_unit | `false` | `true` / `false` | Do not show a unit for the average & max/min information.
 | labels | `hover` | `true` / `false` / `hover` | Display Y-axis labels.
 | labels_secondary | `hover` | `true` / `false` / `hover` | Display secondary Y-axis labels.
 | name_adaptive_color | `false` | `true` / `false` | Make the name color adapt with the primary entity color.
 | icon_adaptive_color | `false` | `true` / `false` | Make the icon color adapt with the primary entity color.
 | loading_indicator | `true` | `true` / `false` | Show loading indicator while attempting to retrieve a history.
+| graphs_order | `direct` | `direct` / `reversed` | Define an order of displaying graphs (see [Graphs order](#graphs-order)).
 
 
 #### Line color object
@@ -210,7 +223,7 @@ color_thresholds:
   - value: 4
     color: "#0000ff"
 ```
-The example above will result in the following colors of the graph: if value is 
+The example above will result in the following colors of the graph: if value is
 * between `0` (including this value) and  `1.33333`, the color is `#ff0000`,
 * between `1.33333` (including this value) and `2.666667`, the color is `#ffff00`,
 * between `2.666667` (including this value) and `4`, the color is `#00ff00`,
@@ -228,10 +241,17 @@ As a shorthand, you can just use a color string for the stops that you want inte
 ```
 
 #### Action object options
+
+All card's area - except a graph part - supports processing of actions.
+By default, tapping on an element opens a `more-info` dialog:
+1. For "state" elements - the dialog is opened for a corresponding graph entity.
+2. For "legend" elements - same as above.
+3. For other card's areas (except a graph part) - the dialog is opened for the 1st graph entity.
+
 | Name | Type | Default | Options | Description |
 |------|:----:|:-------:|:-----------:|-------------|
 | action | string | `more-info` | `more-info` / `navigate` / `call-service`  / `url` / `none` | Action to perform.
-| entity | string |  | Any entity id | Override default entity of `more-info`, when  `action` is defined as `more-info`.
+| entity | string |  | Any entity id | Override default entity of `more-info`, when  `action` is defined as `more-info`.<br>Note that this override is not applied when a "state" or a "legend" elements are tapped - in these cases always a corresponding graph entity is processed.
 | service | string |  | Any service | Service to call (e.g. `media_player.toggle`) when `action` is defined as `call-service`.
 | service_data | object |  | Any service data | Service data to include with the service call (e.g. `entity_id: media_player.office`).
 | navigation_path | string |  | Any path | Path to navigate to (e.g. `/lovelace/0/`) when `action` is defined as `navigate`.
@@ -242,6 +262,30 @@ As a shorthand, you can just use a color string for the stops that you want inte
 |------|:----:|:-------:|-------------|
 | value ***(required)*** | string |  | Value to convert.
 | label | string | same as value | String to show as label (if the value is not precise).
+
+#### Value factor
+
+Defines a coefficent (factor) applied to displayed values (including Y-axis labels).
+There are two available options - `value_factor` & `value_factor_secondary`:
+1. If none option is defined, a default "1" factor is used (values are shown w/o any conversion).
+2. If only `value_factor` is defined - it is applied to all entities.
+3. If only `value_factor_secondary` is defined - it is applied to all entities with `y_axis: secondary`.
+4. If both `value_factor` & `value_factor_secondary` are defined - they are applied to entities without `y_axis: secondary` & with `y_axis: secondary` correspondingly.
+
+Each option can be defined either as a `number` or an `object` (see below).
+
+A `number` value is a legacy format and defines an "exponent". Can be used for a unit conversion (e.g. convert Watts to kilo Watts); a negative value can be used to scale down (e.g. convert kilo Watts to Watts).
+Any non-numerical value leads to a fallback to a default "1" factor.
+
+An `object` value can be used to define either an "exponent" factor or a "scale" factor, see below:
+
+| Name | Type | Default | Description |
+|------|:----:|:-------:|-------------|
+| type ***(required)*** | string |  | `exponent` or `scale`.<br>`exponent` - factor is an exponent (can be negative to scale down).<br>`scale` - factor is a multiplier (can be negative to get a negative value).
+| factor ***(required)*** | number |  | A value of an exponent or a scale.
+
+Invalid values (absent/undefined/invalid `type` or `factor`) passed in the object lead to a fallback to a default "1" factor.
+
 
 ### Aggregate functions
 Recorded values are grouped in time buckets which are determined by `group_by`, `points_per_hour` configuration.
@@ -258,6 +302,82 @@ These buckets are converted later to single point/bar on the graph. Aggregate fu
 | `sum` | v0.9.2 |
 | `delta` | v0.9.4 | Calculates difference between max and min value
 | `diff` | v0.11.0 | Calculates difference between first and last value
+
+### Number format
+
+Options `decimals` defined "card-wide" and/or for some entity are used to set an exact number of decimals according to the following rules:
+1. For state & attribute values:
+- if none `decimals` option is defined - a default presentation (see a note below) is used;
+- if "card-wide" `decimals` is defined - this value is used;
+- if `decimals` for some entity is defined - this value is used for this entity.
+2. For extrema & average values (supported for the 1st entity only):
+- if none `decimals` option is defined - a default presentation is used;
+- if "card-wide" `decimals` is defined - this value is used;
+- if `decimals` is defined for the 1st entity - this value is used.
+3. For primary Y-axis labels:
+- if "card-wide" `decimals` & `decimals_primary_labels` options are not defined - a default presentation is used;
+- if "card-wide" `decimals` option is defined - this value is used;
+- if "card-wide" `decimals_primary_labels` option is defined - this value is used.
+4. For secondary Y-axis labels:
+- if "card-wide" `decimals` & `decimals_secondary_labels` options are not defined - a default presentation is used;
+- if "card-wide" `decimals` option is defined - this value is used;
+- if "card-wide" `decimals_secondary_labels` option is defined - this value is used.
+  
+A "default presentation" refers to a default look in HA:
+1. For a state value (also for extrema & average): if accuracy settings are defined for an entity - these settings are used, otherwise some default HA settings (depend on many factors incl. a `device_class`; for template sensors - a user-defined accuracy set in jinja templates is used).
+2. For an attribute value (also for extrema & average): default HA settings are used (for template sensors - a user-defined accuracy set in jinja templates is used).
+3. For Y-axis labels: "maximum 2 decimals" accuracy is used.
+And for all values, HA number format settings (like `xxxx.xx` or `x xxx.x` or `x,xxx.x`) are used.
+
+
+### Custom format for datetime values
+
+By default, the card uses global HA Frontend settings for date & time values. An explicitly defined `datetime_format` option overrides the default format.
+
+Note that the same approach is applied to `hour24` option: if the option is not defined, default settings are used. An explicitly defined `hour24` option overrides the default format.
+
+Here are possible values for the `datetime_format` option:
+```
+DD/MM/YYYY HH:mm  DD.MM.YYYY HH:mm  DD-MM-YYYY HH:mm
+MM/DD/YYYY HH:mm  MM.DD.YYYY HH:mm  MM-DD-YYYY HH:mm
+YYYY/MM/DD HH:mm  YYYY.MM.DD HH:mm  YYYY-MM-DD HH:mm
+```
+where can be used `YYYY` or `YY`, `MM` or `M`, `DD` or `D`, `HH` or `H`.
+A singular whitespace must be used to separate date & time formats. Letter case does matter.
+
+Any values which do not match the pattern - lead to a fallback to a "day weekday" format (used as the only and default format till v.0.13).
+For clarity, it is recommended to explicitly define a `day_weekday` value in case the legacy "day weekday" format is needed.
+
+### Logarithmic options
+
+Normally gaps between numbers on the graph are equal; the gap between 1 and 2 on the graph is the same as the gap between 100 and 101. The `logarithmic` option applies a [logarithmic transformation](https://en.wikipedia.org/wiki/Log_transformation_(statistics)) to the graph. With `logarithmic`, the graph is scaled by powers of 10, so the gap between 1, 10, 100, etc are equal. This is useful when your values span a wide range. Illuminance, for example, can swing from 1 to 5000 over the course of a day, and without a transformation it's hard to read the smaller values on the graph.
+
+Note that this option rounds up the input to 1 so negative numbers or numbers less than 1 are rendered as 0; this is different from the formal definition of logarithm, where `log(x) == 0` when `x<1` and $\infty$ when `x<0`.
+
+### Line styles
+
+A default line style is a "solid line". A style should be defined in a format used for a standard CSS `stroke-dasharray` property. Examples: `10,10` (dashes), `20,10` (long dashes); see cards examples [below](#custom-styles-for-line-graphs). It is better to use along with a `line_width` option.
+
+
+### Graphs order
+
+Note: this section applies to `line` graphs only.
+
+For each entity, a `line` graph consists of 3 basic parts: a "line" part (curve), a "fill" part (if displaying a fill is configured), a "points" part (if displaying points is configured).
+
+By default, graphs are shown in the following order:
+1. All "fill" parts are shown (if configured).
+2. All "line" parts are shown.
+3. All "points" parts are shown (if configured).
+
+Within each category, parts are shown in the following order:
+1. First, a part for the 1st entity in the `entities` list is processed.
+2. Last, a part for the last entity in the `entities` list is processed.
+
+I.e. the last entity's graph will be shown as topmost.
+
+This can be altered by setting a `graph_order` option: `direct` (default) stands for the described default order, `reversed` stands for `1st entity's graph is topmost`.
+
 
 ### Theme variables
 The following theme variables can be set in your HA theme to customize the appearance of the card.
@@ -339,6 +459,8 @@ points_per_hour: 0.25
 #### Graph only card
 Use the `show` option to show/hide UI elements.
 
+<img width="482" height="127" alt="image" src="https://github.com/user-attachments/assets/95196d3b-4de9-49a1-ae88-72bf19b3f3d2" />
+
 ```yaml
 type: custom:mini-graph-card
 entities:
@@ -397,11 +519,11 @@ color_thresholds:
     color: "#c0392b"
 ```
 
-#### Alternate y-axis
-Have one or more series plot on a separate y-axis, which appears on the right side of the graph. This example also
+#### Alternate Y-axis
+Have one or more series plot on a separate Y-axis, which appears on the right side of the graph. This example also
 shows turning off the line, points and legend.
 
-![Alternate y-axis](https://user-images.githubusercontent.com/373079/60764115-63cf2780-a0c6-11e9-8b9a-97fc47161180.png)
+![Alternate Y-axis](https://user-images.githubusercontent.com/373079/60764115-63cf2780-a0c6-11e9-8b9a-97fc47161180.png)
 
 ```yaml
 type: custom:mini-graph-card
@@ -423,6 +545,32 @@ show:
   labels: true
   labels_secondary: true
 ```
+
+#### Custom styles for line graphs
+
+Set a custom line style globally for a whole card or per-entity:
+
+<img width="478" height="221" alt="image" src="https://github.com/user-attachments/assets/daafee31-dec7-42bf-afa4-a3393755fbae" />
+
+```
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.xiaomi_cg_1_temperature
+line_style: 20,10
+```
+
+<img width="485" height="259" alt="image" src="https://github.com/user-attachments/assets/ce67cc56-b7eb-448f-aa7f-1ad48f3a65e1" />
+
+```
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.xiaomi_cg_1_temperature
+    line_style: 20,10
+  - entity: sensor.xiaomi_cg_2_temperature
+    line_style: 6,6
+```
+
+
 
 
 #### Grouping by date
@@ -499,6 +647,7 @@ state_map:
   - value: "on"
     label: Detected
 ```
+
 
 #### Showing additional info on the card
 
