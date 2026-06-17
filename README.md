@@ -355,7 +355,8 @@ Note that this option rounds up the input to 1 so negative numbers or numbers le
 
 ### Line styles
 
-A default line style is a "solid line". A style should be defined in a format used for a standard CSS `stroke-dasharray` property. Examples: `10,10` (dashes), `20,10` (long dashes). It is better to use along with a `line_width` option.
+A default line style is a "solid line". A style should be defined in a format used for a standard CSS `stroke-dasharray` property. Examples: `10,10` (dashes), `20,10` (long dashes). It is better to use along with a `line_width` option. Examples provided [below](#custom-styles-for-line-graphs).
+
 
 ### Graphs order
 
@@ -541,6 +542,32 @@ show:
   labels: true
   labels_secondary: true
 ```
+
+#### Custom styles for line graphs
+
+Set a custom line style globally for a whole card or per-entity:
+
+<img width="478" height="221" alt="image" src="https://github.com/user-attachments/assets/daafee31-dec7-42bf-afa4-a3393755fbae" />
+
+```
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.xiaomi_cg_1_temperature
+line_style: 20,10
+```
+
+<img width="485" height="259" alt="image" src="https://github.com/user-attachments/assets/ce67cc56-b7eb-448f-aa7f-1ad48f3a65e1" />
+
+```
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.xiaomi_cg_1_temperature
+    line_style: 20,10
+  - entity: sensor.xiaomi_cg_2_temperature
+    line_style: 6,6
+```
+
+
 
 
 #### Grouping by date
