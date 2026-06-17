@@ -1153,7 +1153,8 @@ class MiniGraphCard extends LitElement {
     this.updateBounds();
 
     if (config.show.graph) {
-      let graphPos = 0; // index of a bar (only used for bars & only increments if a particular graph to be shown)
+      // index of a bar (only used for bars & only increments if a particular graph to be shown)
+      let graphPos = 0;
       this.entity.forEach((entity, i) => {
         if (!entity || this.Graph[i].coords.length === 0) return;
         this.Graph[i].logarithmic = this.computeUsesLogarithmic(i);
@@ -1163,7 +1164,12 @@ class MiniGraphCard extends LitElement {
           const numVisible = this.visibleEntities.length;
           const bar_spacing_group = config.bar_spacing_group !== undefined
             ? config.bar_spacing_group : config.bar_spacing;
-          this.bar[i] = this.Graph[i].getBars(graphPos, numVisible, config.bar_spacing, bar_spacing_group);
+          this.bar[i] = this.Graph[i].getBars(
+            graphPos,
+            numVisible,
+            config.bar_spacing,
+            bar_spacing_group
+          );
           graphPos += 1;
         } else {
           const line = this.Graph[i].getPath();
