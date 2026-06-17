@@ -1168,7 +1168,7 @@ class MiniGraphCard extends LitElement {
             graphPos,
             numVisible,
             config.bar_spacing,
-            bar_spacing_group
+            bar_spacing_group,
           );
           graphPos += 1;
         } else {
