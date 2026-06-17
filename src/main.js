@@ -523,6 +523,10 @@ class MiniGraphCard extends LitElement {
   renderSvgLine(line, i) {
     if (!line) return;
 
+    const strokeDashArray = (this.config.animate
+      ? this.length[i]
+      : this.config.entities[i].line_style || this.config.line_style)
+      || 'none';
     const path = svg`
       <path
         class='line'
@@ -530,7 +534,7 @@ class MiniGraphCard extends LitElement {
         anim=${this.config.animate} ?init=${this.length[i]}
         style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
         fill='none'
-        stroke-dasharray=${this.length[i] || 'none'} stroke-dashoffset=${this.length[i] || 'none'}
+        stroke-dasharray=${strokeDashArray} stroke-dashoffset=${this.length[i] || 'none'}
         stroke=${'white'}
         stroke-width=${this.config.line_width}
         d=${this.line[i]}
