@@ -458,6 +458,8 @@ points_per_hour: 0.25
 #### Graph only card
 Use the `show` option to show/hide UI elements.
 
+<img width="482" height="127" alt="image" src="https://github.com/user-attachments/assets/95196d3b-4de9-49a1-ae88-72bf19b3f3d2" />
+
 ```yaml
 type: custom:mini-graph-card
 entities:
