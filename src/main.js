@@ -20,6 +20,7 @@ import {
   UPDATE_PROPS,
   X, Y, V,
   ONE_HOUR,
+  DEFAULT_MARGIN,
 } from './const';
 import { getFactor } from './others';
 import {
@@ -124,11 +125,18 @@ class MiniGraphCard extends LitElement {
 
     if (!this.Graph || entitiesChanged) {
       if (this._hass) this.hass = this._hass;
+      const min_line_width = this.getMinMaxLineWidth().min;
+      const max_line_width = this.getMinMaxLineWidth().max;
+      const margin = this.config.show.graph === 'bar'
+        ? [DEFAULT_MARGIN, DEFAULT_MARGIN]
+        : this.config.show.fill
+          ? [0, max_line_width]
+          : [min_line_width, max_line_width];
       this.Graph = this.config.entities.map(
         (entity, index) => new Graph(
           500,
           this.config.height,
-          [this.config.show.fill ? 0 : this.config.line_width, this.config.line_width],
+          margin,
           this.config.hours_to_show,
           this.config.points_per_hour,
           entity.aggregate_func || this.config.aggregate_func,
