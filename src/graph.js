@@ -25,7 +25,7 @@ export default class Graph {
     this.margin = margin;
     this._max = 0;
     this._min = 0;
-    this.points = points;  // stands for "points_per_hour"
+    this.points = points; // stands for "points_per_hour"
     this.hours = hours; // stands for "hours_to_show"
     this.aggregateFuncName = aggregateFuncName;
     this._calcPoint = aggregateFuncMap[aggregateFuncName] || this._average;
