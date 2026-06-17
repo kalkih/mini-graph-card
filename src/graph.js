@@ -25,8 +25,8 @@ export default class Graph {
     this.margin = margin;
     this._max = 0;
     this._min = 0;
-    this.points = points;
-    this.hours = hours;
+    this.points = points;  // stands for "points_per_hour"
+    this.hours = hours; // stands for "hours_to_show"
     this.aggregateFuncName = aggregateFuncName;
     this._calcPoint = aggregateFuncMap[aggregateFuncName] || this._average;
     this._smoothing = smoothing;
@@ -196,14 +196,30 @@ export default class Graph {
     return fill;
   }
 
-  getBars(position, total, spacing = 4) {
+  /**
+   * Get bars for an entity
+   * @param {number} position Index of a bar (0,1,..) (i.e. index of an entity with a shown graph)
+   * @param {number} total Number of bars (i.e. number of entities with a shown graph)
+   * @param {number} spacing Spacing between bars
+   * @param {number} spacing_group Spacing between groups of bars
+   * @returns Bars for an entity to be shown at a `position` index
+   */
+  getBars(position, total, spacing, spacing_group) {
     const coords = this._calcY(this.coords);
-    const xRatio = ((this.width - spacing) / Math.ceil(this.hours * this.points)) / total;
+    // number of measures
+    const total_groups = Math.ceil(this.hours * this.points);
+    // width of a group of bars
+    const group_width = (this.width - spacing_group * (total_groups - 1))
+      / total_groups;
+    // a width of a bar
+    const bar_width = (group_width - spacing * (total - 1)) / total;
     return coords.map((coord, i) => ({
-      x: (xRatio * i * total) + (xRatio * position) + spacing,
+      x: this.margin[X]
+        + (group_width + spacing_group) * i
+        + (bar_width + spacing) * position,
       y: coord[Y],
       height: this.height - coord[Y] + this.margin[Y] * 4,
-      width: xRatio - spacing,
+      width: bar_width,
       value: coord[V],
     }));
   }
