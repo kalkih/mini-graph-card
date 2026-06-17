@@ -355,7 +355,7 @@ Note that this option rounds up the input to 1 so negative numbers or numbers le
 
 ### Line styles
 
-A default line style is a "solid line". A style should be defined in a format used for a standard CSS `stroke-dasharray` property. Examples: `10,10` (dashes), `20,10` (long dashes). It is better to use along with a `line_width` option. Examples provided [below](#custom-styles-for-line-graphs).
+A default line style is a "solid line". A style should be defined in a format used for a standard CSS `stroke-dasharray` property. Examples: `10,10` (dashes), `20,10` (long dashes); see cards examples [below](#custom-styles-for-line-graphs). It is better to use along with a `line_width` option.
 
 
 ### Graphs order
