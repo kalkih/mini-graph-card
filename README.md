@@ -98,6 +98,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | height | number | `150` | v0.0.1 | Set a custom height of the line graph.
 | bar_spacing | number | `4` | v0.9.0 | Set the spacing between bars in bar graph.
 | line_width | number | `5` | v0.0.1 | Set the thickness of the line.
+| line_style | string |  | v0.14.0 | Set the style of the line (see [Line styles](#line-styles)).
 | line_color | string/list | `var(--accent-color)` | v0.0.1 | Set a custom color for the graph line, provide a list of colors for multiple graph entries.
 | color_thresholds | list |  | v0.2.3 | Set thresholds for dynamic graph colors, see [Line color object](#line-color-object).
 | color_thresholds_transition | string | `smooth` | v0.4.3 | Color threshold transition, `smooth` or `hard`.
@@ -138,6 +139,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | unit | string |         | Set a custom unit of measurement, overrides `unit` set in base config (`''` value for an empty unit).
 | aggregate_func | string |         | Override for aggregate function used to calculate point on the graph, `avg`, `median`, `min`, `max`, `first`, `last`, `sum`.
 | decimals | integer |    | Override the exact number of decimals to show for number values, see [Number format](#number-format).
+| line_style | string |  | v0.14.0 | Override the style of the line (see [Line styles](#line-styles)).
 | show_state | boolean |         | Display the current state.
 | show_legend_state | boolean |  false  | Display the current state as part of the legend.
 | show_indicator | boolean |         | Display a color indicator next to the state.
@@ -351,6 +353,9 @@ Normally gaps between numbers on the graph are equal; the gap between 1 and 2 on
 
 Note that this option rounds up the input to 1 so negative numbers or numbers less than 1 are rendered as 0; this is different from the formal definition of logarithm, where `log(x) == 0` when `x<1` and $\infty$ when `x<0`.
 
+### Line styles
+
+A default line style is a "solid line". A style should be defined in a format used for a standard CSS `stroke-dasharray` property. Examples: `10,10` (dashes), `20,10` (long dashes). It is better to use along with a `line_width` option.
 
 ### Graphs order
 
