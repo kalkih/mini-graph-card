@@ -1,3 +1,31 @@
+# [0.13.0](https://github.com/kalkih/mini-graph-card/compare/v0.12.1...v0.13.0) (2025-05-29)
+
+
+### Bug Fixes
+
+* adapt state color to tooltip properties ([#1214](https://github.com/kalkih/mini-graph-card/issues/1214)) ([1142f25](https://github.com/kalkih/mini-graph-card/commit/1142f259b168ddc936e7060c6cffabc4e89dc8bf))
+* computeUom() for attribute & empty unit ([#1236](https://github.com/kalkih/mini-graph-card/issues/1236)) ([436b9a9](https://github.com/kalkih/mini-graph-card/commit/436b9a94f3b16f60fa39bcce5163ee07038c7e22))
+* deprecated paper-item-icon-color ([#1247](https://github.com/kalkih/mini-graph-card/issues/1247)) ([2e99db5](https://github.com/kalkih/mini-graph-card/commit/2e99db5e97adc8c7836258020007cf0bc6cd3bdd))
+* hide graph loading indicator when appropriate ([#1197](https://github.com/kalkih/mini-graph-card/issues/1197)) ([d708d6a](https://github.com/kalkih/mini-graph-card/commit/d708d6a22f1531681855a1b852f2f7ee7cfc07ba))
+* indicator style for the 1st state ([#1105](https://github.com/kalkih/mini-graph-card/issues/1105)) ([c0ad333](https://github.com/kalkih/mini-graph-card/commit/c0ad333ee96998bab7179b23b86684ba74851326))
+* legend indicators respect entity attribute configuration ([#1115](https://github.com/kalkih/mini-graph-card/issues/1115)) ([5fe01d1](https://github.com/kalkih/mini-graph-card/commit/5fe01d15a791d09646fd26cce5c8d7113e0cd4b7))
+* legend unit percent w/o whitespace ([#1191](https://github.com/kalkih/mini-graph-card/issues/1191)) ([9f5cfd9](https://github.com/kalkih/mini-graph-card/commit/9f5cfd9c86e1d05bbaa14691fbaa77bceb63144a))
+* migrate to ha-spinner  ([#1234](https://github.com/kalkih/mini-graph-card/issues/1234)) ([d68f651](https://github.com/kalkih/mini-graph-card/commit/d68f651af0899b37a78ec9f58ac0a030231c14bd))
+* more intuitive min_bound_range behavior ([#1136](https://github.com/kalkih/mini-graph-card/issues/1136)) ([54d9875](https://github.com/kalkih/mini-graph-card/commit/54d987568b850451e0b6009d3d002526bb1f5b13))
+* name and icon color respect attribute choice ([#1131](https://github.com/kalkih/mini-graph-card/issues/1131)) ([cbfba7a](https://github.com/kalkih/mini-graph-card/commit/cbfba7a6a4a02e944d82d83fca69f61148cbcd34))
+* padding fill ([#1238](https://github.com/kalkih/mini-graph-card/issues/1238)) ([f930fa6](https://github.com/kalkih/mini-graph-card/commit/f930fa60dfce7b1003b2ebb64c9ce1673b160c60))
+* process absent UoM in computeLegend() ([#1237](https://github.com/kalkih/mini-graph-card/issues/1237)) ([5724cfd](https://github.com/kalkih/mini-graph-card/commit/5724cfdd8e73316659d4bd38ee351628f247ae85))
+* remove unused argument from getBoundary ([#1193](https://github.com/kalkih/mini-graph-card/issues/1193)) ([f5261d9](https://github.com/kalkih/mini-graph-card/commit/f5261d92c37b93f2fd8c7f8da01fe8af4a5a18e8))
+* use a proper config in renderState() ([#1217](https://github.com/kalkih/mini-graph-card/issues/1217)) ([c980460](https://github.com/kalkih/mini-graph-card/commit/c9804600989bd9d3c5868e0312479a26330ac7f2))
+* use d3 to interpolate colors ([#1118](https://github.com/kalkih/mini-graph-card/issues/1118)) ([b8676f5](https://github.com/kalkih/mini-graph-card/commit/b8676f557107fb5ebda550652a947fa74ab39a9c))
+
+
+### Features
+
+* add "tooltip--label" class ([#1202](https://github.com/kalkih/mini-graph-card/issues/1202)) ([0d3c184](https://github.com/kalkih/mini-graph-card/commit/0d3c184dc19c43dd2c0797f3f7d25b6aaac014e4))
+* Add loader ([#1180](https://github.com/kalkih/mini-graph-card/issues/1180)) ([30c5263](https://github.com/kalkih/mini-graph-card/commit/30c5263a30dfd2ebde6b4d1a4969696073c20482))
+* add show_legend_state ([#1173](https://github.com/kalkih/mini-graph-card/issues/1173)) ([3b1c827](https://github.com/kalkih/mini-graph-card/commit/3b1c82793a01baf613dfae4ad4bfa981a29b999f))
+
 # [0.13.0-dev.3](https://github.com/kalkih/mini-graph-card/compare/v0.13.0-dev.2...v0.13.0-dev.3) (2025-04-29)
 
 

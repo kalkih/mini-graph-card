@@ -10,7 +10,10 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
 ### HACS (recommended) 
 
 This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community Store).
+
 <small>*HACS is a third party community store and is not included in Home Assistant out of the box.*</small>
+
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=kalkih&repository=mini-graph-card)
 
 ### Manual install
 
@@ -26,7 +29,7 @@ This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community St
 2. Grab `mini-graph-card-bundle.js`:
 
   ```console
-  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.12.1/mini-graph-card-bundle.js
+  $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.13.0/mini-graph-card-bundle.js
   ```
 
 3. Add the resource reference as decribed below.
@@ -37,7 +40,7 @@ If you configure Lovelace via YAML, add a reference to `mini-graph-card-bundle.j
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.12.1
+    - url: /local/mini-graph-card-bundle.js?v=0.13.0
       type: module
   ```
 
@@ -60,7 +63,7 @@ Else, if you prefer the graphical editor, use the menu to add the resource:
 
   ```yaml
   resources:
-    - url: /local/mini-graph-card-bundle.js?v=0.12.1
+    - url: /local/mini-graph-card-bundle.js?v=0.13.0
       type: module
   ```
 
@@ -132,7 +135,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | aggregate_func | string |         | Override for aggregate function used to calculate point on the graph, `avg`, `median`, `min`, `max`, `first`, `last`, `sum`.
 | show_state | boolean |         | Display the current state.
 | show_legend_state | boolean |  false  | Display the current state as part of the legend.
-| show_indicator | boolean |         | Display a color indicator next to the state, (only when more than two states are visible).
+| show_indicator | boolean |         | Display a color indicator next to the state.
 | show_graph | boolean |         | Set to false to completely hide the entity in the graph.
 | show_line | boolean |         | Set to false to hide the line.
 | show_fill | boolean |         | Set to false to hide the fill.
