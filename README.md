@@ -97,6 +97,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | animate | boolean | `false` | v0.2.0 | Add a reveal animation to the graph.
 | height | number | `150` | v0.0.1 | Set a custom height of the line graph.
 | bar_spacing | number | `4` | v0.9.0 | Set the spacing between bars in bar graph.
+| bar_spacing_group | number |   | 0.14.0 | Set an additional spacing between bar groups (multiple entities) in bar graph. Fallback to `bar_spacing` if undefined.
 | line_width | number | `5` | v0.0.1 | Set the thickness of the line.
 | line_style | string |  | v0.14.0 | Set the style of the line (see [Line styles](#line-styles)).
 | line_color | string/list | `var(--accent-color)` | v0.0.1 | Set a custom color for the graph line, provide a list of colors for multiple graph entries.
