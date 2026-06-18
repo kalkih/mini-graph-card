@@ -62,7 +62,8 @@ class MiniGraphCard extends LitElement {
     this.updateHour24 = true;
     this.updateDateTimeFormat = true;
 
-    // Keeps a native unit/order for an entity: used for historical data for a currently unavailable entity
+    // Keeps a native unit/order for an entity: used for historical data
+    // for a currently unavailable entity
     this.preserved_uom = [];
     this.preserved_order = [];
   }
@@ -946,7 +947,7 @@ class MiniGraphCard extends LitElement {
           // try using a unit from config & attributes
           unit = this.config.entities[index].unit
             || this.config.unit
-            || stateObj.attributes['unit_of_measurement']
+            || stateObj.attributes.unit_of_measurement
             || '';
         }
       } else {
@@ -1132,7 +1133,7 @@ class MiniGraphCard extends LitElement {
             // presuming an order from config & attributes
             const unit = this.config.entities[index].unit
               || this.config.unit
-              || stateObj.attributes['unit_of_measurement'];
+              || stateObj.attributes.unit_of_measurement;
             const delimiter = unit
               ? unit === '%' && blankBeforePercent(this._hass.locale) === ''
                 ? '' : ' '
