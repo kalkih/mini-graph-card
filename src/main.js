@@ -768,7 +768,7 @@ class MiniGraphCard extends LitElement {
   */
   renderLabels() {
     if (!this.config.show.labels || this.primaryYaxisSeries.length === 0) return;
-    // index is not passed into computeState() for a primary axis
+    // index is not passed into computeStateWithUom() for a primary axis
     return html`
       <div class="graph__labels --primary flex">
         <span class="label--max">${this.computeState(this.bound[1])}</span>
