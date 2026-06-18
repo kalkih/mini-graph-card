@@ -851,7 +851,7 @@ class MiniGraphCard extends LitElement {
   /**
    * Checks whether an entity uses logarithmic scaling.
    * @param {number} index Index of an entity in config.entities
-   * @returns {boolean} True if the entity uses logarithmic scaling, otherwise false
+   * @returns {boolean} True if the entity uses logarithmic scaling, false - otherwise
    */
   computeUsesLogarithmic(index) {
     return getFirstDefinedItem(
@@ -1115,7 +1115,7 @@ class MiniGraphCard extends LitElement {
   * @param {number|string} inState Value of a state/attribute,
   * only used to process a preserved unit for a currently unavailable entity
   */
-  computeStateOrder(index) {
+  computeStateOrder(index, inState = undefined) {
     const entityId = this.config.entities[index].entity;
     const { attribute } = this.config.entities[index];
     if (!attribute || !this.isObjectAttr(attribute)) {
