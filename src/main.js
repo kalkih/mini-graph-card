@@ -768,7 +768,7 @@ class MiniGraphCard extends LitElement {
   */
   renderLabels() {
     if (!this.config.show.labels || this.primaryYaxisSeries.length === 0) return;
-    // index is not passed into computeStateWithUom() for a primary axis
+    // index is not passed into computeState() for a primary axis
     return html`
       <div class="graph__labels --primary flex">
         <span class="label--max">${this.computeState(this.bound[1])}</span>
@@ -800,7 +800,7 @@ class MiniGraphCard extends LitElement {
     const hideUnit = this.config.show.info_hide_unit;
     const { extrema, average } = this.config.show;
     const location = (extrema === 'below' || average === 'below') ? 'below' : 'above';
-    // index "0" is passed into computeState() since "info" is shown for the 1st entity
+    // index "0" is passed into computeStateWithUom() since "info" is shown for the 1st entity
     return this.abs.length > 0 ? html`
       <div class="info flex" loc=${location}>
         ${this.abs.map(entry => html`
