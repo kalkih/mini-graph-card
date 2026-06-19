@@ -294,6 +294,7 @@ class MiniGraphCard extends LitElement {
   }
 
   renderWarnings() {
+    /* eslint-disable indent */
     return html`
       <hui-warning>
         <div>mini-graph-card</div>
@@ -302,6 +303,7 @@ class MiniGraphCard extends LitElement {
           : html``))}
       </hui-warning>
     `;
+    /* eslint-enable indent */
   }
 
   /**
@@ -493,7 +495,7 @@ class MiniGraphCard extends LitElement {
     const ready = ((this.entity[0] || this.isStaticValue(0))
       && !this.Graph.some(
         (element, index) => element._history === undefined
-        && this.config.entities[index].show_graph !== false,
+          && this.config.entities[index].show_graph !== false,
     ))
     || this.config.show.loading_indicator === false;
     return this.config.show.graph ? html`
@@ -534,6 +536,7 @@ class MiniGraphCard extends LitElement {
     // do not show a legend for only 1 entry or when a legend is globally disabled
     if (this.visibleLegends.length <= 1 || !this.config.show.legend) return;
     const location = this.config.show.legend === 'below' ? 'below' : 'above';
+    /* eslint-disable indent */
     return html`
       <div class="graph__legend" loc=${location}>
         ${this.visibleLegends.map((entity) => {
@@ -550,6 +553,7 @@ class MiniGraphCard extends LitElement {
         })}
       </div>
     `;
+    /* eslint-enable indent */
   }
 
   /**
