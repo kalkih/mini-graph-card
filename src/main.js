@@ -270,7 +270,7 @@ class MiniGraphCard extends LitElement {
     if (!config || !this.entity || !this._hass)
       return html``;
     if (this.config.entities.some(
-      (_, index) => this.entity[index] === undefined && !this.isStaticValue(index)
+      (_, index) => this.entity[index] === undefined && !this.isStaticValue(index),
     )) {
       return this.renderWarnings();
     }
