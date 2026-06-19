@@ -1,3 +1,4 @@
+import { parseDateTimeFormat } from './locale';
 import { log } from './utils';
 import {
   URL_DOCS,
@@ -6,6 +7,7 @@ import {
   MAX_BARS,
   DEFAULT_COLORS,
   DEFAULT_SHOW,
+  DEFAULT_MARGIN,
 } from './const';
 
 /**
@@ -111,7 +113,6 @@ export default (config) => {
 
   const conf = {
     animate: false,
-    hour24: false,
     font_size: FONT_SIZE,
     font_size_header: FONT_SIZE_HEADER,
     height: 100,
@@ -122,13 +123,12 @@ export default (config) => {
     line_color: [...DEFAULT_COLORS],
     color_thresholds: [],
     color_thresholds_transition: 'smooth',
-    line_width: 5,
+    line_width: DEFAULT_MARGIN,
     bar_spacing: 4,
     compress: true,
     smoothing: true,
     state_map: [],
     cache: true,
-    value_factor: 0,
     tap_action: {
       action: 'more-info',
     },
@@ -155,9 +155,10 @@ export default (config) => {
     conf.color_thresholds,
     conf.color_thresholds_transition,
   );
-  const additional = conf.hours_to_show > 24 ? { day: 'numeric', weekday: 'short' } : {};
-  const hourFormat = conf.hour24 ? { hourCycle: 'h23' } : { hour12: true };
-  conf.format = { ...hourFormat, ...additional };
+
+  // parse a possibly defined "datetime_format" option;
+  // fallback to "day_weekday" if undefined
+  conf.datetimeFormatParsed = parseDateTimeFormat(conf.datetime_format);
 
   // override points per hour to mach group_by function
   switch (conf.group_by) {
