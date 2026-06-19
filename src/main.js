@@ -872,8 +872,8 @@ class MiniGraphCard extends LitElement {
   }
 
   handlePopup(e, entity) {
-    if ((entity
-         && this.config.tap_action === 'more-info') || this.config.tap_action !== 'more-info')) {
+    if ((entity && this.config.tap_action === 'more-info')
+        || this.config.tap_action !== 'more-info') {
       e.stopPropagation();
       handleClick(
         this,
