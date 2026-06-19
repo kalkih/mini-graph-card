@@ -881,6 +881,8 @@ class MiniGraphCard extends LitElement {
         this.config.tap_action,
         entity.entity_id || entity,
       );
+    } else if (!entity && this.config.tap_action.action === 'more-info') {
+      e.stopPropagation();
     }
   }
 
