@@ -128,8 +128,8 @@ properties of the Entity object detailed in the following table (as per `sensor.
 |------|:----:|:-------:|-------------|
 | entity | string |         | Entity id of the sensor. Either `entity` or `static_value` must be defined.
 | attribute | string |         | Retrieves an attribute or [sub-attribute (attr1.attr2...)](#accessing-attributes-in-complex-structures) instead of the state.
-| static_value | number |         | Set a static value for a [preset line](#preset-lines). Either `entity` or `static_value` must be defined.
-| name | string |         | Set a custom display name, defaults to entity's friendly_name.
+| static_value | number |         | Set a value for a [static line](#static-lines). Either `entity` or `static_value` must be defined.
+| name | string |         | Set a custom display name, defaults to entity's friendly_name or a `Static` label for a `static_value` entry (see [Static lines](#static-lines)).
 | color | string |         | Set a custom color, overrides all other color options including thresholds.
 | unit | string |         | Set a custom unit of measurement, overrides `unit` set in base config (`''` value for an empty unit).
 | aggregate_func | string |         | Override for aggregate function used to calculate point on the graph, `avg`, `median`, `min`, `max`, `first`, `last`, `sum`.
@@ -578,11 +578,11 @@ entities:
 ```
 ![image](https://github.com/ildar170975/mini-graph-card/assets/71872483/eebd0cea-da93-4bf5-97a1-118edd2a9c5e)
 
-#### Preset lines
+#### Static lines
 
-A preset horizontal line is drawn for a user-defined static value.
+A static horizontal line is drawn for a user-defined static value.
 Can be used in various applcations like drawing a threshold line or a zeroth X-axis.
-Like a dynamic graph for an entity (defined by an `entity` option), a preset line (defined by a `static_value` option) can use other applicable options: `name`, `color`, `unit`, `show_...`, `state_adaptive_color`, `y_axis`.
+Like a dynamic graph for an entity (defined by an `entity` option), a static line (defined by a `static_value` option) can use other applicable options: `name`, `color`, `unit`, `show_...`, `state_adaptive_color`, `y_axis`.
 
 Example with a threshold line (with a fill) with displaying a threshold's value:
 ```
