@@ -610,9 +610,22 @@ show:
 
 Example with a zeroth X-axis:
 
-```yaml
-```
+<img width="480" height="219" alt="image" src="https://github.com/user-attachments/assets/2fe260f2-439c-4652-b817-feec461cbee8" />
 
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.temperature
+  - static_value: 0
+    show_state: false
+    show_points: false
+    show_fill: false
+    show_legend: false
+    line_width: 1
+    color: grey
+show:
+  labels: true
+```
 
 
 #### Grouping by date
