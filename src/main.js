@@ -297,12 +297,9 @@ class MiniGraphCard extends LitElement {
     return html`
       <hui-warning>
         <div>mini-graph-card</div>
-        ${this.config.entities.map(
-          (_, index) => (!this.entity[index] && !this.isStaticValue(index)
-            ? html`<div>
-                Entity not available: ${this.config.entities[index].entity}
-              </div>`
-            : html``))}
+        ${this.config.entities.map((_, index) => (!this.entity[index] && !this.isStaticValue(index)
+          ? html`<div>Entity not available: ${this.config.entities[index].entity}</div>`
+          : html``))}
       </hui-warning>
     `;
   }
