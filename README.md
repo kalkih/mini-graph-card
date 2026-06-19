@@ -308,7 +308,12 @@ These buckets are converted later to single point/bar on the graph. Aggregate fu
 
 A static horizontal line is drawn for a user-defined static value.
 Can be used in various applcations like drawing a threshold line or a zeroth X-axis.
-Like a dynamic graph for an entity (defined by an `entity` option), a static line (defined by a `static_value` option) can use other applicable options: `name`, `line_width`, `line_style`, `color`, `unit`, `decimals`, `show_...`, `state_adaptive_color`, `y_axis`.
+
+Notes:
+1. Like a dynamic graph for an entity (defined by an `entity` option), a static line (defined by a `static_value` option) can use other applicable options: `name`, `line_width`, `line_style`, `color`, `unit`, `decimals`, `show_...`, `state_adaptive_color`, `y_axis`.
+2. When `graph: bar`, a `static_value` entry is rendered as a set of constant bars.
+3. Displaying extrema/average values is not supported for `static_value` entries.
+
 See examples [below](#displaying-static-lines).
 
 ### Number format
