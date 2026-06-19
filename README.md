@@ -588,6 +588,7 @@ entities:
 Example with a threshold line:
 
 <img width="485" height="257" alt="image" src="https://github.com/user-attachments/assets/7d668913-1811-48e8-9a24-d6bed93f7ee9" />
+
 ```yaml
 type: custom:mini-graph-card
 entities:
@@ -608,6 +609,7 @@ show:
 ```
 
 Example with a zeroth X-axis:
+
 ```yaml
 ```
 
