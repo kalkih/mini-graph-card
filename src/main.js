@@ -872,8 +872,8 @@ class MiniGraphCard extends LitElement {
   }
 
   handlePopup(e, entity) {
+    e.stopPropagation();
     if (entity) {
-      e.stopPropagation();
       handleClick(
         this,
         this._hass,
