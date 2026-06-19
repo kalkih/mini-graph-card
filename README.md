@@ -585,8 +585,25 @@ entities:
 
 #### Displaying static lines
 
-Example with a threshold line (with a fill) with displaying a threshold's value:
+Example with a threshold line:
+<img width="485" height="257" alt="image" src="https://github.com/user-attachments/assets/7d668913-1811-48e8-9a24-d6bed93f7ee9" />
 ```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.system_monitor_processor_use
+  - static_value: 50
+    name: Threshold
+    unit: "%"
+    show_legend_state: true
+    show_state: false
+    show_points: false
+    show_fill: false
+    line_width: 1
+    line_style: 4,7
+    color: red
+lower_bound: ~0
+show:
+  labels: true
 ```
 
 Example with a zeroth X-axis:
