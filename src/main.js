@@ -192,7 +192,7 @@ class MiniGraphCard extends LitElement {
    * @returns True if smoothing is applicable for an entity, false - otherwise
    */
   getDefaultSmoothing(index) {
-    const entity = this.config.entities[index].entity;
+    const { entity } = this.config.entities[index];
     if (entity) {
       // Turn off default smoothing for binary_sensor entities.
       // Can be also refactored for other non-numerical domains if needed.
@@ -270,8 +270,8 @@ class MiniGraphCard extends LitElement {
     if (!config || !this.entity || !this._hass)
       return html``;
     if (this.config.entities.some(
-      (_, index) => this.entity[index] === undefined && !this.isStaticValue(index))
-    ) {
+      (_, index) => this.entity[index] === undefined && !this.isStaticValue(index)
+    )) {
       return this.renderWarnings();
     }
     this.updateFormatFromLocale();
@@ -496,7 +496,7 @@ class MiniGraphCard extends LitElement {
       && !this.Graph.some(
         (element, index) => element._history === undefined
           && this.config.entities[index].show_graph !== false,
-    ))
+      ))
     || this.config.show.loading_indicator === false;
     return this.config.show.graph ? html`
       <div class="graph">
