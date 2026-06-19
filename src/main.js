@@ -880,7 +880,7 @@ class MiniGraphCard extends LitElement {
         this._hass,
         this.config,
         this.config.tap_action,
-        entity.entity_id || entity,
+        entity && entity.entity_id || entity,
       );
     }
   }
