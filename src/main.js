@@ -196,7 +196,8 @@ class MiniGraphCard extends LitElement {
     if (entity) {
       // Turn off default smoothing for binary_sensor entities.
       // Can be also refactored for other non-numerical domains if needed.
-      // Smoothing should be manually turned on in config in case of addressing a numerical attribute.
+      // Smoothing should be manually turned on in config
+      // in case of addressing a numerical attribute.
       return !entity.startsWith('binary_sensor.');
     }
     // processing a possible `static_value` entry
@@ -445,7 +446,8 @@ class MiniGraphCard extends LitElement {
       // "tooltip" - a selected point/bar
       const { entity: tooltipEntityIndex, value: tooltipValue } = this.tooltip;
       const isTooltip = isPrimary && tooltipEntityIndex !== undefined;
-      // either a state/attr/static_value for a selected point/bar - or a "native" state/attr/static_value
+      // either a state/attr/static_value for a selected point/bar
+      // - or a "native" state/attr/static_value
       const value = isTooltip ? tooltipValue : state;
       const entityIndex = isTooltip ? tooltipEntityIndex : index;
       const entityConfig = this.config.entities[entityIndex];
@@ -871,7 +873,13 @@ class MiniGraphCard extends LitElement {
   handlePopup(e, entity) {
     if (entity) {
       e.stopPropagation();
-      handleClick(this, this._hass, this.config, this.config.tap_action, entity.entity_id || entity);
+      handleClick(
+        this,
+        this._hass,
+        this.config,
+        this.config.tap_action,
+        entity.entity_id || entity,
+      );
     }
   }
 
@@ -1487,7 +1495,9 @@ class MiniGraphCard extends LitElement {
       if (this.config.state_map.length > 0 || this.config.entities[index].attribute) {
         newStateHistory[0].forEach((item) => {
           if (this.config.entities[index].attribute) {
+            // eslint-disable-next-line no-param-reassign
             item.state = this.getObjectAttr(item.attributes, this.config.entities[index].attribute);
+            // eslint-disable-next-line no-param-reassign
             delete item.attributes;
           }
           if (this.config.state_map.length > 0)
