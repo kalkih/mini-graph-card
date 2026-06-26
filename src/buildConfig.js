@@ -19,7 +19,7 @@ import {
  * @returns {number}
  */
 const findFirstValuedIndex = (stops, startIndex) => {
-  for (let i = startIndex, l = stops.length; i < l; i += 1) {
+  for (let i = startIndex; i < stops.length; i += 1) {
     if (stops[i].value != null) {
       return i;
     }
@@ -66,10 +66,7 @@ const interpolateStops = (stops) => {
       return { ...stop };
     }
 
-    if (rightValuedIndex == null) {
-      rightValuedIndex = findFirstValuedIndex(stops, stopIndex);
-    } else if (stopIndex > rightValuedIndex) {
-      leftValuedIndex = rightValuedIndex;
+    if (rightValuedIndex == null || stopIndex > rightValuedIndex) {
       rightValuedIndex = findFirstValuedIndex(stops, stopIndex);
     }
 
@@ -83,7 +80,7 @@ const interpolateStops = (stops) => {
     const m = (rightValue - leftValue) / (rightValuedIndex - leftValuedIndex);
     return {
       color: typeof stop === 'string' ? stop : stop.color,
-      value: m * stopIndex + leftValue,
+      value: m * (stopIndex - leftValuedIndex) + leftValue,
     };
   });
 };
@@ -96,7 +93,7 @@ const computeThresholds = (stops, type) => {
     return valuedStops;
   } else {
     const rect = [].concat(...valuedStops.map((stop, i) => ([stop, {
-      value: stop.value - 0.0001,
+      value: stop.value * 0.9999,
       color: valuedStops[i + 1] ? valuedStops[i + 1].color : stop.color,
     }])));
     return rect;
