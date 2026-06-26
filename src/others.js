@@ -66,6 +66,9 @@ const getFactor = (config, index = undefined) => {
   return 1;
 };
 
+const isNumeric = (value) => typeof value === 'number' && !Number.isNaN(value);
+
 export {
   getFactor,
+  isNumeric,
 };
