@@ -192,7 +192,7 @@ export default class Graph {
     const height = this.height + this.margin[Y] * 4;
     let fill = path;
     // note that currently this.margin[X] = 0 when fill is defined
-    fill += ` L ${this.width - this.margin[X]}, ${height}`;
+    fill += ` L ${this.width + this.margin[X]}, ${height}`;
     fill += ` L ${this.coords[0][X]}, ${height} z`;
     return fill;
   }
