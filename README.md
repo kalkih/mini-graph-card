@@ -150,6 +150,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | show_fill | boolean |         | Set to false to hide the fill.
 | show_points | boolean |         | Set to false to hide the points (see a note below).
 | show_legend | boolean |         | Set to false to turn hide from the legend.
+| show_static_inactive | boolean |         | Set to true to disable hiding the line when a point of a line of another entity selected; meaningful for a [static line](#static-lines) only.
 | state_adaptive_color | boolean |         | Make the color of the state adapt to the entity/static value color.
 | y_axis | string |         | If 'secondary', displays using the secondary Y-axis on the right.
 | fixed_value | boolean |         | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
@@ -627,6 +628,33 @@ show:
   labels: true
 ```
 
+Example with a static line which is not hidden when a point of a line of another entity selected:
+
+<img width="481" height="353" alt="изображение" src="https://github.com/user-attachments/assets/bc11d3c1-c557-46e0-afe9-b7d2e17b35be" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.system_monitor_processor_use
+    line_width: 4
+  - static_value: 50
+    name: Threshold
+    unit: "%"
+    show_legend_state: true
+    show_state: false
+    show_points: false
+    line_width: 1
+    line_style: 4,7
+    color: red
+    show_static_inactive: true
+lower_bound: ~0
+points_per_hour: 60
+hours_to_show: 3
+height: 200
+show:
+  labels: true
+  fill: false
+```
 
 #### Grouping by date
 
