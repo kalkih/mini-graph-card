@@ -22,7 +22,10 @@ import {
   ONE_HOUR,
   DEFAULT_MARGIN,
 } from './const';
-import { getFactor } from './others';
+import {
+  getFactor,
+  isNumeric,
+} from './others';
 import {
   getMin, getAvg, getMax,
   getMilli,
@@ -138,8 +141,7 @@ class MiniGraphCard extends LitElement {
       .filter(entityConfig => entityConfig.show_graph !== false)
       .map((entityConfig) => {
         const value = entityConfig.line_width;
-        return (typeof value === 'number'
-          && !Number.isNaN(value))
+        return isNumeric(value)
           ? value : this.config.line_width;
       });
     return ({
@@ -385,7 +387,7 @@ class MiniGraphCard extends LitElement {
    */
   isStaticValue(index) {
     const entity = this.config.entities[index];
-    return typeof entity.static_value === 'number' && !Number.isNaN(entity.static_value);
+    return isNumeric(entity.static_value);
   }
 
   /**
