@@ -1,4 +1,4 @@
-import interpolateRGB from './color';
+import { interpolateRGB } from './color';
 import {
   X, Y, V,
   ONE_HOUR,
