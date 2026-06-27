@@ -943,7 +943,8 @@ class MiniGraphCard extends LitElement {
   */
   computeColor(inState, index) {
     const { line_color } = this.config;
-    const color_thresholds = this.config.entities[index].color_thresholds || this.config.color_thresholds;
+    const color_thresholds = 
+      this.config.entities[index].color_thresholds || this.config.color_thresholds;
     const state = Number(inState) || 0;
 
     let intColor;
@@ -1351,9 +1352,11 @@ class MiniGraphCard extends LitElement {
             this.points[i] = this.Graph[i].getPoints();
           }
           if ((config.color_thresholds.length > 0
-            || (config.entities[i].color_thresholds && config.entities[i].color_thresholds.length > 0))
+            || (config.entities[i].color_thresholds
+                && config.entities[i].color_thresholds.length > 0))
             && !config.entities[i].color)
-            this.gradient[i] = this.Graph[i].computeGradient(config.entities[i].color_thresholds || config.color_thresholds);
+            this.gradient[i] = this.Graph[i]
+              .computeGradient(config.entities[i].color_thresholds || config.color_thresholds);
         }
       });
       this.line = [...this.line];
