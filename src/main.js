@@ -2,7 +2,7 @@ import { LitElement, html, svg } from 'lit-element';
 import localForage from 'localforage/src/localforage';
 import { stateIcon } from 'custom-card-helpers';
 import SparkMD5 from 'spark-md5';
-import interpolateRGB from './color';
+import { interpolateRGB } from './color';
 import Graph from './graph';
 import style from './style';
 import handleClick from './handleClick';
