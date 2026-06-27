@@ -137,7 +137,7 @@ export default (config) => {
     if (typeof entity === 'string') {
       conf.entities[i] = { entity };
     } else if (entity.color_thresholds) {
-      // process per-entity color_thresholds
+      // eslint-disable-next-line no-param-reassign
       entity.color_thresholds = computeThresholds(
         entity.color_thresholds,
         entity.color_thresholds_transition || conf.color_thresholds_transition,
