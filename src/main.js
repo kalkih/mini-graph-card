@@ -949,10 +949,10 @@ class MiniGraphCard extends LitElement {
 
     let intColor;
     if (color_thresholds.length > 0) {
-      const { color } = color_thresholds.find(ele => ele.value < state)
-        || color_thresholds.slice(-1)[0];
+      const { color } = color_thresholds.find(ele => ele.value <= state)
+        || color_thresholds.at(-1);
       intColor = color;
-      const indexThreshold = color_thresholds.findIndex(ele => ele.value < state);
+      const indexThreshold = color_thresholds.findIndex(ele => ele.value <= state);
       const c1 = color_thresholds[indexThreshold];
       const c2 = color_thresholds[indexThreshold - 1];
       if (c2) {
