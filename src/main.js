@@ -943,7 +943,7 @@ class MiniGraphCard extends LitElement {
   */
   computeColor(inState, index) {
     const { line_color } = this.config;
-    const color_thresholds = 
+    const color_thresholds =
       this.config.entities[index].color_thresholds || this.config.color_thresholds;
     const state = Number(inState) || 0;
 
