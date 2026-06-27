@@ -285,7 +285,6 @@ class MiniGraphCard extends LitElement {
         ?points=${config.show.points === 'hover'}
         ?labels=${config.show.labels === 'hover'}
         ?labels-secondary=${config.show.labels_secondary === 'hover'}
-        ?gradient=${config.color_thresholds.length > 0}
         ?hover=${config.tap_action.action !== 'none'}
         style="font-size: ${config.font_size}px;"
         @click=${e => this.handlePopup(e, config.tap_action.entity || this.entity[0])}
@@ -943,7 +942,8 @@ class MiniGraphCard extends LitElement {
   * @param {number} index Index of an entry in config.entities
   */
   computeColor(inState, index) {
-    const { color_thresholds, line_color } = this.config;
+    const { line_color } = this.config;
+    const color_thresholds = this.config.entities[index].color_thresholds || this.config.color_thresholds;
     const state = Number(inState) || 0;
 
     let intColor;
@@ -1350,8 +1350,10 @@ class MiniGraphCard extends LitElement {
           if (config.show.points && (config.entities[i].show_points !== false)) {
             this.points[i] = this.Graph[i].getPoints();
           }
-          if (config.color_thresholds.length > 0 && !config.entities[i].color)
-            this.gradient[i] = this.Graph[i].computeGradient(config.color_thresholds);
+          if ((config.color_thresholds.length > 0
+            || (config.entities[i].color_thresholds && config.entities[i].color_thresholds.length > 0))
+            && !config.entities[i].color)
+            this.gradient[i] = this.Graph[i].computeGradient(config.entities[i].color_thresholds || config.color_thresholds);
         }
       });
       this.line = [...this.line];
