@@ -4,9 +4,9 @@ const isAssumingCssVar = value => (typeof value === 'string' && value.trim().sta
 
 const convertCssVarToValue = (cssVar) => {
   const name = cssVar.trim().replace('var(', '').replace(')', '');
-  let element = document.querySelector('ha-card'); //// eslint-disable-line no-undef
+  let element = document.querySelector('ha-card'); // eslint-disable-line no-undef
   if (!element)
-    element = document.body; //// eslint-disable-line no-undef
+    element = document.body; // eslint-disable-line no-undef
   return window
     ? window.getComputedStyle(element).getPropertyValue(name)
     : '#000000';
