@@ -1,3 +1,4 @@
+import { parseDateTimeFormat } from './locale';
 import { log } from './utils';
 import {
   URL_DOCS,
@@ -6,6 +7,7 @@ import {
   MAX_BARS,
   DEFAULT_COLORS,
   DEFAULT_SHOW,
+  DEFAULT_MARGIN,
 } from './const';
 
 /**
@@ -17,7 +19,7 @@ import {
  * @returns {number}
  */
 const findFirstValuedIndex = (stops, startIndex) => {
-  for (let i = startIndex, l = stops.length; i < l; i += 1) {
+  for (let i = startIndex; i < stops.length; i += 1) {
     if (stops[i].value != null) {
       return i;
     }
@@ -64,10 +66,7 @@ const interpolateStops = (stops) => {
       return { ...stop };
     }
 
-    if (rightValuedIndex == null) {
-      rightValuedIndex = findFirstValuedIndex(stops, stopIndex);
-    } else if (stopIndex > rightValuedIndex) {
-      leftValuedIndex = rightValuedIndex;
+    if (rightValuedIndex == null || stopIndex > rightValuedIndex) {
       rightValuedIndex = findFirstValuedIndex(stops, stopIndex);
     }
 
@@ -81,11 +80,19 @@ const interpolateStops = (stops) => {
     const m = (rightValue - leftValue) / (rightValuedIndex - leftValuedIndex);
     return {
       color: typeof stop === 'string' ? stop : stop.color,
-      value: m * stopIndex + leftValue,
+      value: m * (stopIndex - leftValuedIndex) + leftValue,
     };
   });
 };
 
+/**
+ * Process color_thresholds array: first reverse it,
+ * then either return it "as is" (if type = smooth)
+ * or augment it with additional stops to prevent an unneeded color transition (if type = hard)
+ * @param {Array<{ color: string, value: number }>} stops Initial color_thresholds array
+ * @param {string} type Type of color thresholds transition
+ * @returns {Array<{ color: string, value: number }>} Processed color_thresholds array
+ */
 const computeThresholds = (stops, type) => {
   const valuedStops = interpolateStops(stops);
   valuedStops.sort((a, b) => b.value - a.value);
@@ -94,7 +101,7 @@ const computeThresholds = (stops, type) => {
     return valuedStops;
   } else {
     const rect = [].concat(...valuedStops.map((stop, i) => ([stop, {
-      value: stop.value - 0.0001,
+      value: stop.value * 0.9999,
       color: valuedStops[i + 1] ? valuedStops[i + 1].color : stop.color,
     }])));
     return rect;
@@ -111,7 +118,6 @@ export default (config) => {
 
   const conf = {
     animate: false,
-    hour24: false,
     font_size: FONT_SIZE,
     font_size_header: FONT_SIZE_HEADER,
     height: 100,
@@ -122,13 +128,12 @@ export default (config) => {
     line_color: [...DEFAULT_COLORS],
     color_thresholds: [],
     color_thresholds_transition: 'smooth',
-    line_width: 5,
+    line_width: DEFAULT_MARGIN,
     bar_spacing: 4,
     compress: true,
     smoothing: true,
     state_map: [],
     cache: true,
-    value_factor: 0,
     tap_action: {
       action: 'more-info',
     },
@@ -137,7 +142,15 @@ export default (config) => {
   };
 
   conf.entities.forEach((entity, i) => {
-    if (typeof entity === 'string') conf.entities[i] = { entity };
+    if (typeof entity === 'string') {
+      conf.entities[i] = { entity };
+    } else if (entity.color_thresholds) {
+      // eslint-disable-next-line no-param-reassign
+      entity.color_thresholds = computeThresholds(
+        entity.color_thresholds,
+        entity.color_thresholds_transition || conf.color_thresholds_transition,
+      );
+    }
   });
 
   conf.state_map.forEach((state, i) => {
@@ -155,9 +168,10 @@ export default (config) => {
     conf.color_thresholds,
     conf.color_thresholds_transition,
   );
-  const additional = conf.hours_to_show > 24 ? { day: 'numeric', weekday: 'short' } : {};
-  const hourFormat = conf.hour24 ? { hourCycle: 'h23' } : { hour12: true };
-  conf.format = { ...hourFormat, ...additional };
+
+  // parse a possibly defined "datetime_format" option;
+  // fallback to "day_weekday" if undefined
+  conf.datetimeFormatParsed = parseDateTimeFormat(conf.datetime_format);
 
   // override points per hour to mach group_by function
   switch (conf.group_by) {
