@@ -134,7 +134,15 @@ export default (config) => {
   };
 
   conf.entities.forEach((entity, i) => {
-    if (typeof entity === 'string') conf.entities[i] = { entity };
+    if (typeof entity === 'string') {
+      conf.entities[i] = { entity };
+    } else if (entity.color_thresholds) {
+      // process per-entity color_thresholds
+      entity.color_thresholds = computeThresholds(
+        entity.color_thresholds,
+        entity.color_thresholds_transition || conf.color_thresholds_transition,
+      );
+    }
   });
 
   conf.state_map.forEach((state, i) => {
