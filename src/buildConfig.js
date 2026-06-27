@@ -86,7 +86,8 @@ const interpolateStops = (stops) => {
 };
 
 /**
- * Process color_thresholds array: first reverse it, then either return it "as is" (if type = smooth)
+ * Process color_thresholds array: first reverse it,
+ * then either return it "as is" (if type = smooth)
  * or augment it with additional stops to prevent an unneeded color transition (if type = hard)
  * @param {Array<{ color: string, value: number }>} stops Initial color_thresholds array
  * @param {string} type Type of color thresholds transition
