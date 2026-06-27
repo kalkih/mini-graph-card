@@ -139,6 +139,8 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | line_width | number |         | Override for a thickness of the line.
 | line_style | string |   | Override the style of the line (see [Line styles](#line-styles)).
 | color | string |         | Set a custom color, overrides all other color options including thresholds.
+| color_thresholds | list |  | v0.14.0 | Override the thresholds for dynamic graph colors.
+| color_thresholds_transition | string |  | v0.14.0 | Override the color threshold transition.
 | unit | string |         | Set a custom unit of measurement, overrides `unit` set in base config (`''` value for an empty unit).
 | aggregate_func | string |         | Override for aggregate function used to calculate point on the graph, `avg`, `median`, `min`, `max`, `first`, `last`, `sum`.
 | decimals | integer |    | Override the exact number of decimals to show for number values, see [Number format](#number-format).
