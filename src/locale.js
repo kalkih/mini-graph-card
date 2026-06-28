@@ -585,7 +585,7 @@ const blankBeforePercent = (localeOptions) => {
     }).formatToParts(1);
 
     const hasSpace = parts.some(part => part.type === 'literal' && /\s/.test(part.value));
-    сonst result = hasSpace ? '\u00A0' : '';
+    const result = hasSpace ? '\u00A0' : '';
 
     blankPercentCache.set(language, result);
     return result;
