@@ -631,7 +631,7 @@ const blankBeforePercent = (localeOptions) => {
 
     blankPercentCache.set(language, result);
     return result;
-  } catch {
+  } catch (e) {
     return '';
   }
 };
