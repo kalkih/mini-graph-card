@@ -484,7 +484,8 @@ const getDefaultFormatOptions = (
     || (options.minimumFractionDigits === undefined
         && options.maximumFractionDigits === undefined)
   ) {
-    const digits = num.indexOf('.') > -1 ? num.split('.')[1].length : 0;
+    const parts = num.split('.');
+    const digits = parts.length > 1 ? parts[1].length : 0;
     defaultOptions.minimumFractionDigits = digits;
     defaultOptions.maximumFractionDigits = digits;
   }
@@ -505,6 +506,11 @@ const formatNumberToParts = (
   localeOptions,
   options,
 ) => {
+  if (num === '' || num === null || num === undefined) {
+    return [{ type: 'literal', value: '' }];
+  }
+
+  const convertedNumber = Number(num);
   const locale = localeOptions
     ? numberFormatToLocale(localeOptions)
     : undefined;
@@ -512,16 +518,16 @@ const formatNumberToParts = (
   if (
     localeOptions
     && localeOptions.number_format !== NumberFormat.none
-    && !Number.isNaN(Number(num))
+    && !Number.isNaN(convertedNumber)
   ) {
     return new Intl.NumberFormat(
       locale,
       getDefaultFormatOptions(num, options),
-    ).formatToParts(Number(num));
+    ).formatToParts(convertedNumber);
   }
 
   if (
-    !Number.isNaN(Number(num))
+    !Number.isNaN(convertedNumber)
     && num !== ''
     && localeOptions
     && localeOptions.number_format === NumberFormat.none
@@ -533,7 +539,7 @@ const formatNumberToParts = (
         ...options,
         useGrouping: false,
       }),
-    ).formatToParts(Number(num));
+    ).formatToParts(convertedNumber);
   }
 
   return [{ type: 'literal', value: num }];
@@ -557,22 +563,38 @@ const formatNumber = (
   .join('');
 
 /**
+ * Memoized blankPercent dictionary for each language
+ */
+const blankPercentCache = {};
+
+/**
  * Checks if a whitespace is needed before a "%" unit dependently on a locale
  * @param {FrontendLocaleData} localeOptions Object containing
  * a user-selected language and formatting settings
  * @returns {string} Whitespace if needed before "%", empty otherwise
  */
 const blankBeforePercent = (localeOptions) => {
-  switch (localeOptions.language) {
-    case 'cs':
-    case 'de':
-    case 'fi':
-    case 'fr':
-    case 'sk':
-    case 'sv':
-      return ' ';
-    default:
-      return '';
+  const language = localeOptions?.language || 'en';
+
+  if (blankPercentCache[language] !== undefined) {
+    return blankPercentCache[language];
+  }
+
+  try {
+    const parts = new Intl.NumberFormat(language, {
+      style: 'percent',
+    }).formatToParts(1);
+
+    const hasSpace = parts.some(
+      (part) => part.type === 'literal' && part.value.includes(' ')
+    );
+
+    const result = hasSpace ? ' ' : '';
+
+    blankPercentCache[language] = result;
+    return result;
+  } catch (e) {
+    return '';
   }
 };
 
