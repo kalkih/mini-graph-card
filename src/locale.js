@@ -584,9 +584,8 @@ const blankBeforePercent = (localeOptions) => {
       style: 'percent',
     }).formatToParts(1);
 
-    const hasSpace = parts.some(
-      part => part.type === 'literal' && part.value.includes(' ')
-    );
+    const hasSpace =
+      parts.some(part => part.type === 'literal' && part.value.includes(' '));
 
     const result = hasSpace ? ' ' : '';
 
