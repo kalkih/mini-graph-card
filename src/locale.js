@@ -1,4 +1,4 @@
-import { log } from "./utils";
+import { log } from './utils';
 
 /**
  * HA Frontend time format settings
@@ -290,7 +290,7 @@ const composeDateString = (
   let monthPart = null;
   let yearPart = null;
 
-  for (let i = 0; i < parts.length; i++) {
+  for (let i = 0; i < parts.length; i += 1) {
     const part = parts[i];
     if (!dateLiteralPart && part.type === 'literal') dateLiteralPart = part;
     else if (!dayPart && part.type === 'day') dayPart = part;
@@ -337,7 +337,7 @@ const composeTimeString = (
 ) => {
   let composed = '';
   const len = parts.length;
-  for (let i = 0; i < len; i++) {
+  for (let i = 0; i < len; i += 1) {
     const part = parts[i];
     let value = part.value || '';
     if (!hour_2digit && part.type === 'hour' && value.indexOf('0') === 0) {
@@ -366,7 +366,10 @@ const formatDate = (
   const localeOptions = hass.locale; // FrontendLocaleData object
   const localeDate = localeOptions.date_format === DateFormat.system
     ? undefined : localeOptions.language;
-  let formatter, formatted, composed, parts;
+  let formatter;
+  let formatted;
+  let composed;
+  let parts;
   const { datetime_format, datetimeFormatParsed } = config; // user-defined datetime format
 
   if (!datetime_format) {
@@ -424,7 +427,8 @@ const formatTime = (
   const localeOptions = hass.locale; // FrontendLocaleData object
   const localeTime = localeOptions.time_format === TimeFormat.system
     ? undefined : localeOptions.language;
-  let formatter, formatted, composed;
+  let formatter;
+  let formatted;
   const { datetime_format, datetimeFormatParsed } = config; // user-defined datetime format
 
   if (!datetime_format) {
@@ -446,7 +450,7 @@ const formatTime = (
   formatter = new Intl.DateTimeFormat(undefined, config.time_format);
   const parts = formatter.formatToParts(dateObj);
   // re-compose a string with a possibly needed fix for "hour" value
-  composed = composeTimeString(
+  const composed = composeTimeString(
     parts,
     datetimeFormatParsed.hour_2digit,
   );
