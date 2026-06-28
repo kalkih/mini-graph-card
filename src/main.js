@@ -953,15 +953,19 @@ class MiniGraphCard extends LitElement {
         || color_thresholds.at(-1);
       intColor = color;
       const indexThreshold = color_thresholds.findIndex(ele => ele.value <= state);
-      const c1 = color_thresholds[indexThreshold];
-      const c2 = color_thresholds[indexThreshold - 1];
-      if (c2) {
-        const factor = (c2.value - state) / (c2.value - c1.value);
-        intColor = interpolateRGB(c2.color, c1.color, factor);
+      if (indexThreshold !== -1) {
+        const c1 = color_thresholds[indexThreshold];
+        const c2 = color_thresholds[indexThreshold - 1];
+        if (c2) {
+          const factor = (c2.value - state) / (c2.value - c1.value);
+          intColor = interpolateRGB(c2.color, c1.color, factor);
+        } else {
+          // state is equal to or above the last stop point
+          intColor = color_thresholds[0].color;
+        }
       } else {
-        intColor = indexThreshold
-          ? color_thresholds[color_thresholds.length - 1].color
-          : color_thresholds[0].color;
+        // state is below the first stop point
+        intColor = color_thresholds[color_thresholds.length - 1].color;
       }
     }
 
