@@ -564,7 +564,7 @@ const formatNumber = (
 /**
  * Memoized blankPercent dictionary for each language
  */
-const blankPercentCache = {};
+const blankPercentCache = new Map();
 
 /**
  * Checks if a whitespace is needed before a "%" unit dependently on a locale
@@ -575,8 +575,8 @@ const blankPercentCache = {};
 const blankBeforePercent = (localeOptions) => {
   const language = (localeOptions && localeOptions.language) || 'en';
 
-  if (blankPercentCache[language] !== undefined) {
-    return blankPercentCache[language];
+  if (blankPercentCache.has(language)) {
+    return blankPercentCache.get(language);
   }
 
   try {
@@ -584,11 +584,10 @@ const blankBeforePercent = (localeOptions) => {
       style: 'percent',
     }).formatToParts(1);
 
-    const hasSpace = parts.some(part => part.type === 'literal' && part.value.includes(' '));
+    const hasSpace = parts.some(part => part.type === 'literal' && /\s/.test(part.value));
+    сonst result = hasSpace ? '\u00A0' : '';
 
-    const result = hasSpace ? ' ' : '';
-
-    blankPercentCache[language] = result;
+    blankPercentCache.set(language, result);
     return result;
   } catch (e) {
     return '';
