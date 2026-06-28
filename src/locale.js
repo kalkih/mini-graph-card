@@ -528,7 +528,6 @@ const formatNumberToParts = (
 
   if (
     !Number.isNaN(convertedNumber)
-    && num !== ''
     && localeOptions
     && localeOptions.number_format === NumberFormat.none
   ) {
