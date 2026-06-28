@@ -7,6 +7,8 @@
 
 import { log } from './utils';
 
+const isNumeric = value => typeof value === 'number' && !Number.isNaN(value);
+
 /**
   * Return a multiplying factor (exponental or scale) based on a "value_factor" option
   * @param {object} config Card config
@@ -74,8 +76,6 @@ const getFactor = (config, index = undefined) => {
   // fallback to a default factor
   return 1;
 };
-
-const isNumeric = value => typeof value === 'number' && !Number.isNaN(value);
 
 export {
   getFactor,
