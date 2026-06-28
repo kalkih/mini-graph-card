@@ -582,7 +582,7 @@ const blankBeforePercent = (localeOptions) => {
   try {
     const parts = new Intl.NumberFormat(language, {
       style: 'percent',
-    }).formatToParts(1);
+    }).formatToParts(0);
 
     const hasSpace = parts.some(part => part.type === 'literal' && /\s/.test(part.value));
     const result = hasSpace ? '\u00A0' : '';
