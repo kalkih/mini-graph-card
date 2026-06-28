@@ -89,7 +89,7 @@ const useAmPm = (localeOptions, hour24) => {
     let isHour12 = false;
     try {
       isHour12 = Intl.DateTimeFormat(testLanguage).resolvedOptions().hour12 === true;
-    } catch {
+    } catch (e) {
       log('useAmPm(): error');
     }
 
