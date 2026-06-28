@@ -573,7 +573,7 @@ const blankPercentCache = {};
  * @returns {string} Whitespace if needed before "%", empty otherwise
  */
 const blankBeforePercent = (localeOptions) => {
-  const language = localeOptions?.language || 'en';
+  const language = (localeOptions && localeOptions.language) || 'en';
 
   if (blankPercentCache[language] !== undefined) {
     return blankPercentCache[language];
