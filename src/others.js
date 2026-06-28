@@ -14,11 +14,20 @@ import { log } from './utils';
   * @returns {number} Multiplying factor
   */
 const getFactor = (config, index = undefined) => {
+  if (!config) {
+    // fallback to a default factor
+    return 1;
+  }
+
   let value_factor;
-  if (index >= 0 && config.entities[index] && config.entities[index].value_factor !== undefined) {
-    // provided for a possible per-entity value_factor
+  const validIndex = typeof index === 'number'
+    && index >= 0
+    && config.entities
+    && config.entities[index];
+  if (validIndex && config.entities[index].value_factor !== undefined) {
+    // provided a per-entity value_factor
     ({ value_factor } = config.entities[index]);
-  } else if (index >= 0 && config.entities[index] && config.entities[index].y_axis === 'secondary'
+  } else if (validIndex && config.entities[index].y_axis === 'secondary'
     && config.value_factor_secondary !== undefined) {
     // use value_factor_secondary for entities with 'y_axis: secondary'
     value_factor = config.value_factor_secondary;
@@ -30,7 +39,7 @@ const getFactor = (config, index = undefined) => {
     ({ value_factor } = config);
   }
 
-  if (value_factor === undefined) {
+  if (value_factor === undefined || value_factor === null) {
     // fallback to a default factor
     return 1;
   }
@@ -41,7 +50,7 @@ const getFactor = (config, index = undefined) => {
   if (typeof value_factor === 'object') {
     const { type, factor } = value_factor;
     if (type === undefined || factor === undefined
-      || typeof type !== 'string' || typeof factor !== 'number') {
+      || typeof type !== 'string' || !isNumeric(factor)) {
       // invalid options, fallback to a default factor
       logValueFactor(value_factor);
       return 1;
@@ -56,7 +65,7 @@ const getFactor = (config, index = undefined) => {
     return 1;
   }
 
-  if (typeof value_factor === 'number') {
+  if (isNumeric(value_factor)) {
     // use a legacy "exponent" way
     return getExponent(value_factor);
   }
