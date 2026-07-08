@@ -525,6 +525,7 @@ class MiniGraphCard extends LitElement {
       ))
     || this.config.show.loading_indicator === false;
 
+    /* eslint-disable indent */
     return this.config.show.graph
       ? html`
           <div class="graph">
@@ -543,6 +544,7 @@ class MiniGraphCard extends LitElement {
               : html`<ha-spinner aria-label="Loading" size="small"></ha-spinner>`}
           </div>`
       : html``;
+    /* eslint-enable indent */
   }
 
   /**
