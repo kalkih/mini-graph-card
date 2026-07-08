@@ -20,7 +20,10 @@ import {
   UPDATE_PROPS,
   X, Y, V,
   ONE_HOUR,
+  DEFAULT_GRAPH_HEIGHT,
   DEFAULT_MARGIN,
+  DEFAULT_STATIC_VALUE_LABEL_OFFSET,
+  NBSP,
 } from './const';
 import {
   getFactor,
@@ -62,6 +65,7 @@ class MiniGraphCard extends LitElement {
     this.stateChanged = false;
     this.initial = true;
     this._md5Config = undefined;
+    this.staticValueLabelOffset = undefined; // offset (x) for labels for static lines
 
     // update datetime settings periodically
     this.updateHour24 = true;
@@ -154,6 +158,9 @@ class MiniGraphCard extends LitElement {
     this.config = buildConfig(config);
     this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
     const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
+
+    // set offset (x) for labels for static lines
+    this.prepareStaticValueLabelOffset();
 
     // update datetime settings periodically
     this.updateHour24 = config.hour24 === undefined;
@@ -256,6 +263,8 @@ class MiniGraphCard extends LitElement {
   }
 
   updated(changedProperties) {
+    super.updated(changedProperties);
+
     if (this.config.animate && changedProperties.has('line')) {
       if (this.length.length < this.entity.length) {
         this.shadowRoot.querySelectorAll('svg path.line').forEach((ele) => {
@@ -502,26 +511,40 @@ class MiniGraphCard extends LitElement {
     `;
   }
 
+  /**
+  * Renders a Graph element (along with a legend)
+  * @returns {TemplateResult} Lit template result
+  */
   renderGraph() {
-    const ready = ((this.entity[0] || this.isStaticValue(0))
+    const hasInitialData = this.entity
+      && (this.entity[0] || this.isStaticValue(0));
+    const ready = (hasInitialData
       && !this.Graph.some(
         (element, index) => element._history === undefined
           && this.config.entities[index].show_graph !== false,
       ))
     || this.config.show.loading_indicator === false;
-    return this.config.show.graph ? html`
-      <div class="graph">
-        ${ready ? html`
-            <div class="graph__container">
-              ${this.renderLabels()}
-              ${this.renderLabelsSecondary()}
-              <div class="graph__container__svg">
-                ${this.renderSvg()}
-              </div>
-            </div>
-            ${this.renderLegend()}
-        ` : html`<ha-spinner aria-label="Loading" size="small"></ha-spinner>`}
-      </div>` : '';
+
+    /* eslint-disable indent */
+    return this.config.show.graph
+      ? html`
+          <div class="graph">
+            ${ready
+              ? html`
+                  <div class="graph__container">
+                    ${this.renderLabels()}
+                    ${this.renderLabelsSecondary()}
+                    <div class="graph__container__svg">
+                      ${this.renderSvg()}
+                      ${this.renderStaticLabels()}
+                    </div>
+                  </div>
+                  ${this.renderLegend()}
+                `
+              : html`<ha-spinner aria-label="Loading" size="small"></ha-spinner>`}
+          </div>`
+      : html``;
+    /* eslint-enable indent */
   }
 
   /**
@@ -579,6 +602,80 @@ class MiniGraphCard extends LitElement {
         <rect width='10' height='10' fill=${this.computeColor(state, index)} />
       </svg>
     `;
+  }
+
+  prepareStaticValueLabelOffset() {
+    const { static_value_label_offset: offset } = this.config;
+    this.staticValueLabelOffset = DEFAULT_STATIC_VALUE_LABEL_OFFSET;
+
+    if (offset === undefined || offset === null) return;
+    if (isNumeric(offset)) {
+      this.staticValueLabelOffset = Number(offset);
+    } else {
+      log('value of static_value_label_offset is incorrect, a default value is used');
+    }
+  }
+
+  /**
+  * Renders static lines' labels
+  * @returns {TemplateResult} Lit template result
+  */
+  renderStaticLabels() {
+    if (!this.config.show.static_value_labels) {
+      return html``;
+    }
+
+    const graphHeight = this.config.height !== undefined
+      ? this.config.height : DEFAULT_GRAPH_HEIGHT;
+    if (!isNumeric(graphHeight) || graphHeight <= 0) {
+      return html``;
+    }
+
+    const isLeft = this.config.show.static_value_labels === 'left';
+
+    /* eslint-disable indent */
+    return html`
+      <div
+        class="graph__static_value_labels"
+        loc="${this.config.show.static_value_labels}"
+      >
+        ${this.config.entities.map((_, index) => {
+          if (!this.isStaticValue(index)
+            || this.config.entities[index].show_static_value_label === false) {
+            return;
+          }
+          const staticValue = this.config.entities[index].static_value;
+          // get Y coord in SVG space
+          const [staticLineCoord] = this.Graph[index]._calcY([[0, 0, staticValue]]);
+          const [, topSVG] = staticLineCoord; // top in SVG coords
+
+          const topPercent = (topSVG / graphHeight) * 100; // top in %
+          if (!isNumeric(topPercent)) {
+            return;
+          }
+
+          const offset = this.staticValueLabelOffset; // offset in %
+
+          const color = this.config.entities[index].state_adaptive_color
+            ? this.computeColor(staticValue, index)
+            : 'var(--primary-text-color)';
+
+          return html`<span
+            id="static-label-${index}"
+            ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== index
+              && !this.isShowStaticInactive(index)}
+            style="
+              color: ${color};
+              top: ${topPercent}%;
+              left: ${isLeft ? `${offset}%` : `calc(100% - ${offset}%)`};
+            "
+          >
+            ${this.computeState(staticValue, index)}
+          </span>`;
+        })}
+      </div>
+    `;
+    /* eslint-enable indent */
   }
 
   renderSvgFill(fill, i) {
@@ -768,7 +865,7 @@ class MiniGraphCard extends LitElement {
   }
 
   /** Returns all rendered SVG parts (fill, line, bars, points)
-  * @returns {any} SVG
+  * @returns {any} SVG element
   */
   renderSvg() {
     const { height, show } = this.config;
@@ -1224,7 +1321,7 @@ class MiniGraphCard extends LitElement {
               || stateObj.attributes.unit_of_measurement;
             const delimiter = unit
               ? unit === '%' && blankBeforePercent(this._hass.locale) === ''
-                ? '' : ' '
+                ? '' : NBSP
               : '';
             return {
               directOrder: true,
@@ -1258,7 +1355,7 @@ class MiniGraphCard extends LitElement {
       }
     } else {
       // processing entity, object attribute
-      return { directOrder: true, delimiter: ' ' };
+      return { directOrder: true, delimiter: NBSP };
     }
   }
 
@@ -1286,9 +1383,9 @@ class MiniGraphCard extends LitElement {
       && !nativeDelimiter
       && (this.config.unit || this.config.entities[index].unit)
       && (unit !== '%'
-        || blankBeforePercent(this._hass.locale) === ' ')) {
+        || blankBeforePercent(this._hass.locale) === NBSP)) {
       // add a delimiter for a user-defined unit (except for "%" for some locales)
-      delimiter = ' ';
+      delimiter = NBSP;
     } else {
       delimiter = nativeDelimiter;
     }

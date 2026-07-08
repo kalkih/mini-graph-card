@@ -1,4 +1,5 @@
 import { log } from './utils';
+import { NBSP } from './const';
 
 /**
  * HA Frontend time format settings
@@ -631,7 +632,7 @@ const blankBeforePercent = (localeOptions) => {
     }).formatToParts(1);
 
     const hasSpace = parts.some(part => part.type === 'literal' && /\s/.test(part.value));
-    const result = hasSpace ? '\u00A0' : '';
+    const result = hasSpace ? NBSP : '';
 
     blankPercentCache.set(language, result);
     return result;

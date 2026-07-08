@@ -7,6 +7,7 @@ import {
   MAX_BARS,
   DEFAULT_COLORS,
   DEFAULT_SHOW,
+  DEFAULT_GRAPH_HEIGHT,
   DEFAULT_MARGIN,
   DEFAULT_BAR_SPACING,
 } from './const';
@@ -121,7 +122,7 @@ export default (config) => {
     animate: false,
     font_size: FONT_SIZE,
     font_size_header: FONT_SIZE_HEADER,
-    height: 100,
+    height: DEFAULT_GRAPH_HEIGHT,
     hours_to_show: 24,
     points_per_hour: 0.5,
     aggregate_func: 'avg',

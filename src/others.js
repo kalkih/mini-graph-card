@@ -7,7 +7,7 @@
 
 import { log } from './utils';
 
-const isNumeric = value => typeof value === 'number' && !Number.isNaN(value);
+const isNumeric = value => typeof value === 'number' && Number.isFinite(value);
 
 /**
   * Return a multiplying factor (exponental or scale) based on a "value_factor" option
