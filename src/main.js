@@ -631,6 +631,7 @@ class MiniGraphCard extends LitElement {
 
     const isLeft = this.config.show.static_value_labels === 'left';
 
+    /* eslint-disable indent */
     return html`
       <div
         class="graph__static_value_labels"
@@ -672,6 +673,7 @@ class MiniGraphCard extends LitElement {
         })}
       </div>
     `;
+    /* eslint-enable indent */
   }
 
   renderSvgFill(fill, i) {
