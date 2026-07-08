@@ -5,6 +5,7 @@ const MAX_BARS = 96;
 const DEFAULT_GRAPH_HEIGHT = 100;
 const DEFAULT_MARGIN = 5;
 const DEFAULT_STATIC_VALUE_LABEL_OFFSET = 20; // in %
+const NBSP = '\u00A0';
 const ICONS = {
   humidity: 'hass:water-percent',
   illuminance: 'hass:brightness-5',
@@ -61,6 +62,7 @@ export {
   DEFAULT_GRAPH_HEIGHT,
   DEFAULT_MARGIN,
   DEFAULT_STATIC_VALUE_LABEL_OFFSET,
+  NBSP,
   ICONS,
   DEFAULT_COLORS,
   UPDATE_PROPS,

@@ -23,6 +23,7 @@ import {
   DEFAULT_GRAPH_HEIGHT,
   DEFAULT_MARGIN,
   DEFAULT_STATIC_VALUE_LABEL_OFFSET,
+  NBSP,
 } from './const';
 import {
   getFactor,
@@ -1314,7 +1315,7 @@ class MiniGraphCard extends LitElement {
               || stateObj.attributes.unit_of_measurement;
             const delimiter = unit
               ? unit === '%' && blankBeforePercent(this._hass.locale) === ''
-                ? '' : ' '
+                ? '' : NBSP
               : '';
             return {
               directOrder: true,
@@ -1348,7 +1349,7 @@ class MiniGraphCard extends LitElement {
       }
     } else {
       // processing entity, object attribute
-      return { directOrder: true, delimiter: ' ' };
+      return { directOrder: true, delimiter: NBSP };
     }
   }
 
@@ -1376,9 +1377,9 @@ class MiniGraphCard extends LitElement {
       && !nativeDelimiter
       && (this.config.unit || this.config.entities[index].unit)
       && (unit !== '%'
-        || blankBeforePercent(this._hass.locale) === ' ')) {
+        || blankBeforePercent(this._hass.locale) === NBSP)) {
       // add a delimiter for a user-defined unit (except for "%" for some locales)
-      delimiter = ' ';
+      delimiter = NBSP;
     } else {
       delimiter = nativeDelimiter;
     }
