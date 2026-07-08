@@ -634,7 +634,8 @@ class MiniGraphCard extends LitElement {
     return html`
       <div class="graph__static_value_labels" loc="${this.config.show.static_value_labels}">
         ${this.config.entities.map((_, index) => {
-          if (!this.isStaticValue(index) || this.config.entities[index].show_static_value_label === false) {
+          if (!this.isStaticValue(index)
+              || this.config.entities[index].show_static_value_label === false) {
             return;
           }
           const staticValue = this.config.entities[index].static_value;
@@ -653,20 +654,18 @@ class MiniGraphCard extends LitElement {
             ? this.computeColor(staticValue, index)
             : 'var(--primary-text-color)';
 
-          return html`
-            <span
-              id="static-label-${index}"
-              ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== index
-                && !this.isShowStaticInactive(index)}
-              style="
-                color: ${color};
-                top: ${topPercent}%;
-                left: ${isLeft ? `${offset}%` : `calc(100% - ${offset}%)`};
-              "
-            >
-              ${this.computeState(staticValue, index)}
-            </span>
-          `;
+          return html`<span
+            id="static-label-${index}"
+            ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== index
+              && !this.isShowStaticInactive(index)}
+            style="
+              color: ${color};
+              top: ${topPercent}%;
+              left: ${isLeft ? `${offset}%` : `calc(100% - ${offset}%)`};
+            "
+          >
+            ${this.computeState(staticValue, index)}
+          </span>`;
         })}
       </div>
     `;
