@@ -1259,7 +1259,7 @@ class MiniGraphCard extends LitElement {
       }
     } else {
       // processing entity, object attribute
-      return { directOrder: true, delimiter: ' ' };
+      return { directOrder: true, delimiter: NBSP };
     }
   }
 
@@ -1289,7 +1289,7 @@ class MiniGraphCard extends LitElement {
       && (unit !== '%'
         || blankBeforePercent(this._hass.locale) === NBSP)) {
       // add a delimiter for a user-defined unit (except for "%" for some locales)
-      delimiter = ' ';
+      delimiter = NBSP;
     } else {
       delimiter = nativeDelimiter;
     }
