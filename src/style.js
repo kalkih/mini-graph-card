@@ -23,11 +23,7 @@ const style = css`
     order: 10;
   }
   ha-card[points] .line--points,
-  ha-card[labels] .graph__labels.--primary {
-    opacity: 0;
-    transition: opacity .25s;
-    animation: none;
-  }
+  ha-card[labels] .graph__labels.--primary,
   ha-card[labels-secondary] .graph__labels.--secondary {
     opacity: 0;
     transition: opacity .25s;
@@ -245,13 +241,19 @@ const style = css`
     width: 100%;
   }
   .graph__container {
-    display: flex;
-    flex-direction: row;
-    position: relative;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    align-items: stretch;
   }
   .graph__container__svg {
     cursor: default;
-    flex: 1;
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    grid-column: 1;
+    grid-row: 1;
   }
   svg {
     overflow: hidden;
@@ -278,7 +280,8 @@ const style = css`
     animation: none !important;
     transition: all .15s !important;
   }
-  .line--points[tooltip] .line--point[inactive] {
+  .line--points[tooltip] .line--point[inactive],
+  .graph__static_value_labels > span[inactive] {
     opacity: 0;
   }
   .line--point {
@@ -319,30 +322,47 @@ const style = css`
   .line[anim="true"][init] {
     animation: dash 1s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   }
-  .graph__labels.--secondary {
-    right: 0;
-    margin-right: 0px;
-    align-items: flex-end;
-  }
   .graph__labels {
-    align-items: flex-start;
+    display: flex;
     flex-direction: column;
-    font-size: calc(.15em + 8.5px);
-    font-weight: 400;
     justify-content: space-between;
-    margin-right: 10px;
+    align-items: flex-start;
+    font-size: calc(.15em + 8.5px);
     padding: .6em;
-    position: absolute;
     pointer-events: none;
-    top: 0; bottom: 0;
     opacity: .75;
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .graph__labels.--secondary {
+    align-items: flex-end;
+    grid-column: 1;
+    grid-row: 1;
   }
   .graph__labels > span {
     cursor: pointer;
+  }
+  .graph__static_value_labels {
+    font-size: calc(.15em + 8.5px);
+    position: absolute;
+    pointer-events: none;
+    top: 0; bottom: 0;
+    left: 0; right: 0;
+  }
+  .graph__labels > span,
+  .graph__static_value_labels > span {
     background: var(--primary-background-color, white);
     border-radius: 1em;
     padding: .2em .6em;
     box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.24);
+    white-space: nowrap;
+    font-weight: 400;
+    user-select: none;
+  }
+  .graph__static_value_labels > span {
+    opacity: 0.75;
+    position: absolute;
+    transform: translate(-50%, -50%);
   }
   .graph__legend {
     display: flex;
