@@ -638,7 +638,7 @@ class MiniGraphCard extends LitElement {
       >
         ${this.config.entities.map((_, index) => {
           if (!this.isStaticValue(index)
-              || this.config.entities[index].show_static_value_label === false) {
+            || this.config.entities[index].show_static_value_label === false) {
             return;
           }
           const staticValue = this.config.entities[index].static_value;
