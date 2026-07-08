@@ -3,6 +3,7 @@ const FONT_SIZE = 14;
 const FONT_SIZE_HEADER = 14;
 const MAX_BARS = 96;
 const DEFAULT_MARGIN = 5;
+const NBSP = '\u00A0';
 const ICONS = {
   humidity: 'hass:water-percent',
   illuminance: 'hass:brightness-5',
@@ -57,6 +58,7 @@ export {
   FONT_SIZE_HEADER,
   MAX_BARS,
   DEFAULT_MARGIN,
+  NBSP,
   ICONS,
   DEFAULT_COLORS,
   UPDATE_PROPS,
