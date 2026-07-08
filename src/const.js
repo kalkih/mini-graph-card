@@ -2,7 +2,9 @@ const URL_DOCS = 'https://github.com/kalkih/mini-graph-card/blob/master/README.m
 const FONT_SIZE = 14;
 const FONT_SIZE_HEADER = 14;
 const MAX_BARS = 96;
+const DEFAULT_GRAPH_HEIGHT = 100;
 const DEFAULT_MARGIN = 5;
+const DEFAULT_STATIC_VALUE_LABEL_OFFSET = 20; // in %
 const ICONS = {
   humidity: 'hass:water-percent',
   illuminance: 'hass:brightness-5',
@@ -56,7 +58,9 @@ export {
   FONT_SIZE,
   FONT_SIZE_HEADER,
   MAX_BARS,
+  DEFAULT_GRAPH_HEIGHT,
   DEFAULT_MARGIN,
+  DEFAULT_STATIC_VALUE_LABEL_OFFSET,
   ICONS,
   DEFAULT_COLORS,
   UPDATE_PROPS,
