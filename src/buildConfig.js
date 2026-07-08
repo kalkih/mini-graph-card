@@ -8,6 +8,7 @@ import {
   DEFAULT_COLORS,
   DEFAULT_SHOW,
   DEFAULT_MARGIN,
+  DEFAULT_BAR_SPACING,
 } from './const';
 
 /**
@@ -124,7 +125,7 @@ export default (config) => {
     color_thresholds: [],
     color_thresholds_transition: 'smooth',
     line_width: DEFAULT_MARGIN,
-    bar_spacing: 4,
+    bar_spacing: DEFAULT_BAR_SPACING,
     compress: true,
     smoothing: true,
     state_map: [],
@@ -159,6 +160,13 @@ export default (config) => {
   // parse a possibly defined "datetime_format" option;
   // fallback to "day_weekday" if undefined
   conf.datetimeFormatParsed = parseDateTimeFormat(conf.datetime_format);
+
+  // set valid values for bar_spacing options
+  conf.bar_spacing = config.bar_spacing < 0
+    ? DEFAULT_BAR_SPACING : config.bar_spacing;
+  conf.bar_spacing_group = config.bar_spacing_group !== undefined
+    ? config.bar_spacing_group
+    : conf.bar_spacing;
 
   // override points per hour to mach group_by function
   switch (conf.group_by) {
