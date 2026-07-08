@@ -20,7 +20,7 @@ import {
  * @returns {number}
  */
 const findFirstValuedIndex = (stops, startIndex) => {
-  for (let i = startIndex, l = stops.length; i < l; i += 1) {
+  for (let i = startIndex; i < stops.length; i += 1) {
     if (stops[i].value != null) {
       return i;
     }
@@ -67,10 +67,7 @@ const interpolateStops = (stops) => {
       return { ...stop };
     }
 
-    if (rightValuedIndex == null) {
-      rightValuedIndex = findFirstValuedIndex(stops, stopIndex);
-    } else if (stopIndex > rightValuedIndex) {
-      leftValuedIndex = rightValuedIndex;
+    if (rightValuedIndex == null || stopIndex > rightValuedIndex) {
       rightValuedIndex = findFirstValuedIndex(stops, stopIndex);
     }
 
@@ -84,11 +81,19 @@ const interpolateStops = (stops) => {
     const m = (rightValue - leftValue) / (rightValuedIndex - leftValuedIndex);
     return {
       color: typeof stop === 'string' ? stop : stop.color,
-      value: m * stopIndex + leftValue,
+      value: m * (stopIndex - leftValuedIndex) + leftValue,
     };
   });
 };
 
+/**
+ * Process color_thresholds array: first reverse it,
+ * then either return it "as is" (if type = smooth)
+ * or augment it with additional stops to prevent an unneeded color transition (if type = hard)
+ * @param {Array<{ color: string, value: number }>} stops Initial color_thresholds array
+ * @param {string} type Type of color thresholds transition
+ * @returns {Array<{ color: string, value: number }>} Processed color_thresholds array
+ */
 const computeThresholds = (stops, type) => {
   const valuedStops = interpolateStops(stops);
   valuedStops.sort((a, b) => b.value - a.value);
@@ -97,7 +102,7 @@ const computeThresholds = (stops, type) => {
     return valuedStops;
   } else {
     const rect = [].concat(...valuedStops.map((stop, i) => ([stop, {
-      value: stop.value - 0.0001,
+      value: stop.value * 0.9999,
       color: valuedStops[i + 1] ? valuedStops[i + 1].color : stop.color,
     }])));
     return rect;
@@ -138,7 +143,15 @@ export default (config) => {
   };
 
   conf.entities.forEach((entity, i) => {
-    if (typeof entity === 'string') conf.entities[i] = { entity };
+    if (typeof entity === 'string') {
+      conf.entities[i] = { entity };
+    } else if (entity.color_thresholds) {
+      // eslint-disable-next-line no-param-reassign
+      entity.color_thresholds = computeThresholds(
+        entity.color_thresholds,
+        entity.color_thresholds_transition || conf.color_thresholds_transition,
+      );
+    }
   });
 
   conf.state_map.forEach((state, i) => {

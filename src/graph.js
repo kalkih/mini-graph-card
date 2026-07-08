@@ -1,4 +1,4 @@
-import { interpolateRgb } from 'd3-interpolate';
+import { interpolateRGB } from './color';
 import {
   X, Y, V,
   ONE_HOUR,
@@ -166,10 +166,10 @@ export default class Graph {
       let color;
       if (stop.value > this._max && arr[index + 1]) {
         const factor = (this._max - arr[index + 1].value) / (stop.value - arr[index + 1].value);
-        color = interpolateRgb(arr[index + 1].color, stop.color)(factor);
+        color = interpolateRGB(arr[index + 1].color, stop.color, factor);
       } else if (stop.value < this._min && arr[index - 1]) {
         const factor = (arr[index - 1].value - this._min) / (arr[index - 1].value - stop.value);
-        color = interpolateRgb(arr[index - 1].color, stop.color)(factor);
+        color = interpolateRGB(arr[index - 1].color, stop.color, factor);
       }
       let offset;
       if (scale <= 0) {
@@ -191,7 +191,8 @@ export default class Graph {
   getFill(path) {
     const height = this.height + this.margin[Y] * 4;
     let fill = path;
-    fill += ` L ${this.width - this.margin[X] * 2}, ${height}`;
+    // note that currently this.margin[X] = 0 when fill is defined
+    fill += ` L ${this.width + this.margin[X]}, ${height}`;
     fill += ` L ${this.coords[0][X]}, ${height} z`;
     return fill;
   }

@@ -302,9 +302,6 @@ const style = css`
     opacity: .5;
     cursor: pointer;
   }
-  ha-card[gradient] .line--point:hover {
-    fill: var(--primary-text-color, white);
-  }
   path,
   .line--points,
   .fill {

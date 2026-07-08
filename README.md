@@ -80,7 +80,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | Name | Type | Default | Since | Description |
 |------|:----:|:-------:|:-----:|-------------|
 | type ***(required)*** | string |  | v0.0.1 | `custom:mini-graph-card`.
-| entities ***(required)*** | list |  | v0.2.0 | One or more sensor entities in a list, see [entities object](#entities-object) for additional entity options.
+| entities ***(required)*** | list |  | v0.2.0 | One or more sensor entities (along with [static values](#static-lines)) in a list, see [entities object](#entities-object) for additional entity/static value options.
 | icon | string |  | v0.0.1 | Set a custom icon from any of the available mdi icons.
 | icon_image | string |  | v0.12.0 | Override icon with an image url.
 | name | string |  | v0.0.1 | Set a custom name which is displayed beside the icon.
@@ -133,23 +133,28 @@ properties of the Entity object detailed in the following table (as per `sensor.
 
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
-| entity ***(required)*** | string |         | Entity id of the sensor.
+| entity ***(required)*** | string |         | Entity id of the sensor. Either `entity` or `static_value` must be defined.
 | attribute | string |         | Retrieves an attribute or [sub-attribute (attr1.attr2...)](#accessing-attributes-in-complex-structures) instead of the state
-| name | string |         | Set a custom display name, defaults to entity's friendly_name.
+| static_value | number |         | Set a value for a [static line](#static-lines). Either `entity` or `static_value` must be defined.
+| name | string |         | Set a custom display name, defaults to entity's friendly_name or a `Static` label for a [static value](#static-lines).
+| line_width | number |         | Override for a thickness of the line.
+| line_style | string |   | Override the style of the line (see [Line styles](#line-styles)).
 | color | string |         | Set a custom color, overrides all other color options including thresholds.
+| color_thresholds | list |  | v0.14.0 | Override the thresholds for dynamic graph colors.
+| color_thresholds_transition | string |  | v0.14.0 | Override the color threshold transition.
 | unit | string |         | Set a custom unit of measurement, overrides `unit` set in base config (`''` value for an empty unit).
 | aggregate_func | string |         | Override for aggregate function used to calculate point on the graph, `avg`, `median`, `min`, `max`, `first`, `last`, `sum`.
 | decimals | integer |    | Override the exact number of decimals to show for number values, see [Number format](#number-format).
-| line_style | string |   | Override the style of the line (see [Line styles](#line-styles)).
 | show_state | boolean |         | Display the current state.
 | show_legend_state | boolean |  false  | Display the current state as part of the legend.
 | show_indicator | boolean |         | Display a color indicator next to the state.
-| show_graph | boolean |         | Set to false to completely hide the entity in the graph.
+| show_graph | boolean |         | Set to false to completely hide the graph.
 | show_line | boolean |         | Set to false to hide the line.
 | show_fill | boolean |         | Set to false to hide the fill.
 | show_points | boolean |         | Set to false to hide the points (see a note below).
 | show_legend | boolean |         | Set to false to turn hide from the legend.
-| state_adaptive_color | boolean |         | Make the color of the state adapt to the entity color.
+| show_static_inactive | boolean |         | Set to true to disable hiding the line when a point of a line of another entity selected; meaningful for a [static line](#static-lines) only.
+| state_adaptive_color | boolean |         | Make the color of the state adapt to the entity/static value color.
 | y_axis | string |         | If 'secondary', displays using the secondary Y-axis on the right.
 | fixed_value | boolean |         | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 | smoothing | boolean |         | Override for a flag indicating whether to make graph line smooth.
@@ -183,8 +188,8 @@ All properties are optional.
 | info_hide_unit | `false` | `true` / `false` | Do not show a unit for the average & max/min information.
 | labels | `hover` | `true` / `false` / `hover` | Display Y-axis labels.
 | labels_secondary | `hover` | `true` / `false` / `hover` | Display secondary Y-axis labels.
-| name_adaptive_color | `false` | `true` / `false` | Make the name color adapt with the primary entity color.
-| icon_adaptive_color | `false` | `true` / `false` | Make the icon color adapt with the primary entity color.
+| name_adaptive_color | `false` | `true` / `false` | Make the name color adapt with the primary entity/static value color.
+| icon_adaptive_color | `false` | `true` / `false` | Make the icon color adapt with the primary entity/static value color.
 | loading_indicator | `true` | `true` / `false` | Show loading indicator while attempting to retrieve a history.
 | graphs_order | `direct` | `direct` / `reversed` | Define an order of displaying graphs (see [Graphs order](#graphs-order)).
 
@@ -244,9 +249,9 @@ As a shorthand, you can just use a color string for the stops that you want inte
 
 All card's area - except a graph part - supports processing of actions.
 By default, tapping on an element opens a `more-info` dialog:
-1. For "state" elements - the dialog is opened for a corresponding graph entity.
+1. For "state" elements - the dialog is opened for a corresponding graph entity (not processed for a [static value](#static-lines)).
 2. For "legend" elements - same as above.
-3. For other card's areas (except a graph part) - the dialog is opened for the 1st graph entity.
+3. For other card's areas (except a graph part) - the dialog is opened for the 1st graph entity (not processed for a [static value](#static-lines)).
 
 | Name | Type | Default | Options | Description |
 |------|:----:|:-------:|:-----------:|-------------|
@@ -303,10 +308,22 @@ These buckets are converted later to single point/bar on the graph. Aggregate fu
 | `delta` | v0.9.4 | Calculates difference between max and min value
 | `diff` | v0.11.0 | Calculates difference between first and last value
 
+### Static lines
+
+A static horizontal line is drawn for a user-defined static value.
+Can be used in various applications like drawing a threshold line or a zeroth X-axis.
+
+Notes:
+1. Like a dynamic graph for an entity (defined by an `entity` option), a static line (defined by a `static_value` option) can use other applicable options: `name`, `line_width`, `line_style`, `color`, `unit`, `decimals`, `show_...`, `state_adaptive_color`, `y_axis`.
+2. When `graph: bar`, a `static_value` entry is rendered as a set of constant bars.
+3. Displaying extrema/average values is not supported for `static_value` entries.
+
+See examples [below](#displaying-static-lines).
+
 ### Number format
 
-Options `decimals` defined "card-wide" and/or for some entity are used to set an exact number of decimals according to the following rules:
-1. For state & attribute values:
+Options `decimals` defined "card-wide" and/or for some entity/[static value](#static-lines) are used to set an exact number of decimals according to the following rules:
+1. For state & attribute values, static values:
 - if none `decimals` option is defined - a default presentation (see a note below) is used;
 - if "card-wide" `decimals` is defined - this value is used;
 - if `decimals` for some entity is defined - this value is used for this entity.
@@ -326,7 +343,7 @@ Options `decimals` defined "card-wide" and/or for some entity are used to set an
 A "default presentation" refers to a default look in HA:
 1. For a state value (also for extrema & average): if accuracy settings are defined for an entity - these settings are used, otherwise some default HA settings (depend on many factors incl. a `device_class`; for template sensors - a user-defined accuracy set in jinja templates is used).
 2. For an attribute value (also for extrema & average): default HA settings are used (for template sensors - a user-defined accuracy set in jinja templates is used).
-3. For Y-axis labels: "maximum 2 decimals" accuracy is used.
+3. For Y-axis labels, [static values](#static-lines): "maximum 2 decimals" accuracy is used.
 And for all values, HA number format settings (like `xxxx.xx` or `x xxx.x` or `x,xxx.x`) are used.
 
 
@@ -357,13 +374,14 @@ Note that this option rounds up the input to 1 so negative numbers or numbers le
 ### Line styles
 
 A default line style is a "solid line". A style should be defined in a format used for a standard CSS `stroke-dasharray` property. Examples: `10,10` (dashes), `20,10` (long dashes); see cards examples [below](#custom-styles-for-line-graphs). It is better to use along with a `line_width` option.
+Warning: the `line_style` option is not accounted if `animation: true` option is set.
 
 
 ### Graphs order
 
 Note: this section applies to `line` graphs only.
 
-For each entity, a `line` graph consists of 3 basic parts: a "line" part (curve), a "fill" part (if displaying a fill is configured), a "points" part (if displaying points is configured).
+For each entity/[static value](#static-lines), a `line` graph consists of 3 basic parts: a "line" part (curve), a "fill" part (if displaying a fill is configured), a "points" part (if displaying points is configured).
 
 By default, graphs are shown in the following order:
 1. All "fill" parts are shown (if configured).
@@ -371,12 +389,12 @@ By default, graphs are shown in the following order:
 3. All "points" parts are shown (if configured).
 
 Within each category, parts are shown in the following order:
-1. First, a part for the 1st entity in the `entities` list is processed.
-2. Last, a part for the last entity in the `entities` list is processed.
+1. First, a part for the 1st entity/static value in the `entities` list is processed.
+2. Last, a part for the last entity/static value in the `entities` list is processed.
 
-I.e. the last entity's graph will be shown as topmost.
+I.e. the last entity's/static value's graph will be shown as topmost.
 
-This can be altered by setting a `graph_order` option: `direct` (default) stands for the described default order, `reversed` stands for `1st entity's graph is topmost`.
+This can be altered by setting a `graph_order` option: `direct` (default) stands for the described default order, `reversed` stands for `1st entity's/static value's graph is topmost`.
 
 
 ### Theme variables
@@ -570,8 +588,77 @@ entities:
     line_style: 6,6
 ```
 
+#### Displaying static lines
 
+Example with a threshold line:
 
+<img width="485" height="257" alt="image" src="https://github.com/user-attachments/assets/7d668913-1811-48e8-9a24-d6bed93f7ee9" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.system_monitor_processor_use
+  - static_value: 50
+    name: Threshold
+    unit: "%"
+    show_legend_state: true
+    show_state: false
+    show_points: false
+    show_fill: false
+    line_width: 1
+    line_style: 4,7
+    color: red
+lower_bound: ~0
+show:
+  labels: true
+```
+
+Example with a zeroth X-axis:
+
+<img width="480" height="219" alt="image" src="https://github.com/user-attachments/assets/2fe260f2-439c-4652-b817-feec461cbee8" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.temperature
+  - static_value: 0
+    show_state: false
+    show_points: false
+    show_fill: false
+    show_legend: false
+    line_width: 1
+    color: grey
+show:
+  labels: true
+```
+
+Example with a static line which is not hidden when a point of a line of another entity selected:
+
+<img width="481" height="353" alt="изображение" src="https://github.com/user-attachments/assets/bc11d3c1-c557-46e0-afe9-b7d2e17b35be" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.system_monitor_processor_use
+    line_width: 4
+  - static_value: 50
+    name: Threshold
+    unit: "%"
+    show_legend_state: true
+    show_state: false
+    show_points: false
+    line_width: 1
+    line_style: 4,7
+    color: red
+    show_static_inactive: true
+lower_bound: ~0
+points_per_hour: 60
+hours_to_show: 3
+height: 200
+show:
+  labels: true
+  fill: false
+```
 
 #### Grouping by date
 
@@ -726,7 +813,6 @@ entities:
     name: value_1 from first element of list attribute
 ```
 ![image](https://github.com/ildar170975/mini-graph-card/assets/71872483/eebd0cea-da93-4bf5-97a1-118edd2a9c5e)
-
 
 ## Development
 
