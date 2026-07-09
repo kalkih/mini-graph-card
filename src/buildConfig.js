@@ -176,10 +176,10 @@ export default (config) => {
   conf.datetimeFormatParsed = parseDateTimeFormat(conf.datetime_format);
 
   // set valid values for bar_spacing options
-  conf.bar_spacing = config.bar_spacing < 0
-    ? DEFAULT_BAR_SPACING : config.bar_spacing;
-  conf.bar_spacing_group = config.bar_spacing_group !== undefined
-    ? config.bar_spacing_group
+  conf.bar_spacing = conf.bar_spacing < 0
+    ? -1 : conf.bar_spacing; // "-1" stands for stacked bars
+  conf.bar_spacing_group = conf.bar_spacing_group !== undefined
+    ? conf.bar_spacing_group
     : conf.bar_spacing;
 
   // override points per hour to mach group_by function
