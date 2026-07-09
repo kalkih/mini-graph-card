@@ -213,11 +213,13 @@ export default class Graph {
     const group_width = (this.width - spacing_group * (total_groups - 1))
       / total_groups;
     // a width of a bar
-    const bar_width = (group_width - spacing * (total - 1)) / total;
+    const bar_width = spacing == -1
+      ? group_width
+      : (group_width - spacing * (total - 1)) / total;
     return coords.map((coord, i) => ({
       x: this.margin[X]
         + (group_width + spacing_group) * i
-        + (bar_width + spacing) * position,
+        + (spacing === -1 ? 0 : (bar_width + spacing) * position),
       y: coord[Y],
       height: this.height - coord[Y] + this.margin[Y] * 4,
       width: bar_width,
