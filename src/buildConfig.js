@@ -180,7 +180,8 @@ export default (config) => {
     ? -1 : conf.bar_spacing; // "-1" stands for stacked bars
   conf.bar_spacing_group = conf.bar_spacing_group !== undefined
     ? conf.bar_spacing_group
-    : conf.bar_spacing;
+    : conf.bar_spacing < 0
+      ? DEFAULT_BAR_SPACING : conf.bar_spacing;
 
   // override points per hour to mach group_by function
   switch (conf.group_by) {
