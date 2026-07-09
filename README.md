@@ -96,8 +96,8 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | show | list |  | v0.2.0 | List of UI elements to display/hide, for available items see [available show options](#available-show-options).
 | animate | boolean | `false` | v0.2.0 | Add a reveal animation to the graph.
 | height | number | `150` | v0.0.1 | Set a custom height of the line graph.
-| bar_spacing | number | `4` | v0.9.0 | Set the spacing between bars in bar graph.
-| bar_spacing_group | number |   | 0.14.0 | Set an additional spacing between bar groups (multiple entities) in bar graph. Fallback to `bar_spacing` if undefined.
+| bar_spacing | number | `4` | v0.9.0 | Set the spacing between bars in bar graph. Value `-1` is used to place bars on each other. See [examples](#bar-spacing-examples).
+| bar_spacing_group | number |   | 0.14.0 | Set an additional spacing between bar groups (multiple entities) in bar graph. Fallback to `bar_spacing` if undefined; if `bar_spacing: -1` - then a default `4` value is used. See [examples](#bar-spacing-examples).
 | line_width | number | `5` | v0.0.1 | Set the thickness of the line.
 | line_style | string |  | v0.14.0 | Set the style of the line (see [Line styles](#line-styles)).
 | line_color | string/list | `var(--accent-color)` | v0.0.1 | Set a custom color for the graph line, provide a list of colors for multiple graph entries.
@@ -458,6 +458,57 @@ name: ENERGY CONSUMPTION
 show:
   graph: bar
 ```
+
+#### Bar spacing examples
+
+Custom `bar_spacing` & `bar_spacing_group`:
+
+<img width="476" height="305" alt="image" src="https://github.com/user-attachments/assets/0f0bd87b-13d0-4237-b8ab-0c457d3df1d5" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.ac68u_cpu_usage
+    state_adaptive_color: true
+  - entity: sensor.system_monitor_processor_use
+    show_state: true
+    state_adaptive_color: true
+hours_to_show: 0.75
+points_per_hour: 60
+height: 200
+smoothing: false
+aggregate_func: last
+bar_spacing: 1
+bar_spacing_group: 4
+show:
+  graph: bar
+  icon: false
+  name: false
+```
+Placing bars on each other with `bar_spacing: -1`:
+
+<img width="485" height="311" alt="image" src="https://github.com/user-attachments/assets/8fd8bdae-cd0e-4519-860c-b0bf54e824f4" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.ac68u_cpu_usage
+    state_adaptive_color: true
+  - entity: sensor.system_monitor_processor_use
+    show_state: true
+    state_adaptive_color: true
+hours_to_show: 0.75
+points_per_hour: 60
+height: 200
+smoothing: false
+aggregate_func: last
+bar_spacing: -1
+show:
+  graph: bar
+  icon: false
+  name: false
+```
+
 
 #### Show data from the past week
 ![Show data from the past week](https://user-images.githubusercontent.com/457678/52009167-913df680-24d2-11e9-8732-52fc65e3f0d8.png)
