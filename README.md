@@ -459,7 +459,7 @@ show:
   graph: bar
 ```
 
-#### Bar spacing examples
+#### Bar spacing
 
 Custom `bar_spacing` & `bar_spacing_group`:
 
