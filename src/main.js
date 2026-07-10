@@ -881,7 +881,7 @@ class MiniGraphCard extends LitElement {
           ${this.renderSvgPart(this.fill, this.renderSvgFillRect, reversed)}
           ${this.renderSvgPart(this.line, this.renderSvgLine, reversed)}
           ${this.renderSvgPart(this.line, this.renderSvgLineRect, reversed)}
-          ${this.bar.map((bars, i) => this.renderSvgBars(bars, i))}
+          ${this.renderSvgPart(this.bar, this.renderSvgBars, this.config.bar_spacing === -1 && reversed)}
         </g>
         ${this.renderSvgPart(this.points, this.renderSvgPoints, reversed)}
       </svg>`;
