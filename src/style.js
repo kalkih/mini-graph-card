@@ -333,6 +333,7 @@ const style = css`
     opacity: .75;
     grid-column: 1;
     grid-row: 1;
+    position: relative;
   }
   .graph__labels.--secondary {
     align-items: flex-end;
