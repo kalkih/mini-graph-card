@@ -670,7 +670,7 @@ class MiniGraphCard extends LitElement {
               left: ${isLeft ? `${offset}%` : `calc(100% - ${offset}%)`};
             "
           >
-            ${this.computeStateWithUnit(staticValue, index)}
+            ${this.computeStateWithUom(staticValue, index)}
           </span>`;
         })}
       </div>
