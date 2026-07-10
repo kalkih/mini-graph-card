@@ -798,6 +798,12 @@ class MiniGraphCard extends LitElement {
       />`;
   }
 
+  /**
+  * Renders bars for a particular entity/static value
+  * @returns {SVGTemplateResult} SVG element
+  * @param bars Array of bars for a particular entity/static value
+  * @param {number} index Index of an entry in config.entities
+  */
   renderSvgFillRect(fill, i) {
     if (!fill) return;
     const state = this.entity[i] !== undefined
@@ -833,7 +839,13 @@ class MiniGraphCard extends LitElement {
           ${animation}
         </rect>`;
     });
-    return svg`<g class='bars' ?anim=${this.config.animate}>${items}</g>`;
+    return svg`
+      <g
+        class='bars'
+        ?anim=${this.config.animate}
+        ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== index
+          && !this.isShowStaticInactive(index)}
+      >${items}</g>`;
   }
 
   /** Returns a rendered SVG part (fill, line, bars, points)
