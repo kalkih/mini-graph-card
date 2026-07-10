@@ -275,7 +275,8 @@ const style = css`
   }
   .line--points[inactive],
   .line--rect[inactive],
-  .fill--rect[inactive] {
+  .fill--rect[inactive],
+  .bars[inactive] {
     opacity: 0 !important;
     animation: none !important;
     transition: all .15s !important;
