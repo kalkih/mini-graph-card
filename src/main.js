@@ -1383,7 +1383,7 @@ class MiniGraphCard extends LitElement {
             // presuming an order from config & attributes
             const unit = this.config.entities[index].unit
               || this.config.unit
-              || stateObj.attributes.unit_of_measurement;
+              || stateObj && stateObj.attributes.unit_of_measurement;
             const delimiter = unit
               ? unit === '%' && blankBeforePercent(this._hass.locale) === ''
                 ? '' : NBSP
