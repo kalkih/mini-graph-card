@@ -85,6 +85,14 @@ class MiniGraphCard extends LitElement {
     this._hass = hass;
     let updated = false;
     const queue = [];
+
+    // initailize memoized arrays
+    this._visibleEntitiesCache = null;
+    this._visibleBarEntitiesCache = null;
+    this._primaryYaxisEntitiesCache = null;
+    this._secondaryYaxisEntitiesCache = null;
+    this._visibleLegendsCache = null;
+
     this.config.entities.forEach((entity, index) => {
       this.config.entities[index].index = index; // Required for filtered views
       // entityState stands for "stateObj"
@@ -1006,20 +1014,41 @@ class MiniGraphCard extends LitElement {
   }
 
   get visibleEntities() {
-    return this.config.entities.filter(entity => entity.show_graph !== false);
+    if (!this._visibleEntitiesCache) {
+      this._visibleEntitiesCache = this.config.entities.filter(entity => entity.show_graph !== false);
+    }
+    return this._visibleEntitiesCache;
+  }
+
+  get visibleBarEntities() {
+    if (!this._visibleBarEntitiesCache) {
+      this._visibleBarEntitiesCache = this.config.show.graph === 'bar'
+        ? this.visibleEntities
+        : this.visibleEntities.filter(entity => entity.graph === 'bar');
+    }
+    return this._visibleBarEntitiesCache;
   }
 
   get primaryYaxisEntities() {
-    return this.visibleEntities.filter(entity => entity.y_axis === undefined
-      || entity.y_axis === 'primary');
+    if (!this._primaryYaxisEntitiesCache) {
+      this._primaryYaxisEntitiesCache = this.visibleEntities.filter(entity => entity.y_axis === undefined
+        || entity.y_axis === 'primary');
+    }
+    return this._primaryYaxisEntitiesCache;
   }
 
   get secondaryYaxisEntities() {
-    return this.visibleEntities.filter(entity => entity.y_axis === 'secondary');
+    if (!this._secondaryYaxisEntitiesCache) {
+      this._secondaryYaxisEntitiesCache = this.visibleEntities.filter(entity => entity.y_axis === 'secondary');
+    }
+    return this._secondaryYaxisEntitiesCache;
   }
 
   get visibleLegends() {
-    return this.visibleEntities.filter(entity => entity.show_legend !== false);
+    if (!this._visibleLegendsCache) {
+      this._visibleLegendsCache = this.visibleEntities.filter(entity => entity.show_legend !== false);
+    }
+    return this._visibleLegendsCache;
   }
 
   get primaryYaxisSeries() {
