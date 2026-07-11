@@ -628,7 +628,7 @@ class MiniGraphCard extends LitElement {
     /* eslint-enable indent */
   }
 
-/**
+  /**
   * Renders an indicator for an entity/static_value
   * @returns {SVGTemplateResult} SVG element
   * @param {string | number} state Value of a state/attribute or a static_value
