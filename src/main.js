@@ -521,6 +521,7 @@ class MiniGraphCard extends LitElement {
         </div>
       `;
     }
+    return html``;
   }
 
   /**
