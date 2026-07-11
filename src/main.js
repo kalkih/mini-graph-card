@@ -1014,29 +1014,33 @@ class MiniGraphCard extends LitElement {
 
   get visibleEntities() {
     if (!this._visibleEntitiesCache) {
-      this._visibleEntitiesCache = this.config.entities.filter(entity => entity.show_graph !== false);
+      this._visibleEntitiesCache =
+        this.config.entities.filter(entity => entity.show_graph !== false);
     }
     return this._visibleEntitiesCache;
   }
 
   get primaryYaxisEntities() {
     if (!this._primaryYaxisEntitiesCache) {
-      this._primaryYaxisEntitiesCache = this.visibleEntities.filter(entity => entity.y_axis === undefined
-        || entity.y_axis === 'primary');
+      this._primaryYaxisEntitiesCache =
+        this.visibleEntities.filter(entity => entity.y_axis === undefined
+          || entity.y_axis === 'primary');
     }
     return this._primaryYaxisEntitiesCache;
   }
 
   get secondaryYaxisEntities() {
     if (!this._secondaryYaxisEntitiesCache) {
-      this._secondaryYaxisEntitiesCache = this.visibleEntities.filter(entity => entity.y_axis === 'secondary');
+      this._secondaryYaxisEntitiesCache =
+        this.visibleEntities.filter(entity => entity.y_axis === 'secondary');
     }
     return this._secondaryYaxisEntitiesCache;
   }
 
   get visibleLegends() {
     if (!this._visibleLegendsCache) {
-      this._visibleLegendsCache = this.visibleEntities.filter(entity => entity.show_legend !== false);
+      this._visibleLegendsCache =
+        this.visibleEntities.filter(entity => entity.show_legend !== false);
     }
     return this._visibleLegendsCache;
   }
