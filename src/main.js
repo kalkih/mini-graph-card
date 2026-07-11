@@ -88,6 +88,7 @@ class MiniGraphCard extends LitElement {
 
     // initailize memoized arrays
     this._visibleEntitiesCache = null;
+    this._visibleBarEntitiesCache = null;
     this._primaryYaxisEntitiesCache = null;
     this._secondaryYaxisEntitiesCache = null;
     this._visibleLegendsCache = null;
@@ -1018,6 +1019,15 @@ class MiniGraphCard extends LitElement {
         .filter(entity => entity.show_graph !== false);
     }
     return this._visibleEntitiesCache;
+  }
+
+  get visibleBarEntities() {
+    if (!this._visibleBarEntitiesCache) {
+      this._visibleBarEntitiesCache = this.config.show.graph === 'bar'
+        ? this.visibleEntities
+        : this.visibleEntities.filter(entity => entity.graph === 'bar');
+    }
+    return this._visibleBarEntitiesCache;
   }
 
   get primaryYaxisEntities() {
