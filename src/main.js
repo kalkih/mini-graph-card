@@ -49,7 +49,7 @@ class MiniGraphCard extends LitElement {
     this.config = {};
     this.bound = [0, 0];
     this.boundSecondary = [0, 0];
-    this.length = [];
+    this.length = []; // length of a line (used for animation)
     this.entity = []; // stateObj for each entity in config.entities
     this.line = [];
     this.bar = [];
@@ -285,8 +285,9 @@ class MiniGraphCard extends LitElement {
   }
 
   render({ config } = this) {
-    if (!config || !this.entity || !this._hass)
+    if (!config || !this.entity || !this._hass) {
       return html``;
+    }
     if (this.config.entities.some(
       (_, index) => this.entity[index] === undefined && !this.isStaticValue(index),
     )) {
@@ -325,24 +326,29 @@ class MiniGraphCard extends LitElement {
 
   /**
   * Renders a header containing a name and an icon
-  * @returns HTML element
+  * @returns {TemplateResult} Lit template result
   */
   renderHeader() {
     const {
       show, align_icon, align_header, font_size_header,
     } = this.config;
-    return show.name || (show.icon && align_icon !== 'state')
+    const showIcon = show.icon && align_icon !== 'state';
+    return show.name || showIcon
       ? html`
-          <div class="header flex" loc=${align_header} style="font-size: ${font_size_header}px;">
-            ${this.renderName()} ${align_icon !== 'state' ? this.renderIcon() : ''}
+          <div
+            class="header flex"
+            loc="${align_header || 'left'}"
+            style="font-size: ${font_size_header}px;"
+          >
+            ${show.name ? this.renderName() : html``}${showIcon ? this.renderIcon() : html``}
           </div>
         `
-      : '';
+      : html``;
   }
 
   /**
   * Renders an icon
-  * @returns HTML element
+  * @returns {TemplateResult} Lit template result
   */
   renderIcon() {
     if (this.config.icon_image !== undefined) {
@@ -354,45 +360,67 @@ class MiniGraphCard extends LitElement {
     }
 
     const { icon, icon_adaptive_color } = this.config.show;
-    return icon ? html`
-      <div class="icon" loc=${this.config.align_icon}
-        style=${icon_adaptive_color ? `color: ${this.color};` : ''}>
+
+    if (!icon || !this.entity || !this.entity[0]) {
+      return html``;
+    }
+
+    return html`
+      <div
+        class="icon"
+        loc="${this.config.align_icon}"
+        style="${icon_adaptive_color ? `color: ${this.color};` : ''}"
+      >
         <ha-icon .icon=${this.computeIcon(this.entity[0])}></ha-icon>
       </div>
-    ` : '';
+    `;
   }
 
   /**
   * Renders a name
-  * @returns HTML element
+  * @returns {TemplateResult} Lit template result
   */
   renderName() {
-    if (!this.config.show.name) return;
+    if (!this.config.show.name) {
+      return html``;
+    }
+
     const name = this.tooltip.entity !== undefined
       ? this.computeName(this.tooltip.entity)
       : this.config.name || this.computeName(0);
-    const color = this.config.show.name_adaptive_color ? `opacity: 1; color: ${this.color};` : '';
-
+    const color = this.config.show.name_adaptive_color
+      ? `opacity: 1; color: ${this.color};`
+      : '';
     return html`
       <div class="name flex">
-        <span class="ellipsis" style=${color}>${name}</span>
+        <span
+          class="ellipsis"
+          style="${color}"
+        >${name}</span>
       </div>
     `;
   }
 
   /**
   * Renders states
-  * @returns HTML element
+  * @returns {TemplateResult} Lit template result
   */
   renderStates() {
-    if (this.config.show.state)
-      return html`
-        <div class="states flex" loc=${this.config.align_state}>
-          ${this.renderState(0)}
-          <div class="states--secondary">${this.config.entities.map((entityConfig, i) => i > 0 && this.renderState(i) || '')}</div>
-          ${this.config.align_icon === 'state' ? this.renderIcon() : ''}
+    if (!this.config.show.state) {
+      return html``;
+    }
+    return html`
+      <div
+        class="states flex"
+        loc="${this.config.align_state}"
+      >
+        ${this.renderState(0)}
+        <div class="states--secondary">
+          ${this.config.entities.slice(1).map((entityConfig, i) => this.renderState(i + 1))}
         </div>
-      `;
+        ${this.config.align_icon === 'state' ? this.renderIcon() : html``}
+      </div>
+    `;
   }
 
   /**
@@ -402,7 +430,7 @@ class MiniGraphCard extends LitElement {
    */
   isStaticValue(index) {
     const entity = this.config.entities[index];
-    return isNumeric(entity.static_value);
+    return entity && typeof entity === 'object' && isNumeric(entity.static_value);
   }
 
   /**
@@ -412,7 +440,7 @@ class MiniGraphCard extends LitElement {
   * false - otherwise
   */
   isShowStaticInactive(index) {
-    return this.isStaticValue(index) && this.config.entities[index].show_static_inactive;
+    return this.isStaticValue(index) && this.config.entities[index].show_static_inactive === true;
   }
 
   /**
@@ -422,13 +450,16 @@ class MiniGraphCard extends LitElement {
   * @param path Attribute defined as either a singular attribute or a tree-like path
   */
   getObjectAttr(obj, path) {
+    if (!obj) {
+      return;
+    }
     return path.split('.').reduce((res, key) => res && res[key], obj);
   }
 
   /**
-  * Check if an attribute represents an object (dictionary or list)
-  * @returns {boolean} True if an attribute is an object, false - otherwise
-  * @param path Attribute defined as either a singular attribute or a tree-like path
+  * Check if an attribute path represents a nested object path (contains a dot separator)
+  * @returns {boolean} True if a path contains a dot separator, false - otherwise
+  * @param {string} path Attribute defined as either a singular attribute or a tree-like path
   */
   isObjectAttr(path) {
     return path.includes('.');
@@ -460,7 +491,7 @@ class MiniGraphCard extends LitElement {
 
   /**
   * Renders a state/attrubute value or a static_value (if "show_state: true")
-  * @returns HTML element
+  * @returns {TemplateResult} Lit template result
   * @param {number} index Index of an entry in config.entities
   */
   renderState(index) {
@@ -497,15 +528,18 @@ class MiniGraphCard extends LitElement {
         </div>
       `;
     }
+    return html``;
   }
 
   /**
   * Renders a "time interval" element for a selected point/bar
-  * @returns HTML element
+  * @returns {TemplateResult} Lit template result
   */
   renderStateTime() {
     // "tooltip" - a selected point/bar
-    if (this.tooltip.value === undefined) return;
+    if (this.tooltip.value === undefined) {
+      return html``;
+    }
     return html`
       <div class="state__time">
         ${this.tooltip.label ? html`
@@ -555,15 +589,18 @@ class MiniGraphCard extends LitElement {
   }
 
   /**
-  * Renders a legend entry for an entity/static_value
-  * @returns HTML element
+  * Renders a legend text entry for an entity/static_value
+  * @returns {string} Legend text string
   * @param {number} index Index of an entry in config.entities
   */
   computeLegend(index) {
     let legend = this.computeName(index);
     const state = this.getEntityState(index);
-    const { show_legend_state = false } = this.config.entities[index];
-    if (show_legend_state) {
+    const entityConfig = this.config.entities[index];
+    const showLegendState = entityConfig && typeof entityConfig === 'object'
+      ? entityConfig.show_legend_state === true
+      : false;
+    if (showLegendState) {
       legend += ` (${this.computeStateWithUom(state, index)})`;
     }
     return legend;
@@ -571,11 +608,13 @@ class MiniGraphCard extends LitElement {
 
   /**
   * Renders a whole legend for all entities
-  * @returns HTML element
+  * @returns {TemplateResult} Lit template result
   */
   renderLegend() {
     // do not show a legend for only 1 entry or when a legend is globally disabled
-    if (this.visibleLegends.length <= 1 || !this.config.show.legend) return;
+    if (this.visibleLegends.length <= 1 || !this.config.show.legend) {
+      return html``;
+    }
     const location = this.config.show.legend === 'below' ? 'below' : 'above';
     /* eslint-disable indent */
     return html`
@@ -599,14 +638,14 @@ class MiniGraphCard extends LitElement {
 
   /**
   * Renders an indicator for an entity/static_value
-  * @returns HTML element
+  * @returns {SVGTemplateResult} SVG element
   * @param {string | number} state Value of a state/attribute or a static_value
   * @param {number} index Index of an entry in config.entities
   */
   renderIndicator(state, index) {
     return svg`
-      <svg width='10' height='10'>
-        <rect width='10' height='10' fill=${this.computeColor(state, index)} />
+      <svg width="10" height="10">
+        <rect width="10" height="10" fill="${this.computeColor(state, index)}" />
       </svg>
     `;
   }
@@ -649,7 +688,7 @@ class MiniGraphCard extends LitElement {
         ${this.config.entities.map((_, index) => {
           if (!this.isStaticValue(index)
             || this.config.entities[index].show_static_value_label === false) {
-            return;
+            return html``;
           }
           const staticValue = this.config.entities[index].static_value;
           // get Y coord in SVG space
@@ -658,7 +697,7 @@ class MiniGraphCard extends LitElement {
 
           const topPercent = (topSVG / graphHeight) * 100; // top in %
           if (!isNumeric(topPercent)) {
-            return;
+            return html``;
           }
 
           const offset = this.staticValueLabelOffset; // offset in %
@@ -805,12 +844,6 @@ class MiniGraphCard extends LitElement {
       />`;
   }
 
-  /**
-  * Renders bars for a particular entity/static value
-  * @returns {SVGTemplateResult} SVG element
-  * @param bars Array of bars for a particular entity/static value
-  * @param {number} index Index of an entry in config.entities
-  */
   renderSvgFillRect(fill, i) {
     if (!fill) return;
     const state = this.entity[i] !== undefined
@@ -828,6 +861,12 @@ class MiniGraphCard extends LitElement {
       />`;
   }
 
+  /**
+  * Renders bars for a particular entity/static value
+  * @returns {SVGTemplateResult} SVG element
+  * @param bars Array of bars for a particular entity/static value
+  * @param {number} index Index of an entry in config.entities
+  */
   renderSvgBars(bars, index) {
     if (!bars) return;
     const items = bars.map((bar, i) => {
@@ -944,10 +983,13 @@ class MiniGraphCard extends LitElement {
 
   /**
   * Renders primary Y-axis labels
-  * @returns HTML element
+  * @returns {TemplateResult} Lit template result
   */
   renderLabels() {
-    if (!this.config.show.labels || this.primaryYaxisSeries.length === 0) return;
+    if (!this.config.show.labels
+        || !this.bound || this.primaryYaxisSeries.length === 0) {
+      return html``;
+    }
     // index is not passed into computeState() for a primary axis
     return html`
       <div class="graph__labels --primary flex">
@@ -959,10 +1001,13 @@ class MiniGraphCard extends LitElement {
 
   /**
   * Renders secondary Y-axis labels
-  * @returns HTML element
+  * @returns {TemplateResult} Lit template result
   */
   renderLabelsSecondary() {
-    if (!this.config.show.labels_secondary || this.secondaryYaxisSeries.length === 0) return;
+    if (!this.config.show.labels_secondary
+        || !this.boundSecondary || this.secondaryYaxisSeries.length === 0) {
+      return html``;
+    }
     // index "-1" is passed into computeState() for a secondary axis
     return html`
       <div class="graph__labels --secondary flex">
@@ -974,11 +1019,14 @@ class MiniGraphCard extends LitElement {
 
   /**
   * Renders extrema & average info
-  * @returns HTML element
+  * @returns {TemplateResult} Lit template result
   */
   renderInfo() {
-    const hideUnit = this.config.show.info_hide_unit;
-    const { extrema, average } = this.config.show;
+    const {
+      extrema,
+      average,
+      info_hide_unit: hideUnit,
+    } = this.config.show;
     const location = (extrema === 'below' || average === 'below') ? 'below' : 'above';
     // index "0" is passed into computeStateWithUom() since "info" is shown for the 1st entry
     return this.abs.length > 0 ? html`
@@ -999,17 +1047,17 @@ class MiniGraphCard extends LitElement {
   }
 
   handlePopup(e, entity) {
-    if ((entity && this.config.tap_action === 'more-info')
-        || this.config.tap_action !== 'more-info') {
-      e.stopPropagation();
-      handleClick(
-        this,
-        this._hass,
-        this.config,
-        this.config.tap_action,
-        entity && entity.entity_id || entity,
-      );
+    if (this.config.tap_action === 'more-info' && !entity) {
+      return;
     }
+    e.stopPropagation();
+    handleClick(
+      this,
+      this._hass,
+      this.config,
+      this.config.tap_action,
+      entity && entity.entity_id || entity,
+    );
   }
 
   get visibleEntities() {
@@ -1168,7 +1216,7 @@ class MiniGraphCard extends LitElement {
             // try using a unit from config & attributes
             unit = this.config.entities[index].unit
               || this.config.unit
-              || stateObj.attributes.unit_of_measurement
+              || stateObj && stateObj.attributes.unit_of_measurement
               || '';
           }
         } else {
@@ -1234,6 +1282,10 @@ class MiniGraphCard extends LitElement {
       }
     }
 
+    if (inState === undefined || inState === null || inState === '') {
+      return formatNumber(NaN, this._hass.locale);
+    }
+
     let state;
     if (isUnavailableState(inState)) {
       // as is
@@ -1277,6 +1329,15 @@ class MiniGraphCard extends LitElement {
         const entityId = this.config.entities[index].entity;
         const { attribute } = this.config.entities[index];
         const stateObj = this._hass.states[entityId];
+
+        // additional check before calling API
+        if (!stateObj) {
+          return formatNumber(
+            state,
+            this._hass.locale,
+          );
+        }
+
         if (attribute && !this.isObjectAttr(attribute)) {
           // formatting not-object attribute
           const attrParts = this._hass.formatEntityAttributeValueToParts(
@@ -1352,7 +1413,7 @@ class MiniGraphCard extends LitElement {
             // presuming an order from config & attributes
             const unit = this.config.entities[index].unit
               || this.config.unit
-              || stateObj.attributes.unit_of_measurement;
+              || stateObj && stateObj.attributes.unit_of_measurement;
             const delimiter = unit
               ? unit === '%' && blankBeforePercent(this._hass.locale) === ''
                 ? '' : NBSP

@@ -9,6 +9,10 @@ import { log } from './utils';
 
 const isNumeric = value => typeof value === 'number' && Number.isFinite(value);
 
+const getExponent = factor => 10 ** factor;
+
+const logValueFactor = factor_obj => log(`invalid value_factor: ${JSON.stringify(factor_obj)}`);
+
 /**
   * Return a multiplying factor (exponental or scale) based on a "value_factor" option
   * @param {object} config Card config
@@ -45,9 +49,6 @@ const getFactor = (config, index = undefined) => {
     // fallback to a default factor
     return 1;
   }
-
-  const getExponent = factor => 10 ** factor;
-  const logValueFactor = factor_obj => log(`invalid value_factor: ${JSON.stringify(factor_obj)}`);
 
   if (typeof value_factor === 'object') {
     const { type, factor } = value_factor;
