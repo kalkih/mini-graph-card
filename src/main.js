@@ -85,6 +85,13 @@ class MiniGraphCard extends LitElement {
     this._hass = hass;
     let updated = false;
     const queue = [];
+
+    // initailize memoized arrays
+    this._visibleEntitiesCache = null;
+    this._primaryYaxisEntitiesCache = null;
+    this._secondaryYaxisEntitiesCache = null;
+    this._visibleLegendsCache = null;
+
     this.config.entities.forEach((entity, index) => {
       this.config.entities[index].index = index; // Required for filtered views
       // entityState stands for "stateObj"
@@ -798,6 +805,12 @@ class MiniGraphCard extends LitElement {
       />`;
   }
 
+  /**
+  * Renders bars for a particular entity/static value
+  * @returns {SVGTemplateResult} SVG element
+  * @param bars Array of bars for a particular entity/static value
+  * @param {number} index Index of an entry in config.entities
+  */
   renderSvgFillRect(fill, i) {
     if (!fill) return;
     const state = this.entity[i] !== undefined
@@ -833,7 +846,13 @@ class MiniGraphCard extends LitElement {
           ${animation}
         </rect>`;
     });
-    return svg`<g class='bars' ?anim=${this.config.animate}>${items}</g>`;
+    return svg`
+      <g
+        class='bars'
+        ?anim=${this.config.animate}
+        ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== index
+          && !this.isShowStaticInactive(index)}
+      >${items}</g>`;
   }
 
   /** Returns a rendered SVG part (fill, line, bars, points)
@@ -994,20 +1013,35 @@ class MiniGraphCard extends LitElement {
   }
 
   get visibleEntities() {
-    return this.config.entities.filter(entity => entity.show_graph !== false);
+    if (!this._visibleEntitiesCache) {
+      this._visibleEntitiesCache = this.config.entities
+        .filter(entity => entity.show_graph !== false);
+    }
+    return this._visibleEntitiesCache;
   }
 
   get primaryYaxisEntities() {
-    return this.visibleEntities.filter(entity => entity.y_axis === undefined
-      || entity.y_axis === 'primary');
+    if (!this._primaryYaxisEntitiesCache) {
+      this._primaryYaxisEntitiesCache = this.visibleEntities
+        .filter(entity => entity.y_axis === undefined || entity.y_axis === 'primary');
+    }
+    return this._primaryYaxisEntitiesCache;
   }
 
   get secondaryYaxisEntities() {
-    return this.visibleEntities.filter(entity => entity.y_axis === 'secondary');
+    if (!this._secondaryYaxisEntitiesCache) {
+      this._secondaryYaxisEntitiesCache = this.visibleEntities
+        .filter(entity => entity.y_axis === 'secondary');
+    }
+    return this._secondaryYaxisEntitiesCache;
   }
 
   get visibleLegends() {
-    return this.visibleEntities.filter(entity => entity.show_legend !== false);
+    if (!this._visibleLegendsCache) {
+      this._visibleLegendsCache = this.visibleEntities
+        .filter(entity => entity.show_legend !== false);
+    }
+    return this._visibleLegendsCache;
   }
 
   get primaryYaxisSeries() {
