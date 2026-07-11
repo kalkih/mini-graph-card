@@ -9,7 +9,7 @@ import { log } from './utils';
 
 const isNumeric = value => typeof value === 'number' && Number.isFinite(value);
 
-const getExponent = factor => Math.pow(10, factor);
+const getExponent = factor => 10 ** factor;
 
 const logValueFactor = factor_obj => log(`invalid value_factor: ${JSON.stringify(factor_obj)}`);
 
