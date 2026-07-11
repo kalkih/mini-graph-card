@@ -1252,6 +1252,10 @@ class MiniGraphCard extends LitElement {
       }
     }
 
+    if (inState === undefined || inState === null || inState === '') {
+      return '';
+    }
+
     let state;
     if (isUnavailableState(inState)) {
       // as is
@@ -1295,6 +1299,15 @@ class MiniGraphCard extends LitElement {
         const entityId = this.config.entities[index].entity;
         const { attribute } = this.config.entities[index];
         const stateObj = this._hass.states[entityId];
+
+        // additional check before calling API
+        if (!stateObj) {
+          return formatNumber(
+            state,
+            this._hass.locale,
+          );
+        }
+
         if (attribute && !this.isObjectAttr(attribute)) {
           // formatting not-object attribute
           const attrParts = this._hass.formatEntityAttributeValueToParts(
