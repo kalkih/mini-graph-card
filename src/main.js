@@ -403,10 +403,15 @@ class MiniGraphCard extends LitElement {
       return html``;
     }
     return html`
-      <div class="states flex" loc=${this.config.align_state}>
+      <div
+        class="states flex"
+        loc="${this.config.align_state}"
+      >
         ${this.renderState(0)}
-        <div class="states--secondary">${this.config.entities.map((entityConfig, i) => i > 0 && this.renderState(i) || '')}</div>
-        ${this.config.align_icon === 'state' ? this.renderIcon() : ''}
+        <div class="states--secondary">
+          ${this.config.entities.slice(1).map((entityConfig, i) => this.renderState(i + 1))}
+        </div>
+        ${this.config.align_icon === 'state' ? this.renderIcon() : html``}
       </div>
     `;
   }
