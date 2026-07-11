@@ -484,7 +484,7 @@ class MiniGraphCard extends LitElement {
 
   /**
   * Renders a state/attrubute value or a static_value (if "show_state: true")
-  * @returns HTML element
+  * @returns {TemplateResult} Lit template result
   * @param {number} index Index of an entry in config.entities
   */
   renderState(index) {
