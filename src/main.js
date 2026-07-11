@@ -1258,7 +1258,7 @@ class MiniGraphCard extends LitElement {
     }
 
     if (inState === undefined || inState === null || inState === '') {
-      return '';
+      return formatNumber(NaN, this._hass.locale);
     }
 
     let state;
