@@ -430,7 +430,7 @@ class MiniGraphCard extends LitElement {
    */
   isStaticValue(index) {
     const entity = this.config.entities[index];
-    return entity && typeof entity === "object" && isNumeric(entity.static_value);
+    return entity && typeof entity === 'object' && isNumeric(entity.static_value);
   }
 
   /**
@@ -986,7 +986,8 @@ class MiniGraphCard extends LitElement {
   * @returns {TemplateResult} Lit template result
   */
   renderLabels() {
-    if (!this.config.show.labels || !this.bound || this.primaryYaxisSeries.length === 0) {
+    if (!this.config.show.labels
+        || !this.bound || this.primaryYaxisSeries.length === 0) {
       return html``;
     }
     // index is not passed into computeState() for a primary axis
@@ -1003,7 +1004,8 @@ class MiniGraphCard extends LitElement {
   * @returns {TemplateResult} Lit template result
   */
   renderLabelsSecondary() {
-    if (!this.config.show.labels_secondary || !this.boundSecondary || this.secondaryYaxisSeries.length === 0) {
+    if (!this.config.show.labels_secondary
+        || !this.boundSecondary || this.secondaryYaxisSeries.length === 0) {
       return html``;
     }
     // index "-1" is passed into computeState() for a secondary axis
@@ -1023,7 +1025,7 @@ class MiniGraphCard extends LitElement {
     const {
       extrema,
       average,
-      info_hide_unit: hideUnit
+      info_hide_unit: hideUnit,
     } = this.config.show;
     const location = (extrema === 'below' || average === 'below') ? 'below' : 'above';
     // index "0" is passed into computeStateWithUom() since "info" is shown for the 1st entry
