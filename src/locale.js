@@ -129,11 +129,12 @@ const resolveTimeZone = (option, serverTimeZone) => {
 /**
  * Get date formatting options
  * @param {object} config Card config
+ * @param {object} datetimeFormatParsed Parsed datetime format
  * @param {HomeAssistant} hass HomeAssistant object
  * @returns {Intl.DateTimeFormatOptions} Date format
  */
-const getDateFormat = (config, hass) => {
-  const { hours_to_show, datetime_format, datetimeFormatParsed } = config;
+const getDateFormat = (config, datetimeFormatParsed, hass) => {
+  const { hours_to_show, datetime_format } = config;
 
   if (hours_to_show === undefined || hours_to_show <= 24) {
     return {};
@@ -179,10 +180,11 @@ const getDateFormat = (config, hass) => {
 /**
  * Get time formatting options
  * @param {object} config Card config
+ * @param {object} datetimeFormatParsed Parsed datetime format
  * @param {HomeAssistant} hass HomeAssistant object
  * @returns {Intl.DateTimeFormatOptions} Time formatting options
  */
-const getTimeFormat = (config, hass) => {
+const getTimeFormat = (config, datetimeFormatParsed, hass) => {
   const localeOptions = hass.locale; // FrontendLocaleData object
 
   const serverTimeZone = hass.config.time_zone; // Server time zone
@@ -193,7 +195,7 @@ const getTimeFormat = (config, hass) => {
   const hourCycle = valueUseAmPm ? 'h12' : 'h23'; // accounting possibly defined "hour12"
 
   let hourOption;
-  const { datetime_format, datetimeFormatParsed } = config; // user-defined datetime format
+  const { datetime_format } = config; // user-defined datetime format
   if (!datetime_format) {
     // follow global HA Frontend settings
     hourOption = {
@@ -356,12 +358,14 @@ const composeTimeString = (
  * time zone & formatting options
  * @param {Date} dateObj "Date" object representing a date & time value
  * @param {object} config Card config
+ * @param {object} datetimeFormatParsed Parsed datetime format
  * @param {HomeAssistant} hass HomeAssistant object
  * @returns {string} Formatted date string
  */
 const formatDate = (
   dateObj,
   config,
+  datetimeFormatParsed,
   hass,
 ) => {
   const localeOptions = hass.locale; // FrontendLocaleData object
@@ -371,7 +375,7 @@ const formatDate = (
   let formatted;
   let composed;
   let parts;
-  const { datetime_format, datetimeFormatParsed } = config; // user-defined datetime format
+  const { datetime_format } = config; // user-defined datetime format
 
   if (!datetime_format) {
     // follow global HA Frontend settings
@@ -417,12 +421,14 @@ const formatDate = (
  * time zone & formatting options
  * @param {Date} dateObj "Date" object representing a date & time value
  * @param {object} config Card config
+ * @param {object} datetimeFormatParsed Parsed datetime format
  * @param {HomeAssistant} hass HomeAssistant object
  * @returns {string} Formatted time string
  */
 const formatTime = (
   dateObj,
   config,
+  datetimeFormatParsed,
   hass,
 ) => {
   const localeOptions = hass.locale; // FrontendLocaleData object
@@ -430,7 +436,7 @@ const formatTime = (
     ? undefined : localeOptions.language;
   let formatter;
   let formatted;
-  const { datetime_format, datetimeFormatParsed } = config; // user-defined datetime format
+  const { datetime_format } = config; // user-defined datetime format
 
   if (!datetime_format) {
     // follow global HA Frontend settings
@@ -463,18 +469,20 @@ const formatTime = (
  * time zone & formatting options
  * @param {Date} dateObj "Date" object representing a date & time value
  * @param {object} config Card config
+ * @param {object} datetimeFormatParsed Parsed datetime format
  * @param {HomeAssistant} hass HomeAssistant object
  * @returns {string} Formatted string
  */
 const formatDateTime = (
   dateObj,
   config,
+  datetimeFormatParsed,
   hass,
 ) => {
-  let timeString = formatTime(dateObj, config, hass);
+  let timeString = formatTime(dateObj, config, datetimeFormatParsed, hass);
   const { hours_to_show } = config;
   if (hours_to_show > 24) {
-    const dateString = formatDate(dateObj, config, hass);
+    const dateString = formatDate(dateObj, config, datetimeFormatParsed, hass);
     // the ", " separator between date & time parts is hard-coded
     // (same as currently used in HA Frontend)
     timeString = `${dateString}, ${timeString}`;
