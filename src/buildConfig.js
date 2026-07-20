@@ -170,10 +170,6 @@ export default (config) => {
     conf.color_thresholds_transition,
   );
 
-  // parse a possibly defined "datetime_format" option;
-  // fallback to "day_weekday" if undefined
-  conf.datetimeFormatParsed = parseDateTimeFormat(conf.datetime_format);
-
   // override points per hour to mach group_by function
   switch (conf.group_by) {
     case 'date':
