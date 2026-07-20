@@ -11,6 +11,7 @@ import {
   blankBeforePercent,
   formatNumber,
   formatDateTime,
+  parseDateTimeFormat,
   getDateFormat, getTimeFormat,
 } from './locale';
 import './initialize';
@@ -86,7 +87,8 @@ class MiniGraphCard extends LitElement {
     let updated = false;
     const queue = [];
 
-    // initailize memoized arrays
+    // initailize memoized data
+    this._datetimeFormatParsedCache = null;
     this._visibleEntitiesCache = null;
     this._primaryYaxisEntitiesCache = null;
     this._secondaryYaxisEntitiesCache = null;
@@ -218,6 +220,15 @@ class MiniGraphCard extends LitElement {
     }
     // processing a possible `static_value` entry
     return false;
+  }
+
+  get datetimeFormatParsed() {
+    if (!this._datetimeFormatParsedCache) {
+      // parse a possibly defined "datetime_format" option;
+      // fallback to "day_weekday" if undefined
+      this._datetimeFormatParsedCache = parseDateTimeFormat(this.config.datetime_format);
+    }
+    return this._datetimeFormatParsedCache;
   }
 
   /**
@@ -967,9 +978,9 @@ class MiniGraphCard extends LitElement {
     const now = this.getEndDate();
 
     now.setMilliseconds(now.getMilliseconds() - oneMinute - interval * count);
-    const end = formatDateTime(now, this.config, this._hass);
+    const end = formatDateTime(now, this.config, this.datetimeFormatParsed, this._hass);
     now.setMilliseconds(now.getMilliseconds() + oneMinute - interval);
-    const start = formatDateTime(now, this.config, this._hass);
+    const start = formatDateTime(now, this.config, this.datetimeFormatParsed, this._hass);
 
     this.tooltip = {
       value,
@@ -1038,7 +1049,9 @@ class MiniGraphCard extends LitElement {
               ${this.computeStateWithUom(entry.state, 0, hideUnit)}
             </span>
             <span class="info__item__time">
-              ${entry.type !== 'avg' ? formatDateTime(new Date(entry.last_changed), this.config, this._hass) : ''}
+              ${entry.type !== 'avg' ? formatDateTime(
+                new Date(entry.last_changed), this.config, this.datetimeFormatParsed, this._hass
+              ) : ''}
             </span>
           </div>
         `)}
