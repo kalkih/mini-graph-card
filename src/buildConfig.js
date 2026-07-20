@@ -1,4 +1,3 @@
-import { parseDateTimeFormat } from './locale';
 import { log } from './utils';
 import {
   URL_DOCS,
