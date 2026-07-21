@@ -396,11 +396,11 @@ I.e. the last entity's/static value's graph will be shown as topmost.
 
 This can be altered by setting a `graph_order` option: `direct` (default) stands for the described default order, `reversed` stands for "1st entity's/static value's graph is topmost".
 
-Similarly for stacked bars graphs (when `bar_spacing: -1`): by default (or with `graph_order: direct`), bars are processed in the following order:
+Similarly for stacked bars graphs (when `bar_spacing: -1`): by default (or with `graph_order: direct`), bars for each point are processed in the following order:
 1. First, a bar for the 1st entity/static value in the `entities` list is processed.
 2. Last, a bar for the last entity/static value in the `entities` list is processed.
 
-With `graph_order: reversed`, a bar for the last entity/static value becomes bottommost.
+With `graph_order: reversed`, bars for the 1st entity/static value become topmost.
 
 ### Theme variables
 The following theme variables can be set in your HA theme to customize the appearance of the card.
