@@ -11,7 +11,7 @@ import {
   blankBeforePercent,
   formatNumber,
   formatDateTime,
-  parseDateTimeFormat,
+  parseDateTimeFormatFromCfg,
   getDateFormat, getTimeFormat,
 } from './locale';
 import './initialize';
@@ -87,8 +87,8 @@ class MiniGraphCard extends LitElement {
     let updated = false;
     const queue = [];
 
-    // initailize memoized data
-    this._datetimeFormatParsedCache = null;
+    // initialize memoized data
+    this._datetimeFormatFromCfgParsedCache = null;
     this._visibleEntitiesCache = null;
     this._primaryYaxisEntitiesCache = null;
     this._secondaryYaxisEntitiesCache = null;
@@ -222,13 +222,12 @@ class MiniGraphCard extends LitElement {
     return false;
   }
 
-  get datetimeFormatParsed() {
-    if (!this._datetimeFormatParsedCache) {
-      // parse a possibly defined "datetime_format" option;
-      // fallback to "day_weekday" if undefined
-      this._datetimeFormatParsedCache = parseDateTimeFormat(this.config.datetime_format);
+  get datetimeFormatFromCfgParsed() {
+    if (!this._datetimeFormatFromCfgParsedCache) {
+      // parse a possibly defined "datetime_format" option from config
+      this._datetimeFormatFromCfgParsedCache = parseDateTimeFormatFromCfg(this.config.datetime_format);
     }
-    return this._datetimeFormatParsedCache;
+    return this._datetimeFormatFromCfgParsedCache;
   }
 
   /**
@@ -237,10 +236,18 @@ class MiniGraphCard extends LitElement {
   */
   updateFormatFromLocale(forced) {
     if (this.updateDateTimeFormat || forced) {
-      this.config.date_format = getDateFormat(this.config, this._hass);
+      this.datetimeFormatDateOptions = getDateFormat(
+        this.config,
+        this.datetimeFormatFromCfgParsed,
+        this._hass,
+      );
     }
     if (this.updateHour24 || this.updateDateTimeFormat || forced) {
-      this.config.time_format = getTimeFormat(this.config, this._hass);
+      this.datetimeFormatTimeOptions = getTimeFormat(
+        this.config,
+        this.datetimeFormatFromCfgParsed,
+        this._hass,
+      );
     }
   }
 
@@ -978,9 +985,23 @@ class MiniGraphCard extends LitElement {
     const now = this.getEndDate();
 
     now.setMilliseconds(now.getMilliseconds() - oneMinute - interval * count);
-    const end = formatDateTime(now, this.config, this.datetimeFormatParsed, this._hass);
+    const end = formatDateTime(
+      now,
+      this.config,
+      this.datetimeFormatFromCfgParsed,
+      this.datetimeFormatDateOptions,
+      this.datetimeFormatTimeOptions,
+      this._hass,
+    );
     now.setMilliseconds(now.getMilliseconds() + oneMinute - interval);
-    const start = formatDateTime(now, this.config, this.datetimeFormatParsed, this._hass);
+    const start = formatDateTime(
+      now,
+      this.config,
+      this.datetimeFormatFromCfgParsed,
+      this.datetimeFormatDateOptions,
+      this.datetimeFormatTimeOptions,
+      this._hass,
+    );
 
     this.tooltip = {
       value,
@@ -1050,7 +1071,12 @@ class MiniGraphCard extends LitElement {
             </span>
             <span class="info__item__time">
               ${entry.type !== 'avg' ? formatDateTime(
-                new Date(entry.last_changed), this.config, this.datetimeFormatParsed, this._hass
+                new Date(entry.last_changed),
+                this.config,
+                this.datetimeFormatFromCfgParsed,
+                this.datetimeFormatDateOptions,
+                this.datetimeFormatTimeOptions,
+                this._hass,
               ) : ''}
             </span>
           </div>
