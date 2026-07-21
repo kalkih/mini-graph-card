@@ -23,7 +23,6 @@ import {
   ONE_HOUR,
   DEFAULT_GRAPH_HEIGHT,
   DEFAULT_MARGIN,
-  DEFAULT_STATIC_VALUE_LABEL_OFFSET,
   NBSP,
 } from './const';
 import {
@@ -66,7 +65,6 @@ class MiniGraphCard extends LitElement {
     this.stateChanged = false;
     this.initial = true;
     this._md5Config = undefined;
-    this.staticValueLabelOffset = undefined; // offset (x) for labels for static lines
 
     // update datetime settings periodically
     this.updateHour24 = true;
@@ -167,9 +165,6 @@ class MiniGraphCard extends LitElement {
     this.config = buildConfig(config);
     this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
     const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
-
-    // set offset (x) for labels for static lines
-    this.prepareStaticValueLabelOffset();
 
     // update datetime settings periodically
     this.updateHour24 = config.hour24 === undefined;
@@ -670,18 +665,6 @@ class MiniGraphCard extends LitElement {
     `;
   }
 
-  prepareStaticValueLabelOffset() {
-    const { static_value_label_offset: offset } = this.config;
-    this.staticValueLabelOffset = DEFAULT_STATIC_VALUE_LABEL_OFFSET;
-
-    if (offset === undefined || offset === null) return;
-    if (isNumeric(offset)) {
-      this.staticValueLabelOffset = Number(offset);
-    } else {
-      log('value of static_value_label_offset is incorrect, a default value is used');
-    }
-  }
-
   /**
   * Renders static lines' labels
   * @returns {TemplateResult} Lit template result
@@ -720,7 +703,7 @@ class MiniGraphCard extends LitElement {
             return html``;
           }
 
-          const offset = this.staticValueLabelOffset; // offset in %
+          const offset = this.config.static_value_label_offset; // offset in %
 
           const color = this.config.entities[index].state_adaptive_color
             ? this.computeColor(staticValue, index)
