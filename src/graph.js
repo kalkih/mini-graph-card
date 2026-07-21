@@ -199,7 +199,8 @@ export default class Graph {
 
   /**
    * Get bars for an entity
-   * @param {number} position Index of a bar (0,1,..) (i.e. index of an entity with a shown bar graph)
+   * @param {number} position Index of a bar (0,1,..)
+   * (i.e. index of an entity with a shown bar graph)
    * @param {number} total Number of bars (i.e. number of entities with a shown bar graph)
    * @param {number} spacing Spacing between bars
    * @param {number} spacing_group Spacing between groups of bars
