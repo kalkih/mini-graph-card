@@ -225,7 +225,9 @@ class MiniGraphCard extends LitElement {
   get datetimeFormatFromCfgParsed() {
     if (!this._datetimeFormatFromCfgParsedCache) {
       // parse a possibly defined "datetime_format" option from config
-      this._datetimeFormatFromCfgParsedCache = parseDateTimeFormatFromCfg(this.config.datetime_format);
+      this._datetimeFormatFromCfgParsedCache = parseDateTimeFormatFromCfg(
+        this.config.datetime_format
+      );
     }
     return this._datetimeFormatFromCfgParsedCache;
   }
@@ -1061,6 +1063,7 @@ class MiniGraphCard extends LitElement {
     } = this.config.show;
     const location = (extrema === 'below' || average === 'below') ? 'below' : 'above';
     // index "0" is passed into computeStateWithUom() since "info" is shown for the 1st entry
+    /* eslint-disable indent */
     return this.abs.length > 0 ? html`
       <div class="info flex" loc=${location}>
         ${this.abs.map(entry => html`
@@ -1070,19 +1073,22 @@ class MiniGraphCard extends LitElement {
               ${this.computeStateWithUom(entry.state, 0, hideUnit)}
             </span>
             <span class="info__item__time">
-              ${entry.type !== 'avg' ? formatDateTime(
-                new Date(entry.last_changed),
-                this.config,
-                this.datetimeFormatFromCfgParsed,
-                this.datetimeFormatDateOptions,
-                this.datetimeFormatTimeOptions,
-                this._hass,
-              ) : ''}
+              ${entry.type !== 'avg'
+                ? formatDateTime(
+                    new Date(entry.last_changed),
+                    this.config,
+                    this.datetimeFormatFromCfgParsed,
+                    this.datetimeFormatDateOptions,
+                    this.datetimeFormatTimeOptions,
+                    this._hass,
+                  )
+                : ''}
             </span>
           </div>
         `)}
       </div>
     ` : html``;
+    /* eslint-enable indent */
   }
 
   handlePopup(e, entity) {
