@@ -60,7 +60,7 @@ const checkNumericOption = (
   }
   log(`Invalid option ${option}: ${invalidValue} (${errorDescr}); adjusting value to ${clearedValue}`);
   return clearedValue;
-}
+};
 
 /**
  * Check if an option is integer;
@@ -261,7 +261,7 @@ export default (config) => {
     'static_value_label_offset',
     DEFAULT_STATIC_VALUE_LABEL_OFFSET,
     0,
-    100
+    100,
   );
   if (conf.static_value_label_offset === undefined
     || conf.static_value_label_offset === null) {
