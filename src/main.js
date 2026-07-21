@@ -90,6 +90,7 @@ class MiniGraphCard extends LitElement {
     // initialize memoized data
     this._datetimeFormatFromCfgParsedCache = null;
     this._visibleEntitiesCache = null;
+    this._visibleBarEntitiesCache = null;
     this._primaryYaxisEntitiesCache = null;
     this._secondaryYaxisEntitiesCache = null;
     this._visibleLegendsCache = null;
@@ -491,7 +492,11 @@ class MiniGraphCard extends LitElement {
   */
   getEntityState(index) {
     const entityConfig = this.config.entities[index];
-    if (this.config.show.state === 'last' && this.config.show.graph === 'bar') {
+    if (this.config.show.state === 'last'
+      && (this.config.show.graph === 'bar' || this.config.entities[index].graph === 'bar')) {
+      if (!this.bar || !this.bar[index] || !this.bar[index].length) {
+        return undefined;
+      }
       // last "bar" value
       return this.bar[index][this.bar[index].length - 1].value;
     } else if (this.config.show.state === 'last' && this.points[index] && this.points[index].length) {
@@ -957,9 +962,9 @@ class MiniGraphCard extends LitElement {
           </defs>
           ${this.renderSvgPart(this.fill, this.renderSvgFill, reversed)}
           ${this.renderSvgPart(this.fill, this.renderSvgFillRect, reversed)}
+          ${this.bar.map((bars, i) => this.renderSvgBars(bars, i))}
           ${this.renderSvgPart(this.line, this.renderSvgLine, reversed)}
           ${this.renderSvgPart(this.line, this.renderSvgLineRect, reversed)}
-          ${this.bar.map((bars, i) => this.renderSvgBars(bars, i))}
         </g>
         ${this.renderSvgPart(this.points, this.renderSvgPoints, reversed)}
       </svg>`;
@@ -1111,6 +1116,15 @@ class MiniGraphCard extends LitElement {
         .filter(entity => entity.show_graph !== false);
     }
     return this._visibleEntitiesCache;
+  }
+
+  get visibleBarEntities() {
+    if (!this._visibleBarEntitiesCache) {
+      this._visibleBarEntitiesCache = this.config.show.graph === 'bar'
+        ? this.visibleEntities
+        : this.visibleEntities.filter(entity => entity.graph === 'bar');
+    }
+    return this._visibleBarEntitiesCache;
   }
 
   get primaryYaxisEntities() {
@@ -1580,7 +1594,7 @@ class MiniGraphCard extends LitElement {
         this.Graph[i].logarithmic = this.computeUsesLogarithmic(i);
         const bound = config.entities[i].y_axis === 'secondary' ? this.boundSecondary : this.bound;
         [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
-        if (config.show.graph === 'bar') {
+        if (config.show.graph === 'bar' || config.entities[i].graph === 'bar') {
           const numVisible = this.visibleEntities.length;
           this.bar[i] = this.Graph[i].getBars(graphPos, numVisible, config.bar_spacing);
           graphPos += 1;
