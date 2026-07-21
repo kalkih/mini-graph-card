@@ -226,7 +226,7 @@ class MiniGraphCard extends LitElement {
     if (!this._datetimeFormatFromCfgParsedCache) {
       // parse a possibly defined "datetime_format" option from config
       this._datetimeFormatFromCfgParsedCache = parseDateTimeFormatFromCfg(
-        this.config.datetime_format
+        this.config.datetime_format,
       );
     }
     return this._datetimeFormatFromCfgParsedCache;
