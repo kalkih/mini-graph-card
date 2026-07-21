@@ -15,12 +15,12 @@ import { assert, describe, it } from 'vitest';
 import {
   getDateFormat,
   getTimeFormat,
-  parseDateTimeFormat,
+  parseDateTimeFormatFromCfg,
   formatDateTime,
   TimeFormat,
   DateFormat,
   TimeZone,
-} from '../src/locale';
+} from '../locale';
 
 // Set UTC time if your vitest is configired for UTC or has a default config;
 // also, set UTC for HASS_TIME_ZONE
@@ -104,7 +104,6 @@ interface ConfigType {
   hour24?: boolean;
   time_format?: Intl.DateTimeFormatOptions;
   date_format?: Intl.DateTimeFormatOptions;
-  datetimeFormatParsed: any;
 };
 
 const getConfig = (
@@ -126,14 +125,14 @@ const getConfig = (
     config = { ...config, hour24 };
   }
 
-  config.datetimeFormatParsed = parseDateTimeFormat(datetime_format!);
-  config.date_format = getDateFormat(config, hass);
-  config.time_format = getTimeFormat(config, hass);
+  const datetimeFormatFromCfgParsed = parseDateTimeFormatFromCfg(datetime_format!);
+  const datetimeFormatDateOptions = getDateFormat(config, datetimeFormatFromCfgParsed, hass);
+  const datetimeFormatTimeOptions = getTimeFormat(config, datetimeFormatFromCfgParsed, hass);
 
-  return config;
+  return { config, datetimeFormatFromCfgParsed, datetimeFormatDateOptions, datetimeFormatTimeOptions };
 };
 
-// Tests do not bother a bout a difference in "normal vs NNBSP" whitespaces & "AM vs am",
+// Tests do not bother about a difference in "normal vs NNBSP" whitespaces & "AM vs am",
 // it's a complicated & confusing logic in Intl
 const standardizeAmPm = (result: string) => result.replace('\u202f', ' ').replace('am', 'AM');
 
@@ -204,12 +203,24 @@ describe("formatDateTime", () => {
                   date_format, time_format, time_zone, language, hour24, hours_to_show
                 ), () => {
                   patternsOK.forEach((pattern) => {
-                    const config = getConfig(hass, pattern.pattern, hours_to_show, hour24);
+                    const {
+                      config,
+                      datetimeFormatFromCfgParsed,
+                      datetimeFormatDateOptions,
+                      datetimeFormatTimeOptions,
+                    } = getConfig(hass, pattern.pattern, hours_to_show, hour24);
                     const value = getExpectedValue(
                       pattern.value, hours_to_show, hour24, language, time_format
                     );
                     assert.strictEqual(
-                      standardizeAmPm(formatDateTime(dateObj, config, hass)),
+                      standardizeAmPm(formatDateTime(
+                        dateObj,
+                        config,
+                        datetimeFormatFromCfgParsed,
+                        datetimeFormatDateOptions,
+                        datetimeFormatTimeOptions,
+                        hass,
+                      )),
                       value,
                     );
                   });
@@ -227,12 +238,24 @@ describe("formatDateTime", () => {
                 ), () => {
                   patternsOK.forEach((pattern) => {
                     const newPattern = pattern.pattern.replace('HH', 'H');
-                    const config = getConfig(hass, newPattern, hours_to_show, hour24);
+                    const {
+                      config,
+                      datetimeFormatFromCfgParsed,
+                      datetimeFormatDateOptions,
+                      datetimeFormatTimeOptions,
+                    } = getConfig(hass, newPattern, hours_to_show, hour24);
                     const value = getExpectedValue(
                       pattern.value, hours_to_show, hour24, language, time_format
                     );
                     assert.strictEqual(
-                      standardizeAmPm(formatDateTime(dateObj, config, hass)),
+                      standardizeAmPm(formatDateTime(
+                        dateObj,
+                        config,
+                        datetimeFormatFromCfgParsed,
+                        datetimeFormatDateOptions,
+                        datetimeFormatTimeOptions,
+                        hass,
+                      )),
                       value.replace('04:05', '4:05'),
                     );
                   });
@@ -246,12 +269,24 @@ describe("formatDateTime", () => {
                 ), () => {
                   patternsOK.forEach((pattern) => {
                     const newPattern = pattern.pattern.replace('YYYY', 'YY');
-                    const config = getConfig(hass, newPattern, hours_to_show, hour24);
+                    const {
+                      config,
+                      datetimeFormatFromCfgParsed,
+                      datetimeFormatDateOptions,
+                      datetimeFormatTimeOptions,
+                    } = getConfig(hass, newPattern, hours_to_show, hour24);
                     const value = getExpectedValue(
                       pattern.value, hours_to_show, hour24, language, time_format
                     );
                     assert.strictEqual(
-                      standardizeAmPm(formatDateTime(dateObj, config, hass)),
+                      standardizeAmPm(formatDateTime(
+                        dateObj,
+                        config,
+                        datetimeFormatFromCfgParsed,
+                        datetimeFormatDateOptions,
+                        datetimeFormatTimeOptions,
+                        hass,
+                      )),
                       value.replace('2023', '23'),
                     );
                   });
@@ -265,12 +300,24 @@ describe("formatDateTime", () => {
                 ), () => {
                   patternsOK.forEach((pattern) => {
                     const newPattern = pattern.pattern.replace('MM', 'M');
-                    const config = getConfig(hass, newPattern, hours_to_show, hour24);
+                    const {
+                      config,
+                      datetimeFormatFromCfgParsed,
+                      datetimeFormatDateOptions,
+                      datetimeFormatTimeOptions,
+                    } = getConfig(hass, newPattern, hours_to_show, hour24);
                     const value = getExpectedValue(
                       pattern.value, hours_to_show, hour24, language, time_format
                     );
                     assert.strictEqual(
-                      standardizeAmPm(formatDateTime(dateObj, config, hass)),
+                      standardizeAmPm(formatDateTime(
+                        dateObj,
+                        config,
+                        datetimeFormatFromCfgParsed,
+                        datetimeFormatDateOptions,
+                        datetimeFormatTimeOptions,
+                        hass,
+                      )),
                       value.replace('03', '3'),
                     );
                   });
@@ -284,12 +331,24 @@ describe("formatDateTime", () => {
                 ), () => {
                   patternsOK.forEach((pattern) => {
                     const newPattern = pattern.pattern.replace('DD', 'D');
-                    const config = getConfig(hass, newPattern, hours_to_show, hour24);
+                    const {
+                      config,
+                      datetimeFormatFromCfgParsed,
+                      datetimeFormatDateOptions,
+                      datetimeFormatTimeOptions,
+                    } = getConfig(hass, newPattern, hours_to_show, hour24);
                     const value = getExpectedValue(
                       pattern.value, hours_to_show, hour24, language, time_format
                     );
                     assert.strictEqual(
-                      standardizeAmPm(formatDateTime(dateObj, config, hass)),
+                      standardizeAmPm(formatDateTime(
+                        dateObj,
+                        config,
+                        datetimeFormatFromCfgParsed,
+                        datetimeFormatDateOptions,
+                        datetimeFormatTimeOptions,
+                        hass,
+                      )),
                       value.replace('01', '1')
                     );
                   });
@@ -306,7 +365,12 @@ describe("formatDateTime", () => {
                   date_format, time_format, time_zone, language, hour24, hours_to_show
                 ), () => {
                   patternsFaulty.forEach((pattern) => {
-                    const config = getConfig(hass, pattern.pattern, hours_to_show, hour24);
+                    const {
+                      config,
+                      datetimeFormatFromCfgParsed,
+                      datetimeFormatDateOptions,
+                      datetimeFormatTimeOptions,
+                    } = getConfig(hass, pattern.pattern, hours_to_show, hour24);
                     const weekdayLocalized = WEEKDAYS[language];
                     const order = language !== 'en';
                     let valueLocalized = pattern.value(weekdayLocalized, order);
@@ -317,7 +381,14 @@ describe("formatDateTime", () => {
                       valueLocalized, hours_to_show, hour24, language, time_format
                     );
                     assert.strictEqual(
-                      standardizeAmPm(formatDateTime(dateObj, config, hass)),
+                      standardizeAmPm(formatDateTime(
+                        dateObj,
+                        config,
+                        datetimeFormatFromCfgParsed,
+                        datetimeFormatDateOptions,
+                        datetimeFormatTimeOptions,
+                        hass,
+                      )),
                       value,
                     );
                   });
@@ -357,8 +428,20 @@ describe("formatDateTime", () => {
               hour24,
               hours_to_show,
             ), () => {
-              const config = getConfig(hass, undefined, hours_to_show, hour24);
-              const result = formatDateTime(dateObj, config, hass);
+              const {
+                config,
+                datetimeFormatFromCfgParsed,
+                datetimeFormatDateOptions,
+                datetimeFormatTimeOptions,
+              } = getConfig(hass, undefined, hours_to_show, hour24);
+              const result = formatDateTime(
+                dateObj,
+                config,
+                datetimeFormatFromCfgParsed,
+                datetimeFormatDateOptions,
+                datetimeFormatTimeOptions,
+                hass,
+              );
               let newValue = pattern.value;
               if (
                 (hour24 === undefined

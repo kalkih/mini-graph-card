@@ -11,6 +11,7 @@ import {
   blankBeforePercent,
   formatNumber,
   formatDateTime,
+  parseDateTimeFormatFromCfg,
   getDateFormat, getTimeFormat,
 } from './locale';
 import './initialize';
@@ -86,7 +87,8 @@ class MiniGraphCard extends LitElement {
     let updated = false;
     const queue = [];
 
-    // initailize memoized arrays
+    // initialize memoized data
+    this._datetimeFormatFromCfgParsedCache = null;
     this._visibleEntitiesCache = null;
     this._primaryYaxisEntitiesCache = null;
     this._secondaryYaxisEntitiesCache = null;
@@ -220,16 +222,34 @@ class MiniGraphCard extends LitElement {
     return false;
   }
 
+  get datetimeFormatFromCfgParsed() {
+    if (!this._datetimeFormatFromCfgParsedCache) {
+      // parse a possibly defined "datetime_format" option from config
+      this._datetimeFormatFromCfgParsedCache = parseDateTimeFormatFromCfg(
+        this.config.datetime_format,
+      );
+    }
+    return this._datetimeFormatFromCfgParsedCache;
+  }
+
   /**
   * Automatically update datetime formatting options (when they are not explicitly set by a user)
   * on every render
   */
   updateFormatFromLocale(forced) {
     if (this.updateDateTimeFormat || forced) {
-      this.config.date_format = getDateFormat(this.config, this._hass);
+      this.datetimeFormatDateOptions = getDateFormat(
+        this.config,
+        this.datetimeFormatFromCfgParsed,
+        this._hass,
+      );
     }
     if (this.updateHour24 || this.updateDateTimeFormat || forced) {
-      this.config.time_format = getTimeFormat(this.config, this._hass);
+      this.datetimeFormatTimeOptions = getTimeFormat(
+        this.config,
+        this.datetimeFormatFromCfgParsed,
+        this._hass,
+      );
     }
   }
 
@@ -967,9 +987,23 @@ class MiniGraphCard extends LitElement {
     const now = this.getEndDate();
 
     now.setMilliseconds(now.getMilliseconds() - oneMinute - interval * count);
-    const end = formatDateTime(now, this.config, this._hass);
+    const end = formatDateTime(
+      now,
+      this.config,
+      this.datetimeFormatFromCfgParsed,
+      this.datetimeFormatDateOptions,
+      this.datetimeFormatTimeOptions,
+      this._hass,
+    );
     now.setMilliseconds(now.getMilliseconds() + oneMinute - interval);
-    const start = formatDateTime(now, this.config, this._hass);
+    const start = formatDateTime(
+      now,
+      this.config,
+      this.datetimeFormatFromCfgParsed,
+      this.datetimeFormatDateOptions,
+      this.datetimeFormatTimeOptions,
+      this._hass,
+    );
 
     this.tooltip = {
       value,
@@ -1029,6 +1063,7 @@ class MiniGraphCard extends LitElement {
     } = this.config.show;
     const location = (extrema === 'below' || average === 'below') ? 'below' : 'above';
     // index "0" is passed into computeStateWithUom() since "info" is shown for the 1st entry
+    /* eslint-disable indent */
     return this.abs.length > 0 ? html`
       <div class="info flex" loc=${location}>
         ${this.abs.map(entry => html`
@@ -1038,12 +1073,22 @@ class MiniGraphCard extends LitElement {
               ${this.computeStateWithUom(entry.state, 0, hideUnit)}
             </span>
             <span class="info__item__time">
-              ${entry.type !== 'avg' ? formatDateTime(new Date(entry.last_changed), this.config, this._hass) : ''}
+              ${entry.type !== 'avg'
+                ? formatDateTime(
+                    new Date(entry.last_changed),
+                    this.config,
+                    this.datetimeFormatFromCfgParsed,
+                    this.datetimeFormatDateOptions,
+                    this.datetimeFormatTimeOptions,
+                    this._hass,
+                  )
+                : ''}
             </span>
           </div>
         `)}
       </div>
     ` : html``;
+    /* eslint-enable indent */
   }
 
   handlePopup(e, entity) {

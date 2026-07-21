@@ -129,11 +129,12 @@ const resolveTimeZone = (option, serverTimeZone) => {
 /**
  * Get date formatting options
  * @param {object} config Card config
+ * @param {object} datetimeFormatFromCfgParsed Parsed datetime format taken from config
  * @param {HomeAssistant} hass HomeAssistant object
  * @returns {Intl.DateTimeFormatOptions} Date format
  */
-const getDateFormat = (config, hass) => {
-  const { hours_to_show, datetime_format, datetimeFormatParsed } = config;
+const getDateFormat = (config, datetimeFormatFromCfgParsed, hass) => {
+  const { hours_to_show, datetime_format } = config;
 
   if (hours_to_show === undefined || hours_to_show <= 24) {
     return {};
@@ -155,18 +156,18 @@ const getDateFormat = (config, hass) => {
   } else {
     // use formatting settings from a card config
     // eslint-disable-next-line no-lonely-if
-    if (datetimeFormatParsed && datetimeFormatParsed.day_weekday) {
+    if (datetimeFormatFromCfgParsed && datetimeFormatFromCfgParsed.day_weekday) {
       dateOptions = {
         day: 'numeric',
         weekday: 'short',
       };
     } else {
       dateOptions = {
-        year: datetimeFormatParsed && datetimeFormatParsed.year_2digit
+        year: datetimeFormatFromCfgParsed && datetimeFormatFromCfgParsed.year_2digit
           ? '2-digit' : 'numeric',
-        month: datetimeFormatParsed && datetimeFormatParsed.month_2digit
+        month: datetimeFormatFromCfgParsed && datetimeFormatFromCfgParsed.month_2digit
           ? '2-digit' : 'numeric',
-        day: datetimeFormatParsed && datetimeFormatParsed.day_2digit
+        day: datetimeFormatFromCfgParsed && datetimeFormatFromCfgParsed.day_2digit
           ? '2-digit' : 'numeric',
       };
     }
@@ -179,10 +180,11 @@ const getDateFormat = (config, hass) => {
 /**
  * Get time formatting options
  * @param {object} config Card config
+ * @param {object} datetimeFormatFromCfgParsed Parsed datetime format taken from config
  * @param {HomeAssistant} hass HomeAssistant object
  * @returns {Intl.DateTimeFormatOptions} Time formatting options
  */
-const getTimeFormat = (config, hass) => {
+const getTimeFormat = (config, datetimeFormatFromCfgParsed, hass) => {
   const localeOptions = hass.locale; // FrontendLocaleData object
 
   const serverTimeZone = hass.config.time_zone; // Server time zone
@@ -193,7 +195,7 @@ const getTimeFormat = (config, hass) => {
   const hourCycle = valueUseAmPm ? 'h12' : 'h23'; // accounting possibly defined "hour12"
 
   let hourOption;
-  const { datetime_format, datetimeFormatParsed } = config; // user-defined datetime format
+  const { datetime_format } = config; // user-defined datetime format
   if (!datetime_format) {
     // follow global HA Frontend settings
     hourOption = {
@@ -202,13 +204,13 @@ const getTimeFormat = (config, hass) => {
   } else {
     // use formatting settings from a card config
     // eslint-disable-next-line no-lonely-if
-    if (datetimeFormatParsed && datetimeFormatParsed.day_weekday) {
+    if (datetimeFormatFromCfgParsed && datetimeFormatFromCfgParsed.day_weekday) {
       hourOption = {
         hour: valueUseAmPm ? 'numeric' : '2-digit',
       };
     } else {
       hourOption = {
-        hour: datetimeFormatParsed && datetimeFormatParsed.hour_2digit
+        hour: datetimeFormatFromCfgParsed && datetimeFormatFromCfgParsed.hour_2digit
           ? '2-digit' : 'numeric',
       };
     }
@@ -223,14 +225,13 @@ const getTimeFormat = (config, hass) => {
 };
 
 /**
- * Returns formatting options to represent a date & time value
+ * Returns formatting options to represent a date & time value from config
  * @param {string} dateTimeFormat Card config option to represent a date & time value
  * @returns {object} Formatting options
  */
-const parseDateTimeFormat = (dateTimeFormat) => {
+const parseDateTimeFormatFromCfg = (dateTimeFormat) => {
   if (!dateTimeFormat) {
-    // fallback to a default "legacy" format
-    return { day_weekday: true };
+    return undefined;
   }
 
   const regex = /^(M{1,2}|D{1,2}|Y{2,4})(\/|\.|-)(M{1,2}|D{1,2})(\/|\.|-)(M{1,2}|D{1,2}|Y{2,4}) H{1,2}:mm$/;
@@ -356,12 +357,16 @@ const composeTimeString = (
  * time zone & formatting options
  * @param {Date} dateObj "Date" object representing a date & time value
  * @param {object} config Card config
+ * @param {object} datetimeFormatFromCfgParsed Parsed datetime format taken from config
+ * @param {Intl.DateTimeFormatOptions} datetimeFormatDateOptions Date format options
  * @param {HomeAssistant} hass HomeAssistant object
  * @returns {string} Formatted date string
  */
 const formatDate = (
   dateObj,
   config,
+  datetimeFormatFromCfgParsed,
+  datetimeFormatDateOptions,
   hass,
 ) => {
   const localeOptions = hass.locale; // FrontendLocaleData object
@@ -371,11 +376,11 @@ const formatDate = (
   let formatted;
   let composed;
   let parts;
-  const { datetime_format, datetimeFormatParsed } = config; // user-defined datetime format
+  const { datetime_format } = config; // user-defined datetime format
 
   if (!datetime_format) {
     // follow global HA Frontend settings
-    formatter = new Intl.DateTimeFormat(localeDate, config.date_format);
+    formatter = new Intl.DateTimeFormat(localeDate, datetimeFormatDateOptions);
     if (localeOptions.date_format === DateFormat.language
         || localeOptions.date_format === DateFormat.system) {
       // use default auto-generated presentation
@@ -394,20 +399,20 @@ const formatDate = (
   }
 
   // use formatting settings from a card config
-  if ((datetimeFormatParsed && datetimeFormatParsed.day_weekday)
-    || !datetimeFormatParsed) {
-    formatter = new Intl.DateTimeFormat(localeDate, config.date_format);
+  if ((datetimeFormatFromCfgParsed && datetimeFormatFromCfgParsed.day_weekday)
+    || !datetimeFormatFromCfgParsed) {
+    formatter = new Intl.DateTimeFormat(localeDate, datetimeFormatDateOptions);
     formatted = formatter.format(dateObj);
     return formatted;
   }
 
-  formatter = new Intl.DateTimeFormat(undefined, config.date_format);
+  formatter = new Intl.DateTimeFormat(undefined, datetimeFormatDateOptions);
   parts = formatter.formatToParts(dateObj);
   // re-compose a string with a required order
   composed = composeDateString(
     parts,
-    datetimeFormatParsed.order,
-    datetimeFormatParsed.date_literal,
+    datetimeFormatFromCfgParsed.order,
+    datetimeFormatFromCfgParsed.date_literal,
   );
   return composed;
 };
@@ -417,12 +422,16 @@ const formatDate = (
  * time zone & formatting options
  * @param {Date} dateObj "Date" object representing a date & time value
  * @param {object} config Card config
+ * @param {object} datetimeFormatFromCfgParsed Parsed datetime format taken from config
+ * @param {Intl.DateTimeFormatOptions} datetimeFormatTimeOptions Time format options
  * @param {HomeAssistant} hass HomeAssistant object
  * @returns {string} Formatted time string
  */
 const formatTime = (
   dateObj,
   config,
+  datetimeFormatFromCfgParsed,
+  datetimeFormatTimeOptions,
   hass,
 ) => {
   const localeOptions = hass.locale; // FrontendLocaleData object
@@ -430,30 +439,29 @@ const formatTime = (
     ? undefined : localeOptions.language;
   let formatter;
   let formatted;
-  const { datetime_format, datetimeFormatParsed } = config; // user-defined datetime format
+  const { datetime_format } = config; // user-defined datetime format
 
   if (!datetime_format) {
     // follow global HA Frontend settings
-    formatter = new Intl.DateTimeFormat(localeTime, config.time_format);
+    formatter = new Intl.DateTimeFormat(localeTime, datetimeFormatTimeOptions);
     formatted = formatter.format(dateObj);
     return formatted;
   }
-
 
   // use formatting settings from a card config
-  if ((datetimeFormatParsed && datetimeFormatParsed.day_weekday)
-    || !datetimeFormatParsed) {
-    formatter = new Intl.DateTimeFormat(localeTime, config.time_format);
+  if ((datetimeFormatFromCfgParsed && datetimeFormatFromCfgParsed.day_weekday)
+    || !datetimeFormatFromCfgParsed) {
+    formatter = new Intl.DateTimeFormat(localeTime, datetimeFormatTimeOptions);
     formatted = formatter.format(dateObj);
     return formatted;
   }
 
-  formatter = new Intl.DateTimeFormat(undefined, config.time_format);
+  formatter = new Intl.DateTimeFormat(undefined, datetimeFormatTimeOptions);
   const parts = formatter.formatToParts(dateObj);
   // re-compose a string with a possibly needed fix for "hour" value
   const composed = composeTimeString(
     parts,
-    datetimeFormatParsed.hour_2digit,
+    datetimeFormatFromCfgParsed.hour_2digit,
   );
   return composed;
 };
@@ -463,18 +471,36 @@ const formatTime = (
  * time zone & formatting options
  * @param {Date} dateObj "Date" object representing a date & time value
  * @param {object} config Card config
+ * @param {object} datetimeFormatFromCfgParsed Parsed datetime format taken from config
+ * @param {Intl.DateTimeFormatOptions} datetimeFormatDateOptions Date format options
+ * @param {Intl.DateTimeFormatOptions} datetimeFormatTimeOptions Time format options
  * @param {HomeAssistant} hass HomeAssistant object
  * @returns {string} Formatted string
  */
 const formatDateTime = (
   dateObj,
   config,
+  datetimeFormatFromCfgParsed,
+  datetimeFormatDateOptions,
+  datetimeFormatTimeOptions,
   hass,
 ) => {
-  let timeString = formatTime(dateObj, config, hass);
+  let timeString = formatTime(
+    dateObj,
+    config,
+    datetimeFormatFromCfgParsed,
+    datetimeFormatTimeOptions,
+    hass,
+  );
   const { hours_to_show } = config;
   if (hours_to_show > 24) {
-    const dateString = formatDate(dateObj, config, hass);
+    const dateString = formatDate(
+      dateObj,
+      config,
+      datetimeFormatFromCfgParsed,
+      datetimeFormatDateOptions,
+      hass,
+    );
     // the ", " separator between date & time parts is hard-coded
     // (same as currently used in HA Frontend)
     timeString = `${dateString}, ${timeString}`;
@@ -643,7 +669,7 @@ const blankBeforePercent = (localeOptions) => {
 
 export {
   formatNumber,
-  parseDateTimeFormat,
+  parseDateTimeFormatFromCfg,
   getDateFormat, getTimeFormat,
   formatDateTime,
   TimeZone, TimeFormat, DateFormat, // used in tests

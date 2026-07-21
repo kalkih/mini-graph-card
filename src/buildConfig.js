@@ -1,4 +1,3 @@
-import { parseDateTimeFormat } from './locale';
 import { log } from './utils';
 import {
   URL_DOCS,
@@ -170,10 +169,6 @@ export default (config) => {
     conf.color_thresholds,
     conf.color_thresholds_transition,
   );
-
-  // parse a possibly defined "datetime_format" option;
-  // fallback to "day_weekday" if undefined
-  conf.datetimeFormatParsed = parseDateTimeFormat(conf.datetime_format);
 
   // set valid values for bar_spacing options
   conf.bar_spacing = conf.bar_spacing < 0
