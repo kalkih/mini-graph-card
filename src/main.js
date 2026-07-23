@@ -1147,10 +1147,16 @@ class MiniGraphCard extends LitElement {
   */
   computeColor(inState, index) {
     const { line_color } = this.config;
+    const defaultColor = line_color[index] || line_color[0];
+
+    if (inState === undefined) {
+      return this.config.entities[index].color
+        || defaultColor;
+    }
+
     const color_thresholds = this.config.entities[index].color_thresholds
       || this.config.color_thresholds;
     const state = Number(inState) || 0;
-
     let intColor;
     if (color_thresholds.length > 0) {
       const { color } = color_thresholds.find(ele => ele.value <= state)
@@ -1175,7 +1181,7 @@ class MiniGraphCard extends LitElement {
 
     return this.config.entities[index].color
       || intColor
-      || line_color[index] || line_color[0];
+      || defaultColor;
   }
 
   /**
