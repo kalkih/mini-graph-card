@@ -45,7 +45,7 @@ class MiniGraphCard extends LitElement {
     super();
     this.id = Math.random()
       .toString(36)
-      .substr(2, 9);
+      .substring(2, 11);
     this.config = {};
     this.bound = [0, 0];
     this.boundSecondary = [0, 0];
