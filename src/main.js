@@ -747,61 +747,61 @@ class MiniGraphCard extends LitElement {
     /* eslint-enable indent */
   }
 
-  renderSvgFill(fill, i) {
+  renderSvgFill(fill, index) {
     if (!fill) return;
     const fade = this.config.show.fill === 'fade';
-    const init = this.length[i] || this.config.entities[i].show_line === false;
+    const init = this.length[index] || this.config.entities[index].show_line === false;
     return svg`
       <defs>
-        <linearGradient id=${`fill-grad-${this.id}-${i}`} x1="0%" y1="0%" x2="0%" y2="100%">
+        <linearGradient id=${`fill-grad-${this.id}-${index}`} x1="0%" y1="0%" x2="0%" y2="100%">
           <stop stop-color='white' offset='0%' stop-opacity='1'/>
           <stop stop-color='white' offset='100%' stop-opacity='.15'/>
         </linearGradient>
-        <mask id=${`fill-grad-mask-${this.id}-${i}`}>
-          <rect width="100%" height="100%" fill=${`url(#fill-grad-${this.id}-${i})`} />
+        <mask id=${`fill-grad-mask-${this.id}-${index}`}>
+          <rect width="100%" height="100%" fill=${`url(#fill-grad-${this.id}-${index})`} />
         </mask>
       </defs>
-      <mask id=${`fill-${this.id}-${i}`}>
+      <mask id=${`fill-${this.id}-${index}`}>
         <path class='fill'
           type=${this.config.show.fill}
-          .id=${i} anim=${this.config.animate} ?init=${init}
-          style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
+          .id=${index} anim=${this.config.animate} ?init=${init}
+          style="animation-delay: ${this.config.animate ? `${index * 0.5}s` : '0s'}"
           fill='white'
-          mask=${fade ? `url(#fill-grad-mask-${this.id}-${i})` : ''}
-          d=${this.fill[i]}
+          mask=${fade ? `url(#fill-grad-mask-${this.id}-${index})` : ''}
+          d=${this.fill[index]}
         />
       </mask>`;
   }
 
-  renderSvgLine(line, i) {
+  renderSvgLine(line, index) {
     if (!line) return;
 
     const strokeDashArray = (this.config.animate
-      ? this.length[i]
-      : this.config.entities[i].line_style || this.config.line_style)
+      ? this.length[index]
+      : this.config.entities[index].line_style || this.config.line_style)
       || 'none';
     const path = svg`
       <path
         class='line'
-        .id=${i}
-        anim=${this.config.animate} ?init=${this.length[i]}
-        style="animation-delay: ${this.config.animate ? `${i * 0.5}s` : '0s'}"
+        .id=${index}
+        anim=${this.config.animate} ?init=${this.length[index]}
+        style="animation-delay: ${this.config.animate ? `${index * 0.5}s` : '0s'}"
         fill='none'
-        stroke-dasharray=${strokeDashArray} stroke-dashoffset=${this.length[i] || 'none'}
+        stroke-dasharray=${strokeDashArray} stroke-dashoffset=${this.length[index] || 'none'}
         stroke=${'white'}
-        stroke-width=${this.config.entities[i].line_width || this.config.line_width}
-        d=${this.line[i]}
+        stroke-width=${this.config.entities[index].line_width || this.config.line_width}
+        d=${this.line[index]}
       />`;
 
     return svg`
-      <mask id=${`line-${this.id}-${i}`}>
+      <mask id=${`line-${this.id}-${index}`}>
         ${path}
       </mask>
     `;
   }
 
-  renderSvgPoint(point, i) {
-    const color = this.gradient[i] ? this.computeColor(point[V], i) : 'inherit';
+  renderSvgPoint(point, index) {
+    const color = this.gradient[index] ? this.computeColor(point[V], index) : 'inherit';
     return svg`
       <circle
         class='line--point'
@@ -809,30 +809,30 @@ class MiniGraphCard extends LitElement {
         style=${`--mcg-hover: ${color};`}
         stroke=${color}
         fill=${color}
-        cx=${point[X]} cy=${point[Y]} r=${this.config.entities[i].line_width || this.config.line_width}
-        @mouseover=${() => this.setTooltip(i, point[3], point[V])}
+        cx=${point[X]} cy=${point[Y]} r=${this.config.entities[index].line_width || this.config.line_width}
+        @mouseover=${() => this.setTooltip(index, point[3], point[V])}
         @mouseout=${() => (this.tooltip = {})}
       />
     `;
   }
 
-  renderSvgPoints(points, i) {
+  renderSvgPoints(points, index) {
     if (!points) return;
-    const state = this.entity[i] !== undefined
-      ? this.entity[i].state
-      : this.isStaticValue(i) ? this.config.entities[i].static_value : undefined;
-    const color = this.computeColor(state, i);
+    const state = this.entity[index] !== undefined
+      ? this.entity[index].state
+      : this.isStaticValue(index) ? this.config.entities[index].static_value : undefined;
+    const color = this.computeColor(state, index);
     return svg`
       <g class='line--points'
-        ?tooltip=${this.tooltip.entity === i}
-        ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== i && !this.isShowStaticInactive(i)}
-        ?init=${this.length[i]}
+        ?tooltip=${this.tooltip.entity === index}
+        ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== index && !this.isShowStaticInactive(index)}
+        ?init=${this.length[index]}
         anim=${this.config.animate && this.config.show.points !== 'hover'}
-        style="animation-delay: ${this.config.animate ? `${i * 0.5 + 0.5}s` : '0s'}"
+        style="animation-delay: ${this.config.animate ? `${index * 0.5 + 0.5}s` : '0s'}"
         fill=${color}
         stroke=${color}
-        stroke-width=${(this.config.entities[i].line_width || this.config.line_width) / 2}>
-        ${points.map(point => this.renderSvgPoint(point, i))}
+        stroke-width=${(this.config.entities[index].line_width || this.config.line_width) / 2}>
+        ${points.map(point => this.renderSvgPoint(point, index))}
       </g>`;
   }
 
@@ -850,37 +850,37 @@ class MiniGraphCard extends LitElement {
     return svg`${items}`;
   }
 
-  renderSvgLineRect(line, i) {
+  renderSvgLineRect(line, index) {
     if (!line) return;
-    const state = this.entity[i] !== undefined
-      ? this.entity[i].state
-      : this.isStaticValue(i) ? this.config.entities[i].static_value : undefined;
-    const fill = this.gradient[i]
-      ? `url(#grad-${this.id}-${i})`
-      : this.computeColor(state, i);
+    const state = this.entity[index] !== undefined
+      ? this.entity[index].state
+      : this.isStaticValue(index) ? this.config.entities[index].static_value : undefined;
+    const fill = this.gradient[index]
+      ? `url(#grad-${this.id}-${index})`
+      : this.computeColor(state, index);
     return svg`
       <rect class='line--rect'
-        ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== i && !this.isShowStaticInactive(i)}
-        id=${`rect-${this.id}-${i}`}
+        ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== index && !this.isShowStaticInactive(index)}
+        id=${`rect-${this.id}-${index}`}
         fill=${fill} height="100%" width="100%"
-        mask=${`url(#line-${this.id}-${i})`}
+        mask=${`url(#line-${this.id}-${index})`}
       />`;
   }
 
-  renderSvgFillRect(fill, i) {
+  renderSvgFillRect(fill, index) {
     if (!fill) return;
-    const state = this.entity[i] !== undefined
-      ? this.entity[i].state
-      : this.isStaticValue(i) ? this.config.entities[i].static_value : undefined;
-    const svgFill = this.gradient[i]
-      ? `url(#grad-${this.id}-${i})`
-      : this.computeColor(state, i);
+    const state = this.entity[index] !== undefined
+      ? this.entity[index].state
+      : this.isStaticValue(index) ? this.config.entities[index].static_value : undefined;
+    const svgFill = this.gradient[index]
+      ? `url(#grad-${this.id}-${index})`
+      : this.computeColor(state, index);
     return svg`
       <rect class='fill--rect'
-        ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== i && !this.isShowStaticInactive(i)}
-        id=${`fill-rect-${this.id}-${i}`}
+        ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== index && !this.isShowStaticInactive(index)}
+        id=${`fill-rect-${this.id}-${index}`}
         fill=${svgFill} height="100%" width="100%"
-        mask=${`url(#fill-${this.id}-${i})`}
+        mask=${`url(#fill-${this.id}-${index})`}
       />`;
   }
 
