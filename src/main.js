@@ -1200,7 +1200,7 @@ class MiniGraphCard extends LitElement {
     return (
       this.config.icon
       || entity && entity.attributes.icon
-      || entity && stateIcon(entity)
+      || typeof stateIcon === 'function' && entity && stateIcon(entity)
       || ICONS.temperature
     );
   }
