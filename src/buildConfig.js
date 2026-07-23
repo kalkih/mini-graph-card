@@ -179,10 +179,19 @@ const computeThresholds = (stops, type) => {
   if (type === 'smooth') {
     return valuedStops;
   } else {
-    const rect = [].concat(...valuedStops.map((stop, i) => ([stop, {
-      value: stop.value * 0.9999,
-      color: valuedStops[i + 1] ? valuedStops[i + 1].color : stop.color,
-    }])));
+    const rect = [].concat(...valuedStops.map((stop, i) => {
+      const nextStop = valuedStops[i + 1];
+      const delta = nextStop
+        ? Math.abs(stop.value - nextStop.value) * 0.0001
+        : Math.abs(stop.value) * 0.0001 || 0.0001;
+      return [
+        stop,
+        {
+          value: stop.value - delta,
+          color: nextStop ? nextStop.color : stop.color,
+        },
+      ];
+    }));
     return rect;
   }
 };
