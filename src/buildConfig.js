@@ -58,7 +58,7 @@ const checkNumericOption = (
       errorDescr = `out of bounds, maximum allowed: ${maxBound}`;
     }
   }
-  log(`Invalid option ${option}: ${invalidValue} (${errorDescr}); adjusting value to ${clearedValue}`);
+  log(`Invalid option ${option}: [${invalidValue}] (${errorDescr}); adjusting value to ${clearedValue}`);
   return clearedValue;
 };
 
@@ -83,7 +83,7 @@ const checkIntegerOption = (
   const value = checkNumericOption(config, option, defaultValue, minBound, maxBound);
   if (value !== undefined && !Number.isInteger(value)) {
     const roundedValue = Math.round(value);
-    log(`Invalid integer option ${option}: ${value}; rounding value to ${roundedValue}`);
+    log(`Invalid integer option ${option}: [${value}]; rounding value to ${roundedValue}`);
     return roundedValue;
   }
   return value;
