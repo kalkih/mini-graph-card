@@ -925,7 +925,9 @@ class MiniGraphCard extends LitElement {
     if (!fill) return;
     const state = this.entity[index] !== undefined
       ? this.entity[index].state
-      : this.isStaticValue(index) ? this.config.entities[index].static_value : undefined;
+      : this.isStaticValue(index)
+        ? this.config.entities[index].static_value
+        : undefined;
     const svgFill = this.gradient[index]
       ? `url(#grad-${this.id}-${index})`
       : this.computeColor(state, index);
