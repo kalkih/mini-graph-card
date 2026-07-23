@@ -1178,15 +1178,24 @@ class MiniGraphCard extends LitElement {
   }
 
   /**
-  * Returns a name of an entity/static_value accounting a `name` option
-  * @returns {string} Name of an entity
+  * Returns a name of an entity/static value accounting a `name` option
+  * @returns {string} Name of an entity/static value
   * @param {number} index Index of an entry in config.entities
   */
   computeName(index) {
-    return this.config.entities[index].name
-      || this.entity[index] && (this.entity[index].attributes.friendly_name
-        || this.entity[index].entity_id)
-      || (this.isStaticValue(index) && 'Static');
+    // use a possibly defined "name" option
+    const entityConfig = this.config.entities[index];
+    if (entityConfig
+      && entityConfig.name !== undefined && entityConfig.name !== null) {
+      return String(entityConfig.name);
+    }
+    // use a possibly present friendly_name for an entity
+    const stateObj = this.entity && this.entity[index];
+    if (stateObj) {
+      return stateObj.attributes.friendly_name || stateObj.entity_id;
+    }
+    // use a fixed label for a static value
+    return this.isStaticValue(index) ? 'Static' : '';
   }
 
   /**
