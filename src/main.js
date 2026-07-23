@@ -183,7 +183,7 @@ class MiniGraphCard extends LitElement {
         (entity, index) => new Graph({
           width: 500,
           height: this.config.height,
-          margin: margin,
+          margin,
           hours: this.config.hours_to_show,
           points: this.config.points_per_hour,
           aggregateFuncName: entity.aggregate_func || this.config.aggregate_func,
@@ -198,7 +198,7 @@ class MiniGraphCard extends LitElement {
             this.config.logarithmic,
             false,
           ),
-        }),          
+        }),
       );
     }
   }
