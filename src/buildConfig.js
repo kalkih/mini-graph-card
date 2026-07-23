@@ -277,6 +277,8 @@ export default (config) => {
     conf.static_value_label_offset = DEFAULT_STATIC_VALUE_LABEL_OFFSET;
   }
 
+  conf.fill_baseline = checkNumericOption(conf, 'fill_baseline', undefined);
+
   conf.state_map.forEach((state, i) => {
     // convert string values to objects
     if (typeof state === 'string') conf.state_map[i] = { value: state, label: state };
