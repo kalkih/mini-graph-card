@@ -116,7 +116,7 @@ export default class Graph {
   }
 
   /**
-   * Recalculates a point's coords based on possibly defined min & max thresholds
+   * Recalculates a point's coords based on min & max thresholds
    * @param coords Array of X, Y, Value
    * @returns Array of X, Y, Value, where Y - recalculated based on min/max thresholds
    */
@@ -210,7 +210,7 @@ export default class Graph {
   }
 
   /**
-   * Generate an SVG path for a fill
+   * Get an SVG path for a fill
    * @param path SVG path for a line
    * @returns SVG path for a fill
    */
