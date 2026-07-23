@@ -125,7 +125,7 @@ class MiniGraphCard extends LitElement {
 
   static get properties() {
     return {
-      id: String,
+      id: String, // do not remove (unless a "this.id" property is renamed)
       _hass: {},
       config: {},
       entity: [],
@@ -1141,19 +1141,6 @@ class MiniGraphCard extends LitElement {
   }
 
   /**
-   * Checks whether an entity uses logarithmic scaling.
-   * @param {number} index Index of an entry in config.entities
-   * @returns {boolean} True if the entity uses logarithmic scaling, false - otherwise
-   */
-  computeUsesLogarithmic(index) {
-    return getFirstDefinedItem(
-      this.config.entities[index].logarithmic,
-      this.config.logarithmic,
-      false,
-    );
-  }
-
-  /**
   * Returns a color for an entity/static_value
   * accounting `color_thresholds`, global `line_color` & individual `color` settings
   * @returns Color
@@ -1573,7 +1560,6 @@ class MiniGraphCard extends LitElement {
         if ((!entity && !this.isStaticValue(i))
           || this.Graph[i].coords.length === 0)
           return;
-        this.Graph[i].logarithmic = this.computeUsesLogarithmic(i);
         const bound = config.entities[i].y_axis === 'secondary' ? this.boundSecondary : this.bound;
         [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
         if (config.show.graph === 'bar') {
