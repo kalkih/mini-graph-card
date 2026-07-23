@@ -45,7 +45,7 @@ export default class Graph {
     this.aggregateFuncName = aggregateFuncName;
     this._calcPoint = aggregateFuncMap[aggregateFuncName] || this._average;
     this._smoothing = smoothing;
-    this._logarithmic = logarithmic;
+    this.logarithmic = logarithmic;
     this.bar_spacing = bar_spacing;
     this.bar_spacing_group = bar_spacing_group;
     this.total_bars_in_group = total_bars_in_group;
@@ -60,10 +60,6 @@ export default class Graph {
   get min() { return this._min; }
 
   set min(min) { this._min = min; }
-
-  get logarithmic() { return this._logarithmic; }
-
-  set logarithmic(logarithmic) { this._logarithmic = logarithmic; }
 
   set history(data) { this._history = data; }
 
@@ -119,12 +115,12 @@ export default class Graph {
 
   _calcY(coords) {
     // account for logarithmic graph
-    const max = this._logarithmic ? Math.log10(Math.max(1, this.max)) : this.max;
-    const min = this._logarithmic ? Math.log10(Math.max(1, this.min)) : this.min;
+    const max = this.logarithmic ? Math.log10(Math.max(1, this.max)) : this.max;
+    const min = this.logarithmic ? Math.log10(Math.max(1, this.min)) : this.min;
 
     const yRatio = ((max - min) / this.height) || 1;
     const coords2 = coords.map((coord) => {
-      const val = this._logarithmic ? Math.log10(Math.max(1, coord[V])) : coord[V];
+      const val = this.logarithmic ? Math.log10(Math.max(1, coord[V])) : coord[V];
       const coordY = this.height - ((val - min) / yRatio) + this.margin[Y] * 2;
       return [coord[X], coordY, coord[V]];
     });
@@ -176,7 +172,7 @@ export default class Graph {
   }
 
   computeGradient(thresholds) {
-    const scale = this._logarithmic
+    const scale = this.logarithmic
       ? Math.log10(Math.max(1, this._max)) - Math.log10(Math.max(1, this._min))
       : this._max - this._min;
 
@@ -192,7 +188,7 @@ export default class Graph {
       let offset;
       if (scale <= 0) {
         offset = 0;
-      } else if (this._logarithmic) {
+      } else if (this.logarithmic) {
         offset = (Math.log10(Math.max(1, this._max))
           - Math.log10(Math.max(1, stop.value)))
           * (100 / scale);
