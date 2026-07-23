@@ -242,6 +242,7 @@ class MiniGraphCard extends LitElement {
   /**
   * Automatically update datetime formatting options (when they are not explicitly set by a user)
   * on every render
+  * @param {boolean|undefined} forced True to forcibly update a format
   */
   updateFormatFromLocale(forced) {
     if (this.updateDateTimeFormat || forced) {
@@ -473,7 +474,7 @@ class MiniGraphCard extends LitElement {
   }
 
   /**
-  * Returns an object attrubute value
+  * Returns an object attribute value
   * @returns {any} Value of an attribute/subattribute
   * @param obj stateObj.attributes
   * @param path Attribute defined as either a singular attribute or a tree-like path
@@ -494,7 +495,7 @@ class MiniGraphCard extends LitElement {
     return path.includes('.');
   }
 
-  /** Returns a state/attrubute value or a static_value
+  /** Returns a state/attribute value or a static_value
   * @returns {any} value of a state/attribute or a static_value
   * @param {number} index Index of an entry in config.entities
   */
@@ -519,7 +520,7 @@ class MiniGraphCard extends LitElement {
   }
 
   /**
-  * Renders a state/attrubute value or a static_value (if "show_state: true")
+  * Renders a state/attribute value or a static_value (if "show_state: true")
   * @returns {TemplateResult} Lit template result
   * @param {number} index Index of an entry in config.entities
   */
@@ -618,7 +619,7 @@ class MiniGraphCard extends LitElement {
   }
 
   /**
-  * Renders a legend text entry for an entity/static_value
+  * Renders a legend text entry for an entity/static value
   * @returns {string} Legend text string
   * @param {number} index Index of an entry in config.entities
   */
@@ -666,7 +667,7 @@ class MiniGraphCard extends LitElement {
   }
 
   /**
-  * Renders an indicator for an entity/static_value
+  * Renders an indicator for an entity/static value
   * @returns {SVGTemplateResult} SVG element
   * @param {string | number} state Value of a state/attribute or a static_value
   * @param {number} index Index of an entry in config.entities
@@ -680,7 +681,7 @@ class MiniGraphCard extends LitElement {
   }
 
   /**
-  * Renders static lines' labels
+  * Renders labels for static lines
   * @returns {TemplateResult} Lit template result
   */
   renderStaticLabels() {
@@ -913,9 +914,9 @@ class MiniGraphCard extends LitElement {
 
   /** Returns a rendered SVG part (fill, line, bars, points)
    * in a direct or a reversed order
-  * @returns {any} SVG part
+  * @returns {SVGTemplateResult[]} SVG part
   * @param {any[]} data Array of data to render an SVG part
-  * @param {()} renderFunc Function to render an SVG part
+  * @param {Function} renderFunc Function to render an SVG part
   * @param {boolean} reversed True if a reversed order
   */
   renderSvgPart(data, renderFunc, reversed) {
@@ -935,7 +936,7 @@ class MiniGraphCard extends LitElement {
   }
 
   /** Returns all rendered SVG parts (fill, line, bars, points)
-  * @returns {any} SVG element
+  * @returns {SVGTemplateResult} SVG element
   */
   renderSvg() {
     const { height, show } = this.config;
@@ -1138,7 +1139,7 @@ class MiniGraphCard extends LitElement {
   }
 
   /**
-  * Returns a color for an entity/static_value
+  * Returns a color for an entity/static value
   * accounting `color_thresholds`, global `line_color` & individual `color` settings
   * @returns Color
   * @param {string | number} inState Value of a state/attribute or a static_value
@@ -1295,7 +1296,7 @@ class MiniGraphCard extends LitElement {
   }
 
   /**
-  * Returns a string value for a state/attrubute or a static_value:
+  * Returns a string value for a state/attribute or a static_value:
   * localized, following locale settings,
   * (for entities:) accounting possible individual accuracy settings & possible "decimals" options
   * @returns {string} value of a state/attribute
@@ -1416,7 +1417,7 @@ class MiniGraphCard extends LitElement {
   }
 
   /**
-  * Returns settings defining an order of a state/attrubute value presentation;
+  * Returns settings defining an order of a state/attribute value presentation;
   * fallback to default settings in case of a static_value
   * @returns {Object}
   * directOrder - true: "value literal unit", false: "unit literal value";
@@ -1488,8 +1489,8 @@ class MiniGraphCard extends LitElement {
   }
 
   /**
-  * Returns a string state/attrubute value or static_value presentation
-  * @returns {string} State/attrubute value or static_value presentation
+  * Returns a string state/attribute value or static_value presentation
+  * @returns {string} State/attribute value or static_value presentation
   * @param {number|string} inState Value of a state/attribute/static_value
   * @param {number} index Index of an entry in config.entities
   * @param {boolean} [hideUnit] Do not show a unit for a value
