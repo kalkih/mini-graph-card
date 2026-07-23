@@ -787,7 +787,6 @@ class MiniGraphCard extends LitElement {
   */
   renderSvgLine(line, index) {
     if (!line) return;
-
     const strokeDashArray = (this.config.animate
       ? this.length[index]
       : this.config.entities[index].line_style || this.config.line_style)
@@ -817,9 +816,12 @@ class MiniGraphCard extends LitElement {
   * @returns {SVGTemplateResult} SVG element
   * @param {Array} point Point for a particular entity/static value
   * @param {number} index Index of an entry in config.entities
+  * @param {number} radius Previously calculated radius of a point
   */
-  renderSvgPoint(point, index) {
-    const color = this.gradient[index] ? this.computeColor(point[V], index) : 'inherit';
+  renderSvgPoint(point, index, radius) {
+    const color = this.gradient[index]
+      ? this.computeColor(point[V], index)
+      : 'inherit';
     return svg`
       <circle
         class='line--point'
@@ -827,7 +829,7 @@ class MiniGraphCard extends LitElement {
         style=${`--mcg-hover: ${color};`}
         stroke=${color}
         fill=${color}
-        cx=${point[X]} cy=${point[Y]} r=${this.config.entities[index].line_width || this.config.line_width}
+        cx=${point[X]} cy=${point[Y]} r=${radius}
         @mouseover=${() => this.setTooltip(index, point[3], point[V])}
         @mouseout=${() => (this.tooltip = {})}
       />
@@ -844,19 +846,28 @@ class MiniGraphCard extends LitElement {
     if (!points) return;
     const state = this.entity[index] !== undefined
       ? this.entity[index].state
-      : this.isStaticValue(index) ? this.config.entities[index].static_value : undefined;
+      : this.isStaticValue(index)
+        ? this.config.entities[index].static_value
+        : undefined;
     const color = this.computeColor(state, index);
+    const inactive = this.tooltip.entity !== undefined
+      && this.tooltip.entity !== index
+      && !this.isShowStaticInactive(index);
+    const radius = getFirstDefinedItem(
+      this.config.entities[index].line_width,
+      this.config.line_width
+    );
     return svg`
       <g class='line--points'
         ?tooltip=${this.tooltip.entity === index}
-        ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== index && !this.isShowStaticInactive(index)}
+        ?inactive=${inactive}
         ?init=${this.length[index]}
         anim=${this.config.animate && this.config.show.points !== 'hover'}
         style="animation-delay: ${this.config.animate ? `${index * 0.5 + 0.5}s` : '0s'}"
         fill=${color}
         stroke=${color}
-        stroke-width=${(this.config.entities[index].line_width || this.config.line_width) / 2}>
-        ${points.map(point => this.renderSvgPoint(point, index))}
+        stroke-width=${radius / 2}>
+        ${points.map(point => this.renderSvgPoint(point, index, radius))}
       </g>`;
   }
 
@@ -884,13 +895,18 @@ class MiniGraphCard extends LitElement {
     if (!line) return;
     const state = this.entity[index] !== undefined
       ? this.entity[index].state
-      : this.isStaticValue(index) ? this.config.entities[index].static_value : undefined;
+      : this.isStaticValue(index)
+        ? this.config.entities[index].static_value
+        : undefined;
     const fill = this.gradient[index]
       ? `url(#grad-${this.id}-${index})`
       : this.computeColor(state, index);
+    const inactive = this.tooltip.entity !== undefined
+      && this.tooltip.entity !== index
+      && !this.isShowStaticInactive(index);
     return svg`
       <rect class='line--rect'
-        ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== index && !this.isShowStaticInactive(index)}
+        ?inactive=${inactive}
         id=${`rect-${this.id}-${index}`}
         fill=${fill} height="100%" width="100%"
         mask=${`url(#line-${this.id}-${index})`}
@@ -911,9 +927,12 @@ class MiniGraphCard extends LitElement {
     const svgFill = this.gradient[index]
       ? `url(#grad-${this.id}-${index})`
       : this.computeColor(state, index);
+    const inactive = this.tooltip.entity !== undefined
+      && this.tooltip.entity !== index
+      && !this.isShowStaticInactive(index);
     return svg`
       <rect class='fill--rect'
-        ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== index && !this.isShowStaticInactive(index)}
+        ?inactive=${inactive}
         id=${`fill-rect-${this.id}-${index}`}
         fill=${svgFill} height="100%" width="100%"
         mask=${`url(#fill-${this.id}-${index})`}
@@ -944,12 +963,14 @@ class MiniGraphCard extends LitElement {
           ${animation}
         </rect>`;
     });
+    const inactive = this.tooltip.entity !== undefined
+      && this.tooltip.entity !== index
+      && !this.isShowStaticInactive(index);
     return svg`
       <g
         class='bars'
         ?anim=${this.config.animate}
-        ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== index
-          && !this.isShowStaticInactive(index)}
+        ?inactive=${inactive}
       >${items}</g>`;
   }
 
