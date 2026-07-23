@@ -920,18 +920,13 @@ class MiniGraphCard extends LitElement {
     const renderFuncBound = renderFunc.bind(this);
     const len = data.length;
     const result = new Array(len);
-    // "for" loop is used to avoid issues caused by
-    // how JS processes arrays with empty elements un "map()"
-    // (also for a higher performance)
     if (reversed) {
-      /* eslint-disable-next-line no-plusplus */
-      for (let i = len - 1; i >= 0; i--) {
-        result[len - 1 - i] = renderFuncBound(data[i], i);
+      for (let index = len - 1; index >= 0; index -= 1) {
+        result[len - 1 - index] = renderFuncBound(data[index], index);
       }
     } else {
-      /* eslint-disable-next-line no-plusplus */
-      for (let i = 0; i < len; i++) {
-        result[i] = renderFuncBound(data[i], i);
+      for (let index = 0; index < len; index += 1) {
+        result[index] = renderFuncBound(data[index], index);
       }
     }
     return result;
