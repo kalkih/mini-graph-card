@@ -855,7 +855,7 @@ class MiniGraphCard extends LitElement {
       && !this.isShowStaticInactive(index);
     const radius = getFirstDefinedItem(
       this.config.entities[index].line_width,
-      this.config.line_width
+      this.config.line_width,
     );
     return svg`
       <g class='line--points'
