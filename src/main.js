@@ -180,21 +180,25 @@ class MiniGraphCard extends LitElement {
           ? [0, max_line_width]
           : [min_line_width, max_line_width];
       this.Graph = this.config.entities.map(
-        (entity, index) => new Graph(
-          500,
-          this.config.height,
-          margin,
-          this.config.hours_to_show,
-          this.config.points_per_hour,
-          entity.aggregate_func || this.config.aggregate_func,
-          this.config.group_by,
-          getFirstDefinedItem(
+        (entity, index) => new Graph({
+          width: 500,
+          height: this.config.height,
+          margin: margin,
+          hours: this.config.hours_to_show,
+          points: this.config.points_per_hour,
+          aggregateFuncName: entity.aggregate_func || this.config.aggregate_func,
+          groupBy: this.config.group_by,
+          smoothing: getFirstDefinedItem(
             entity.smoothing,
             this.config.smoothing,
             this.getDefaultSmoothing(index),
           ),
-          this.computeUsesLogarithmic(index),
-        ),
+          logarithmic: getFirstDefinedItem(
+            entity.logarithmic,
+            this.config.logarithmic,
+            false,
+          ),
+        }),          
       );
     }
   }
