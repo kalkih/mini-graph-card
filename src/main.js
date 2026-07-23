@@ -211,6 +211,10 @@ class MiniGraphCard extends LitElement {
           bar_spacing: this.config.bar_spacing,
           bar_spacing_group: this.config.bar_spacing_group,
           total_bars_in_group: this.visibleEntities.length,
+          fill_baseline: getFirstDefinedItem(
+            entity.fill_baseline,
+            this.config.fill_baseline,
+          ),
         }),
       );
     }
@@ -1649,7 +1653,8 @@ class MiniGraphCard extends LitElement {
           const line = this.Graph[i].getPath();
           if (config.entities[i].show_line !== false) this.line[i] = line;
           if (config.show.fill
-            && config.entities[i].show_fill !== false) this.fill[i] = this.Graph[i].getFill(line);
+            && config.entities[i].show_fill !== false) this.fill[i] = this.Graph[i]
+            .getFill(line, config.entities[i].fill_threshold);
           if (config.show.points && (config.entities[i].show_points !== false)) {
             this.points[i] = this.Graph[i].getPoints();
           }

@@ -20,6 +20,7 @@ export default class Graph {
     bar_spacing = DEFAULT_BAR_SPACING, // spacing between bars
     bar_spacing_group = DEFAULT_BAR_SPACING, // spacing between groups of bars
     total_bars_in_group = 1, // number of bars (i.e. number of entities with a shown bar graph)
+    fill_baseline,
   }) {
     const aggregateFuncMap = {
       avg: this._average,
@@ -51,6 +52,7 @@ export default class Graph {
     this.total_bars_in_group = total_bars_in_group;
     this._groupBy = groupBy;
     this._endTime = 0;
+    this.fill_baseline = fill_baseline;
   }
 
   get max() { return this._max; }
@@ -113,6 +115,11 @@ export default class Graph {
     return coords;
   }
 
+  /**
+   * Recalculates a point's coords based on possibly defined min & max thresholds
+   * @param coords Array of X, Y, Value
+   * @returns Array of X, Y, Value, where Y - recalculated based on min/max thresholds
+   */
   _calcY(coords) {
     // account for logarithmic graph
     const max = this.logarithmic ? Math.log10(Math.max(1, this.max)) : this.max;
@@ -202,8 +209,17 @@ export default class Graph {
     });
   }
 
+  /**
+   * Generate an SVG path for a fill
+   * @param path SVG path for a line
+   * @returns SVG path for a fill
+   */
   getFill(path) {
-    const height = this.height + this.margin[Y] * 4;
+    let height = this.height + this.margin[Y] * 4;
+    if (this.fill_baseline !== undefined) {
+      const [baselineCoord] = this._calcY([[0, 0, this.fill_baseline]]);
+      [, height] = baselineCoord;
+    }
     let fill = path;
     // note that currently this.margin[X] = 0 when fill is defined
     fill += ` L ${this.width + this.margin[X]}, ${height}`;
