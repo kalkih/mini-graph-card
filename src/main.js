@@ -747,6 +747,12 @@ class MiniGraphCard extends LitElement {
     /* eslint-enable indent */
   }
 
+  /**
+  * Renders a fill mask for a particular entity/static value
+  * @returns {SVGTemplateResult} SVG element
+  * @param {Array} fill Array of fill for a particular entity/static value
+  * @param {number} index Index of an entry in config.entities
+  */
   renderSvgFill(fill, index) {
     if (!fill) return;
     const fade = this.config.show.fill === 'fade';
@@ -773,6 +779,12 @@ class MiniGraphCard extends LitElement {
       </mask>`;
   }
 
+  /**
+  * Renders a line for a particular entity/static value
+  * @returns {SVGTemplateResult} SVG element
+  * @param {Array} line Array of lines for a particular entity/static value
+  * @param {number} index Index of an entry in config.entities
+  */
   renderSvgLine(line, index) {
     if (!line) return;
 
@@ -800,6 +812,12 @@ class MiniGraphCard extends LitElement {
     `;
   }
 
+  /**
+  * Renders a line point for a particular entity/static value
+  * @returns {SVGTemplateResult} SVG element
+  * @param {Array} point Point for a particular entity/static value
+  * @param {number} index Index of an entry in config.entities
+  */
   renderSvgPoint(point, index) {
     const color = this.gradient[index] ? this.computeColor(point[V], index) : 'inherit';
     return svg`
@@ -816,6 +834,12 @@ class MiniGraphCard extends LitElement {
     `;
   }
 
+  /**
+  * Renders points for a particular entity/static value
+  * @returns {SVGTemplateResult} SVG element
+  * @param {Array} points Array of points for a particular entity/static value
+  * @param {number} index Index of an entry in config.entities
+  */
   renderSvgPoints(points, index) {
     if (!points) return;
     const state = this.entity[index] !== undefined
@@ -850,6 +874,12 @@ class MiniGraphCard extends LitElement {
     return svg`${items}`;
   }
 
+  /**
+  * Renders a background rectangle for a particular entity/static value
+  * @returns {SVGTemplateResult} SVG element
+  * @param {Array} line Array of lines for a particular entity/static value
+  * @param {number} index Index of an entry in config.entities
+  */
   renderSvgLineRect(line, index) {
     if (!line) return;
     const state = this.entity[index] !== undefined
@@ -867,6 +897,12 @@ class MiniGraphCard extends LitElement {
       />`;
   }
 
+  /**
+  * Renders a background fill rectangle for a particular entity/static value
+  * @returns {SVGTemplateResult} SVG element
+  * @param {Array} fill Array of fill for a particular entity/static value
+  * @param {number} index Index of an entry in config.entities
+  */
   renderSvgFillRect(fill, index) {
     if (!fill) return;
     const state = this.entity[index] !== undefined
@@ -887,7 +923,7 @@ class MiniGraphCard extends LitElement {
   /**
   * Renders bars for a particular entity/static value
   * @returns {SVGTemplateResult} SVG element
-  * @param bars Array of bars for a particular entity/static value
+  * @param {Array} bars Array of bars for a particular entity/static value
   * @param {number} index Index of an entry in config.entities
   */
   renderSvgBars(bars, index) {
@@ -918,7 +954,7 @@ class MiniGraphCard extends LitElement {
   }
 
   /** Returns a rendered SVG part (fill, line, bars, points)
-   * in a direct or a reversed order
+  * in a direct or a reversed order
   * @returns {SVGTemplateResult[]} SVG part
   * @param {any[]} data Array of data to render an SVG part
   * @param {Function} renderFunc Function to render an SVG part
