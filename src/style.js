@@ -8,7 +8,7 @@ const style = css`
   ha-card {
     flex-direction: column;
     flex: 1;
-    padding: 16px 0;
+    padding: 16px 0 0 0;
     position: relative;
     overflow: hidden;
   }
@@ -18,12 +18,12 @@ const style = css`
   ha-card > div:last-child {
     padding-bottom: 0;
   }
-  ha-card[points] .line--points,
-  ha-card[labels] .graph__labels.--primary {
-    opacity: 0;
-    transition: opacity .25s;
-    animation: none;
+  ha-card .graph {
+    padding: 0;
+    order: 10;
   }
+  ha-card[points] .line--points,
+  ha-card[labels] .graph__labels.--primary,
   ha-card[labels-secondary] .graph__labels.--secondary {
     opacity: 0;
     transition: opacity .25s;
@@ -34,26 +34,21 @@ const style = css`
   ha-card:hover .graph__labels.--secondary {
       opacity: 1;
   }
-  ha-card[fill] {
-    padding-bottom: 0;
-  }
-  ha-card[fill] .graph {
-    padding: 0;
-    order: 10;
-  }
   ha-card[fill] path {
     stroke-linecap: initial;
     stroke-linejoin: initial;
   }
-  ha-card[fill] .graph__legend {
+  .graph__legend {
     order: -1;
     padding: 0 16px 8px 16px;
   }
-  ha-card[fill] .info {
-    padding-bottom: 16px;
+  .graph__legend[loc="below"] {
+    order: 9;
+    padding: 4px 16px;
   }
   ha-card[group] {
     box-shadow: none;
+    border: none;
     padding: 0;
   }
   ha-card[group] > div {
@@ -66,6 +61,9 @@ const style = css`
   }
   ha-card[hover] {
     cursor: pointer;
+  }
+  ha-spinner {
+    margin: 4px auto;
   }
   .flex {
     display: flex;
@@ -97,7 +95,7 @@ const style = css`
     opacity: .65;
   }
   .icon {
-    color: var(--paper-item-icon-color, #44739e);
+    color: var(--state-icon-color, #44739e);
     display: inline-block;
     flex: 0 0 1.7em;
     text-align: center;
@@ -110,6 +108,9 @@ const style = css`
     order: -1;
     margin-right: .6em;
     margin-left: 0;
+  }
+  .icon[loc="right"] {
+    margin-left: auto;
   }
   .icon[loc="state"] {
     align-self: center;
@@ -167,8 +168,10 @@ const style = css`
     flex-wrap: nowrap;
     max-width: 100%;
     min-width: 0;
+    gap: .25rem;
   }
-  .state > svg {
+  .state > svg,
+  .states--secondary > div:only-child svg {
     align-self: center;
     border-radius: 100%;
   }
@@ -177,7 +180,7 @@ const style = css`
     margin-bottom: .6rem;
     flex-wrap: nowrap;
   }
-  .state--small > svg {
+  .states--secondary > :not(div:only-child) svg {
     position: absolute;
     left: -1.6em;
     align-self: center;
@@ -189,18 +192,17 @@ const style = css`
   .state--small:last-child {
     margin-bottom: 0;
   }
-  .states--secondary > :only-child {
+  .states--secondary > div:only-child {
     font-size: 1em;
     margin-bottom: 0;
-  }
-  .states--secondary > :only-child svg {
-    display: none;
   }
   .state__value {
     display: inline-block;
     font-size: 2.4em;
-    margin-right: .25rem;
     line-height: 1.2em;
+  }
+  .state[reversed="true"] .state__value {
+    order: 9;
   }
   .state__uom {
     flex: 1;
@@ -239,13 +241,19 @@ const style = css`
     width: 100%;
   }
   .graph__container {
-    display: flex;
-    flex-direction: row;
-    position: relative;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    align-items: stretch;
   }
   .graph__container__svg {
     cursor: default;
-    flex: 1;
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    grid-column: 1;
+    grid-row: 1;
   }
   svg {
     overflow: hidden;
@@ -267,12 +275,14 @@ const style = css`
   }
   .line--points[inactive],
   .line--rect[inactive],
-  .fill--rect[inactive] {
+  .fill--rect[inactive],
+  .bars[inactive] {
     opacity: 0 !important;
     animation: none !important;
     transition: all .15s !important;
   }
-  .line--points[tooltip] .line--point[inactive] {
+  .line--points[tooltip] .line--point[inactive],
+  .graph__static_value_labels > span[inactive] {
     opacity: 0;
   }
   .line--point {
@@ -296,9 +306,6 @@ const style = css`
     opacity: .5;
     cursor: pointer;
   }
-  ha-card[gradient] .line--point:hover {
-    fill: var(--primary-text-color, white);
-  }
   path,
   .line--points,
   .fill {
@@ -316,36 +323,53 @@ const style = css`
   .line[anim="true"][init] {
     animation: dash 1s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   }
-  .graph__labels.--secondary {
-    right: 0;
-    margin-right: 0px;
-    align-items: flex-end;
-  }
   .graph__labels {
-    align-items: flex-start;
+    display: flex;
     flex-direction: column;
-    font-size: calc(.15em + 8.5px);
-    font-weight: 400;
     justify-content: space-between;
-    margin-right: 10px;
+    align-items: flex-start;
+    font-size: calc(.15em + 8.5px);
     padding: .6em;
-    position: absolute;
     pointer-events: none;
-    top: 0; bottom: 0;
     opacity: .75;
+    grid-column: 1;
+    grid-row: 1;
+    position: relative;
+  }
+  .graph__labels.--secondary {
+    align-items: flex-end;
+    grid-column: 1;
+    grid-row: 1;
   }
   .graph__labels > span {
     cursor: pointer;
+  }
+  .graph__static_value_labels {
+    font-size: calc(.15em + 8.5px);
+    position: absolute;
+    pointer-events: none;
+    top: 0; bottom: 0;
+    left: 0; right: 0;
+  }
+  .graph__labels > span,
+  .graph__static_value_labels > span {
     background: var(--primary-background-color, white);
     border-radius: 1em;
     padding: .2em .6em;
     box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.24);
+    white-space: nowrap;
+    font-weight: 400;
+    user-select: none;
+  }
+  .graph__static_value_labels > span {
+    opacity: 0.75;
+    position: absolute;
+    transform: translate(-50%, -50%);
   }
   .graph__legend {
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
-    padding-top: 16px;
     flex-wrap: wrap;
   }
   .graph__legend__item {
@@ -366,6 +390,11 @@ const style = css`
   .info {
     justify-content: space-between;
     align-items: middle;
+  }
+  .info[loc="below"] {
+    order: 99;
+    padding-top: 4px;
+    padding-bottom: 4px;
   }
   .info__item {
     display: flex;
