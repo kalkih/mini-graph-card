@@ -1600,7 +1600,7 @@ class MiniGraphCard extends LitElement {
               .computeGradient(config.entities[i].color_thresholds || config.color_thresholds);
         }
       });
-      this.line = [...this.line];
+      this.line = [...this.line]; // force the card's re-rendering
     }
     this.updating = false;
     this.setNextUpdate();
