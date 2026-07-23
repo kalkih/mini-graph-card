@@ -246,7 +246,9 @@ const parseDateTimeFormatFromCfg = (dateTimeFormat) => {
   */
   const trimmed = dateTimeFormat.trim();
   if (!regex.test(trimmed)) {
+    // invalid datetime_format
     // fallback to a default "legacy" format
+    log(`invalid datetime_format [${dateTimeFormat}], fallback to legacy 'day_weekday'`);
     return { day_weekday: true };
   }
 
