@@ -791,6 +791,9 @@ class MiniGraphCard extends LitElement {
       ? this.length[index]
       : this.config.entities[index].line_style || this.config.line_style)
       || 'none';
+    const lineWidth = getFirstDefinedItem(
+      this.config.entities[index].line_width,
+      this.config.line_width);
     const path = svg`
       <path
         class='line'
@@ -800,10 +803,9 @@ class MiniGraphCard extends LitElement {
         fill='none'
         stroke-dasharray=${strokeDashArray} stroke-dashoffset=${this.length[index] || 'none'}
         stroke=${'white'}
-        stroke-width=${this.config.entities[index].line_width || this.config.line_width}
+        stroke-width=${lineWidth}
         d=${this.line[index]}
       />`;
-
     return svg`
       <mask id=${`line-${this.id}-${index}`}>
         ${path}
