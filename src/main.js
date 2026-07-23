@@ -85,9 +85,6 @@ class MiniGraphCard extends LitElement {
     let updated = false;
     const queue = [];
 
-    // initialize memoized data
-    this._datetimeFormatFromCfgParsedCache = null;
-
     this.config.entities.forEach((entity, index) => {
       this.config.entities[index].index = index; // Required for filtered views
       // entityState stands for "stateObj"
@@ -169,6 +166,7 @@ class MiniGraphCard extends LitElement {
     const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
 
     // initialize memoized data
+    this._datetimeFormatFromCfgParsedCache = null;
     this._visibleEntitiesCache = null;
     this._primaryYaxisEntitiesCache = null;
     this._secondaryYaxisEntitiesCache = null;
