@@ -793,7 +793,8 @@ class MiniGraphCard extends LitElement {
       || 'none';
     const lineWidth = getFirstDefinedItem(
       this.config.entities[index].line_width,
-      this.config.line_width);
+      this.config.line_width,
+    );
     const path = svg`
       <path
         class='line'
