@@ -155,6 +155,12 @@ class MiniGraphCard extends LitElement {
         return isNumeric(value)
           ? value : this.config.line_width;
       });
+    if (arr.length === 0) {
+      return ({
+        min: this.config.line_width,
+        max: this.config.line_width,
+      });
+    }
     return ({
       min: Math.min(...arr),
       max: Math.max(...arr),
@@ -172,8 +178,10 @@ class MiniGraphCard extends LitElement {
 
     if (!this.Graph || entitiesChanged) {
       if (this._hass) this.hass = this._hass;
-      const min_line_width = this.getMinMaxLineWidth().min;
-      const max_line_width = this.getMinMaxLineWidth().max;
+      const {
+        min: min_line_width,
+        max: max_line_width,
+      } = this.getMinMaxLineWidth();
       const margin = this.config.show.graph === 'bar'
         ? [DEFAULT_MARGIN, DEFAULT_MARGIN]
         : this.config.show.fill
