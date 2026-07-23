@@ -11,7 +11,7 @@ const isNumeric = value => typeof value === 'number' && Number.isFinite(value);
 
 const getExponent = factor => 10 ** factor;
 
-const logValueFactor = factor_obj => log(`invalid value_factor: ${JSON.stringify(factor_obj)}`);
+const logValueFactor = factor_obj => log(`invalid value_factor: [${JSON.stringify(factor_obj)}]`);
 
 /**
   * Return a multiplying factor (exponental or scale) based on a "value_factor" option
