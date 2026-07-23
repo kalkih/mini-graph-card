@@ -388,7 +388,9 @@ class MiniGraphCard extends LitElement {
 
     const { icon, icon_adaptive_color } = this.config.show;
 
-    if (!icon || !this.entity || !this.entity[0]) {
+    if (!icon
+      || !this.entity
+      || (!this.entity[0] && !this.isStaticValue(0))) {
       return html``;
     }
 
