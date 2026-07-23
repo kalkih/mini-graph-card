@@ -87,10 +87,6 @@ class MiniGraphCard extends LitElement {
 
     // initialize memoized data
     this._datetimeFormatFromCfgParsedCache = null;
-    this._visibleEntitiesCache = null;
-    this._primaryYaxisEntitiesCache = null;
-    this._secondaryYaxisEntitiesCache = null;
-    this._visibleLegendsCache = null;
 
     this.config.entities.forEach((entity, index) => {
       this.config.entities[index].index = index; // Required for filtered views
@@ -171,6 +167,12 @@ class MiniGraphCard extends LitElement {
     this.config = buildConfig(config);
     this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
     const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
+
+    // initialize memoized data
+    this._visibleEntitiesCache = null;
+    this._primaryYaxisEntitiesCache = null;
+    this._secondaryYaxisEntitiesCache = null;
+    this._visibleLegendsCache = null;
 
     // update datetime settings periodically
     this.updateHour24 = config.hour24 === undefined;
