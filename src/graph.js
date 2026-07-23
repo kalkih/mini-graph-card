@@ -5,7 +5,17 @@ import {
 } from './const';
 
 export default class Graph {
-  constructor(width, height, margin, hours = 24, points = 1, aggregateFuncName = 'avg', groupBy = 'interval', smoothing = true, logarithmic = false) {
+  constructor({
+    width,
+    height,
+    margin,
+    hours = 24,
+    points = 1,
+    aggregateFuncName = 'avg',
+    groupBy = 'interval',
+    smoothing = true,
+    logarithmic = false,
+  }) {
     const aggregateFuncMap = {
       avg: this._average,
       median: this._median,
