@@ -206,6 +206,9 @@ class MiniGraphCard extends LitElement {
             this.config.logarithmic,
             false,
           ),
+          bar_spacing: this.config.bar_spacing,
+          bar_spacing_group: this.config.bar_spacing_group,
+          total_bars_in_group: this.visibleEntities.length,
         }),
       );
     }
@@ -1576,13 +1579,7 @@ class MiniGraphCard extends LitElement {
         const bound = config.entities[i].y_axis === 'secondary' ? this.boundSecondary : this.bound;
         [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
         if (config.show.graph === 'bar') {
-          const numVisible = this.visibleEntities.length;
-          this.bar[i] = this.Graph[i].getBars(
-            graphPos,
-            numVisible,
-            config.bar_spacing,
-            config.bar_spacing_group,
-          );
+          this.bar[i] = this.Graph[i].getBars(graphPos);
           graphPos += 1;
         } else {
           const line = this.Graph[i].getPath();
