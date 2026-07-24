@@ -734,7 +734,7 @@ show:
 
 Baseline is set to 0:
 
-<img width="497" height="217" alt="изображение" src="https://github.com/user-attachments/assets/ac5798d3-50a7-4876-986c-2e3be83e17bc" />
+<img width="497" height="217" alt="изображение" src="https://github.com/user-attachments/assets/c755d398-bbe8-435a-8571-ee4947483b56" />
 
 ```yaml
 type: custom:mini-graph-card
