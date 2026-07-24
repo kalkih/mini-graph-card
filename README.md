@@ -124,6 +124,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | value_factor | number or object |   | v0.9.4<br>v0.14.0 | Scale a value, see [Value factor](#value-factor).
 | value_factor_secondary | number or object |   | v0.14.0 | Scale a value, see [Value factor](#value-factor).
 | logarithmic | boolean | `false` | v0.10.0 | Use a logarithmic scale for the graph (see [Logarithmic options](#logarithmic-options)).
+| fill_baseline | number |  | v0.14.0 | Set a custom baseline for the graph (see [Baseline](#baseline)).
 
 
 
@@ -159,6 +160,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | fixed_value | boolean |         | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 | smoothing | boolean |         | Override for a flag indicating whether to make graph line smooth.
 | logarithmic | boolean |         | Override logarithmic scaling for this entity only (see [Logarithmic options](#logarithmic-options)).
+| fill_baseline | number |  | v0.14.0 | Set a custom baseline for the graph (see [Baseline](#baseline)) or override a global `fill_baseline` option.
 
 Note: the "points" term is only applicable to a "line" graph, not to a "bar" graph.
 
@@ -375,6 +377,18 @@ Note that this option rounds up the input to 1 so negative numbers or numbers le
 
 A default line style is a "solid line". A style should be defined in a format used for a standard CSS `stroke-dasharray` property. Examples: `10,10` (dashes), `20,10` (long dashes); see cards examples [below](#custom-styles-for-line-graphs). It is better to use along with a `line_width` option.
 Warning: the `line_style` option is not accounted if `animation: true` option is set.
+
+### Baseline
+
+The `fill_baseline` option is only meaningful for linear graphs with a fill.
+
+By default, a fill is applied to an area between a curve and a bottom edge.
+With the `fill_baseline` option set, areas between a curve & a baseline are filled.
+This can be useful to show a deviation of a value near some basis (like for entities which can be both positive & nagitive).
+
+Additionally, the `fill_baseline` option can be set individually for entities.
+
+See examples [below](#custom-baseline).
 
 
 ### Graphs order
@@ -714,6 +728,54 @@ height: 200
 show:
   labels: true
   fill: false
+```
+
+#### Custom baseline
+
+Baseline is set to 0:
+
+<img width="497" height="217" alt="изображение" src="https://github.com/user-attachments/assets/ac5798d3-50a7-4876-986c-2e3be83e17bc" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.xxx
+fill_baseline: 0
+show:
+  labels: true
+```
+
+Individual baselines for entities (along with displaying static lines):
+
+<img width="498" height="264" alt="изображение" src="https://github.com/user-attachments/assets/43a39c0b-4ca2-40ad-8443-2e8821aa987b" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.xiaomi_cg_1_co2
+    fill_baseline: 660
+    color: orange
+    name: Room 1
+  - static_value: 660
+    show_fill: false
+    line_width: 1
+    color: orange
+    show_legend: false
+  - entity: sensor.xiaomi_cg_2_co2
+    fill_baseline: 740
+    color: green
+    name: Room 2
+  - static_value: 740
+    show_fill: false
+    line_width: 1
+    color: green
+    show_legend: false
+height: 200
+show:
+  static_value_labels: left
+  name: false
+  icon: false
+  state: false
 ```
 
 #### Grouping by date
