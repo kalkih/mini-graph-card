@@ -85,9 +85,6 @@ class MiniGraphCard extends LitElement {
     let updated = false;
     const queue = [];
 
-    // initialize memoized data
-    this._datetimeFormatFromCfgParsedCache = null;
-
     this.config.entities.forEach((entity, index) => {
       this.config.entities[index].index = index; // Required for filtered views
       // entityState stands for "stateObj"
@@ -169,6 +166,7 @@ class MiniGraphCard extends LitElement {
     const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
 
     // initialize memoized data
+    this._datetimeFormatFromCfgParsedCache = null;
     this._visibleEntitiesCache = null;
     this._primaryYaxisEntitiesCache = null;
     this._secondaryYaxisEntitiesCache = null;
@@ -1653,8 +1651,7 @@ class MiniGraphCard extends LitElement {
           const line = this.Graph[i].getPath();
           if (config.entities[i].show_line !== false) this.line[i] = line;
           if (config.show.fill
-            && config.entities[i].show_fill !== false) this.fill[i] = this.Graph[i]
-            .getFill(line, config.entities[i].fill_threshold);
+            && config.entities[i].show_fill !== false) this.fill[i] = this.Graph[i].getFill(line);
           if (config.show.points && (config.entities[i].show_points !== false)) {
             this.points[i] = this.Graph[i].getPoints();
           }
