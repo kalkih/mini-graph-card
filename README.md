@@ -160,7 +160,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | fixed_value | boolean |         | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 | smoothing | boolean |         | Override for a flag indicating whether to make graph line smooth.
 | logarithmic | boolean |         | Override logarithmic scaling for this entity only (see [Logarithmic options](#logarithmic-options)).
-| fill_baseline | number |   | Set a custom baseline for the graph (see [Baseline](#baseline)) or override a global `fill_baseline` option (see [Baseline](#baseline)).
+| fill_baseline | number |   | Set a custom baseline for the graph or override a global `fill_baseline` option (see [Baseline](#baseline)).
 
 Note: the "points" term is only applicable to a "line" graph, not to a "bar" graph.
 
