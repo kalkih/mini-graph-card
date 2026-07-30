@@ -44,8 +44,8 @@ export default class Graph {
     this._lmax = null;
     this._lmin = null;
     this._yRatio = null;
-    this._baseline = null;
-    this._bRatio = null;
+    this._baselineCoordY = null;
+    this._baselineRatio = null;
     this.points = points; // stands for "points_per_hour"
     this.hours = hours; // stands for "hours_to_show"
     this.aggregateFuncName = aggregateFuncName;
@@ -67,8 +67,8 @@ export default class Graph {
       this._max = max;
       this._lmax = null;
       this._yRatio = null;
-      this._baseline = null;
-      this._bRatio = null;
+      this._baselineCoordY = null;
+      this._baselineRatio = null;
     }
   }
 
@@ -79,8 +79,8 @@ export default class Graph {
       this._min = min;
       this._lmin = null;
       this._yRatio = null;
-      this._baseline = null;
-      this._bRatio = null;
+      this._baselineCoordY = null;
+      this._baselineRatio = null;
     }
   }
 
@@ -105,26 +105,26 @@ export default class Graph {
     return this._yRatio;
   }
 
-  get baseline() {
-    if (this._baseline === null) {
-      let baseline;
+  get baselineCoordY() {
+    if (this._baselineCoordY === null) {
+      let baselineCoordY;
 
       // only positive values, positive and zero values, or only zero values
-      if (this.lmax >= 0 && this.lmin >= 0) baseline = this.height + this.margin[Y] * 4;
+      if (this.lmax >= 0 && this.lmin >= 0) baselineCoordY = this.height + this.margin[Y] * 4;
       // only negative values, negative and zero values
-      else if (this.lmax <= 0) baseline = 0;
+      else if (this.lmax <= 0) baselineCoordY = 0;
       // positive and negative values (sign values)
-      else [[, baseline]] = this._calcY([[0, 0, 0]]);
-      this._baseline = baseline;
+      else [[, baselineCoordY]] = this._calcY([[0, 0, 0]]);
+      this._baselineCoordY = baselineCoordY;
     }
-    return this._baseline;
+    return this._baselineCoordY;
   }
 
-  get bRatio() {
-    if (this._bRatio === null) {
-      this._bRatio = this.baseline / (this.height + this.margin[Y] * 4);
+  get baselineRatio() {
+    if (this._baselineRatio === null) {
+      this._baselineRatio = this.baselineCoordY / (this.height + this.margin[Y] * 4);
     }
-    return this._bRatio;
+    return this._baselineRatio;
   }
 
   set history(data) { this._history = data; }
@@ -274,7 +274,7 @@ export default class Graph {
    * @returns SVG path for a fill
    */
   getFill(path) {
-    let height = this.baseline;
+    let height = this.baselineCoordY;
     if (this.fill_baseline !== undefined) {
       const [baselineCoord] = this._calcY([[0, 0, this.fill_baseline]]);
       [, height] = baselineCoord;
@@ -322,8 +322,8 @@ export default class Graph {
       x: this.margin[X]
         + (group_width + spacing_group) * i
         + (spacing === -1 ? 0 : (bar_width + spacing) * position),
-      y: Math.min(this.baseline, coord[Y]),
-      height: Math.max(this.baseline, coord[Y]) - Math.min(this.baseline, coord[Y]),
+      y: Math.min(this.baselineCoordY, coord[Y]),
+      height: Math.max(this.baselineCoordY, coord[Y]) - Math.min(this.baselineCoordY, coord[Y]),
       width: bar_width,
       value: coord[V],
     }));
