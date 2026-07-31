@@ -213,6 +213,7 @@ class MiniGraphCard extends LitElement {
             entity.fill_baseline,
             this.config.fill_baseline,
           ),
+          tension: this.config.tension,
         }),
       );
     }

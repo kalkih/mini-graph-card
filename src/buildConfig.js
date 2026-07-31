@@ -279,6 +279,8 @@ export default (config) => {
 
   conf.fill_baseline = checkNumericOption(conf, 'fill_baseline', undefined);
 
+  conf.tension = checkNumericOption(conf, 'tension', 0.15);
+
   conf.state_map.forEach((state, i) => {
     // convert string values to objects
     if (typeof state === 'string') conf.state_map[i] = { value: state, label: state };
