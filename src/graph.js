@@ -3,6 +3,7 @@ import {
   X, Y, V,
   ONE_HOUR,
   DEFAULT_BAR_SPACING,
+  DEFAULT_BEZIERC_TENSION,
 } from './const';
 import { log } from './utils';
 
@@ -21,7 +22,7 @@ export default class Graph {
     bar_spacing_group = DEFAULT_BAR_SPACING, // spacing between groups of bars
     total_bars_in_group = 1, // number of bars (i.e. number of entities with a shown bar graph)
     fill_baseline,
-    tension = 0.15,
+    tension = DEFAULT_BEZIERC_TENSION, // tension for Bezier C curve
   }) {
     const aggregateFuncMap = {
       avg: this._average,

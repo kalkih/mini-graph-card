@@ -9,6 +9,7 @@ import {
   DEFAULT_HOURS_TO_SHOW,
   DEFAULT_POINTS_PER_HOUR,
   DEFAULT_STATIC_VALUE_LABEL_OFFSET,
+  DEFAULT_BEZIERC_TENSION,
   DEFAULT_COLORS,
   DEFAULT_SHOW,
 } from './const';
@@ -279,7 +280,7 @@ export default (config) => {
 
   conf.fill_baseline = checkNumericOption(conf, 'fill_baseline', undefined);
 
-  conf.tension = checkNumericOption(conf, 'tension', 0.15);
+  conf.tension = checkNumericOption(conf, 'tension', DEFAULT_BEZIERC_TENSION, 0);
 
   conf.state_map.forEach((state, i) => {
     // convert string values to objects
