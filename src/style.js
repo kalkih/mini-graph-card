@@ -355,7 +355,6 @@ const style = css`
   .graph__labels > span,
   .graph__static_value_labels > span {
     background: var(--primary-background-color, white);
-    border-radius: 1em;
     padding: .2em .6em;
     box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.24);
     white-space: nowrap;
