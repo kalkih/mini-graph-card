@@ -424,6 +424,12 @@ The following theme variables can be set in your HA theme to customize the appea
 |------|:-------:|-------------|
 | mcg-title-letter-spacing |  | Letter spacing of the card title (`name` option).
 | mcg-title-font-weight | 500 | Font weight of the card title.
+| mcg-label-axis-opacity | 0.75 | Opacity of the Y-axis labels.
+| mcg-label-static-opacity | 0.75 | Opacity of the static values' labels.
+| mcg-label-axis-border-radius | 1em | Border radius of the Y-axis labels.
+| mcg-label-static-border-radius | 1em | Border radius of the static values' labels.
+
+
 
 ### Example usage
 

@@ -331,7 +331,7 @@ const style = css`
     font-size: calc(.15em + 8.5px);
     padding: .6em;
     pointer-events: none;
-    opacity: .75;
+    opacity: var(--mcg-label-axis-opacity, .75);
     grid-column: 1;
     grid-row: 1;
     position: relative;
@@ -343,6 +343,7 @@ const style = css`
   }
   .graph__labels > span {
     cursor: pointer;
+    border-radius: var(--mcg-label-axis-border-radius, 1em);
   }
   .graph__static_value_labels {
     font-size: calc(.15em + 8.5px);
@@ -354,7 +355,6 @@ const style = css`
   .graph__labels > span,
   .graph__static_value_labels > span {
     background: var(--primary-background-color, white);
-    border-radius: 1em;
     padding: .2em .6em;
     box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.24);
     white-space: nowrap;
@@ -362,7 +362,8 @@ const style = css`
     user-select: none;
   }
   .graph__static_value_labels > span {
-    opacity: 0.75;
+    border-radius: var(--mcg-label-static-border-radius, 1em);
+    opacity: var(--mcg-label-static-opacity, .75);
     position: absolute;
     transform: translate(-50%, -50%);
   }
