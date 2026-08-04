@@ -731,10 +731,7 @@ class MiniGraphCard extends LitElement {
 
     /* eslint-disable indent */
     return html`
-      <div
-        class="graph__static_value_labels"
-        loc="${this.config.show.static_value_labels}"
-      >
+      <div class="graph__static_value_labels">
         ${this.config.entities.map((_, index) => {
           if (!this.isStaticValue(index)
             || this.config.entities[index].show_static_value_label === false) {
