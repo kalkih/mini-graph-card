@@ -111,8 +111,8 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | datetime_format | string | | v.0.14.0 | Set a custom [format](#custom-format-for-datetime-values) for datetime values.
 | font_size | number | `100` | v0.0.3 | Adjust the font size of the state, as percentage of the original size.
 | font_size_header | number | `14` | v0.3.1 | Adjust the font size of the header, size in pixels.
-| align_header | string | `default` | v0.2.0 | Set the alignment of the header, `left`, `right`, `center` or `default`.
-| align_icon | string | `right` | v0.2.0 | Set the alignment of the icon, `left`, `right` or `state`.
+| align_header | string |  | v0.2.0 | Set the alignment of the header, `left`, `right` or `center`. See more details [here](#alignment-for-name--icon-elements).
+| align_icon | string | `right` | v0.2.0 | Set the alignment of the icon, `left`, `right` or `state`. See more details [here](#alignment-for-name--icon-elements).
 | align_state | string | `left` | v0.2.0 | Set the alignment of the current state, `left`, `right` or `center`.
 | lower_bound | number *or* string |  | v0.2.3 | Set a fixed lower bound for the graph Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
 | upper_bound | number *or* string |  | v0.2.3 | Set a fixed upper bound for the graph Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
@@ -310,6 +310,20 @@ These buckets are converted later to single point/bar on the graph. Aggregate fu
 | `sum` | v0.9.2 |
 | `delta` | v0.9.4 | Calculates difference between max and min value
 | `diff` | v0.11.0 | Calculates difference between first and last value
+
+### Alignment for "name" & "icon" elements
+
+Depending on the configuration, the "name" & "icon" elements are aligned as follows:
+
+1. If the icon is hidden (`show.icon: false`) & `align_header` is not defined — the "name" is aligned to the left.
+2. If the icon is hidden (`show.icon: false`) & `align_header` is defined — the "name" is aligned to the left/center/right depending on `align_header`.
+3. If the icon is shown (here and below) & both `align_header` and `align_icon` are not defined — the "name" is on the left, and the "icon" is on the right.
+4. If `align_header` is defined & the name is hidden (`show.name: false`) & `align_icon` is not defined — the "icon" is aligned to the right.
+5. If `align_header` is defined & the name is shown & `align_icon` is not defined — the "name" is aligned to the left/center/right depending on `align_header`, and the "icon" is placed on the left (if `align_header: right`) or on the right (if `align_header: left/center`).
+6. If both `align_header` & `align_icon` are defined — the "icon" is aligned to the left/right depending on `align_icon`, and the "name" is placed on the left (if `align_icon: right`), on the right (if `align_icon: left`), or in the center (if `align_header: center`), meaning `align_icon` takes precedence.
+7. If `align_header` is not defined & `align_icon` is defined — the "icon" is aligned to the left/right depending on `align_icon`, and the "name" is placed on the left (if `align_icon: right`) or on the right (if `align_icon: left`).
+
+
 
 ### Static lines
 
