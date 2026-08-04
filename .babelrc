@@ -9,7 +9,7 @@
         }
       }
     ],
-    ["minify"],
+    ["minify"]
   ],
   "comments": false,
   "plugins": [
@@ -22,6 +22,6 @@
     }],
     ["@babel/plugin-proposal-object-rest-spread"],
     ["@babel/plugin-transform-spread"],
-    ["iife-wrap"],
-  ],
+    ["iife-wrap"]
+  ]
 }

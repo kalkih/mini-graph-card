@@ -2,29 +2,6 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"type": "npm",
-			"script": "watch",
-			"group": "test",
-			"label": "npm: watch",
-			"detail": "rollup -c --watch",
-			"isBackground": true,
-			"problemMatcher": {
-				"pattern": [
-					{
-						"regexp": ".",
-						"file": 1,
-						"location": 2,
-						"message": 3
-					}
-				],
-				"background": {
-					"activeOnStart": true,
-					"beginsPattern": "^bundles\\s",
-					"endsPattern": "^.*waiting for changes\\.\\.\\."
-				}
-			}
-		},
-		{
 			"type": "shell",
 			"label": "devcontainer: Start HA",
 			"command": "sh -c 'sudo --preserve-env=PATH container start'",
@@ -69,8 +46,20 @@
 			},
 			"args": [
 				"-c",
-				"sudo killall hass; sudo kill $(ps au | grep 'node.*rollup' | grep -v grep | awk {'print $2'}); exit 0;",
+				"sudo killall hass; sudo kill $(ps au | grep 'node.*rollup' | grep -v grep | awk {'print $2'}); exit 0;"
 			]
+		},
+		{
+			"type": "npm",
+			"script": "test",
+			"group": "test",
+			"problemMatcher": [],
+			"label": "npm: test",
+			"detail": "vitest run",
+			"presentation": {
+				"clear": true,
+				"panel": "dedicated",
+			}
 		}
 	]
 }
