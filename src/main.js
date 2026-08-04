@@ -403,10 +403,7 @@ class MiniGraphCard extends LitElement {
     }
 
     const { icon_color } = this.config;
-    const iconColor = icon_color
-      ? icon_color
-      : icon_adaptive_color
-        ? this.color : undefined;
+    const iconColor = icon_color || (icon_adaptive_color ? this.color : undefined);
 
     return html`
       <div
