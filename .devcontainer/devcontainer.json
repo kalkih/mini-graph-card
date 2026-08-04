@@ -1,6 +1,6 @@
 {
   "name": "Mini Graph Card Development",
-  "image": "ghcr.io/custom-cards/custom-card-devcontainer:latest",
+  "image": "ghcr.io/ludeeus/devcontainer/generic:latest",
   "context": "..",
   "remoteUser": "vscode",
   "appPort": [
@@ -30,14 +30,6 @@
       "**/node_modules/**": true,
       "**/.hg/store/**": true,
       "**/.rpt2_cache/**": true
-    }
-  },
-  "portsAttributes": {
-    "5000": {
-      "label": "rollup"
-    },
-    "8123": {
-      "label": "HA"
     }
   }
 }
