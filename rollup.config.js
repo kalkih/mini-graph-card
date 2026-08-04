@@ -1,4 +1,4 @@
-import resolve from '@rollup/plugin-node-resolve';
+import resolve from 'rollup-plugin-node-resolve';
 import json from '@rollup/plugin-json';
 import serve from 'rollup-plugin-serve';
 import commonjs from '@rollup/plugin-commonjs';
