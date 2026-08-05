@@ -372,7 +372,7 @@ For clarity, it is recommended to explicitly define a `day_weekday` value in cas
 
 Normally gaps between numbers on the graph are equal; the gap between 1 and 2 on the graph is the same as the gap between 100 and 101. The `logarithmic` option applies a [logarithmic transformation](https://en.wikipedia.org/wiki/Log_transformation_(statistics)) to the graph. With `logarithmic`, the graph is scaled by powers of 10, so the gap between 1, 10, 100, etc are equal. This is useful when your values span a wide range. Illuminance, for example, can swing from 1 to 5000 over the course of a day, and without a transformation it's hard to read the smaller values on the graph.
 
-Note that this option rounds up the input to 1 so negative numbers or numbers less than 1 are rendered as 0; this is different from the formal definition of logarithm, where `log(x) == 0` when `x<1` and $\infty$ when `x<0`.
+Note that this option rounds up the input to 1 so negative numbers or numbers less than 1 are rendered as 0; this is different from the formal definition of logarithm, where `log(x) < 0` when `x > 0 && x < 1` and $\infty$ or `NaN` when `x <= 0`.
 
 ### Line styles
 
