@@ -12,7 +12,6 @@ import {
   DEFAULT_COLORS,
   DEFAULT_SHOW,
 } from './const';
-import { isNumeric } from './others';
 import { log } from './utils';
 import { checkNumericOption, checkIntegerOption } from './checkOption';
 
