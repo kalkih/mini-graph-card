@@ -28,17 +28,19 @@ const getFactor = (config, index = undefined) => {
   let value_factor;
   const validIndex = typeof index === 'number'
     && index >= 0
-    && config.entities
+    && Array.isArray(config.entities)
     && config.entities[index];
+
   if (validIndex && config.entities[index].value_factor !== undefined) {
     // provided a per-entity value_factor
     ({ value_factor } = config.entities[index]);
-  } else if (validIndex && config.entities[index].y_axis === 'secondary'
-    && config.value_factor_secondary !== undefined) {
+  } else if (validIndex && config.entities[index].y_axis === 'secondary') {
     // use value_factor_secondary for entities with 'y_axis: secondary'
+    // if value_factor_secondary = undefined, then later it will fallback to 1
     value_factor = config.value_factor_secondary;
-  } else if (index === -1 && config.value_factor_secondary !== undefined) {
+  } else if (index === -1) {
     // use value_factor_secondary for secondary Y-axis labels
+    // if value_factor_secondary = undefined, then later it will fallback to 1
     value_factor = config.value_factor_secondary;
   } else {
     // use a global value_factor
