@@ -14,7 +14,6 @@ interface ValueFactorType {
 };
 
 interface EntityConfig {
-  // value_factor?: number | ValueFactorType | any;  // ?
   y_axis?: "primary" | "secondary";
 };
 
