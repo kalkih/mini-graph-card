@@ -188,7 +188,7 @@ describe("getFactor", () => {
     //////////////////////////////////////////////////////////////////////////
     // Testing value_factor_secondary with value_factor
 
-    it(`getFactor [value: ${value}]: value_factor_secondary: explicitly set to 0 - ignored since "index" in "getFactor()" is undefined, a global value_factor 'exponent 3' is used instead`, () => {
+    it(`getFactor [value: ${value}]: value_factor_secondary: explicitly set to 0 - ignored since "index" in "getFactor()" is undefined, value_factor 'exponent 3' is used instead`, () => {
       const exponent = 3;
       const config: ConfigType = {
         value_factor: exponent,
@@ -202,7 +202,7 @@ describe("getFactor", () => {
       );
     });
 
-    it(`getFactor [value: ${value}]: value_factor_secondary: explicitly set to 0 - ignored since "index" in "getFactor()" is set to 0, and the 0th entity is not assigned to a 'secondary' y_axis; a global value_factor 'exponent 3' is used instead`, () => {
+    it(`getFactor [value: ${value}]: value_factor_secondary: explicitly set to 0 - ignored since "index" in "getFactor()" is set to 0, and the 0th entity is not assigned to a 'secondary' y_axis; value_factor 'exponent 3' is used instead`, () => {
       const exponent = 3;
       const config: ConfigType = {
         value_factor: exponent,
