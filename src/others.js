@@ -7,6 +7,11 @@
 
 import { log } from './utils';
 
+/**
+  * Check if a value is a valid number
+  * @param {any} value Value to be checked
+  * @returns {boolean} True if value is a valid number, false - otherwise
+  */
 const isNumeric = value => typeof value === 'number' && Number.isFinite(value);
 
 const getExponent = factor => 10 ** factor;
@@ -81,6 +86,6 @@ const getFactor = (config, index = undefined) => {
 };
 
 export {
-  getFactor,
   isNumeric,
+  getFactor,
 };
