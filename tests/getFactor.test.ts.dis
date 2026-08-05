@@ -14,6 +14,7 @@ interface ValueFactorType {
 };
 
 interface EntityConfig {
+  // value_factor?: number | ValueFactorType | any;  // ?
   y_axis?: "primary" | "secondary";
 };
 
@@ -39,7 +40,7 @@ describe("getFactor", () => {
     //////////////////////////////////////////////////////////////////////////
     // Testing value_factor non-object
 
-    it("value_factor: explicitly set to 0", () => {
+    it(`getFactor [value: ${value}]: value_factor: explicitly set to 0`, () => {
       const config: ConfigType = {
         value_factor: 0,
       };
@@ -51,7 +52,7 @@ describe("getFactor", () => {
       );
     });
 
-    it("value_factor: exponent 2", () => {
+    it(`getFactor [value: ${value}]: value_factor: exponent 2`, () => {
       const exponent = 2;
       const config: ConfigType = {
         value_factor: exponent,
@@ -64,7 +65,7 @@ describe("getFactor", () => {
       );
     });
 
-    it("value_factor: invalid", () => {
+    it(`getFactor [value: ${value}]: value_factor: invalid`, () => {
       const config: ConfigType = {
         value_factor: 'abc',
       };
@@ -76,7 +77,7 @@ describe("getFactor", () => {
       );
     });
 
-    it("value_factor: undefined", () => {
+    it(`getFactor [value: ${value}]: value_factor: undefined`, () => {
       const config: ConfigType = {
       };
       const result = value * getFactor(config);
@@ -90,7 +91,7 @@ describe("getFactor", () => {
     //////////////////////////////////////////////////////////////////////////
     // Testing value_factor_secondary
 
-    it("value_factor_secondary: explicitly set to 0 - still ignored since `index` in `getFactor()` is undefined", () => {
+    it(`getFactor [value: ${value}]: value_factor_secondary: explicitly set to 0 - still ignored since "index" in "getFactor()" is undefined`, () => {
       const config: ConfigType = {
         value_factor_secondary: 0,
       };
@@ -102,7 +103,7 @@ describe("getFactor", () => {
       );
     });
 
-    it("value_factor_secondary: exponent 2 - still ignored since `index` in `getFactor()` is undefined", () => {
+    it(`getFactor [value: ${value}]: value_factor_secondary: exponent 2 - still ignored since "index" in "getFactor()" is undefined`, () => {
       const exponent = 2;
       const config: ConfigType = {
         value_factor_secondary: exponent,
@@ -115,7 +116,7 @@ describe("getFactor", () => {
       );
     });
 
-    it("value_factor_secondary: exponent 2, index -1", () => {
+    it(`getFactor [value: ${value}]: value_factor_secondary: exponent 2, index -1`, () => {
       const exponent = 2;
       const config: ConfigType = {
         value_factor_secondary: exponent,
@@ -128,7 +129,7 @@ describe("getFactor", () => {
       );
     });
 
-    it("value_factor_secondary: exponent 2, index 0 (y_axis: undefined)", () => {
+    it(`getFactor [value: ${value}]: value_factor_secondary: exponent 2, index 0 (y_axis: undefined)`, () => {
       const exponent = 2;
       const config: ConfigType = {
         value_factor_secondary: exponent,
@@ -145,7 +146,7 @@ describe("getFactor", () => {
       );
     });
 
-    it("value_factor_secondary: exponent 2, index 1 (y_axis: secondary)", () => {
+    it(`getFactor [value: ${value}]: value_factor_secondary: exponent 2, index 1 (y_axis: secondary)`, () => {
       const exponent = 2;
       const config: ConfigType = {
         value_factor_secondary: exponent,
@@ -162,7 +163,7 @@ describe("getFactor", () => {
       );
     });
 
-    it("value_factor_secondary: invalid", () => {
+    it(`getFactor [value: ${value}]: value_factor_secondary: invalid`, () => {
       const config: ConfigType = {
         value_factor_secondary: 'abc',
       };
@@ -174,7 +175,7 @@ describe("getFactor", () => {
       );
     });
 
-    it("value_factor_secondary: undefined", () => {
+    it(`getFactor [value: ${value}]: value_factor_secondary: undefined`, () => {
       const config: ConfigType = {
       };
       const result = value * getFactor(config);
@@ -188,8 +189,7 @@ describe("getFactor", () => {
     //////////////////////////////////////////////////////////////////////////
     // Testing value_factor_secondary with value_factor
 
-    it("value_factor_secondary: explicitly set to 0 - still ignored since `index` in `getFactor()` is undefined \
-      a global value_factor 'exponent 3' is used instead", () => {
+    it(`getFactor [value: ${value}]: value_factor_secondary: explicitly set to 0 - ignored since "index" in "getFactor()" is undefined, a global value_factor 'exponent 3' is used instead`, () => {
       const exponent = 3;
       const config: ConfigType = {
         value_factor: exponent,
@@ -203,9 +203,7 @@ describe("getFactor", () => {
       );
     });
 
-    it("value_factor_secondary: explicitly set to 0 - still ignored since `index` in `getFactor()` is set to 0, \
-and the 0th entity is not assigned to a 'secondary' y_axis; \
-a global value_factor 'exponent 3' is used instead", () => {
+    it(`getFactor [value: ${value}]: value_factor_secondary: explicitly set to 0 - ignored since "index" in "getFactor()" is set to 0, and the 0th entity is not assigned to a 'secondary' y_axis; a global value_factor 'exponent 3' is used instead`, () => {
       const exponent = 3;
       const config: ConfigType = {
         value_factor: exponent,
@@ -223,8 +221,7 @@ a global value_factor 'exponent 3' is used instead", () => {
       );
     });
 
-    it("value_factor_secondary: explicitly set to 0, `index` in `getFactor()` is set to 1, \
-and the 1st entity is assigned to a 'secondary' y_axis", () => {
+    it(`getFactor [value: ${value}]: value_factor_secondary: explicitly set to 0, "index" in "getFactor()" is set to 1, and the 1st entity is assigned to a 'secondary' y_axis`, () => {
       const exponent = 3;
       const config: ConfigType = {
         value_factor: exponent,
@@ -242,8 +239,7 @@ and the 1st entity is assigned to a 'secondary' y_axis", () => {
       );
     });
 
-    it("value_factor_secondary: set to 4, `index` in `getFactor()` is set to 1, \
-and the 1st entity is assigned to a 'secondary' y_axis", () => {
+    it(`getFactor [value: ${value}]: value_factor_secondary: set to 4, "index" in "getFactor()" is set to 1, and the 1st entity is assigned to a 'secondary' y_axis`, () => {
       const exponent = 3;
       const exponent_secondary = 4;
       const config: ConfigType = {
@@ -262,9 +258,24 @@ and the 1st entity is assigned to a 'secondary' y_axis", () => {
       );
     });
 
-    it("value_factor_secondary: set to a wrong 'abc', `index` in `getFactor()` is set to 1, \
-and the 1st entity is assigned to a 'secondary' y_axis; \
-finally, a value_factor = 1 is used", () => {
+    it(`getFactor [value: ${value}]: value_factor_secondary undefined, "index" in "getFactor()" is set to 1, and the 1st entity is assigned to a 'secondary' y_axis; finally, a default value_factor = 1 is used`, () => {
+      const exponent = 3;
+      const config: ConfigType = {
+        value_factor: exponent,
+        entities: [
+          {},
+          {y_axis: 'secondary'},
+        ],
+      };
+      const result = value * getFactor(config, 1);
+      const expectedValue = value;
+      assert.strictEqual(
+        result,
+        expectedValue,
+      );
+    });
+
+    it(`getFactor [value: ${value}]: value_factor_secondary: set to a wrong 'abc', "index" in "getFactor()" is set to 1, and the 1st entity is assigned to a 'secondary' y_axis; finally, a default value_factor = 1 is used`, () => {
       const exponent = 3;
       const exponent_secondary = 'abc';
       const config: ConfigType = {
@@ -286,7 +297,7 @@ finally, a value_factor = 1 is used", () => {
     //////////////////////////////////////////////////////////////////////////
     // Testing value_factor object
 
-    it("value_factor: value_factor = object, exponent 2", () => {
+    it(`getFactor [value: ${value}]: value_factor: value_factor = object, exponent 2`, () => {
       const exponent = 2;
       const config: ConfigType = {
         value_factor: {
@@ -302,7 +313,7 @@ finally, a value_factor = 1 is used", () => {
       );
     });
 
-    it("value_factor: value_factor = object, scale 2", () => {
+    it(`getFactor [value: ${value}]: value_factor: value_factor = object, scale 2`, () => {
       const scale = 2;
       const config: ConfigType = {
         value_factor: {
@@ -321,7 +332,7 @@ finally, a value_factor = 1 is used", () => {
     //////////////////////////////////////////////////////////////////////////
     // Testing value_factor object, invalid data
 
-    it("value_factor: value_factor = object, type invalid", () => {
+    it(`getFactor [value: ${value}]: value_factor: value_factor = object, type invalid`, () => {
       const config: ConfigType = {
         value_factor: {
           type: 'abc',
@@ -336,7 +347,7 @@ finally, a value_factor = 1 is used", () => {
       );
     });
 
-    it("value_factor: value_factor = object, type undefined", () => {
+    it(`getFactor [value: ${value}]: value_factor: value_factor = object, type undefined`, () => {
       const config: ConfigType = {
         value_factor: {
           factor: 2,
@@ -350,7 +361,7 @@ finally, a value_factor = 1 is used", () => {
       );
     });
 
-    it("value_factor: value_factor = object, exponent invalid", () => {
+    it(`getFactor [value: ${value}]: value_factor: value_factor = object, exponent invalid`, () => {
       const config: ConfigType = {
         value_factor: {
           type: 'exponent',
@@ -365,7 +376,7 @@ finally, a value_factor = 1 is used", () => {
       );
     });
 
-    it("value_factor: value_factor = object, exponent undefined", () => {
+    it(`getFactor [value: ${value}]: value_factor: value_factor = object, exponent undefined`, () => {
       const config: ConfigType = {
         value_factor: {
           type: 'exponent',
@@ -379,7 +390,7 @@ finally, a value_factor = 1 is used", () => {
       );
     });
 
-    it("value_factor: value_factor = object, scale invalid", () => {
+    it(`getFactor [value: ${value}]: value_factor: value_factor = object, scale invalid`, () => {
       const config: ConfigType = {
         value_factor: {
           type: 'scale',
@@ -394,7 +405,7 @@ finally, a value_factor = 1 is used", () => {
       );
     });
 
-    it("value_factor: value_factor = object, scale undefined", () => {
+    it(`getFactor [value: ${value}]: value_factor: value_factor = object, scale undefined`, () => {
       const config: ConfigType = {
         value_factor: {
           type: 'scale',
