@@ -9,6 +9,7 @@ import { isNumeric } from './others';
  * @param {number} defaultValue Default fallback value
  * @param {number} minBound Optional minimum allowed value
  * @param {number} maxBound Optional maximum allowed value
+ * @param {boolean} [allowString=false] Optional flag to allow string representations of numbers (like "123")
  * @returns {number} Cleared value
  */
 const checkNumericOption = (
@@ -17,6 +18,7 @@ const checkNumericOption = (
   defaultValue,
   minBound = undefined,
   maxBound = undefined,
+  allowString = false,
 ) => {
   const value = config[option];
 
@@ -24,11 +26,16 @@ const checkNumericOption = (
     return undefined;
   }
 
-  if (isNumeric(value)) {
-    const isMinValid = minBound === undefined || value >= minBound;
-    const isMaxValid = maxBound === undefined || value <= maxBound;
+  if (isNumeric(value, allowString)) {
+    if (typeof value === 'string') {
+      log(`Warning for option ${option}: [${value}] is configured as a string; please make it a number`);
+    }
+
+    const valueNumeric = Number(value);
+    const isMinValid = minBound === undefined || valueNumeric >= minBound;
+    const isMaxValid = maxBound === undefined || valueNumeric <= maxBound;
     if (isMinValid && isMaxValid) {
-      return value;
+      return valueNumeric; // return type 'number'
     }
   }
 
@@ -37,10 +44,11 @@ const checkNumericOption = (
     ? JSON.stringify(value)
     : value;
   let errorDescr = 'not a numeric value';
-  if (isNumeric(value)) {
-    if (minBound !== undefined && value < minBound) {
+  if (isNumeric(value, allowString)) {
+    const valueNumeric = Number(value);
+    if (minBound !== undefined && valueNumeric < minBound) {
       errorDescr = `out of bounds, minimum allowed: ${minBound}`;
-    } else if (maxBound !== undefined && value > maxBound) {
+    } else if (maxBound !== undefined && valueNumeric > maxBound) {
       errorDescr = `out of bounds, maximum allowed: ${maxBound}`;
     }
   }
@@ -57,6 +65,7 @@ const checkNumericOption = (
  * @param {number} defaultValue Default fallback value
  * @param {number} minBound Optional minimum allowed value
  * @param {number} maxBound Optional maximum allowed value
+ * @param {boolean} [allowString=false] Optional flag to allow string representations of numbers (like "123")
  * @returns {number} Cleared value
  */
 const checkIntegerOption = (
@@ -65,8 +74,9 @@ const checkIntegerOption = (
   defaultValue,
   minBound = undefined,
   maxBound = undefined,
+  allowString = false,
 ) => {
-  const value = checkNumericOption(config, option, defaultValue, minBound, maxBound);
+  const value = checkNumericOption(config, option, defaultValue, minBound, maxBound, allowString);
   if (value !== undefined && !Number.isInteger(value)) {
     const roundedValue = Math.round(value) + 0; // prevent "-0" value
     log(`Invalid integer option ${option}: [${value}]; rounding value to ${roundedValue}`);
