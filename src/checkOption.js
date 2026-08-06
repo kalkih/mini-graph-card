@@ -123,7 +123,8 @@ const checkBoundOption = (config, option) => {
 /**
  * Check both upper/lower bounds for valid values
  * @param {object} config Config object
- * @returns {{lowerBound: string|number|undefined, upperBound: string|number|undefined}} Cleared bounds
+ * @returns {{lowerBound: string|number|undefined, upperBound: string|number|undefined}} Cleared
+ * bounds
  */
 const checkBounds = (config) => {
   const lowerBound = checkBoundOption(config, 'lower_bound');
