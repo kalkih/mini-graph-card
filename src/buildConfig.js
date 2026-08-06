@@ -13,7 +13,11 @@ import {
   DEFAULT_SHOW,
 } from './const';
 import { log } from './utils';
-import { checkNumericOption, checkIntegerOption } from './checkOption';
+import {
+  checkNumericOption,
+  checkIntegerOption,
+  checkBounds,
+} from './checkOption';
 import { getFactor } from './others';
 
 /**
@@ -170,6 +174,8 @@ export default (config) => {
   conf.hours_to_show = checkNumericOption(conf, 'hours_to_show', DEFAULT_HOURS_TO_SHOW, 0.01, undefined, true);
   conf.points_per_hour = checkNumericOption(conf, 'points_per_hour', DEFAULT_POINTS_PER_HOUR, 0.001, undefined, true);
   conf.update_interval = checkNumericOption(conf, 'update_interval', undefined, 0, undefined, true);
+
+  ({ lowerBound: conf.lower_bound, upperBound: conf.upper_bound } = checkBounds(conf));
 
   conf.min_bound_range = checkNumericOption(conf, 'min_bound_range', undefined, 0, undefined, true);
   conf.min_bound_range_secondary = checkNumericOption(conf, 'min_bound_range_secondary', undefined, 0, undefined, true);
