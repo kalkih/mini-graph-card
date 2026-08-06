@@ -193,6 +193,7 @@ export default (config) => {
   conf.fill_baseline = checkNumericOption(conf, 'fill_baseline', undefined, undefined, undefined, true);
 
   // process per-entity configs
+  // eslint-disable-next-line no-param-reassign
   conf.entities.forEach((entity, i) => {
     if (typeof entity === 'string') {
       conf.entities[i] = { entity };
