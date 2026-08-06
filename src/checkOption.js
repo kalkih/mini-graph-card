@@ -9,7 +9,8 @@ import { isNumeric } from './others';
  * @param {number} defaultValue Default fallback value
  * @param {number} minBound Optional minimum allowed value
  * @param {number} maxBound Optional maximum allowed value
- * @param {boolean} [allowString=false] Optional flag to allow string representations of numbers (like "123")
+ * @param {boolean} [allowString=false] Optional flag
+ * to allow string representations of numbers (like "123")
  * @returns {number} Cleared value
  */
 const checkNumericOption = (
@@ -65,7 +66,8 @@ const checkNumericOption = (
  * @param {number} defaultValue Default fallback value
  * @param {number} minBound Optional minimum allowed value
  * @param {number} maxBound Optional maximum allowed value
- * @param {boolean} [allowString=false] Optional flag to allow string representations of numbers (like "123")
+ * @param {boolean} [allowString=false] Optional flag
+ * to allow string representations of numbers (like "123")
  * @returns {number} Cleared value
  */
 const checkIntegerOption = (
