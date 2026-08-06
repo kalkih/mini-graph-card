@@ -1,9 +1,13 @@
 import { log } from './utils';
-import { isNumeric, getBound } from './others';
+import {
+  isNumeric,
+  logStringWarning,
+  getBound,
+} from './others';
 
 /**
  * Check if an option is numeric (if not undefined);
- * fallback to a default value if not numeric or out of bounds
+ * fallback to a default value if not numeric or out of bounds.
  * @param {object} config Config object
  * @param {string} option Name of option to be checked
  * @param {number} defaultValue Default fallback value
@@ -28,9 +32,8 @@ const checkNumericOption = (
   }
 
   if (isNumeric(value, allowString)) {
-    if (typeof value === 'string') {
-      log(`Warning for option ${option}: [${value}] is configured as a string; please make it a number`);
-    }
+    // log a warning in case of a string presentation of a number
+    logStringWarning(value, option);
 
     const valueNumeric = Number(value);
     const isMinValid = minBound === undefined || valueNumeric >= minBound;
@@ -60,7 +63,7 @@ const checkNumericOption = (
 /**
  * Check if an option is integer;
  * fallback to a default value if not numeric or out of bounds;
- * round to an integer if needed
+ * round to an integer if needed.
  * @param {object} config Config object
  * @param {string} option Name of option to be checked
  * @param {number} defaultValue Default fallback value
@@ -88,7 +91,7 @@ const checkIntegerOption = (
 };
 
 /**
- * "Check if a bound option is valid (accounting for an optional "~" prefix).
+ * Check if a bound option is valid (accounting for an optional "~" prefix).
  * @param {object} config Config object
  * @param {string} option Name of the option to be checked
  * @returns {number|string|undefined} Cleared value in its original format, or undefined
@@ -104,7 +107,9 @@ const checkBoundOption = (config, option) => {
     const parsed = getBound(value);
     if (parsed !== undefined && isNumeric(parsed.value)) {
       if (!parsed.soft && typeof value === 'string') {
-        log(`Warning for option ${option}: [${value}] is configured as a string; please make it a number`);
+        // check for a "string number" since this will not be cleared below
+        // log a warning in case of a string presentation of a number
+        logStringWarning(value, option);
       }
 
       const cfg = { [option]: parsed.value };
@@ -121,10 +126,12 @@ const checkBoundOption = (config, option) => {
 };
 
 /**
- * Check both upper/lower bounds for valid values
+ * Check both upper/lower bounds for valid values.
  * @param {object} config Config object
- * @returns {{lowerBound: string|number|undefined, upperBound: string|number|undefined}} Cleared
- * bounds
+ * @returns {{
+ *   lowerBound: string|number|undefined,
+ *   upperBound: string|number|undefined
+ * }} Cleared bounds
  */
 const checkBounds = (config) => {
   const lowerBound = checkBoundOption(config, 'lower_bound');
@@ -148,9 +155,67 @@ const checkBounds = (config) => {
   return { lowerBound, upperBound };
 };
 
+/**
+ * Check color_thresholds array.
+ * @param {object} config Config object containing color_thresholds
+ * @param {string} configName Name of a config object
+ */
+const checkColorThresholds = (config, configName) => {
+  const thresholds = config.color_thresholds;
+
+  if (thresholds === undefined || thresholds === null) {
+    // color_thresholds not defined
+    return;
+  }
+
+  if (!Array.isArray(thresholds)) {
+    // color_thresholds not a list
+    log(`Invalid option ${configName}.color_thresholds: expected a list; unsetting to []`);
+    config.color_thresholds = [];
+    return;
+  }
+
+  config.color_thresholds = thresholds
+    .map((threshold, idx) => {
+      if (typeof threshold === 'string') {
+        return { color: threshold };
+      }
+
+      if (threshold && typeof threshold === 'object') {
+        let { color, value } = threshold;
+
+        if (color === undefined || typeof color !== 'string') {
+          log(`Invalid option ${configName}.color_thresholds[${idx}]: "color" is missing or not a string; adjusting to "var(--primary-text-color)"`);
+          color = 'var(--primary-text-color)';
+        }
+
+        if (value !== undefined && value !== null) {
+          if (!isNumeric(value, true)) {
+            log(`Invalid option ${configName}.color_thresholds[${idx}]: "value" is not a numeric value; unsetting to undefined`);
+            value = undefined;
+          } else {
+            // log a warning in case of a string presentation of a number
+            logStringWarning(value, `${configName}.color_thresholds[${idx}].value`);
+            value = Number(value);
+          }
+        } else if (value === null) {
+          log(`Invalid option ${configName}.color_thresholds[${idx}]: "value" is null, unsetting to undefined`);
+          value = undefined;
+        }
+
+        return { color, value };
+      }
+
+      // other invalid content
+      log(`Invalid option ${configName}.color_thresholds[${idx}]: expected an object or color string; replacing with a default entry`);
+      return { color: 'var(--primary-text-color)' };
+    });
+};
+
 export {
   checkNumericOption,
   checkIntegerOption,
   checkBoundOption,
   checkBounds,
+  checkColorThresholds,
 };
