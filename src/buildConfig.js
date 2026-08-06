@@ -14,6 +14,7 @@ import {
 } from './const';
 import { log } from './utils';
 import { checkNumericOption, checkIntegerOption } from './checkOption';
+import { getFactor } from './others';
 
 /**
  * Starting from the given index, increment the index until an array element with a
@@ -214,6 +215,13 @@ export default (config) => {
   });
   /* eslint-enable no-param-reassign */
 
+  // prepare predefined factors
+  const entityFactors = conf.entities.map((_, index) => getFactor(conf, index));
+  const axisFactors = {
+    primary: getFactor(conf),
+    secondary: getFactor(conf, -1),
+  };
+
   conf.state_map.forEach((state, i) => {
     // convert string values to objects
     if (typeof state === 'string') conf.state_map[i] = { value: state, label: state };
@@ -258,5 +266,9 @@ export default (config) => {
     }
   }
 
-  return conf;
+  return {
+    config: conf,
+    entityFactors,
+    axisFactors,
+  };
 };
