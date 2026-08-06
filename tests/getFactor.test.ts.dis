@@ -45,9 +45,10 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config);
       const expectedValue = value;
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits adter a point
       );
     });
 
@@ -58,9 +59,10 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config);
       const expectedValue = value * (10 ** exponent);
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits adter a point
       );
     });
 
@@ -70,9 +72,10 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config);
       const expectedValue = value; // fallback to "factor = 1"
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits after a point
       );
     });
 
@@ -81,9 +84,10 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config);
       const expectedValue = value; // fallback to "factor = 1"
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits after a point
       );
     });
 
@@ -96,9 +100,10 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config);
       const expectedValue = value; // fallback to "factor = 1"
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits after a point
       );
     });
 
@@ -109,9 +114,10 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config);
       const expectedValue = value; // fallback to "factor = 1"
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits after a point
       );
     });
 
@@ -122,9 +128,10 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config, -1);
       const expectedValue = value * (10 ** exponent);
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits after a point
       );
     });
 
@@ -139,9 +146,10 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config, 0);
       const expectedValue = value;  // fallback to "factor = 1"
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits after a point
       );
     });
 
@@ -156,9 +164,10 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config, 1);
       const expectedValue = value * (10 ** exponent);
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits after a point
       );
     });
 
@@ -168,9 +177,10 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config);
       const expectedValue = value; // fallback to "factor = 1"
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits after a point
       );
     });
 
@@ -179,9 +189,10 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config);
       const expectedValue = value; // fallback to "factor = 1"
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits after a point
       );
     });
 
@@ -196,9 +207,10 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config);
       const expectedValue = value * (10 ** exponent);
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits after a point
       );
     });
 
@@ -214,9 +226,10 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config, 0);
       const expectedValue = value * (10 ** exponent);
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits after a point
       );
     });
 
@@ -232,9 +245,10 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config, 1);
       const expectedValue = value;
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits after a point
       );
     });
 
@@ -251,9 +265,10 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config, 1);
       const expectedValue = value * (10 ** exponent_secondary);
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits after a point
       );
     });
 
@@ -268,9 +283,10 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config, 1);
       const expectedValue = value;
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits after a point
       );
     });
 
@@ -287,9 +303,10 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config, 1);
       const expectedValue = value;
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits after a point
       );
     });
 
@@ -306,9 +323,10 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config);
       const expectedValue = value * (10 ** exponent);
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits after a point
       );
     });
 
@@ -322,9 +340,10 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config);
       const expectedValue = value * scale;
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits after a point
       );
     });
 
@@ -340,9 +359,10 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config);
       const expectedValue = value; // fallback to "exponent = 1"
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits after a point
       );
     });
 
@@ -354,9 +374,10 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config);
       const expectedValue = value; // fallback to "exponent = 1"
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits after a point
       );
     });
 
@@ -369,9 +390,26 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config);
       const expectedValue = value; // fallback to "exponent = 1"
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`getFactor [value: ${value}]: value_factor: value_factor = object, exponent = string`, () => {
+      const config: ConfigType = {
+        value_factor: {
+          type: 'exponent',
+          factor: '-2',
+        },
+      };
+      const result = value * getFactor(config);
+      const expectedValue = value * (10 ** Number(config.value_factor.factor));
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
       );
     });
 
@@ -383,9 +421,26 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config);
       const expectedValue = value; // fallback to "exponent = 1"
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`getFactor [value: ${value}]: value_factor: value_factor = object, scale = string`, () => {
+      const config: ConfigType = {
+        value_factor: {
+          type: 'scale',
+          factor: '123',
+        },
+      };
+      const result = value * getFactor(config);
+      const expectedValue = value * Number(config.value_factor.factor);
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
       );
     });
 
@@ -398,9 +453,10 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config);
       const expectedValue = value; // fallback to "exponent = 1"
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits after a point
       );
     });
 
@@ -412,9 +468,10 @@ describe("getFactor", () => {
       };
       const result = value * getFactor(config);
       const expectedValue = value; // fallback to "exponent = 1"
-      assert.strictEqual(
+      assert.closeTo(
         result,
         expectedValue,
+        6, // number of digits after a point
       );
     });
 

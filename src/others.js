@@ -10,9 +10,26 @@ import { log } from './utils';
 /**
   * Check if a value is a valid number
   * @param {any} value Value to be checked
+  * @param {boolean} [allowString=false] Optional flag
+  * to allow string representations of numbers (like "123")
   * @returns {boolean} True if value is a valid number, false - otherwise
   */
-const isNumeric = value => typeof value === 'number' && Number.isFinite(value);
+const isNumeric = (value, allowString = false) => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return true;
+  }
+  if (allowString && typeof value === 'string') {
+    const trimmed = value.trim();
+    if (trimmed === '') {
+      // empty string
+      return false;
+    }
+    // try to convert a string to a number
+    const num = Number(trimmed);
+    return Number.isFinite(num);
+  }
+  return false;
+};
 
 const getExponent = factor => 10 ** factor;
 
@@ -60,24 +77,24 @@ const getFactor = (config, index = undefined) => {
   if (typeof value_factor === 'object') {
     const { type, factor } = value_factor;
     if (type === undefined || factor === undefined
-      || typeof type !== 'string' || !isNumeric(factor)) {
+      || typeof type !== 'string' || !isNumeric(factor, true)) {
       // invalid options, fallback to a default factor
       logValueFactor(value_factor);
       return 1;
     }
     if (type === 'exponent') {
-      return getExponent(factor);
+      return getExponent(Number(factor));
     } else if (type === 'scale') {
-      return factor;
+      return Number(factor);
     }
     // invalid 'type' option
     logValueFactor(value_factor);
     return 1;
   }
 
-  if (isNumeric(value_factor)) {
+  if (isNumeric(value_factor, true)) {
     // use a legacy "exponent" way
-    return getExponent(value_factor);
+    return getExponent(Number(value_factor));
   }
 
   logValueFactor(value_factor);
