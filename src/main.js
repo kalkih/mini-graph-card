@@ -25,10 +25,7 @@ import {
   DEFAULT_MARGIN,
   NBSP,
 } from './const';
-import {
-  getFactor,
-  isNumeric,
-} from './others';
+import { isNumeric } from './others';
 import {
   getMin, getAvg, getMax,
   getMilli,
@@ -161,7 +158,12 @@ class MiniGraphCard extends LitElement {
   }
 
   setConfig(config) {
-    this.config = buildConfig(config);
+    ({
+      config: this.config,
+      entityFactors: this.entityFactors, // predefined factors
+      axisFactors: this.axisFactors, // predefined factors
+    } = buildConfig(config));
+
     this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
     const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
 
@@ -1409,7 +1411,11 @@ class MiniGraphCard extends LitElement {
       // as is presented as a number
       state = Number(inState);
     }
-    const factor = getFactor(this.config, index);
+    const factor = index === undefined
+      ? this.axisFactors.primary
+      : index === -1
+        ? this.axisFactors.secondary
+        : this.entityFactors[index];
     // safely process with a factor
     state = Number.isNaN(Number(state)) ? state : state * factor;
 
