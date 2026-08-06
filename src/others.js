@@ -10,7 +10,8 @@ import { log } from './utils';
 /**
   * Check if a value is a valid number
   * @param {any} value Value to be checked
-  * @param {boolean} [allowString=false] Optional flag to allow string representations of numbers (like "123")
+  * @param {boolean} [allowString=false] Optional flag
+  * to allow string representations of numbers (like "123")
   * @returns {boolean} True if value is a valid number, false - otherwise
   */
 const isNumeric = (value, allowString = false) => {
