@@ -76,24 +76,24 @@ const getFactor = (config, index = undefined) => {
   if (typeof value_factor === 'object') {
     const { type, factor } = value_factor;
     if (type === undefined || factor === undefined
-      || typeof type !== 'string' || !isNumeric(factor)) {
+      || typeof type !== 'string' || !isNumeric(factor, true)) {
       // invalid options, fallback to a default factor
       logValueFactor(value_factor);
       return 1;
     }
     if (type === 'exponent') {
-      return getExponent(factor);
+      return getExponent(Number(factor));
     } else if (type === 'scale') {
-      return factor;
+      return Number(factor);
     }
     // invalid 'type' option
     logValueFactor(value_factor);
     return 1;
   }
 
-  if (isNumeric(value_factor)) {
+  if (isNumeric(value_factor, true)) {
     // use a legacy "exponent" way
-    return getExponent(value_factor);
+    return getExponent(Number(value_factor));
   }
 
   logValueFactor(value_factor);
