@@ -31,9 +31,16 @@ const isNumeric = (value, allowString = false) => {
   return false;
 };
 
-const getExponent = factor => 10 ** factor;
-
-const logValueFactor = factor_obj => log(`invalid value_factor: [${JSON.stringify(factor_obj)}]`);
+/**
+ * Log a warning if a configuration numeric value is passed as a string.
+ * @param {any} value Value to check
+ * @param {string} option Name of the option for the log message
+ */
+const logStringWarning = (value, option) => {
+  if (typeof value === 'string') {
+    log(`Warning for option ${option}: [${value}] is configured as a string; please make it a number`);
+  }
+};
 
 /**
   * Return a multiplying factor (exponental or scale) based on a "value_factor" option
@@ -74,6 +81,9 @@ const getFactor = (config, index = undefined) => {
     return 1;
   }
 
+  const getExponent = factor => 10 ** factor;
+  const logValueFactor = factor_obj => log(`invalid value_factor: [${JSON.stringify(factor_obj)}]`);
+
   if (typeof value_factor === 'object') {
     const { type, factor } = value_factor;
     if (type === undefined || factor === undefined
@@ -82,10 +92,15 @@ const getFactor = (config, index = undefined) => {
       logValueFactor(value_factor);
       return 1;
     }
-    if (type === 'exponent') {
-      return getExponent(Number(factor));
-    } else if (type === 'scale') {
-      return Number(factor);
+    if (type === 'exponent' || type === 'scale') {
+      // log a warning in case of a string presentation of a number
+      logStringWarning(factor, 'factor');
+      switch (type) {
+        case 'exponent':
+          return getExponent(Number(factor))
+        default: // scale
+          return Number(factor);
+      }
     }
     // invalid 'type' option
     logValueFactor(value_factor);
@@ -93,6 +108,8 @@ const getFactor = (config, index = undefined) => {
   }
 
   if (isNumeric(value_factor, true)) {
+    // log a warning in case of a string presentation of a number
+    logStringWarning(value_factor, 'value_factor');
     // use a legacy "exponent" way
     return getExponent(Number(value_factor));
   }
@@ -137,6 +154,7 @@ const getBound = (bound) => {
 
 export {
   isNumeric,
+  logStringWarning,
   getFactor,
   getBound,
 };

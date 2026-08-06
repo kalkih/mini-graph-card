@@ -17,6 +17,7 @@ import {
   checkNumericOption,
   checkIntegerOption,
   checkBounds,
+  checkColorThresholds,
 } from './checkOption';
 import { getFactor } from './others';
 
@@ -211,6 +212,8 @@ export default (config) => {
       entity.fill_baseline = checkNumericOption(entity, 'fill_baseline', undefined, undefined, undefined, true);
 
       if (entity.color_thresholds) {
+        // check color_thresholds
+        checkColorThresholds(entity, `entities[${i}]`);
         // eslint-disable-next-line no-param-reassign
         entity.color_thresholds = computeThresholds(
           entity.color_thresholds,
@@ -239,6 +242,9 @@ export default (config) => {
     conf.line_color = [config.line_color, ...DEFAULT_COLORS];
 
   conf.font_size = (config.font_size / 100) * DEFAULT_FONT_SIZE || DEFAULT_FONT_SIZE;
+
+  // check color_thresholds
+  checkColorThresholds(conf, 'config');
   conf.color_thresholds = computeThresholds(
     conf.color_thresholds,
     conf.color_thresholds_transition,
