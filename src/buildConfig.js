@@ -155,41 +155,27 @@ export default (config) => {
     show: { ...DEFAULT_SHOW, ...config.show },
   };
 
-  conf.entities.forEach((entity, i) => {
-    if (typeof entity === 'string') {
-      conf.entities[i] = { entity };
-    } else if (entity.color_thresholds) {
-      // eslint-disable-next-line no-param-reassign
-      entity.color_thresholds = computeThresholds(
-        entity.color_thresholds,
-        entity.color_thresholds_transition || conf.color_thresholds_transition,
-      );
-    }
-  });
-
   // check numeric options for validity
-  conf.font_size = checkNumericOption(conf, 'font_size', 100, 0.1);
-  conf.font_size_header = checkNumericOption(conf, 'font_size_header', DEFAULT_FONT_SIZE_HEADER, 0.1);
+  conf.font_size = checkNumericOption(conf, 'font_size', 100, 0.1, undefined, true);
+  conf.font_size_header = checkNumericOption(conf, 'font_size_header', DEFAULT_FONT_SIZE_HEADER, 0.1, undefined, true);
 
-  conf.bar_spacing = checkNumericOption(conf, 'bar_spacing', DEFAULT_BAR_SPACING, -1);
-  conf.bar_spacing_group = checkNumericOption(conf, 'bar_spacing_group', undefined, 0);
+  conf.bar_spacing = checkNumericOption(conf, 'bar_spacing', DEFAULT_BAR_SPACING, -1, undefined, true);
+  conf.bar_spacing_group = checkNumericOption(conf, 'bar_spacing_group', undefined, 0, undefined, true);
 
-  conf.height = checkNumericOption(conf, 'height', DEFAULT_GRAPH_HEIGHT, 0);
+  conf.height = checkNumericOption(conf, 'height', DEFAULT_GRAPH_HEIGHT, 0, undefined, true);
 
-  // per-entity options are not checked here
-  conf.line_width = checkNumericOption(conf, 'line_width', DEFAULT_MARGIN, 0);
+  conf.line_width = checkNumericOption(conf, 'line_width', DEFAULT_MARGIN, 0, undefined, true);
 
-  conf.hours_to_show = checkNumericOption(conf, 'hours_to_show', DEFAULT_HOURS_TO_SHOW, 0.01);
-  conf.points_per_hour = checkNumericOption(conf, 'points_per_hour', DEFAULT_POINTS_PER_HOUR, 0.001);
-  conf.update_interval = checkNumericOption(conf, 'update_interval', undefined, 0);
+  conf.hours_to_show = checkNumericOption(conf, 'hours_to_show', DEFAULT_HOURS_TO_SHOW, 0.01, undefined, true);
+  conf.points_per_hour = checkNumericOption(conf, 'points_per_hour', DEFAULT_POINTS_PER_HOUR, 0.001, undefined, true);
+  conf.update_interval = checkNumericOption(conf, 'update_interval', undefined, 0, undefined, true);
 
-  conf.min_bound_range = checkNumericOption(conf, 'min_bound_range', undefined, 0);
-  conf.min_bound_range_secondary = checkNumericOption(conf, 'min_bound_range_secondary', undefined, 0);
+  conf.min_bound_range = checkNumericOption(conf, 'min_bound_range', undefined, 0, undefined, true);
+  conf.min_bound_range_secondary = checkNumericOption(conf, 'min_bound_range_secondary', undefined, 0, undefined, true);
 
-  conf.decimals_primary_labels = checkIntegerOption(conf, 'decimals_primary_labels', undefined, 0);
-  conf.decimals_secondary_labels = checkIntegerOption(conf, 'decimals_secondary_labels', undefined, 0);
-  // per-entity options are not checked here
-  conf.decimals = checkIntegerOption(conf, 'decimals', undefined, 0);
+  conf.decimals_primary_labels = checkIntegerOption(conf, 'decimals_primary_labels', undefined, 0, undefined, true);
+  conf.decimals_secondary_labels = checkIntegerOption(conf, 'decimals_secondary_labels', undefined, 0, undefined, true);
+  conf.decimals = checkIntegerOption(conf, 'decimals', undefined, 0, undefined, true);
 
   conf.static_value_label_offset = checkNumericOption(
     conf,
@@ -197,13 +183,34 @@ export default (config) => {
     DEFAULT_STATIC_VALUE_LABEL_OFFSET,
     0,
     100,
+    true,
   );
   if (conf.static_value_label_offset === undefined
     || conf.static_value_label_offset === null) {
     conf.static_value_label_offset = DEFAULT_STATIC_VALUE_LABEL_OFFSET;
   }
 
-  conf.fill_baseline = checkNumericOption(conf, 'fill_baseline', undefined);
+  conf.fill_baseline = checkNumericOption(conf, 'fill_baseline', undefined, undefined, undefined, true);
+
+  // process per-entity configs
+  conf.entities.forEach((entity, i) => {
+    if (typeof entity === 'string') {
+      conf.entities[i] = { entity };
+    } else {
+      // check numeric per-entity options for validity
+      entity.line_width = checkNumericOption(entity, 'line_width', conf.line_width, 0, undefined, true);
+      entity.decimals = checkIntegerOption(entity, 'decimals', conf.decimals, 0, undefined, true);
+      entity.fill_baseline = checkNumericOption(entity, 'fill_baseline', undefined, undefined, undefined, true);
+
+      if (entity.color_thresholds) {
+        // eslint-disable-next-line no-param-reassign
+        entity.color_thresholds = computeThresholds(
+          entity.color_thresholds,
+          entity.color_thresholds_transition || conf.color_thresholds_transition,
+        );
+      }
+    }
+  });
 
   conf.state_map.forEach((state, i) => {
     // convert string values to objects
