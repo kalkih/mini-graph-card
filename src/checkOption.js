@@ -1,5 +1,5 @@
 import { log } from './utils';
-import { isNumeric } from './others';
+import { isNumeric, getBound } from './others';
 
 /**
  * Check if an option is numeric (if not undefined);
@@ -87,7 +87,70 @@ const checkIntegerOption = (
   return value;
 };
 
+/**
+ * "Check if a bound option is valid (accounting for an optional "~" prefix).
+ * @param {object} config Config object
+ * @param {string} option Name of the option to be checked
+ * @returns {number|string|undefined} Cleared value in its original format, or undefined
+ */
+const checkBoundOption = (config, option) => {
+  const value = config[option];
+
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+
+  if (typeof value === 'number' || typeof value === 'string') {
+    const parsed = getBound(value);
+    if (parsed !== undefined && isNumeric(parsed.value)) {
+      if (!parsed.soft && typeof value === 'string') {
+        log(`Warning for option ${option}: [${value}] is configured as a string; please make it a number`);
+      }
+
+      const cfg = { [option]: parsed.value };
+      if (checkNumericOption(cfg, option, undefined) !== undefined) {
+        return parsed.soft ? value : parsed.value;
+      }
+    }
+  }
+
+  // invalid type or value of the option
+  const invalidValue = typeof value === 'object' ? JSON.stringify(value) : value;
+  log(`Invalid option ${option}: [${invalidValue}] (not a numeric value); adjusting value to undefined`);
+  return undefined;
+};
+
+/**
+ * Check both upper/lower bounds for valid values
+ * @param {object} config Config object
+ * @returns {{lowerBound: string|number|undefined, upperBound: string|number|undefined}} Cleared
+ * bounds
+ */
+const checkBounds = (config) => {
+  const lowerBound = checkBoundOption(config, 'lower_bound');
+  let upperBound = checkNumericOption(
+    config,
+    'upper_bound',
+    undefined,
+    undefined,
+    undefined,
+    true, // allowString
+  );
+
+  if (lowerBound !== undefined && upperBound !== undefined) {
+    const cleanLowerBount = getBound(lowerBound).value;
+    if (upperBound <= cleanLowerBount) {
+      log(`Invalid lower & upper bounds: [${lowerBound}, ${upperBound}]; unsetting value of upper_bound to undefined`);
+      upperBound = undefined;
+    }
+  }
+
+  return { lowerBound, upperBound };
+};
+
 export {
   checkNumericOption,
   checkIntegerOption,
+  checkBoundOption,
+  checkBounds,
 };
