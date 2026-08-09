@@ -1777,10 +1777,8 @@ class MiniGraphCard extends LitElement {
 
     this.updateQueue = this.updateQueue.filter(entry => entry !== `${entity.entity_id}-${index}`);
 
-    // Long-term statistics are pre-aggregated server side, so the whole
-    // window is refetched rather than appended to a cached tail: buckets are
-    // revised as a period completes, and an incremental merge would duplicate
-    // or truncate the boundary bucket.
+    // The whole window is refetched, not appended to a cached tail:
+    // a bucket is revised until its period completes.
     const { statistics } = this.config.entities[index];
     if (statistics) {
       const period = statistics.period || this.statisticsPeriod();
@@ -1883,9 +1881,8 @@ class MiniGraphCard extends LitElement {
   }
 
   /**
-   * Hand a normalised [{last_changed, state}] series to the graph. Shared by
-   * the recorder-history and long-term-statistics paths - nothing downstream
-   * cares which one produced it.
+   * Pass a [{last_changed, state}] series to the graph;
+   * used by both the history & the statistics paths.
    */
   applyHistory(entity, index, stateHistory) {
     if (stateHistory.length === 0) return;
@@ -1902,11 +1899,7 @@ class MiniGraphCard extends LitElement {
     }
   }
 
-  /**
-   * Pick a statistics period wide enough for the window being shown. HA only
-   * retains 5-minute statistics for a short time, so long spans must step up
-   * to hourly or coarser.
-   */
+  /** Pick a period wide enough for hours_to_show. */
   statisticsPeriod() {
     const match = STATISTICS_PERIOD_THRESHOLDS
       .find(({ hours }) => this.config.hours_to_show <= hours);

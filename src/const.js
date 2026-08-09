@@ -57,13 +57,11 @@ const Y = 1;
 const V = 2;
 const ONE_HOUR = 1000 * 3600;
 
-// Long-term statistics. HA keeps 5-minute statistics for a short window
-// (10 days by default) and hourly statistics indefinitely, so the period is
-// derived from hours_to_show unless the user pins one.
-const STATISTICS_PERIODS = ['5minute', 'hour', 'day', 'week', 'month'];
+// Long-term statistics
+const STATISTICS_PERIODS = ['5minute', 'hour', 'day', 'week', 'month', 'year'];
 const STATISTICS_TYPES = ['mean', 'min', 'max', 'sum', 'state'];
 const DEFAULT_STATISTICS_TYPE = 'mean';
-// Hours up to which each period is a sensible default.
+// A default period, by hours_to_show; HA keeps 5-minute statistics ~10 days only.
 const STATISTICS_PERIOD_THRESHOLDS = [
   { hours: 24, period: '5minute' },
   { hours: 24 * 90, period: 'hour' },

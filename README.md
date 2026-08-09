@@ -334,7 +334,7 @@ entities:
 
 | Option | Type | Default | Description
 |--------|------|---------|------------
-| period | string | derived from `hours_to_show` | `5minute`, `hour`, `day`, `week` or `month`.
+| period | string | derived from `hours_to_show` | `5minute`, `hour`, `day`, `week`, `month` or `year`.
 | type | string | `mean` | Which statistic to plot: `mean`, `min`, `max`, `sum` or `state`.
 
 ```yaml
@@ -361,6 +361,14 @@ Notes:
   point per period only produces empty buckets.
 - The whole window is refetched on update rather than appended to the cached
   tail, because a period's bucket is revised until that period completes.
+- `statistics` cannot be combined with `attribute` or `state_map`. Statistics
+  hold numeric aggregates of the state, so there is no attribute to read and
+  no non-numeric state to map. Either combination logs a warning and the
+  entity falls back to raw history, which honours both options.
+- Values arrive in the entity's own unit. Home Assistant converts a statistic
+  from the unit it was recorded in to the entity's current
+  `unit_of_measurement` before returning it, which is the unit the card labels
+  the axis with.
 
 ### Static lines
 

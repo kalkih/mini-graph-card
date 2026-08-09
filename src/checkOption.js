@@ -220,9 +220,10 @@ const checkColorThresholds = (config, configName) => {
 
 
 /**
- * Validate and normalise the `statistics` option for entity `index`.
- * May be set per entity or card-wide; `true` is shorthand for the defaults.
- * Sourcing a series from long-term statistics instead of raw history.
+ * Check the `statistics` option (may be set per entity or card-wide);
+ * `true` is a shorthand for the defaults.
+ * @param {object} config Config object
+ * @param {number} index Index of an entity
  */
 /* eslint-disable no-param-reassign */
 const checkStatistics = (config, index) => {
@@ -230,6 +231,16 @@ const checkStatistics = (config, index) => {
   const stats = entity.statistics !== undefined ? entity.statistics : config.statistics;
 
   if (stats === undefined || stats === false) {
+    delete entity.statistics;
+    return;
+  }
+
+  // Statistics are numeric aggregates of a state: no attribute to read,
+  // no non-numeric state to map. Fall back to a raw history.
+  const incompatible = (entity.attribute !== undefined && 'attribute')
+    || (Array.isArray(config.state_map) && config.state_map.length > 0 && 'state_map');
+  if (incompatible) {
+    log(`Option statistics of entities[${index}] is not compatible with ${incompatible}; ignoring statistics and reading raw history instead`);
     delete entity.statistics;
     return;
   }
