@@ -24,6 +24,8 @@ import {
   DEFAULT_GRAPH_HEIGHT,
   DEFAULT_MARGIN,
   NBSP,
+  STATISTICS_PERIOD_THRESHOLDS,
+  STATISTICS_PERIOD_FALLBACK,
 } from './const';
 import { isNumeric } from './others';
 import {
@@ -1775,6 +1777,24 @@ class MiniGraphCard extends LitElement {
 
     this.updateQueue = this.updateQueue.filter(entry => entry !== `${entity.entity_id}-${index}`);
 
+    // Long-term statistics are pre-aggregated server side, so the whole
+    // window is refetched rather than appended to a cached tail: buckets are
+    // revised as a period completes, and an incremental merge would duplicate
+    // or truncate the boundary bucket.
+    const { statistics } = this.config.entities[index];
+    if (statistics) {
+      const period = statistics.period || this.statisticsPeriod();
+      const stats = await this.fetchStatistics(entity.entity_id, initStart, end, period);
+      const statHistory = stats
+        .map(item => ({
+          last_changed: new Date(item.start).toISOString(),
+          state: item[statistics.type],
+        }))
+        .filter(item => !Number.isNaN(parseFloat(item.state)));
+      this.applyHistory(entity, index, statHistory);
+      return;
+    }
+
     let stateHistory = [];
     let start = initStart;
     let skipInitialState = false;
@@ -1859,6 +1879,15 @@ class MiniGraphCard extends LitElement {
       }
     }
 
+    this.applyHistory(entity, index, stateHistory);
+  }
+
+  /**
+   * Hand a normalised [{last_changed, state}] series to the graph. Shared by
+   * the recorder-history and long-term-statistics paths - nothing downstream
+   * cares which one produced it.
+   */
+  applyHistory(entity, index, stateHistory) {
     if (stateHistory.length === 0) return;
 
     if (this.entity[0] && entity.entity_id === this.entity[0].entity_id) {
@@ -1871,6 +1900,28 @@ class MiniGraphCard extends LitElement {
     } else {
       this.Graph[index].history = stateHistory;
     }
+  }
+
+  /**
+   * Pick a statistics period wide enough for the window being shown. HA only
+   * retains 5-minute statistics for a short time, so long spans must step up
+   * to hourly or coarser.
+   */
+  statisticsPeriod() {
+    const match = STATISTICS_PERIOD_THRESHOLDS
+      .find(({ hours }) => this.config.hours_to_show <= hours);
+    return match ? match.period : STATISTICS_PERIOD_FALLBACK;
+  }
+
+  async fetchStatistics(entityId, start, end, period) {
+    const result = await this._hass.callWS({
+      type: 'recorder/statistics_during_period',
+      start_time: start ? start.toISOString() : undefined,
+      end_time: end ? end.toISOString() : undefined,
+      statistic_ids: [entityId],
+      period,
+    });
+    return (result && result[entityId]) || [];
   }
 
   async fetchRecent(entityId, start, end, skipInitialState, withAttributes) {

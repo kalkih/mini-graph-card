@@ -1,3 +1,9 @@
+import {
+  URL_DOCS,
+  STATISTICS_PERIODS,
+  STATISTICS_TYPES,
+  DEFAULT_STATISTICS_TYPE,
+} from './const';
 import { log } from './utils';
 import {
   isNumeric,
@@ -212,7 +218,36 @@ const checkColorThresholds = (config, configName) => {
     });
 };
 
+
+/**
+ * Validate and normalise the `statistics` option for entity `index`.
+ * May be set per entity or card-wide; `true` is shorthand for the defaults.
+ * Sourcing a series from long-term statistics instead of raw history.
+ */
+/* eslint-disable no-param-reassign */
+const checkStatistics = (config, index) => {
+  const entity = config.entities[index];
+  const stats = entity.statistics !== undefined ? entity.statistics : config.statistics;
+
+  if (stats === undefined || stats === false) {
+    delete entity.statistics;
+    return;
+  }
+
+  const opts = stats === true ? {} : stats;
+  if (typeof opts !== 'object' || Array.isArray(opts))
+    throw new Error(`"statistics" must be a boolean or an object.\n See ${URL_DOCS}`);
+  if (opts.period !== undefined && !STATISTICS_PERIODS.includes(opts.period))
+    throw new Error(`"statistics.period" must be one of ${STATISTICS_PERIODS.join(', ')}.\n See ${URL_DOCS}`);
+  if (opts.type !== undefined && !STATISTICS_TYPES.includes(opts.type))
+    throw new Error(`"statistics.type" must be one of ${STATISTICS_TYPES.join(', ')}.\n See ${URL_DOCS}`);
+
+  entity.statistics = { type: DEFAULT_STATISTICS_TYPE, ...opts };
+};
+/* eslint-enable no-param-reassign */
+
 export {
+  checkStatistics,
   checkNumericOption,
   checkIntegerOption,
   checkBoundOption,
