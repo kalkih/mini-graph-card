@@ -335,7 +335,7 @@ entities:
 | Option | Type | Default | Description
 |--------|------|---------|------------
 | period | string | derived from `hours_to_show` | `5minute`, `hour`, `day`, `week`, `month` or `year`.
-| type | string | `mean` | Which statistic to plot: `mean`, `min`, `max`, `sum` or `state`.
+| type | string | see below | Which statistic to plot: `mean`, `min`, `max`, `sum`, `state` or `change`.
 
 ```yaml
 entities:
@@ -351,8 +351,17 @@ the defaults, and `statistics: false` on an entity opts it back out.
 
 Notes:
 
-- Only entities with a `state_class` have statistics. Others produce an empty
-  graph, so leave them on raw history.
+- Only entities with a `state_class` have statistics; the card logs a warning
+  if there are none for an entity.
+- Which types exist depends on the `state_class`: `measurement` has `mean`,
+  `min` and `max`, `measurement_angle` has `mean` only (a circular mean),
+  `total` and `total_increasing` have `sum`, `state` and `change`. The card
+  reads the available types from a response, so a type which is not there is
+  replaced by a default one, with a warning in a console.
+- When `type` is not set, `mean` is used if it is available, otherwise `state`
+  - the reading a raw history would show. Use `change` to plot a consumption
+  per period instead, which is usually what is wanted for an energy, water or
+  gas sensor.
 - Home Assistant retains `5minute` statistics for a limited window (10 days by
   default) and hourly statistics indefinitely. When `period` is not set it is
   derived from `hours_to_show` so a long graph does not ask for data that has

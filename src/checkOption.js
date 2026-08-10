@@ -2,7 +2,6 @@ import {
   URL_DOCS,
   STATISTICS_PERIODS,
   STATISTICS_TYPES,
-  DEFAULT_STATISTICS_TYPE,
 } from './const';
 import { log } from './utils';
 import {
@@ -253,7 +252,7 @@ const checkStatistics = (config, index) => {
   if (opts.type !== undefined && !STATISTICS_TYPES.includes(opts.type))
     throw new Error(`"statistics.type" must be one of ${STATISTICS_TYPES.join(', ')}.\n See ${URL_DOCS}`);
 
-  entity.statistics = { type: DEFAULT_STATISTICS_TYPE, ...opts };
+  entity.statistics = { ...opts };
 };
 /* eslint-enable no-param-reassign */
 

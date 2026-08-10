@@ -27,7 +27,7 @@ import {
   STATISTICS_PERIOD_THRESHOLDS,
   STATISTICS_PERIOD_FALLBACK,
 } from './const';
-import { isNumeric } from './others';
+import { isNumeric, getStatisticsType } from './others';
 import {
   getMin, getAvg, getMax,
   getMilli,
@@ -64,6 +64,7 @@ class MiniGraphCard extends LitElement {
     this.stateChanged = false;
     this.initial = true;
     this._md5Config = undefined;
+    this.loggedMessages = new Set();
 
     // update datetime settings periodically
     this.updateHour24 = true;
@@ -1783,10 +1784,24 @@ class MiniGraphCard extends LitElement {
     if (statistics) {
       const period = statistics.period || this.statisticsPeriod();
       const stats = await this.fetchStatistics(entity.entity_id, initStart, end, period);
+      if (stats.length === 0) {
+        this.logOnce(`No ${period} statistics for ${entity.entity_id} in a shown period`);
+        return;
+      }
+      // A type is resolved here & not in buildConfig(): only a response tells
+      // whether an entity has "mean" or "sum" statistics.
+      const type = getStatisticsType(stats, statistics.type);
+      if (type === undefined) {
+        this.logOnce(`No statistics types for ${entity.entity_id}`);
+        return;
+      }
+      if (statistics.type !== undefined && statistics.type !== type) {
+        this.logOnce(`Statistics type ${statistics.type} is not available for ${entity.entity_id}; using ${type}`);
+      }
       const statHistory = stats
         .map(item => ({
           last_changed: new Date(item.start).toISOString(),
-          state: item[statistics.type],
+          state: item[type],
         }))
         .filter(item => !Number.isNaN(parseFloat(item.state)));
       this.applyHistory(entity, index, statHistory);
@@ -1878,6 +1893,13 @@ class MiniGraphCard extends LitElement {
     }
 
     this.applyHistory(entity, index, stateHistory);
+  }
+
+  /** Log a message once: updateEntity() is called on every update. */
+  logOnce(message) {
+    if (this.loggedMessages.has(message)) return;
+    this.loggedMessages.add(message);
+    log(message);
   }
 
   /**

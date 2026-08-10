@@ -7,7 +7,7 @@
 
 import { expect, describe, it, vi, afterEach } from 'vitest';
 import { checkStatistics } from '../checkOption';
-import { STATISTICS_PERIODS, STATISTICS_TYPES, DEFAULT_STATISTICS_TYPE } from '../const';
+import { STATISTICS_PERIODS, STATISTICS_TYPES } from '../const';
 
 interface ConfigType {
   entities: any[];
@@ -45,16 +45,16 @@ describe('checkStatistics', () => {
     expect(config.entities[0].statistics).toBeUndefined();
   });
 
-  it('checkStatistics: [true] -> shorthand for the defaults', () => {
+  it('checkStatistics: [true] -> an empty object', () => {
     const config = makeConfig({ entity: ENTITY, statistics: true });
     checkStatistics(config, 0);
-    expect(config.entities[0].statistics).toEqual({ type: DEFAULT_STATISTICS_TYPE });
+    expect(config.entities[0].statistics).toEqual({});
   });
 
   it('checkStatistics: card-wide [true] applies to an entity', () => {
     const config = makeConfig({ entity: ENTITY }, true);
     checkStatistics(config, 0);
-    expect(config.entities[0].statistics).toEqual({ type: DEFAULT_STATISTICS_TYPE });
+    expect(config.entities[0].statistics).toEqual({});
   });
 
   it('checkStatistics: card-wide [true], entity [false] -> entity opts out', () => {
@@ -73,12 +73,12 @@ describe('checkStatistics', () => {
     it(`checkStatistics: valid period [${period}]`, () => {
       const config = makeConfig({ entity: ENTITY, statistics: { period } });
       checkStatistics(config, 0);
-      expect(config.entities[0].statistics).toEqual({ type: DEFAULT_STATISTICS_TYPE, period });
+      expect(config.entities[0].statistics).toEqual({ period });
     });
   });
 
   STATISTICS_TYPES.forEach((type) => {
-    it(`checkStatistics: valid type [${type}] is not replaced by a default`, () => {
+    it(`checkStatistics: valid type [${type}]`, () => {
       const config = makeConfig({ entity: ENTITY, statistics: { type } });
       checkStatistics(config, 0);
       expect(config.entities[0].statistics).toEqual({ type });
@@ -98,7 +98,7 @@ describe('checkStatistics', () => {
     });
   });
 
-  ['average', 'MEAN', 'median', 'change', 'last_reset', '', 123, null].forEach((type) => {
+  ['average', 'MEAN', 'median', 'last_reset', '', 123, null].forEach((type) => {
     it(`checkStatistics: invalid type [${JSON.stringify(type)}] -> throws`, () => {
       const config = makeConfig({ entity: ENTITY, statistics: { type } });
       expect(() => checkStatistics(config, 0)).toThrowError(/statistics.type/);
@@ -115,8 +115,7 @@ describe('checkStatistics', () => {
   it('checkStatistics: an unknown sub-option is kept as is', () => {
     const config = makeConfig({ entity: ENTITY, statistics: { some_option: 123 } });
     checkStatistics(config, 0);
-    expect(config.entities[0].statistics)
-      .toEqual({ type: DEFAULT_STATISTICS_TYPE, some_option: 123 });
+    expect(config.entities[0].statistics).toEqual({ some_option: 123 });
   });
 
   it('checkStatistics: with [attribute] -> warns & falls back to a raw history', () => {
@@ -178,7 +177,7 @@ describe('checkStatistics', () => {
       const warn = mockWarn();
       const config = makeConfig({ entity: ENTITY, statistics: true }, undefined, state_map);
       checkStatistics(config, 0);
-      expect(config.entities[0].statistics).toEqual({ type: DEFAULT_STATISTICS_TYPE });
+      expect(config.entities[0].statistics).toEqual({});
       expect(warn).not.toHaveBeenCalled();
     });
   });
@@ -202,7 +201,7 @@ describe('checkStatistics', () => {
       ],
     };
     checkStatistics(config, 0);
-    expect(config.entities[0].statistics).toEqual({ type: DEFAULT_STATISTICS_TYPE });
+    expect(config.entities[0].statistics).toEqual({});
     expect(config.entities[1].statistics).toBeUndefined();
   });
 });

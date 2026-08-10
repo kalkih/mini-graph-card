@@ -6,6 +6,7 @@
  */
 
 import { log } from './utils';
+import { STATISTICS_TYPES, DEFAULT_STATISTICS_TYPES } from './const';
 
 /**
   * Check if a value is a valid number
@@ -152,8 +153,29 @@ const getBound = (bound) => {
   return undefined;
 };
 
+/**
+ * Pick a statistics type which is really present in buckets: available types
+ * depend on a state_class, and an absent one is missing or null in every bucket.
+ * A requested type is returned only if it is available; compare a result with
+ * a requested type to see whether it was replaced.
+ * @param {Array} stats Statistics buckets
+ * @param {string} [requested] A type from a config
+ * @returns {string|undefined} A type to use, or undefined if there are none
+ */
+const getStatisticsType = (stats, requested) => {
+  const hasType = (item, type) => item && item[type] !== undefined && item[type] !== null;
+  const available = Array.isArray(stats)
+    ? STATISTICS_TYPES.filter(type => stats.some(item => hasType(item, type)))
+    : [];
+  if (requested !== undefined && available.includes(requested)) {
+    return requested;
+  }
+  return DEFAULT_STATISTICS_TYPES.find(type => available.includes(type)) || available[0];
+};
+
 export {
   isNumeric,
+  getStatisticsType,
   logStringWarning,
   getFactor,
   getBound,
