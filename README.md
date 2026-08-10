@@ -94,7 +94,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | group_by | string | `interval` | v0.8.0 | Specify type of grouping of data, dynamic `interval`, `date` or `hour`.
 | update_interval | number |  | v0.4.0 | Specify a custom update interval of the history data (in seconds), instead of on every state change.
 | cache | boolean | `true` | v0.9.0 | Enable/disable local caching of history data.
-| statistics | boolean *or* object |  |  | Read the series from long-term statistics instead of raw history, see [Long-term statistics](#long-term-statistics).
+| statistics | boolean *or* object |  |  | Read the series from statistics instead of raw history, see [Statistics](#statistics).
 | show | list |  | v0.2.0 | List of UI elements to display/hide, for available items see [available show options](#available-show-options).
 | animate | boolean | `false` | v0.2.0 | Add a reveal animation to the graph.
 | height | number | `150` | v0.0.1 | Set a custom height of the line graph.
@@ -159,7 +159,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | show_static_inactive | boolean |         | Set to true to disable hiding the line when a point of a line of another entity selected; meaningful for a [static line](#static-lines) only.
 | state_adaptive_color | boolean |         | Make the color of the state adapt to the entity/static value color.
 | y_axis | string |         | If 'secondary', displays using the secondary Y-axis on the right.
-| statistics | boolean *or* object |         | Override long-term statistics for this entity only, see [Long-term statistics](#long-term-statistics).
+| statistics | boolean *or* object |         | Override statistics for this entity only, see [Statistics](#statistics).
 | fixed_value | boolean |         | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 | smoothing | boolean |         | Override for a flag indicating whether to make graph line smooth.
 | logarithmic | boolean |         | Override logarithmic scaling for this entity only (see [Logarithmic options](#logarithmic-options)).
@@ -313,15 +313,15 @@ These buckets are converted later to single point/bar on the graph. Aggregate fu
 | `delta` | v0.9.4 | Calculates difference between max and min value
 | `diff` | v0.11.0 | Calculates difference between first and last value
 
-### Long-term statistics
+### Statistics
 
 By default a series is read from the recorder's raw history. That history is
 bounded by the recorder's `purge_keep_days`, and it gets expensive over long
 spans - every state row in the window is fetched and then bucketed client side.
 
-Setting `statistics` reads the series from Home Assistant's long-term
-statistics instead. Those are pre-aggregated server side and kept far longer
-than raw history, so a wide graph costs a fraction of the rows.
+Setting `statistics` reads the series from Home Assistant's statistics
+instead. Those are pre-aggregated server side and kept far longer than raw
+history, so a wide graph costs a fraction of the rows.
 
 ```yaml
 type: custom:mini-graph-card

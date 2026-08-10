@@ -57,7 +57,7 @@ const Y = 1;
 const V = 2;
 const ONE_HOUR = 1000 * 3600;
 
-// Long-term statistics
+// Statistics
 const STATISTICS_PERIODS = ['5minute', 'hour', 'day', 'week', 'month', 'year'];
 const STATISTICS_TYPES = ['mean', 'min', 'max', 'sum', 'state'];
 const DEFAULT_STATISTICS_TYPE = 'mean';
