@@ -12,82 +12,14 @@ import {
   DEFAULT_COLORS,
   DEFAULT_SHOW,
 } from './const';
-import { isNumeric } from './others';
 import { log } from './utils';
-
-/**
- * Check if an option is numeric (if not undefined);
- * fallback to a default value if not numeric or out of bounds
- * @param {object} config Config object
- * @param {string} option Name of option to be checked
- * @param {number} defaultValue Default fallback value
- * @param {number} minBound Optional minimum allowed value
- * @param {number} maxBound Optional maximum allowed value
- * @returns {number} Cleared value
- */
-const checkNumericOption = (
-  config,
-  option,
-  defaultValue,
-  minBound = undefined,
-  maxBound = undefined,
-) => {
-  const value = config[option];
-
-  if (value === undefined || value === null) {
-    return undefined;
-  }
-
-  if (isNumeric(value)) {
-    const isMinValid = minBound === undefined || value >= minBound;
-    const isMaxValid = maxBound === undefined || value <= maxBound;
-    if (isMinValid && isMaxValid) {
-      return value;
-    }
-  }
-
-  const clearedValue = defaultValue;
-  const invalidValue = typeof value === 'object'
-    ? JSON.stringify(value)
-    : value;
-  let errorDescr = 'not a numeric value';
-  if (isNumeric(value)) {
-    if (minBound !== undefined && value < minBound) {
-      errorDescr = `out of bounds, minimum allowed: ${minBound}`;
-    } else if (maxBound !== undefined && value > maxBound) {
-      errorDescr = `out of bounds, maximum allowed: ${maxBound}`;
-    }
-  }
-  log(`Invalid option ${option}: ${invalidValue} (${errorDescr}); adjusting value to ${clearedValue}`);
-  return clearedValue;
-};
-
-/**
- * Check if an option is integer;
- * fallback to a default value if not numeric or out of bounds;
- * round to an integer if needed
- * @param {object} config Config object
- * @param {string} option Name of option to be checked
- * @param {number} defaultValue Default fallback value
- * @param {number} minBound Optional minimum allowed value
- * @param {number} maxBound Optional maximum allowed value
- * @returns {number} Cleared value
- */
-const checkIntegerOption = (
-  config,
-  option,
-  defaultValue,
-  minBound = undefined,
-  maxBound = undefined,
-) => {
-  const value = checkNumericOption(config, option, defaultValue, minBound, maxBound);
-  if (value !== undefined && !Number.isInteger(value)) {
-    const roundedValue = Math.round(value);
-    log(`Invalid integer option ${option}: ${value}; rounding value to ${roundedValue}`);
-    return roundedValue;
-  }
-  return value;
-};
+import {
+  checkNumericOption,
+  checkIntegerOption,
+  checkBounds,
+  checkColorThresholds,
+} from './checkOption';
+import { getFactor } from './others';
 
 /**
  * Starting from the given index, increment the index until an array element with a
@@ -229,41 +161,29 @@ export default (config) => {
     show: { ...DEFAULT_SHOW, ...config.show },
   };
 
-  conf.entities.forEach((entity, i) => {
-    if (typeof entity === 'string') {
-      conf.entities[i] = { entity };
-    } else if (entity.color_thresholds) {
-      // eslint-disable-next-line no-param-reassign
-      entity.color_thresholds = computeThresholds(
-        entity.color_thresholds,
-        entity.color_thresholds_transition || conf.color_thresholds_transition,
-      );
-    }
-  });
-
   // check numeric options for validity
-  conf.font_size = checkNumericOption(conf, 'font_size', 100, 0.1);
-  conf.font_size_header = checkNumericOption(conf, 'font_size_header', DEFAULT_FONT_SIZE_HEADER, 0.1);
+  conf.font_size = checkNumericOption(conf, 'font_size', 100, 0.1, undefined, true);
+  conf.font_size_header = checkNumericOption(conf, 'font_size_header', DEFAULT_FONT_SIZE_HEADER, 0.1, undefined, true);
 
-  conf.bar_spacing = checkNumericOption(conf, 'bar_spacing', DEFAULT_BAR_SPACING, -1);
-  conf.bar_spacing_group = checkNumericOption(conf, 'bar_spacing_group', undefined, 0);
+  conf.bar_spacing = checkNumericOption(conf, 'bar_spacing', DEFAULT_BAR_SPACING, -1, undefined, true);
+  conf.bar_spacing_group = checkNumericOption(conf, 'bar_spacing_group', undefined, 0, undefined, true);
 
-  conf.height = checkNumericOption(conf, 'height', DEFAULT_GRAPH_HEIGHT, 0);
+  conf.height = checkNumericOption(conf, 'height', DEFAULT_GRAPH_HEIGHT, 0, undefined, true);
 
-  // per-entity options are not checked here
-  conf.line_width = checkNumericOption(conf, 'line_width', DEFAULT_MARGIN, 0);
+  conf.line_width = checkNumericOption(conf, 'line_width', DEFAULT_MARGIN, 0, undefined, true);
 
-  conf.hours_to_show = checkNumericOption(conf, 'hours_to_show', DEFAULT_HOURS_TO_SHOW, 0.01);
-  conf.points_per_hour = checkNumericOption(conf, 'points_per_hour', DEFAULT_POINTS_PER_HOUR, 0.001);
-  conf.update_interval = checkNumericOption(conf, 'update_interval', undefined, 0);
+  conf.hours_to_show = checkNumericOption(conf, 'hours_to_show', DEFAULT_HOURS_TO_SHOW, 0.01, undefined, true);
+  conf.points_per_hour = checkNumericOption(conf, 'points_per_hour', DEFAULT_POINTS_PER_HOUR, 0.001, undefined, true);
+  conf.update_interval = checkNumericOption(conf, 'update_interval', undefined, 0, undefined, true);
 
-  conf.min_bound_range = checkNumericOption(conf, 'min_bound_range', undefined, 0);
-  conf.min_bound_range_secondary = checkNumericOption(conf, 'min_bound_range_secondary', undefined, 0);
+  ({ lowerBound: conf.lower_bound, upperBound: conf.upper_bound } = checkBounds(conf));
 
-  conf.decimals_primary_labels = checkIntegerOption(conf, 'decimals_primary_labels', undefined, 0);
-  conf.decimals_secondary_labels = checkIntegerOption(conf, 'decimals_secondary_labels', undefined, 0);
-  // per-entity options are not checked here
-  conf.decimals = checkIntegerOption(conf, 'decimals', undefined, 0);
+  conf.min_bound_range = checkNumericOption(conf, 'min_bound_range', undefined, 0, undefined, true);
+  conf.min_bound_range_secondary = checkNumericOption(conf, 'min_bound_range_secondary', undefined, 0, undefined, true);
+
+  conf.decimals_primary_labels = checkIntegerOption(conf, 'decimals_primary_labels', undefined, 0, undefined, true);
+  conf.decimals_secondary_labels = checkIntegerOption(conf, 'decimals_secondary_labels', undefined, 0, undefined, true);
+  conf.decimals = checkIntegerOption(conf, 'decimals', undefined, 0, undefined, true);
 
   conf.static_value_label_offset = checkNumericOption(
     conf,
@@ -271,11 +191,45 @@ export default (config) => {
     DEFAULT_STATIC_VALUE_LABEL_OFFSET,
     0,
     100,
+    true,
   );
   if (conf.static_value_label_offset === undefined
     || conf.static_value_label_offset === null) {
     conf.static_value_label_offset = DEFAULT_STATIC_VALUE_LABEL_OFFSET;
   }
+
+  conf.fill_baseline = checkNumericOption(conf, 'fill_baseline', undefined, undefined, undefined, true);
+
+  // process per-entity configs
+  /* eslint-disable no-param-reassign */
+  conf.entities.forEach((entity, i) => {
+    if (typeof entity === 'string') {
+      conf.entities[i] = { entity };
+    } else {
+      // check numeric per-entity options for validity
+      entity.line_width = checkNumericOption(entity, 'line_width', conf.line_width, 0, undefined, true);
+      entity.decimals = checkIntegerOption(entity, 'decimals', conf.decimals, 0, undefined, true);
+      entity.fill_baseline = checkNumericOption(entity, 'fill_baseline', undefined, undefined, undefined, true);
+
+      if (entity.color_thresholds) {
+        // check color_thresholds
+        checkColorThresholds(entity, `entities[${i}]`);
+        // eslint-disable-next-line no-param-reassign
+        entity.color_thresholds = computeThresholds(
+          entity.color_thresholds,
+          entity.color_thresholds_transition || conf.color_thresholds_transition,
+        );
+      }
+    }
+  });
+  /* eslint-enable no-param-reassign */
+
+  // prepare predefined factors
+  const entityFactors = conf.entities.map((_, index) => getFactor(conf, index));
+  const axisFactors = {
+    primary: getFactor(conf),
+    secondary: getFactor(conf, -1),
+  };
 
   conf.state_map.forEach((state, i) => {
     // convert string values to objects
@@ -288,6 +242,9 @@ export default (config) => {
     conf.line_color = [config.line_color, ...DEFAULT_COLORS];
 
   conf.font_size = (config.font_size / 100) * DEFAULT_FONT_SIZE || DEFAULT_FONT_SIZE;
+
+  // check color_thresholds
+  checkColorThresholds(conf, 'config');
   conf.color_thresholds = computeThresholds(
     conf.color_thresholds,
     conf.color_thresholds_transition,
@@ -321,5 +278,9 @@ export default (config) => {
     }
   }
 
-  return conf;
+  return {
+    config: conf,
+    entityFactors,
+    axisFactors,
+  };
 };

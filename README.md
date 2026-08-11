@@ -82,6 +82,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | type ***(required)*** | string |  | v0.0.1 | `custom:mini-graph-card`.
 | entities ***(required)*** | list |  | v0.2.0 | One or more sensor entities (along with [static values](#static-lines)) in a list, see [entities object](#entities-object) for additional entity/static value options.
 | icon | string |  | v0.0.1 | Set a custom icon from any of the available mdi icons.
+| icon_color | string |  | v0.14.0 | Set a custom icon color. Takes precedence over `icon_adaptive_color`.
 | icon_image | string |  | v0.12.0 | Override icon with an image url.
 | name | string |  | v0.0.1 | Set a custom name which is displayed beside the icon.
 | unit | string |  | v0.0.1 | Set a custom unit of measurement (`''` value for an empty unit).
@@ -124,6 +125,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | value_factor | number or object |   | v0.9.4<br>v0.14.0 | Scale a value, see [Value factor](#value-factor).
 | value_factor_secondary | number or object |   | v0.14.0 | Scale a value, see [Value factor](#value-factor).
 | logarithmic | boolean | `false` | v0.10.0 | Use a logarithmic scale for the graph (see [Logarithmic options](#logarithmic-options)).
+| fill_baseline | number |  | v0.14.0 | Set a custom baseline for the graph (see [Baseline](#baseline)).
 
 
 
@@ -159,6 +161,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | fixed_value | boolean |         | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 | smoothing | boolean |         | Override for a flag indicating whether to make graph line smooth.
 | logarithmic | boolean |         | Override logarithmic scaling for this entity only (see [Logarithmic options](#logarithmic-options)).
+| fill_baseline | number |   | Set a custom baseline for the graph or override a global `fill_baseline` option (see [Baseline](#baseline)).
 
 Note: the "points" term is only applicable to a "line" graph, not to a "bar" graph.
 
@@ -369,12 +372,24 @@ For clarity, it is recommended to explicitly define a `day_weekday` value in cas
 
 Normally gaps between numbers on the graph are equal; the gap between 1 and 2 on the graph is the same as the gap between 100 and 101. The `logarithmic` option applies a [logarithmic transformation](https://en.wikipedia.org/wiki/Log_transformation_(statistics)) to the graph. With `logarithmic`, the graph is scaled by powers of 10, so the gap between 1, 10, 100, etc are equal. This is useful when your values span a wide range. Illuminance, for example, can swing from 1 to 5000 over the course of a day, and without a transformation it's hard to read the smaller values on the graph.
 
-Note that this option rounds up the input to 1 so negative numbers or numbers less than 1 are rendered as 0; this is different from the formal definition of logarithm, where `log(x) == 0` when `x<1` and $\infty$ when `x<0`.
+Note that this option rounds up the input to 1 so negative numbers or numbers less than 1 are rendered as 0; this is different from the formal definition of logarithm, where `log(x) < 0` when `x > 0 && x < 1` and $\infty$ or `NaN` when `x <= 0`.
 
 ### Line styles
 
 A default line style is a "solid line". A style should be defined in a format used for a standard CSS `stroke-dasharray` property. Examples: `10,10` (dashes), `20,10` (long dashes); see cards examples [below](#custom-styles-for-line-graphs). It is better to use along with a `line_width` option.
 Warning: the `line_style` option is not accounted if `animation: true` option is set.
+
+### Baseline
+
+The `fill_baseline` option is only meaningful for linear graphs with a fill.
+
+By default, a fill is applied to an area between a curve and a bottom edge.
+With the `fill_baseline` option set, areas between a curve & a baseline are filled.
+This can be useful to show a deviation of a value near some basis (like for entities which can be both positive & nagitive).
+
+Additionally, the `fill_baseline` option can be set individually for entities.
+
+See examples [below](#custom-baseline).
 
 
 ### Graphs order
@@ -409,6 +424,12 @@ The following theme variables can be set in your HA theme to customize the appea
 |------|:-------:|-------------|
 | mcg-title-letter-spacing |  | Letter spacing of the card title (`name` option).
 | mcg-title-font-weight | 500 | Font weight of the card title.
+| mcg-label-axis-opacity | 0.75 | Opacity of the Y-axis labels.
+| mcg-label-static-opacity | 0.75 | Opacity of the static values' labels.
+| mcg-label-axis-border-radius | 1em | Border radius of the Y-axis labels.
+| mcg-label-static-border-radius | 1em | Border radius of the static values' labels.
+
+
 
 ### Example usage
 
@@ -714,6 +735,54 @@ height: 200
 show:
   labels: true
   fill: false
+```
+
+#### Custom baseline
+
+Baseline is set to 0:
+
+<img width="497" height="217" alt="изображение" src="https://github.com/user-attachments/assets/c755d398-bbe8-435a-8571-ee4947483b56" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.xxx
+fill_baseline: 0
+show:
+  labels: true
+```
+
+Individual baselines for entities (along with displaying static lines):
+
+<img width="498" height="264" alt="изображение" src="https://github.com/user-attachments/assets/43a39c0b-4ca2-40ad-8443-2e8821aa987b" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.xiaomi_cg_1_co2
+    fill_baseline: 660
+    color: orange
+    name: Room 1
+  - static_value: 660
+    show_fill: false
+    line_width: 1
+    color: orange
+    show_legend: false
+  - entity: sensor.xiaomi_cg_2_co2
+    fill_baseline: 740
+    color: green
+    name: Room 2
+  - static_value: 740
+    show_fill: false
+    line_width: 1
+    color: green
+    show_legend: false
+height: 200
+show:
+  static_value_labels: left
+  name: false
+  icon: false
+  state: false
 ```
 
 #### Grouping by date
