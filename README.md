@@ -36,6 +36,8 @@ This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community St
 
 ### Add resource reference
 
+Note: If you install the card via HACS, you do not need to add the resource reference manually; HACS handles this automatically during the installation process.
+
 If you configure Lovelace via YAML, add a reference to `mini-graph-card-bundle.js` inside your `configuration.yaml`:
 
   ```yaml
@@ -49,7 +51,6 @@ Else, if you prefer the graphical editor, use the menu to add the resource:
 1. Make sure, advanced mode is enabled in your user profile (click on your user name to get there)
 2. Navigate to Configuration -> Lovelace Dashboards -> Resources Tab. Hit orange (+) icon
 3. Enter URL `/local/mini-graph-card-bundle.js` and select type "JavaScript Module".
-(Use `/hacsfiles/mini-graph-card/mini-graph-card-bundle.js` and select "JavaScript Module" for HACS install)
 4. Restart Home Assistant.
 
 ## Updating
