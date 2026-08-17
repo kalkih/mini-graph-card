@@ -18,6 +18,7 @@ import {
   checkIntegerOption,
   checkBounds,
   checkColorThresholds,
+  checkStatistics,
 } from './checkOption';
 import { getFactor } from './others';
 
@@ -221,6 +222,9 @@ export default (config) => {
         );
       }
     }
+    // `statistics` may be set per entity or card-wide, and accepts a bare
+    // `true` as shorthand for the defaults.
+    checkStatistics(conf, i);
   });
   /* eslint-enable no-param-reassign */
 

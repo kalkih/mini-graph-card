@@ -24,8 +24,10 @@ import {
   DEFAULT_GRAPH_HEIGHT,
   DEFAULT_MARGIN,
   NBSP,
+  STATISTICS_PERIOD_THRESHOLDS,
+  STATISTICS_PERIOD_FALLBACK,
 } from './const';
-import { isNumeric } from './others';
+import { isNumeric, getStatisticsType } from './others';
 import {
   getMin, getAvg, getMax,
   getMilli,
@@ -62,6 +64,7 @@ class MiniGraphCard extends LitElement {
     this.stateChanged = false;
     this.initial = true;
     this._md5Config = undefined;
+    this.loggedMessages = new Set();
 
     // update datetime settings periodically
     this.updateHour24 = true;
@@ -1775,6 +1778,36 @@ class MiniGraphCard extends LitElement {
 
     this.updateQueue = this.updateQueue.filter(entry => entry !== `${entity.entity_id}-${index}`);
 
+    // The whole window is refetched, not appended to a cached tail:
+    // a bucket is revised until its period completes.
+    const { statistics } = this.config.entities[index];
+    if (statistics) {
+      const period = statistics.period || this.statisticsPeriod();
+      const stats = await this.fetchStatistics(entity.entity_id, initStart, end, period);
+      if (stats.length === 0) {
+        this.logOnce(`No ${period} statistics for ${entity.entity_id} in a shown period`);
+        return;
+      }
+      // A type is resolved here & not in buildConfig(): only a response tells
+      // whether an entity has "mean" or "sum" statistics.
+      const type = getStatisticsType(stats, statistics.type);
+      if (type === undefined) {
+        this.logOnce(`No statistics types for ${entity.entity_id}`);
+        return;
+      }
+      if (statistics.type !== undefined && statistics.type !== type) {
+        this.logOnce(`Statistics type ${statistics.type} is not available for ${entity.entity_id}; using ${type}`);
+      }
+      const statHistory = stats
+        .map(item => ({
+          last_changed: new Date(item.start).toISOString(),
+          state: item[type],
+        }))
+        .filter(item => !Number.isNaN(parseFloat(item.state)));
+      this.applyHistory(entity, index, statHistory);
+      return;
+    }
+
     let stateHistory = [];
     let start = initStart;
     let skipInitialState = false;
@@ -1859,6 +1892,21 @@ class MiniGraphCard extends LitElement {
       }
     }
 
+    this.applyHistory(entity, index, stateHistory);
+  }
+
+  /** Log a message once: updateEntity() is called on every update. */
+  logOnce(message) {
+    if (this.loggedMessages.has(message)) return;
+    this.loggedMessages.add(message);
+    log(message);
+  }
+
+  /**
+   * Pass a [{last_changed, state}] series to the graph;
+   * used by both the history & the statistics paths.
+   */
+  applyHistory(entity, index, stateHistory) {
     if (stateHistory.length === 0) return;
 
     if (this.entity[0] && entity.entity_id === this.entity[0].entity_id) {
@@ -1871,6 +1919,24 @@ class MiniGraphCard extends LitElement {
     } else {
       this.Graph[index].history = stateHistory;
     }
+  }
+
+  /** Pick a period wide enough for hours_to_show. */
+  statisticsPeriod() {
+    const match = STATISTICS_PERIOD_THRESHOLDS
+      .find(({ hours }) => this.config.hours_to_show <= hours);
+    return match ? match.period : STATISTICS_PERIOD_FALLBACK;
+  }
+
+  async fetchStatistics(entityId, start, end, period) {
+    const result = await this._hass.callWS({
+      type: 'recorder/statistics_during_period',
+      start_time: start ? start.toISOString() : undefined,
+      end_time: end ? end.toISOString() : undefined,
+      statistic_ids: [entityId],
+      period,
+    });
+    return (result && result[entityId]) || [];
   }
 
   async fetchRecent(entityId, start, end, skipInitialState, withAttributes) {

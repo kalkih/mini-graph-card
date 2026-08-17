@@ -95,6 +95,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | group_by | string | `interval` | v0.8.0 | Specify type of grouping of data, dynamic `interval`, `date` or `hour`.
 | update_interval | number |  | v0.4.0 | Specify a custom update interval of the history data (in seconds), instead of on every state change.
 | cache | boolean | `true` | v0.9.0 | Enable/disable local caching of history data.
+| statistics | boolean *or* object |  |  | Read the series from statistics instead of raw history, see [Statistics](#statistics).
 | show | list |  | v0.2.0 | List of UI elements to display/hide, for available items see [available show options](#available-show-options).
 | animate | boolean | `false` | v0.2.0 | Add a reveal animation to the graph.
 | height | number | `150` | v0.0.1 | Set a custom height of the line graph.
@@ -159,6 +160,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | show_static_inactive | boolean |         | Set to true to disable hiding the line when a point of a line of another entity selected; meaningful for a [static line](#static-lines) only.
 | state_adaptive_color | boolean |         | Make the color of the state adapt to the entity/static value color.
 | y_axis | string |         | If 'secondary', displays using the secondary Y-axis on the right.
+| statistics | boolean *or* object |         | Override statistics for this entity only, see [Statistics](#statistics).
 | fixed_value | boolean |         | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 | smoothing | boolean |         | Override for a flag indicating whether to make graph line smooth.
 | logarithmic | boolean |         | Override logarithmic scaling for this entity only (see [Logarithmic options](#logarithmic-options)).
@@ -311,6 +313,72 @@ These buckets are converted later to single point/bar on the graph. Aggregate fu
 | `sum` | v0.9.2 |
 | `delta` | v0.9.4 | Calculates difference between max and min value
 | `diff` | v0.11.0 | Calculates difference between first and last value
+
+### Statistics
+
+By default a series is read from the recorder's raw history. That history is
+bounded by the recorder's `purge_keep_days`, and it gets expensive over long
+spans - every state row in the window is fetched and then bucketed client side.
+
+Setting `statistics` reads the series from Home Assistant's statistics
+instead. Those are pre-aggregated server side and kept far longer than raw
+history, so a wide graph costs a fraction of the rows.
+
+```yaml
+type: custom:mini-graph-card
+hours_to_show: 336
+points_per_hour: 1
+entities:
+  - entity: sensor.outside_temperature
+    statistics: true
+```
+
+| Option | Type | Default | Description
+|--------|------|---------|------------
+| period | string | derived from `hours_to_show` | `5minute`, `hour`, `day`, `week`, `month` or `year`.
+| type | string | see below | Which statistic to plot: `mean`, `min`, `max`, `sum`, `state` or `change`.
+
+```yaml
+entities:
+  - entity: sensor.outside_temperature
+    statistics:
+      period: hour
+      type: max
+```
+
+`statistics` may be set per entity or card-wide, in which case it applies to
+every entity that does not override it. `statistics: true` is shorthand for
+the defaults, and `statistics: false` on an entity opts it back out.
+
+Notes:
+
+- Only entities with a `state_class` have statistics; the card logs a warning
+  if there are none for an entity.
+- Which types exist depends on the `state_class`: `measurement` has `mean`,
+  `min` and `max`, `measurement_angle` has `mean` only (a circular mean),
+  `total` and `total_increasing` have `sum`, `state` and `change`. The card
+  reads the available types from a response, so a type which is not there is
+  replaced by a default one, with a warning in a console.
+- When `type` is not set, `mean` is used if it is available, otherwise `state`
+  - the reading a raw history would show. Use `change` to plot a consumption
+  per period instead, which is usually what is wanted for an energy, water or
+  gas sensor.
+- Home Assistant retains `5minute` statistics for a limited window (10 days by
+  default) and hourly statistics indefinitely. When `period` is not set it is
+  derived from `hours_to_show` so a long graph does not ask for data that has
+  already been purged.
+- Statistics are aggregated into fixed periods, so `points_per_hour` beyond one
+  point per period only produces empty buckets.
+- The whole window is refetched on update rather than appended to the cached
+  tail, because a period's bucket is revised until that period completes.
+- `statistics` cannot be combined with `attribute` or `state_map`. Statistics
+  hold numeric aggregates of the state, so there is no attribute to read and
+  no non-numeric state to map. Either combination logs a warning and the
+  entity falls back to raw history, which honours both options.
+- Values arrive in the entity's own unit. Home Assistant converts a statistic
+  from the unit it was recorded in to the entity's current
+  `unit_of_measurement` before returning it, which is the unit the card labels
+  the axis with.
 
 ### Static lines
 

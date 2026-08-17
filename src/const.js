@@ -57,6 +57,20 @@ const Y = 1;
 const V = 2;
 const ONE_HOUR = 1000 * 3600;
 
+// Statistics
+const STATISTICS_PERIODS = ['5minute', 'hour', 'day', 'week', 'month', 'year'];
+// "mean" statistics hold mean/min/max, "sum" ones - sum/state/change
+const STATISTICS_TYPES = ['mean', 'min', 'max', 'sum', 'state', 'change'];
+// A preferred type, in order of preference
+const DEFAULT_STATISTICS_TYPES = ['mean', 'state'];
+// A default period, by hours_to_show; HA keeps 5-minute statistics ~10 days only.
+const STATISTICS_PERIOD_THRESHOLDS = [
+  { hours: 24, period: '5minute' },
+  { hours: 24 * 90, period: 'hour' },
+  { hours: 24 * 730, period: 'day' },
+];
+const STATISTICS_PERIOD_FALLBACK = 'month';
+
 export {
   URL_DOCS,
   MAX_BARS,
@@ -77,4 +91,9 @@ export {
   Y,
   V,
   ONE_HOUR,
+  STATISTICS_PERIODS,
+  STATISTICS_TYPES,
+  DEFAULT_STATISTICS_TYPES,
+  STATISTICS_PERIOD_THRESHOLDS,
+  STATISTICS_PERIOD_FALLBACK,
 };
