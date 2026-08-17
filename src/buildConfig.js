@@ -9,6 +9,7 @@ import {
   DEFAULT_HOURS_TO_SHOW,
   DEFAULT_POINTS_PER_HOUR,
   DEFAULT_STATIC_VALUE_LABEL_OFFSET,
+  DEFAULT_BEZIERC_TENSION,
   DEFAULT_COLORS,
   DEFAULT_SHOW,
 } from './const';
@@ -230,6 +231,8 @@ export default (config) => {
     primary: getFactor(conf),
     secondary: getFactor(conf, -1),
   };
+
+  conf.tension = checkNumericOption(conf, 'tension', DEFAULT_BEZIERC_TENSION, 0);
 
   conf.state_map.forEach((state, i) => {
     // convert string values to objects
