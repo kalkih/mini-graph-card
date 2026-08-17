@@ -97,7 +97,7 @@ const getFactor = (config, index = undefined) => {
       logStringWarning(factor, 'factor');
       switch (type) {
         case 'exponent':
-          return getExponent(Number(factor))
+          return getExponent(Number(factor));
         default: // scale
           return Number(factor);
       }

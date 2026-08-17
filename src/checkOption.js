@@ -155,6 +155,7 @@ const checkBounds = (config) => {
   return { lowerBound, upperBound };
 };
 
+/* eslint-disable no-param-reassign */
 /**
  * Check color_thresholds array.
  * @param {object} config Config object containing color_thresholds
@@ -211,6 +212,7 @@ const checkColorThresholds = (config, configName) => {
       return { color: 'var(--primary-text-color)' };
     });
 };
+/* eslint-enable no-param-reassign */
 
 export {
   checkNumericOption,
