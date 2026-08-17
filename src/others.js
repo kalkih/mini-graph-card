@@ -7,11 +7,40 @@
 
 import { log } from './utils';
 
-const isNumeric = value => typeof value === 'number' && Number.isFinite(value);
+/**
+  * Check if a value is a valid number
+  * @param {any} value Value to be checked
+  * @param {boolean} [allowString=false] Optional flag
+  * to allow string representations of numbers (like "123")
+  * @returns {boolean} True if value is a valid number, false - otherwise
+  */
+const isNumeric = (value, allowString = false) => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return true;
+  }
+  if (allowString && typeof value === 'string') {
+    const trimmed = value.trim();
+    if (trimmed === '') {
+      // empty string
+      return false;
+    }
+    // try to convert a string to a number
+    const num = Number(trimmed);
+    return Number.isFinite(num);
+  }
+  return false;
+};
 
-const getExponent = factor => 10 ** factor;
-
-const logValueFactor = factor_obj => log(`invalid value_factor: [${JSON.stringify(factor_obj)}]`);
+/**
+ * Log a warning if a configuration numeric value is passed as a string.
+ * @param {any} value Value to check
+ * @param {string} option Name of the option for the log message
+ */
+const logStringWarning = (value, option) => {
+  if (typeof value === 'string') {
+    log(`Warning for option ${option}: [${value}] is configured as a string; please make it a number`);
+  }
+};
 
 /**
   * Return a multiplying factor (exponental or scale) based on a "value_factor" option
@@ -28,17 +57,19 @@ const getFactor = (config, index = undefined) => {
   let value_factor;
   const validIndex = typeof index === 'number'
     && index >= 0
-    && config.entities
+    && Array.isArray(config.entities)
     && config.entities[index];
+
   if (validIndex && config.entities[index].value_factor !== undefined) {
     // provided a per-entity value_factor
     ({ value_factor } = config.entities[index]);
-  } else if (validIndex && config.entities[index].y_axis === 'secondary'
-    && config.value_factor_secondary !== undefined) {
+  } else if (validIndex && config.entities[index].y_axis === 'secondary') {
     // use value_factor_secondary for entities with 'y_axis: secondary'
+    // if value_factor_secondary = undefined, then later it will fallback to 1
     value_factor = config.value_factor_secondary;
-  } else if (index === -1 && config.value_factor_secondary !== undefined) {
+  } else if (index === -1) {
     // use value_factor_secondary for secondary Y-axis labels
+    // if value_factor_secondary = undefined, then later it will fallback to 1
     value_factor = config.value_factor_secondary;
   } else {
     // use a global value_factor
@@ -50,27 +81,37 @@ const getFactor = (config, index = undefined) => {
     return 1;
   }
 
+  const getExponent = factor => 10 ** factor;
+  const logValueFactor = factor_obj => log(`invalid value_factor: [${JSON.stringify(factor_obj)}]`);
+
   if (typeof value_factor === 'object') {
     const { type, factor } = value_factor;
     if (type === undefined || factor === undefined
-      || typeof type !== 'string' || !isNumeric(factor)) {
+      || typeof type !== 'string' || !isNumeric(factor, true)) {
       // invalid options, fallback to a default factor
       logValueFactor(value_factor);
       return 1;
     }
-    if (type === 'exponent') {
-      return getExponent(factor);
-    } else if (type === 'scale') {
-      return factor;
+    if (type === 'exponent' || type === 'scale') {
+      // log a warning in case of a string presentation of a number
+      logStringWarning(factor, 'factor');
+      switch (type) {
+        case 'exponent':
+          return getExponent(Number(factor));
+        default: // scale
+          return Number(factor);
+      }
     }
     // invalid 'type' option
     logValueFactor(value_factor);
     return 1;
   }
 
-  if (isNumeric(value_factor)) {
+  if (isNumeric(value_factor, true)) {
+    // log a warning in case of a string presentation of a number
+    logStringWarning(value_factor, 'value_factor');
     // use a legacy "exponent" way
-    return getExponent(value_factor);
+    return getExponent(Number(value_factor));
   }
 
   logValueFactor(value_factor);
@@ -78,7 +119,42 @@ const getFactor = (config, index = undefined) => {
   return 1;
 };
 
+/**
+  * Parse a bound value accounting for an optional "~" prefix.
+  * @param {number|string} bound Bound with a possible "~" prefix
+  * @returns {{value: number, soft: boolean}|undefined} Parsed value
+  */
+const getBound = (bound) => {
+  if (bound === undefined || bound === null || typeof bound === 'object') {
+    return undefined;
+  }
+
+  const strBound = String(bound).trim();
+  if (strBound.startsWith('~')) {
+    // soft bound
+    const value = strBound.slice(1);
+    if (isNumeric(value, true)) {
+      return {
+        value: Number(value),
+        soft: true,
+      };
+    }
+    return undefined;
+  }
+
+  // fixed bound
+  if (isNumeric(strBound, true)) {
+    return {
+      value: Number(strBound),
+      soft: false,
+    };
+  }
+  return undefined;
+};
+
 export {
-  getFactor,
   isNumeric,
+  logStringWarning,
+  getFactor,
+  getBound,
 };

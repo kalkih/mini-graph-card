@@ -1,0 +1,484 @@
+/**
+ * Tests for checkFunction(), checkIntegerOption().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { assert, describe, it } from 'vitest';
+import { checkNumericOption, checkIntegerOption } from '../checkOption';
+import { isNumeric } from '../others';
+
+interface ConfigType {
+  some_option?: number | string | any;
+};
+
+const OPTION_GLOBAL = 'some_option';
+const OPTION_NON_EXISTING = 'non_existing_option';
+
+const DEFAULT = 456;
+const HUGE_NEGATIVE = -99999999999;
+const HUGE_POSITIVE = 99999999999;
+
+const FUNCTION_NAMES = [
+  checkNumericOption,
+  checkIntegerOption,
+];
+
+const OPTIONS: string[] = [
+  OPTION_GLOBAL,
+  OPTION_NON_EXISTING,
+];
+
+const VARIANTS: any[] = [
+  {
+    value: 0,
+    defaultValue: DEFAULT,
+    expectedValue: 0,
+  },
+  {
+    value: 0.000001,
+    defaultValue: DEFAULT,
+    expectedValue: 0.000001,
+  },
+  {
+    value: -0.000001,
+    defaultValue: DEFAULT,
+    expectedValue: -0.000001,
+  },
+  {
+    value: 123,
+    defaultValue: DEFAULT,
+    expectedValue: 123,
+  },
+  {
+    value: -123,
+    defaultValue: DEFAULT,
+    expectedValue: -123,
+  },
+  {
+    value: 123.456,
+    defaultValue: DEFAULT,
+    expectedValue: 123.456,
+  },
+  {
+    value: -123.456,
+    defaultValue: DEFAULT,
+    expectedValue: -123.456,
+  },
+  {
+    value: undefined,
+    defaultValue: DEFAULT,
+    expectedValue: undefined,
+  },
+  {
+    value: null,
+    defaultValue: DEFAULT,
+    expectedValue: undefined,
+  },
+  {
+    value: 'abcd',
+    defaultValue: DEFAULT,
+    expectedValue: DEFAULT,
+  },
+  {
+    value: 'abcd abcd',
+    defaultValue: DEFAULT,
+    expectedValue: DEFAULT,
+  },
+  {
+    value: '123a',
+    defaultValue: DEFAULT,
+    expectedValue: DEFAULT,
+  },
+  {
+    value: '123',
+    defaultValue: DEFAULT,
+    expectedValue: DEFAULT,
+  },
+  {
+    value: '123',
+    defaultValue: DEFAULT,
+    expectedValue: 123,
+    allowString: true,
+  },
+  {
+    value: '-123',
+    defaultValue: DEFAULT,
+    expectedValue: DEFAULT,
+  },
+  {
+    value: '-123',
+    defaultValue: DEFAULT,
+    expectedValue: -123,
+    allowString: true,
+  },
+  {
+    value: '123.456',
+    defaultValue: DEFAULT,
+    expectedValue: DEFAULT,
+  },
+  {
+    value: '123.456',
+    defaultValue: DEFAULT,
+    expectedValue: 123.456,
+    allowString: true,
+  },
+  {
+    value: '-123.456',
+    defaultValue: DEFAULT,
+    expectedValue: DEFAULT,
+  },
+  {
+    value: '-123.456',
+    defaultValue: DEFAULT,
+    expectedValue: -123.456,
+    allowString: true,
+  },
+  {
+    value: '123,456',
+    defaultValue: DEFAULT,
+    expectedValue: DEFAULT,
+  },
+  {
+    value: '-123,456',
+    defaultValue: DEFAULT,
+    expectedValue: DEFAULT,
+  },
+  {
+    value: [123, 456],
+    defaultValue: DEFAULT,
+    expectedValue: DEFAULT,
+  },
+  {
+    value: { abc: 123, def: 456 },
+    defaultValue: DEFAULT,
+    expectedValue: DEFAULT,
+  },
+];
+
+const LOG_VALUE = (value: string|number|any|undefined|null) => {
+  return typeof value === 'object'
+    ? JSON.stringify(value)
+    : value;
+};
+
+describe("checkNumericOption, checkIntegerOption", () => {
+  FUNCTION_NAMES.forEach((checkFunction) => {
+    const functionName = checkFunction.name;
+
+    OPTIONS.forEach((option) => {
+      VARIANTS.forEach((variant) => {
+        const config: ConfigType = {
+          some_option: variant.value,
+        };
+
+        const isValueNumeric = isNumeric(variant.value, variant.allowString);
+        const valueNumber = isValueNumeric
+          ? Number(variant.value)
+          : 0;
+        const valueBigger = isValueNumeric
+          ? valueNumber + 1
+          : HUGE_POSITIVE;
+        const valueSmaller = isValueNumeric
+          ? valueNumber - 1
+          : HUGE_NEGATIVE;
+        const valueMuchBigger = isValueNumeric
+          ? valueNumber + 2
+          : HUGE_POSITIVE;
+        const valueMuchSmaller = isValueNumeric
+          ? valueNumber - 2
+          : HUGE_NEGATIVE;
+
+        const allowStringNote = variant.allowString
+          ? ' (allowString)' : '';
+
+        let expectedValue = option === OPTION_NON_EXISTING
+          ? undefined
+          : functionName === 'checkIntegerOption'
+              ? variant.expectedValue === undefined
+                ? undefined
+                : Math.round(variant.expectedValue) + 0 // prevent "-0" value
+              : variant.expectedValue;
+
+        it(`${functionName}: test global config [${LOG_VALUE(variant.value)}] (no min/maxBound)${allowStringNote}`, () => {
+          const result = checkFunction(
+            config,
+            option,
+            variant.defaultValue,
+            undefined,
+            undefined,
+            variant.allowString,
+          );
+          assert.strictEqual(
+            result,
+            expectedValue,
+          );
+        });
+        ///////////////////////////////////////
+        it(`${functionName}: test global config [${LOG_VALUE(variant.value)}], minBound undefined${allowStringNote}`, () => {
+          const result = checkFunction(
+            config,
+            option,
+            variant.defaultValue,
+            undefined,
+            undefined,
+            variant.allowString,
+          );
+          assert.strictEqual(
+            result,
+            expectedValue,
+          );
+        });
+
+        it(`${functionName}: test global config [${LOG_VALUE(variant.value)}], min/maxBound undefined${allowStringNote}`, () => {
+          const result = checkFunction(
+            config,
+            option,
+            variant.defaultValue,
+            undefined,
+            undefined,
+            variant.allowString,
+          );
+          assert.strictEqual(
+            result,
+            expectedValue,
+          );
+        });
+        ///////////////////////////////////////
+        it(`${functionName}: test global config [${LOG_VALUE(variant.value)}], minBound = HUGE_NEGATIVE${allowStringNote}`, () => {
+          const result = checkFunction(
+            config,
+            option,
+            variant.defaultValue,
+            HUGE_NEGATIVE,
+            undefined,
+            variant.allowString,
+          );
+          assert.strictEqual(
+            result,
+            expectedValue,
+          );
+        });
+
+        it(`${functionName}: test global config [${LOG_VALUE(variant.value)}], maxBound = HUGE_POSITIVE${allowStringNote}`, () => {
+          const result = checkFunction(
+            config,
+            option,
+            variant.defaultValue,
+            undefined,
+            HUGE_POSITIVE,
+            variant.allowString,
+          );
+          assert.strictEqual(
+            result,
+            expectedValue,
+          );
+        });
+
+        it(`${functionName}: test global config [${LOG_VALUE(variant.value)}], min/maxBound = HUGE_*${allowStringNote}`, () => {
+          const result = checkFunction(
+            config,
+            option,
+            variant.defaultValue,
+            HUGE_NEGATIVE,
+            HUGE_POSITIVE,
+            variant.allowString,
+          );
+          assert.strictEqual(
+            result,
+            expectedValue,
+          );
+        });
+
+        ///////////////////////////////////////
+
+        it(`${functionName}: test global config [${LOG_VALUE(variant.value)}], minBound = option's value${allowStringNote}`, () => {
+          const result = checkFunction(
+            config,
+            option,
+            variant.defaultValue,
+            valueNumber,
+            undefined,
+            variant.allowString,
+          );
+          assert.strictEqual(
+            result,
+            expectedValue,
+          );
+        });
+
+        it(`${functionName}: test global config [${LOG_VALUE(variant.value)}], maxBound = option's value${allowStringNote}`, () => {
+          const result = checkFunction(
+            config,
+            option,
+            variant.defaultValue,
+            undefined,
+            valueNumber,
+            variant.allowString,
+          );
+          assert.strictEqual(
+            result,
+            expectedValue,
+          );
+        });
+
+        it(`${functionName}: test global config [${LOG_VALUE(variant.value)}], min/maxBound = option's value${allowStringNote}`, () => {
+          const result = checkFunction(
+            config,
+            option,
+            variant.defaultValue,
+            valueNumber,
+            valueNumber,
+            variant.allowString,
+          );
+          assert.strictEqual(
+            result,
+            expectedValue,
+          );
+        });
+        ///////////////////////////////////////
+        it(`${functionName}: test global config [${LOG_VALUE(variant.value)}], minBound = some smaller value${allowStringNote}`, () => {
+          const result = checkFunction(
+            config,
+            option,
+            variant.defaultValue,
+            valueSmaller,
+            undefined,
+            variant.allowString,
+          );
+          assert.strictEqual(
+            result,
+            expectedValue,
+          );
+        });
+
+        it(`${functionName}: test global config [${LOG_VALUE(variant.value)}], maxBound = some bigger value${allowStringNote}`, () => {
+          const result = checkFunction(
+            config,
+            option,
+            variant.defaultValue,
+            undefined,
+            valueBigger,
+            variant.allowString,
+          );
+          assert.strictEqual(
+            result,
+            expectedValue,
+          );
+        });
+
+        it(`${functionName}: test global config [${LOG_VALUE(variant.value)}], minBound = some smaller value, maxBound = option's value${allowStringNote}`, () => {
+          const result = checkFunction(
+            config,
+            option,
+            variant.defaultValue,
+            valueSmaller,
+            valueNumber,
+            variant.allowString,
+          );
+          assert.strictEqual(
+            result,
+            expectedValue,
+          );
+        });
+
+        it(`${functionName}: test global config [${LOG_VALUE(variant.value)}], minBound = option's value, maxBound = some bigger value${allowStringNote}`, () => {
+          const result = checkFunction(
+            config,
+            option,
+            variant.defaultValue,
+            valueNumber,
+            valueBigger,
+            variant.allowString,
+          );
+          assert.strictEqual(
+            result,
+            expectedValue,
+          );
+        });
+
+        it(`${functionName}: test global config [${LOG_VALUE(variant.value)}], minBound = some smaller value, maxBound = some bigger value${allowStringNote}`, () => {
+          const result = checkFunction(
+            config,
+            option,
+            variant.defaultValue,
+            valueSmaller,
+            valueBigger,
+            variant.allowString,
+          );
+          assert.strictEqual(
+            result,
+            expectedValue,
+          );
+        });
+        ///////////////////////////////////////
+        let expectedValue_2 = option === OPTION_NON_EXISTING
+          ? undefined
+          : variant.expectedValue === undefined
+            ? undefined
+            : DEFAULT;
+
+        it(`${functionName}: test global config [${LOG_VALUE(variant.value)}], minBound = some bigger value${allowStringNote}`, () => {
+          const result = checkFunction(
+            config,
+            option,
+            variant.defaultValue,
+            valueBigger,
+            undefined,
+            variant.allowString,
+          );
+          assert.strictEqual(
+            result,
+            expectedValue_2,
+          );
+        });
+
+        it(`${functionName}: test global config [${LOG_VALUE(variant.value)}], min/maxBound = some bigger value${allowStringNote}`, () => {
+          const result = checkFunction(
+            config,
+            option,
+            variant.defaultValue,
+            valueBigger,
+            valueMuchBigger,
+            variant.allowString,
+          );
+          assert.strictEqual(
+            result,
+            expectedValue_2,
+          );
+        });
+
+        it(`${functionName}: test global config [${LOG_VALUE(variant.value)}], maxBound = some smaller value${allowStringNote}`, () => {
+          const result = checkFunction(
+            config,
+            option,
+            variant.defaultValue,
+            undefined,
+            valueSmaller,
+            variant.allowString,
+          );
+          assert.strictEqual(
+            result,
+            expectedValue_2,
+          );
+        });
+
+        it(`${functionName}: test global config [${LOG_VALUE(variant.value)}], min/maxBound = some smaller value${allowStringNote}`, () => {
+          const result = checkFunction(
+            config,
+            option,
+            variant.defaultValue,
+            valueMuchSmaller,
+            valueSmaller,
+            variant.allowString,
+          );
+          assert.strictEqual(
+            result,
+            expectedValue_2,
+          );
+        });
+      });
+    });
+  });
+});
