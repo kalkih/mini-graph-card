@@ -11,8 +11,8 @@ export default class Graph {
     width,
     height,
     margin,
-    hours = 24,
-    points = 1,
+    hours_to_show = 24,
+    points_per_hour = 1,
     aggregateFuncName = 'avg',
     groupBy = 'interval',
     smoothing = true,
@@ -36,23 +36,23 @@ export default class Graph {
 
     this._history = undefined;
     this.coords = [];
-    this.width = width - margin[X] * 2;
-    this.height = height - margin[Y] * 4;
-    this.margin = margin;
+    this._width = width - margin[X] * 2;
+    this._height = height - margin[Y] * 4;
+    this._margin = margin;
     this._max = 0;
     this._min = 0;
-    this.points = points; // stands for "points_per_hour"
-    this.hours = hours; // stands for "hours_to_show"
-    this.aggregateFuncName = aggregateFuncName;
+    this._points_per_hour = points_per_hour;
+    this._hours_to_show = hours_to_show;
+    this._aggregateFuncName = aggregateFuncName;
     this._calcPoint = aggregateFuncMap[aggregateFuncName] || this._average;
     this._smoothing = smoothing;
-    this.logarithmic = logarithmic;
-    this.bar_spacing = bar_spacing;
-    this.bar_spacing_group = bar_spacing_group;
-    this.total_bars_in_group = total_bars_in_group;
+    this._logarithmic = logarithmic;
+    this._bar_spacing = bar_spacing;
+    this._bar_spacing_group = bar_spacing_group;
+    this._total_bars_in_group = total_bars_in_group;
     this._groupBy = groupBy;
     this._endTime = 0;
-    this.fill_baseline = fill_baseline;
+    this._fill_baseline = fill_baseline;
   }
 
   get max() { return this._max; }
@@ -75,7 +75,7 @@ export default class Graph {
     const histGroups = this._history.reduce((res, item) => this._reducer(res, item), []);
 
     // extend length to fill missing history
-    const requiredNumOfPoints = Math.ceil(this.hours * this.points);
+    const requiredNumOfPoints = Math.ceil(this._hours_to_show * this._points_per_hour);
     histGroups.length = requiredNumOfPoints;
 
     this.coords = this._calcPoints(histGroups);
@@ -85,7 +85,7 @@ export default class Graph {
 
   _reducer(res, item) {
     const age = this._endTime - new Date(item.last_changed).getTime();
-    const interval = (age / ONE_HOUR * this.points) - this.hours * this.points;
+    const interval = (age / ONE_HOUR * this._points_per_hour) - this._hours_to_show * this._points_per_hour;
     if (interval < 0) {
       const key = Math.floor(Math.abs(interval));
       if (!res[key]) res[key] = [];
@@ -97,14 +97,14 @@ export default class Graph {
   }
 
   _calcPoints(history) {
-    let xRatio = this.width / (this.hours * this.points - 1);
-    xRatio = Number.isFinite(xRatio) ? xRatio : this.width;
+    let xRatio = this._width / (this._hours_to_show * this._points_per_hour - 1);
+    xRatio = Number.isFinite(xRatio) ? xRatio : this._width;
 
     const coords = [];
     let last = history.filter(Boolean)[0];
     let x;
     for (let i = 0; i < history.length; i += 1) {
-      x = xRatio * i + this.margin[X];
+      x = xRatio * i + this._margin[X];
       if (history[i]) {
         last = history[i];
         coords.push([x, 0, this._calcPoint(last)]);
@@ -120,15 +120,15 @@ export default class Graph {
    * @param coords Array of X, Y, Value
    * @returns Array of X, Y, Value, where Y - recalculated based on min/max thresholds
    */
-  _calcY(coords) {
+  calcY(coords) {
     // account for logarithmic graph
-    const max = this.logarithmic ? Math.log10(Math.max(1, this.max)) : this.max;
-    const min = this.logarithmic ? Math.log10(Math.max(1, this.min)) : this.min;
+    const max = this._logarithmic ? Math.log10(Math.max(1, this.max)) : this.max;
+    const min = this._logarithmic ? Math.log10(Math.max(1, this.min)) : this.min;
 
-    const yRatio = ((max - min) / this.height) || 1;
+    const yRatio = ((max - min) / this._height) || 1;
     const coords2 = coords.map((coord) => {
-      const val = this.logarithmic ? Math.log10(Math.max(1, coord[V])) : coord[V];
-      const coordY = this.height - ((val - min) / yRatio) + this.margin[Y] * 2;
+      const val = this._logarithmic ? Math.log10(Math.max(1, coord[V])) : coord[V];
+      const coordY = this._height - ((val - min) / yRatio) + this._margin[Y] * 2;
       return [coord[X], coordY, coord[V]];
     });
 
@@ -138,9 +138,9 @@ export default class Graph {
   getPoints() {
     let { coords } = this;
     if (coords.length === 1) {
-      coords[1] = [this.width + this.margin[X], 0, coords[0][V]];
+      coords[1] = [this._width + this._margin[X], 0, coords[0][V]];
     }
-    coords = this._calcY(this.coords);
+    coords = this.calcY(this.coords);
     if (this._smoothing) {
       let last = coords[0];
       coords.shift();
@@ -159,9 +159,9 @@ export default class Graph {
   getPath() {
     let { coords } = this;
     if (coords.length === 1) {
-      coords[1] = [this.width + this.margin[X], 0, coords[0][V]];
+      coords[1] = [this._width + this._margin[X], 0, coords[0][V]];
     }
-    coords = this._calcY(this.coords);
+    coords = this.calcY(this.coords);
     let next; let Z;
     let path = '';
     let last = coords[0];
@@ -179,7 +179,7 @@ export default class Graph {
   }
 
   computeGradient(thresholds) {
-    const scale = this.logarithmic
+    const scale = this._logarithmic
       ? Math.log10(Math.max(1, this._max)) - Math.log10(Math.max(1, this._min))
       : this._max - this._min;
 
@@ -195,7 +195,7 @@ export default class Graph {
       let offset;
       if (scale <= 0) {
         offset = 0;
-      } else if (this.logarithmic) {
+      } else if (this._logarithmic) {
         offset = (Math.log10(Math.max(1, this._max))
           - Math.log10(Math.max(1, stop.value)))
           * (100 / scale);
@@ -215,14 +215,14 @@ export default class Graph {
    * @returns SVG path for a fill
    */
   getFill(path) {
-    let height = this.height + this.margin[Y] * 4;
-    if (this.fill_baseline !== undefined) {
-      const [baselineCoord] = this._calcY([[0, 0, this.fill_baseline]]);
+    let height = this._height + this._margin[Y] * 4;
+    if (this._fill_baseline !== undefined) {
+      const [baselineCoord] = this.calcY([[0, 0, this._fill_baseline]]);
       [, height] = baselineCoord;
     }
     let fill = path;
-    // note that currently this.margin[X] = 0 when fill is defined
-    fill += ` L ${this.width + this.margin[X]}, ${height}`;
+    // note that currently this._margin[X] = 0 when fill is defined
+    fill += ` L ${this._width + this._margin[X]}, ${height}`;
     fill += ` L ${this.coords[0][X]}, ${height} z`;
     return fill;
   }
@@ -234,17 +234,17 @@ export default class Graph {
    * @returns Bars for an entity to be shown at a `position` index
    */
   getBars(position) {
-    const spacing = this.bar_spacing;
-    const spacing_group = this.bar_spacing_group;
-    const total = this.total_bars_in_group;
+    const spacing = this._bar_spacing;
+    const spacing_group = this._bar_spacing_group;
+    const total = this._total_bars_in_group;
 
-    const coords = this._calcY(this.coords);
+    const coords = this.calcY(this.coords);
 
     // number of measures
-    const total_groups = Math.ceil(this.hours * this.points);
+    const total_groups = Math.ceil(this._hours_to_show * this._points_per_hour);
 
     // width of a group of bars
-    const group_width = (this.width - spacing_group * (total_groups - 1))
+    const group_width = (this._width - spacing_group * (total_groups - 1))
       / total_groups;
 
     // width of a bar
@@ -260,11 +260,11 @@ export default class Graph {
     }
 
     return coords.map((coord, i) => ({
-      x: this.margin[X]
+      x: this._margin[X]
         + (group_width + spacing_group) * i
         + (spacing === -1 ? 0 : (bar_width + spacing) * position),
       y: coord[Y],
-      height: this.height - coord[Y] + this.margin[Y] * 4,
+      height: this._height - coord[Y] + this._margin[Y] * 4,
       width: bar_width,
       value: coord[V],
     }));
@@ -317,7 +317,7 @@ export default class Graph {
   }
 
   _lastValue(items) {
-    if (['delta', 'diff'].includes(this.aggregateFuncName)) {
+    if (['delta', 'diff'].includes(this._aggregateFuncName)) {
       return 0;
     } else {
       return parseFloat(items[items.length - 1].state) || 0;
