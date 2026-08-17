@@ -71,21 +71,38 @@ const style = css`
     min-width: 0;
   }
   .header {
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr) minmax(0, auto);
+    grid-template-rows: 1fr;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
   }
-  .header[loc="center"] {
-    justify-content: space-around;
-  }
-  .header[loc="left"] {
-    align-self: flex-start;
-  }
-  .header[loc="right"] {
-    align-self: flex-end;
+  .header > * {
+    grid-row: 1;
   }
   .name {
-    align-items: center;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     min-width: 0;
+    width: 100%;
     letter-spacing: var(--mcg-title-letter-spacing, normal);
+    overflow: hidden;
+  }
+  .name[loc="left"] {
+    grid-column: 1 / 3;
+    justify-self: start;
+    text-align: left;
+  }
+  .name[loc="center"] {
+    grid-column: 1 / 4;
+    justify-self: center;
+    text-align: center;
+  }
+  .name[loc="right"]  {
+    grid-column: 2 / 4;
+    justify-self: end;
+    text-align: right;
   }
   .name > span {
     font-size: 1.2em;
@@ -96,21 +113,18 @@ const style = css`
   }
   .icon {
     color: var(--state-icon-color, #44739e);
-    display: inline-block;
-    flex: 0 0 1.7em;
-    text-align: center;
   }
   .icon > ha-icon {
     height: 1.7em;
     width: 1.7em;
   }
   .icon[loc="left"] {
-    order: -1;
-    margin-right: .6em;
-    margin-left: 0;
+    grid-column: 1;
+    justify-self: start;
   }
   .icon[loc="right"] {
-    margin-left: auto;
+    grid-column: 3;
+    justify-self: end;
   }
   .icon[loc="state"] {
     align-self: center;

@@ -370,14 +370,28 @@ class MiniGraphCard extends LitElement {
       show, align_icon, align_header, font_size_header,
     } = this.config;
     const showIcon = show.icon && align_icon !== 'state';
+
+    let iconLoc;
+    if (align_icon === undefined) {
+      iconLoc = align_header === 'right' && show.name
+        ? 'left'
+        : 'right';
+    } else {
+      iconLoc = align_icon;
+    }
+    const nameLoc = align_header === 'center'
+      ? 'center'
+      : iconLoc === 'left'
+        ? 'right'
+        : 'left';
+
     return show.name || showIcon
       ? html`
           <div
-            class="header flex"
-            loc="${align_header || 'left'}"
+            class="header"
             style="font-size: ${font_size_header}px;"
           >
-            ${show.name ? this.renderName() : html``}${showIcon ? this.renderIcon() : html``}
+            ${show.name ? this.renderName(nameLoc) : html``}${showIcon ? this.renderIcon(iconLoc) : html``}
           </div>
         `
       : html``;
@@ -385,12 +399,16 @@ class MiniGraphCard extends LitElement {
 
   /**
   * Renders an icon
+  * @param {string} iconLoc Location of an icon in a header (left/right)
   * @returns {TemplateResult} Lit template result
   */
-  renderIcon() {
+  renderIcon(iconLoc) {
     if (this.config.icon_image !== undefined) {
       return html`
-        <div class="icon">
+        <div
+          class="icon"
+          loc="${iconLoc}"
+        >
           <img src="${this.config.icon_image}" height="25"/>
         </div>
       `;
@@ -410,7 +428,7 @@ class MiniGraphCard extends LitElement {
     return html`
       <div
         class="icon"
-        loc="${this.config.align_icon}"
+        loc="${iconLoc}"
         style="${iconColor !== undefined ? `color: ${iconColor};` : ''}"
       >
         <ha-icon .icon=${this.computeIcon(this.entity[0])}></ha-icon>
@@ -420,9 +438,10 @@ class MiniGraphCard extends LitElement {
 
   /**
   * Renders a name
+  * @param {string} nameLoc Location of a name in a header (left/right/center)
   * @returns {TemplateResult} Lit template result
   */
-  renderName() {
+  renderName(nameLoc) {
     if (!this.config.show.name) {
       return html``;
     }
@@ -434,7 +453,10 @@ class MiniGraphCard extends LitElement {
       ? `opacity: 1; color: ${this.color};`
       : '';
     return html`
-      <div class="name flex">
+      <div
+        class="name"
+        loc="${nameLoc}"
+      >
         <span
           class="ellipsis"
           style="${color}"
