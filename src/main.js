@@ -194,8 +194,8 @@ class MiniGraphCard extends LitElement {
           width: 500,
           height: this.config.height,
           margin,
-          hours: this.config.hours_to_show,
-          points: this.config.points_per_hour,
+          hours_to_show: this.config.hours_to_show,
+          points_per_hour: this.config.points_per_hour,
           aggregateFuncName: entity.aggregate_func || this.config.aggregate_func,
           groupBy: this.config.group_by,
           smoothing: getFirstDefinedItem(
@@ -603,7 +603,7 @@ class MiniGraphCard extends LitElement {
       && (this.entity[0] || this.isStaticValue(0));
     const ready = (hasInitialData
       && !this.Graph.some(
-        (element, index) => element._history === undefined
+        (element, index) => element.history === undefined
           && this.config.entities[index].show_graph !== false,
       ))
     || this.config.show.loading_indicator === false;
@@ -722,7 +722,7 @@ class MiniGraphCard extends LitElement {
           }
           const staticValue = this.config.entities[index].static_value;
           // get Y coord in SVG space
-          const [staticLineCoord] = this.Graph[index]._calcY([[0, 0, staticValue]]);
+          const [staticLineCoord] = this.Graph[index].calcY([[0, 0, staticValue]]);
           const [, topSVG] = staticLineCoord; // top in SVG coords
 
           const topPercent = (topSVG / graphHeight) * 100; // top in %
