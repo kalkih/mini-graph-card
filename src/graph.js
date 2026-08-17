@@ -63,6 +63,8 @@ export default class Graph {
 
   set min(min) { this._min = min; }
 
+  get history() { return this._history; }
+
   set history(data) { this._history = data; }
 
   update(history = undefined) {
