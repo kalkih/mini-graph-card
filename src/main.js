@@ -192,7 +192,7 @@ class MiniGraphCard extends LitElement {
       this.Graph = this.config.entities.map(
         (entity, index) => new Graph({
           width: 500,
-          height: this.config.height,
+          height: this.getGraphHeight(),
           margin,
           hours_to_show: this.config.hours_to_show,
           points_per_hour: this.config.points_per_hour,
@@ -218,6 +218,16 @@ class MiniGraphCard extends LitElement {
         }),
       );
     }
+  }
+
+  /**
+   * Safely returns a graph's height
+   * @returns {number} Graph's height
+   */
+  getGraphHeight() {
+    return this.config.height !== undefined
+      ? this.config.height
+      : DEFAULT_GRAPH_HEIGHT;
   }
 
   /**
@@ -723,8 +733,7 @@ class MiniGraphCard extends LitElement {
       return html``;
     }
 
-    const graphHeight = this.config.height !== undefined
-      ? this.config.height : DEFAULT_GRAPH_HEIGHT;
+    const graphHeight = this.getGraphHeight();
     if (!isNumeric(graphHeight) || graphHeight <= 0) {
       return html``;
     }
@@ -981,7 +990,7 @@ class MiniGraphCard extends LitElement {
     const items = bars.map((bar, i) => {
       const animation = this.config.animate
         ? svg`
-          <animate attributeName='y' from=${this.config.height} to=${bar.y} dur='1s' fill='remove'
+          <animate attributeName='y' from=${this.getGraphHeight()} to=${bar.y} dur='1s' fill='remove'
             calcMode='spline' keyTimes='0; 1' keySplines='0.215 0.61 0.355 1'>
           </animate>`
         : '';
@@ -1032,7 +1041,8 @@ class MiniGraphCard extends LitElement {
   * @returns {SVGTemplateResult} SVG element
   */
   renderSvg() {
-    const { height, show } = this.config;
+    const height = this.getGraphHeight();
+    const { show } = this.config;
     const reversed = show.graph_order === 'reversed';
     return svg`
       <svg width='100%' height=${height !== 0 ? '100%' : 0} viewBox='0 0 500 ${height}'
