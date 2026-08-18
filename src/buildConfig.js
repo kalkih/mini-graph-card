@@ -4,7 +4,6 @@ import {
   DEFAULT_FONT_SIZE,
   DEFAULT_FONT_SIZE_HEADER,
   DEFAULT_BAR_SPACING,
-  DEFAULT_GRAPH_HEIGHT,
   DEFAULT_MARGIN,
   DEFAULT_HOURS_TO_SHOW,
   DEFAULT_POINTS_PER_HOUR,
@@ -140,7 +139,6 @@ export default (config) => {
     animate: false,
     font_size: DEFAULT_FONT_SIZE,
     font_size_header: DEFAULT_FONT_SIZE_HEADER,
-    height: DEFAULT_GRAPH_HEIGHT,
     hours_to_show: DEFAULT_HOURS_TO_SHOW,
     points_per_hour: DEFAULT_POINTS_PER_HOUR,
     aggregate_func: 'avg',
@@ -168,7 +166,7 @@ export default (config) => {
   conf.bar_spacing = checkNumericOption(conf, 'bar_spacing', DEFAULT_BAR_SPACING, -1, undefined, true);
   conf.bar_spacing_group = checkNumericOption(conf, 'bar_spacing_group', undefined, 0, undefined, true);
 
-  conf.height = checkNumericOption(conf, 'height', DEFAULT_GRAPH_HEIGHT, 0, undefined, true);
+  conf.height = checkNumericOption(conf, 'height', undefined, 0, undefined, true);
 
   conf.line_width = checkNumericOption(conf, 'line_width', DEFAULT_MARGIN, 0, undefined, true);
 
