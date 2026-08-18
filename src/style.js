@@ -1,15 +1,12 @@
 import { css } from 'lit-element';
 
 const style = css`
-  :host {
-    display: flex;
-    flex-direction: column;
-  }
   ha-card {
     flex-direction: column;
     flex: 1;
     padding: 16px 0 0 0;
     position: relative;
+    height: 100%;
     overflow: hidden;
   }
   ha-card > div {
@@ -17,10 +14,6 @@ const style = css`
   }
   ha-card > div:last-child {
     padding-bottom: 0;
-  }
-  ha-card .graph {
-    padding: 0;
-    order: 10;
   }
   ha-card[points] .line--points,
   ha-card[labels] .graph__labels.--primary,
@@ -32,7 +25,7 @@ const style = css`
   ha-card[points]:hover .line--points,
   ha-card:hover .graph__labels.--primary,
   ha-card:hover .graph__labels.--secondary {
-      opacity: 1;
+    opacity: 1;
   }
   ha-card[fill] path {
     stroke-linecap: initial;
@@ -253,6 +246,8 @@ const style = css`
     flex-direction: column;
     margin-top: auto;
     width: 100%;
+    padding: 0;
+    order: 10;
   }
   .graph__container {
     display: grid;
@@ -260,16 +255,7 @@ const style = css`
     grid-template-rows: 1fr;
     align-items: stretch;
   }
-  .graph__container__svg {
-    cursor: default;
-    position: relative;
-    display: block;
-    width: 100%;
-    height: 100%;
-    grid-column: 1;
-    grid-row: 1;
-  }
-  svg {
+  .graph__container svg {
     overflow: hidden;
     display: block;
   }
@@ -346,14 +332,12 @@ const style = css`
     padding: .6em;
     pointer-events: none;
     opacity: var(--mcg-label-axis-opacity, .75);
-    grid-column: 1;
-    grid-row: 1;
-    position: relative;
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 0; right: 0;
   }
   .graph__labels.--secondary {
     align-items: flex-end;
-    grid-column: 1;
-    grid-row: 1;
   }
   .graph__labels > span {
     cursor: pointer;
@@ -361,8 +345,8 @@ const style = css`
   }
   .graph__static_value_labels {
     font-size: calc(.15em + 8.5px);
-    position: absolute;
     pointer-events: none;
+    position: absolute;
     top: 0; bottom: 0;
     left: 0; right: 0;
   }
