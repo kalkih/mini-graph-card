@@ -31,6 +31,10 @@ const style = css`
     stroke-linecap: initial;
     stroke-linejoin: initial;
   }
+  path {
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
   .graph__legend {
     order: -1;
     padding: 0 16px 8px 16px;
@@ -258,10 +262,6 @@ const style = css`
   .graph__container svg {
     overflow: hidden;
     display: block;
-  }
-  path {
-    stroke-linecap: round;
-    stroke-linejoin: round;
   }
   .fill[anim="false"] {
     animation: reveal .25s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
