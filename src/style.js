@@ -457,20 +457,12 @@ const style = css`
     100% { opacity: 1; }
   }
   @keyframes growbar {
-    0% {
-      transform: scaleY(0);
-    }
-    100% {
-      transform: scaleY(1);
-    }
+    0% { transform: scaleY(0); }
+    100% { transform: scaleY(1); }
   }
   @keyframes dash {
-    0% {
-      opacity: 0;
-    }
-    25% {
-      opacity: 1;
-    }
+    0% { opacity: 0; }
+    25% { opacity: 1; }
     100% {
       opacity: 1;
       stroke-dashoffset: 0;
