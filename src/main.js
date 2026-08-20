@@ -313,7 +313,7 @@ class MiniGraphCard extends LitElement {
     super.updated(changedProperties);
 
     const hasAnimation = this.config.entities.some(
-      (_, index) => isEntryAnimated(this.config, index)
+      (_, index) => isEntryAnimated(this.config, index),
     );
     if (hasAnimation && changedProperties.has('line')) {
       if (this.length.length < this.config.entities.length) {
