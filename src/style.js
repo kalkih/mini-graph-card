@@ -310,14 +310,17 @@ const style = css`
   .bars {
     animation: pop .25s cubic-bezier(0.215, 0.61, 0.355, 1);
   }
+  .bars[anim] .bar {
+    animation: growbar .6s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+  }
   .bars[anim] {
-    animation: bars .5s cubic-bezier(0.215, 0.61, 0.355, 1);
+    animation: pop .4s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   }
   .bar {
     transition: opacity .25s cubic-bezier(0.215, 0.61, 0.355, 1);
   }
   .bar:hover {
-    opacity: .5;
+    opacity: .5 !important;
     cursor: pointer;
   }
   path,
@@ -453,10 +456,13 @@ const style = css`
     0% { opacity: 0; }
     100% { opacity: 1; }
   }
-  @keyframes bars {
-    0% { opacity: 0; }
-    50% { opacity: 0; }
-    100% { opacity: 1; }
+  @keyframes growbar {
+    0% {
+      transform: scaleY(0);
+    }
+    100% {
+      transform: scaleY(1);
+    }
   }
   @keyframes dash {
     0% {
