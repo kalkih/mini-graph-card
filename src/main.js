@@ -995,14 +995,14 @@ class MiniGraphCard extends LitElement {
     const isAnimated = isEntryAnimated(this.config, index);
     const graphHeight = this.config.height;
     const items = bars.map((bar, i) => {
-      const style = isAnimated
+      const barsStyle = isAnimated
         ? `transform-origin: ${bar.x}px ${graphHeight}px;`
         : '';
       const color = this.computeColor(bar.value, index);
       return svg`
         <rect class='bar' x=${bar.x} y=${bar.y}
           height=${bar.height} width=${bar.width} fill=${color}
-          style=${style}
+          style=${barsStyle}
           @mouseover=${() => this.setTooltip(index, i, bar.value)}
           @mouseout=${() => (this.tooltip = {})}>
         </rect>`;
