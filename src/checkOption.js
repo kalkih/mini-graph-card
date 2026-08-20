@@ -229,7 +229,7 @@ const checkLineStyle = (config) => {
       }
     }
   });
-}
+};
 
 export {
   checkNumericOption,
