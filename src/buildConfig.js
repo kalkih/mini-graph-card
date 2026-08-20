@@ -260,7 +260,7 @@ export default (config) => {
       ? DEFAULT_BAR_SPACING : conf.bar_spacing;
 
   // warn if line_style is defined along with animate=true
-  checkLineStyle(config);
+  checkLineStyle(conf);
 
   // override points per hour to mach group_by function
   switch (conf.group_by) {
