@@ -3,6 +3,7 @@ import {
   isNumeric,
   logStringWarning,
   getBound,
+  isEntryAnimated,
 } from './others';
 
 /**
@@ -214,10 +215,27 @@ const checkColorThresholds = (config, configName) => {
 };
 /* eslint-enable no-param-reassign */
 
+/**
+ * Warn if line_style is defined along with animate=true.
+ * @param {object} config Config object
+ */
+const checkLineStyle = (config) => {
+  config.entities.forEach((entity, index) => {
+    if (isEntryAnimated(config, index)) {
+      const hasLineStyle = (entity.line_style !== undefined && entity.line_style !== null)
+        || (config.line_style !== undefined && config.line_style !== null);
+      if (hasLineStyle) {
+        log(`Option 'line_style' will be ignored for entity[${index}] because animation is enabled for it`);
+      }
+    }
+  });
+};
+
 export {
   checkNumericOption,
   checkIntegerOption,
   checkBoundOption,
   checkBounds,
   checkColorThresholds,
+  checkLineStyle,
 };
