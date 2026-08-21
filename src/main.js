@@ -218,6 +218,7 @@ class MiniGraphCard extends LitElement {
       }
       this.Graph = this.createGraph(this.getGraphHeight());
     }
+  }
 
   /**
    * Create an array of Graph objects
