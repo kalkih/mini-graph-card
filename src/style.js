@@ -2,11 +2,13 @@ import { css } from 'lit-element';
 
 const style = css`
   ha-card {
+    display: flex;
     flex-direction: column;
+    height: 100%;
+    min-height: 0;
     flex: 1;
     padding: 16px 0 0 0;
     position: relative;
-    height: 100%;
     overflow: hidden;
   }
   ha-card > div {
@@ -243,8 +245,33 @@ const style = css`
     left: initial;
     right: 0;
   }
+  .graph.graph--custom-height,
+  .graph.graph--custom-height .graph__container,
+  .graph.graph--custom-height .graph__container svg {
+    flex-grow: 0;
+    flex-shrink: 0;
+    height: auto;
+  }
+  .graph.graph--auto-height {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-height: 0;
+  }
+  .graph.graph--auto-height .graph__container {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-height: 0;
+    position: relative;
+  }
+  .graph.graph--auto-height .graph__container svg {
+    flex-grow: 0;
+    flex-shrink: 1;
+    min-height: 0;
+    height: auto;
+    width: 100%;
+    position: static;
+  }    
   .graph {
-    align-self: flex-end;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -254,14 +281,16 @@ const style = css`
     order: 10;
   }
   .graph__container {
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr;
+    display: flex;
+    flex-direction: column;
     align-items: stretch;
+    position: relative;
+    width: 100%;
   }
   .graph__container svg {
     overflow: hidden;
     display: block;
+    cursor: default;
   }
   .fill[anim="false"] {
     animation: reveal .25s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
@@ -296,14 +325,17 @@ const style = css`
   .bars {
     animation: pop .25s cubic-bezier(0.215, 0.61, 0.355, 1);
   }
+  .bars[anim] .bar {
+    animation: growbar .6s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+  }
   .bars[anim] {
-    animation: bars .5s cubic-bezier(0.215, 0.61, 0.355, 1);
+    animation: pop .4s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   }
   .bar {
     transition: opacity .25s cubic-bezier(0.215, 0.61, 0.355, 1);
   }
   .bar:hover {
-    opacity: .5;
+    opacity: .5 !important;
     cursor: pointer;
   }
   path,
@@ -437,18 +469,13 @@ const style = css`
     0% { opacity: 0; }
     100% { opacity: 1; }
   }
-  @keyframes bars {
-    0% { opacity: 0; }
-    50% { opacity: 0; }
-    100% { opacity: 1; }
+  @keyframes growbar {
+    0% { transform: scaleY(0); }
+    100% { transform: scaleY(1); }
   }
   @keyframes dash {
-    0% {
-      opacity: 0;
-    }
-    25% {
-      opacity: 1;
-    }
+    0% { opacity: 0; }
+    25% { opacity: 1; }
     100% {
       opacity: 1;
       stroke-dashoffset: 0;
