@@ -352,7 +352,7 @@ class MiniGraphCard extends LitElement {
       return;
     }
 
-    this._graphResizeObserver = new ResizeObserver((entries) => {
+    this._graphResizeObserver = new window.ResizeObserver((entries) => {
       const entry = entries[0];
       if (!entry) {
         return;
@@ -398,11 +398,10 @@ class MiniGraphCard extends LitElement {
 
           window.requestAnimationFrame(() => {
             // save histories
-            const savedHistories = this.Graph.map((graph) => (graph ? graph.history : undefined));
+            const savedHistories = this.Graph.map(graph => (graph ? graph.history : undefined));
             // re-create Graph objects
             this.Graph = this.createGraph(newHeight);
             // upload histories
-           
             this.Graph.forEach((graph, index) => {
               if (graph && savedHistories[index]) {
                 /* eslint-disable no-param-reassign */
