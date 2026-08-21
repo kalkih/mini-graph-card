@@ -74,8 +74,8 @@ class MiniGraphCard extends LitElement {
     // for a currently unavailable entity
     this._preservedUom = [];
     this._preservedOrder = [];
-  
-      // resizing
+
+    // resizing
     this._computedHeight = undefined;
     this._graphResizeObserver = undefined;
     this._graphContainer = undefined;
@@ -229,7 +229,7 @@ class MiniGraphCard extends LitElement {
     return this.config.entities.map(
       (entity, index) => new Graph({
         width: 500,
-        height: this.getGraphHeight(),
+        height: height,
         margin: this._graphMargin,
         hours_to_show: this.config.hours_to_show,
         points_per_hour: this.config.points_per_hour,
@@ -353,7 +353,7 @@ class MiniGraphCard extends LitElement {
     }
 
     this._graphResizeObserver = new ResizeObserver((entries) => {
-      const entry = entries[0]; 
+      const entry = entries[0];
       if (!entry) {
         return;
       }
@@ -361,8 +361,8 @@ class MiniGraphCard extends LitElement {
       let pxWidth = entry.contentRect.width;
       let pxHeight = entry.contentRect.height;
 
-      const isShrinking = this._lastPxWidth !== undefined && 
-        (pxWidth < this._lastPxWidth || pxHeight < this._lastPxHeight);
+      const isShrinking = this._lastPxWidth !== undefined
+        && (pxWidth < this._lastPxWidth || pxHeight < this._lastPxHeight);
       const svgElement = graphContainer.querySelector('svg');
       if (svgElement && isShrinking) {
         // hide a graph, then measure an empty container, then unhide a graph
@@ -387,8 +387,8 @@ class MiniGraphCard extends LitElement {
         }
 
         // difference in height
-        const heightDelta = this._computedHeight !== undefined 
-          ? Math.abs(newHeight - this._computedHeight) 
+        const heightDelta = this._computedHeight !== undefined
+          ? Math.abs(newHeight - this._computedHeight)
           : Infinity;
 
         // re-create Graph only if a difference is significant
@@ -399,14 +399,14 @@ class MiniGraphCard extends LitElement {
           window.requestAnimationFrame(() => {
             // save histories
             const savedHistories = this.Graph.map(graph => graph ? graph.history : undefined);
-            //re-create Graph objects
+            // re-create Graph objects
             this.Graph = this.createGraph(newHeight);
             // upload histories
             this.Graph.forEach((graph, index) => {
               if (graph && savedHistories[index]) {
                 graph.history = savedHistories[index];
               }
-            });            
+            });
             this.updateData();
           });
         }
@@ -809,7 +809,7 @@ class MiniGraphCard extends LitElement {
     /* eslint-disable indent */
     return this.config.show.graph
       ? html`
-          <div class="graph">
+          <div class="graph ${graphAdditionalClass}">
             ${ready
               ? html`
                   <div class="graph__container">
@@ -1161,7 +1161,6 @@ class MiniGraphCard extends LitElement {
   renderSvgBars(bars, index) {
     if (!bars) return;
     const isAnimated = isEntryAnimated(this.config, index);
-    const graphHeight = this.config.height;
     const items = bars.map((bar, i) => {
       const barStyle = isAnimated ? 'transform-origin: 50% 100%;' : '';
       const color = this.computeColor(bar.value, index);
