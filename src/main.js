@@ -61,19 +61,19 @@ class MiniGraphCard extends LitElement {
     this.updateQueue = [];
     this.updating = false;
     // set once to "true" when a history is set for a particular entry[index] with static_value
-    this.staticValueUpdated = [];
+    this._staticValueUpdated = [];
     this.stateChanged = false;
     this.initial = true;
     this._md5Config = undefined;
 
     // update datetime settings periodically
-    this.updateHour24 = true;
-    this.updateDateTimeFormat = true;
+    this._updateHour24 = true;
+    this._updateDateTimeFormat = true;
 
     // Keeps a native unit/order for an entity: used for historical data
     // for a currently unavailable entity
-    this.preserved_uom = [];
-    this.preserved_order = [];
+    this._preservedUom = [];
+    this._preservedOrder = [];
   }
 
   static get styles() {
@@ -95,10 +95,10 @@ class MiniGraphCard extends LitElement {
         queue.push(`${entityState.entity_id}-${index}`);
         updated = true;
       } else if (!entity.entity
-          && this.isStaticValue(index) && !this.staticValueUpdated[index]) {
+          && this.isStaticValue(index) && !this._staticValueUpdated[index]) {
         this.entity[index] = undefined;
         queue.push(`static_value-${index}`);
-        this.staticValueUpdated[index] = true; // updated only once
+        this._staticValueUpdated[index] = true; // updated only once
         updated = true;
       }
     });
@@ -163,8 +163,8 @@ class MiniGraphCard extends LitElement {
   setConfig(config) {
     ({
       config: this.config,
-      entityFactors: this.entityFactors, // predefined factors
-      axisFactors: this.axisFactors, // predefined factors
+      entityFactors: this._entityFactors, // predefined factors
+      axisFactors: this._axisFactors, // predefined factors
     } = buildConfig(config));
 
     this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
@@ -178,8 +178,8 @@ class MiniGraphCard extends LitElement {
     this._visibleLegendsCache = null;
 
     // update datetime settings periodically
-    this.updateHour24 = config.hour24 === undefined;
-    this.updateDateTimeFormat = config.datetime_format === undefined;
+    this._updateHour24 = config.hour24 === undefined;
+    this._updateDateTimeFormat = config.datetime_format === undefined;
 
     if (!this.Graph || entitiesChanged) {
       if (this._hass) this.hass = this._hass;
@@ -257,15 +257,15 @@ class MiniGraphCard extends LitElement {
   * @param {boolean|undefined} forced True to forcibly update a format
   */
   updateFormatFromLocale(forced) {
-    if (this.updateDateTimeFormat || forced) {
-      this.datetimeFormatDateOptions = getDateFormat(
+    if (this._updateDateTimeFormat || forced) {
+      this._datetimeFormatDateOptions = getDateFormat(
         this.config,
         this.datetimeFormatFromCfgParsed,
         this._hass,
       );
     }
-    if (this.updateHour24 || this.updateDateTimeFormat || forced) {
-      this.datetimeFormatTimeOptions = getTimeFormat(
+    if (this._updateHour24 || this._updateDateTimeFormat || forced) {
+      this._datetimeFormatTimeOptions = getTimeFormat(
         this.config,
         this.datetimeFormatFromCfgParsed,
         this._hass,
@@ -1090,8 +1090,8 @@ class MiniGraphCard extends LitElement {
       now,
       this.config,
       this.datetimeFormatFromCfgParsed,
-      this.datetimeFormatDateOptions,
-      this.datetimeFormatTimeOptions,
+      this._datetimeFormatDateOptions,
+      this._datetimeFormatTimeOptions,
       this._hass,
     );
     now.setMilliseconds(now.getMilliseconds() + oneMinute - interval);
@@ -1099,8 +1099,8 @@ class MiniGraphCard extends LitElement {
       now,
       this.config,
       this.datetimeFormatFromCfgParsed,
-      this.datetimeFormatDateOptions,
-      this.datetimeFormatTimeOptions,
+      this._datetimeFormatDateOptions,
+      this._datetimeFormatTimeOptions,
       this._hass,
     );
 
@@ -1177,8 +1177,8 @@ class MiniGraphCard extends LitElement {
                     new Date(entry.last_changed),
                     this.config,
                     this.datetimeFormatFromCfgParsed,
-                    this.datetimeFormatDateOptions,
-                    this.datetimeFormatTimeOptions,
+                    this._datetimeFormatDateOptions,
+                    this._datetimeFormatTimeOptions,
                     this._hass,
                   )
                 : ''}
@@ -1355,9 +1355,9 @@ class MiniGraphCard extends LitElement {
         // processing unavailable state
         if (inState !== undefined && !isUnavailableState(inState)) {
           // we need to get a unit for a historical non-unavailable entity
-          if (this.preserved_uom[index] !== undefined) {
+          if (this._preservedUom[index] !== undefined) {
             // use a preserved unit
-            unit = this.preserved_uom[index];
+            unit = this._preservedUom[index];
           } else {
             // try using a unit from config & attributes
             unit = this.config.entities[index].unit
@@ -1399,8 +1399,8 @@ class MiniGraphCard extends LitElement {
           }
         }
         // preserve a computed unit
-        if (this.preserved_uom[index] === undefined) {
-          this.preserved_uom[index] = unit || '';
+        if (this._preservedUom[index] === undefined) {
+          this._preservedUom[index] = unit || '';
         }
         return (unit || '');
       }
@@ -1444,10 +1444,10 @@ class MiniGraphCard extends LitElement {
       state = Number(inState);
     }
     const factor = index === undefined
-      ? this.axisFactors.primary
+      ? this._axisFactors.primary
       : index === -1
-        ? this.axisFactors.secondary
-        : this.entityFactors[index];
+        ? this._axisFactors.secondary
+        : this._entityFactors[index];
     // safely process with a factor
     state = Number.isNaN(Number(state)) ? state : state * factor;
 
@@ -1556,9 +1556,9 @@ class MiniGraphCard extends LitElement {
         // processing unavailable state
         if (inState !== undefined && !isUnavailableState(inState)) {
           // we need to get an order for a historical non-unavailable entity
-          if (this.preserved_order[index] !== undefined) {
+          if (this._preservedOrder[index] !== undefined) {
             // use a preserved order
-            return this.preserved_order[index];
+            return this._preservedOrder[index];
           } else {
             // presuming an order from config & attributes
             const unit = this.config.entities[index].unit
@@ -1593,8 +1593,8 @@ class MiniGraphCard extends LitElement {
         const delimiterPart = parts.find(part => part.type === 'literal');
         const delimiter = delimiterPart && delimiterPart.value || '';
         // preserve a computed order
-        if (this.preserved_order[index] === undefined) {
-          this.preserved_order[index] = { directOrder, delimiter };
+        if (this._preservedOrder[index] === undefined) {
+          this._preservedOrder[index] = { directOrder, delimiter };
         }
         return { directOrder, delimiter };
       }
