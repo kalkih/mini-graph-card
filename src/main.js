@@ -229,7 +229,7 @@ class MiniGraphCard extends LitElement {
     return this.config.entities.map(
       (entity, index) => new Graph({
         width: 500,
-        height: height,
+        height,
         margin: this._graphMargin,
         hours_to_show: this.config.hours_to_show,
         points_per_hour: this.config.points_per_hour,
@@ -378,7 +378,7 @@ class MiniGraphCard extends LitElement {
       if (pxWidth > 0 && pxHeight > 0) {
         let newHeight = 500 * (pxHeight / pxWidth);
         newHeight = Math.max(DEFAULT_GRAPH_HEIGHT, newHeight);
-        newHeight = parseInt(newHeight);
+        newHeight = parseInt(newHeight, 10);
 
         if (this._computedHeight === undefined && newHeight === DEFAULT_GRAPH_HEIGHT) {
           this._computedHeight = newHeight;
@@ -398,7 +398,7 @@ class MiniGraphCard extends LitElement {
 
           window.requestAnimationFrame(() => {
             // save histories
-            const savedHistories = this.Graph.map(graph => graph ? graph.history : undefined);
+            const savedHistories = this.Graph.map((graph) => graph ? graph.history : undefined);
             // re-create Graph objects
             this.Graph = this.createGraph(newHeight);
             // upload histories
