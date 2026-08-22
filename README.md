@@ -299,6 +299,7 @@ Invalid values (absent/undefined/invalid `type` or `factor`) passed in the objec
 
 ### Aggregate functions
 Recorded values are grouped in time buckets which are determined by `group_by`, `points_per_hour` configuration.
+Hour and date boundaries, as well as displayed timestamps, follow the time zone selected in the Home Assistant user profile.
 These buckets are converted later to single point/bar on the graph. Aggregate function defines the methods of that conversion.
 
 | Name | Since | Description |

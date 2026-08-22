@@ -13,6 +13,7 @@ import {
   formatDateTime,
   parseDateTimeFormatFromCfg,
   getDateFormat, getTimeFormat,
+  resolveTimeZone, getEndDate,
 } from './locale';
 import './initialize';
 import { version } from '../package.json';
@@ -1669,7 +1670,7 @@ class MiniGraphCard extends LitElement {
         if (entity
           || (!entity && this.isStaticValue(i))
         ) {
-          this.Graph[i].update();
+          this.Graph[i].update(undefined, end);
         }
       });
     }
@@ -1944,20 +1945,11 @@ class MiniGraphCard extends LitElement {
   }
 
   getEndDate() {
-    const date = new Date();
-    switch (this.config.group_by) {
-      case 'date':
-        date.setDate(date.getDate() + 1);
-        date.setHours(0, 0, 0);
-        break;
-      case 'hour':
-        date.setHours(date.getHours() + 1);
-        date.setMinutes(0, 0);
-        break;
-      default:
-        break;
-    }
-    return date;
+    const timeZone = resolveTimeZone(
+      this._hass && this._hass.locale && this._hass.locale.time_zone,
+      this._hass && this._hass.config && this._hass.config.time_zone,
+    );
+    return getEndDate(new Date(), this.config.group_by, timeZone);
   }
 
   setNextUpdate() {

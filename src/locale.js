@@ -126,6 +126,84 @@ const resolveTimeZone = (option, serverTimeZone) => {
   return timeZone;
 };
 
+const MINUTE = 60 * 1000;
+const MINUTES_PER_DAY = 24 * 60;
+const datePartsFormatters = new Map();
+
+const getDatePartsFormatter = (timeZone) => {
+  if (!datePartsFormatters.has(timeZone)) {
+    datePartsFormatters.set(timeZone, new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      hourCycle: 'h23',
+    }));
+  }
+  return datePartsFormatters.get(timeZone);
+};
+
+const getDateParts = (date, timeZone) => {
+  const parts = {};
+  getDatePartsFormatter(timeZone).formatToParts(date).forEach((part) => {
+    if (part.type !== 'literal') parts[part.type] = Number(part.value);
+  });
+  return parts;
+};
+
+const isGroupBoundary = (parts, groupBy) => {
+  if (parts.minute !== 0) return false;
+  if (groupBy === 'hour') return true;
+  if (parts.hour !== 0) return false;
+  return groupBy !== 'month' || parts.day === 1;
+};
+
+/**
+ * Get the next graph bucket boundary in the selected Home Assistant time zone.
+ * The nearby search accounts for daylight-saving transitions after estimating
+ * the boundary from the current local date parts.
+ * @param {Date} date Current date
+ * @param {string} groupBy Graph grouping mode
+ * @param {string} timeZone IANA time zone
+ * @returns {Date} End of the current graph bucket
+ */
+const getEndDate = (date, groupBy, timeZone) => {
+  if (!['hour', 'date', 'month'].includes(groupBy)) return new Date(date);
+
+  const parts = getDateParts(date, timeZone);
+  const minutesToday = parts.hour * 60 + parts.minute;
+  let minutesToBoundary;
+
+  if (groupBy === 'hour') {
+    minutesToBoundary = 60 - parts.minute;
+  } else if (groupBy === 'date') {
+    minutesToBoundary = MINUTES_PER_DAY - minutesToday;
+  } else {
+    const daysInMonth = new Date(Date.UTC(parts.year, parts.month, 0)).getUTCDate();
+    minutesToBoundary = (daysInMonth - parts.day) * MINUTES_PER_DAY
+      + MINUTES_PER_DAY - minutesToday;
+  }
+
+  const currentMinute = Math.floor(date.getTime() / MINUTE) * MINUTE;
+  const estimate = currentMinute + minutesToBoundary * MINUTE;
+  if (isGroupBoundary(getDateParts(new Date(estimate), timeZone), groupBy)) {
+    return new Date(estimate);
+  }
+
+  // DST shifts can move the estimate. The largest current IANA shift is two hours.
+  for (let offset = -180; offset <= 180; offset += 1) {
+    const candidate = estimate + offset * MINUTE;
+    if (candidate > date.getTime()
+        && isGroupBoundary(getDateParts(new Date(candidate), timeZone), groupBy)) {
+      return new Date(candidate);
+    }
+  }
+
+  return new Date(estimate);
+};
+
 /**
  * Get date formatting options
  * @param {object} config Card config
@@ -674,6 +752,7 @@ export {
   parseDateTimeFormatFromCfg,
   getDateFormat, getTimeFormat,
   formatDateTime,
+  resolveTimeZone, getEndDate,
   TimeZone, TimeFormat, DateFormat, // used in tests
   blankBeforePercent,
 };
