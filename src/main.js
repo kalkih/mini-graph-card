@@ -414,9 +414,9 @@ class MiniGraphCard extends LitElement {
       return html`
         <div
           class="icon"
-          loc="${iconLoc}"
+          loc=${iconLoc}
         >
-          <img src="${this.config.icon_image}" height="25"/>
+          <img src=${this.config.icon_image} height="25"/>
         </div>
       `;
     }
@@ -435,8 +435,8 @@ class MiniGraphCard extends LitElement {
     return html`
       <div
         class="icon"
-        loc="${iconLoc}"
-        style="${iconColor !== undefined ? `color: ${iconColor};` : ''}"
+        loc=${iconLoc}
+        style=${iconColor !== undefined ? `color: ${iconColor};` : ''}
       >
         <ha-icon .icon=${this.computeIcon(this.entity[0])}></ha-icon>
       </div>
@@ -462,11 +462,11 @@ class MiniGraphCard extends LitElement {
     return html`
       <div
         class="name"
-        loc="${nameLoc}"
+        loc=${nameLoc}
       >
         <span
           class="ellipsis"
-          style="${color}"
+          style=${color}
         >${name}</span>
       </div>
     `;
@@ -483,7 +483,7 @@ class MiniGraphCard extends LitElement {
     return html`
       <div
         class="states flex"
-        loc="${this.config.align_state}"
+        loc=${this.config.align_state}
       >
         ${this.renderState(0)}
         <div class="states--secondary">
@@ -716,7 +716,7 @@ class MiniGraphCard extends LitElement {
   renderIndicator(state, index) {
     return svg`
       <svg width="10" height="10">
-        <rect width="10" height="10" fill="${this.computeColor(state, index)}" />
+        <rect width="10" height="10" fill=${this.computeColor(state, index)} />
       </svg>
     `;
   }
