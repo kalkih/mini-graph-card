@@ -1455,16 +1455,16 @@ class MiniGraphCard extends LitElement {
     // attempting to get "decimals" settings
     if (index === undefined) {
       // for a primary Y-axis
-      const primaryDecimals = this.config.y_axis 
-        && this.config.y_axis.primary 
+      const primaryDecimals = this.config.y_axis
+        && this.config.y_axis.primary
         && this.config.y_axis.primary.decimals;
       dec = primaryDecimals !== undefined
         ? primaryDecimals
         : this.config.decimals;
     } else if (index === -1) {
       // for a secondary Y-axis
-      const secondaryDecimals = this.config.y_axis 
-        && this.config.y_axis.secondary 
+      const secondaryDecimals = this.config.y_axis
+        && this.config.y_axis.secondary
         && this.config.y_axis.secondary.decimals;
       dec = secondaryDecimals !== undefined
         ? secondaryDecimals
