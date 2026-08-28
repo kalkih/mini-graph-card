@@ -7,6 +7,7 @@
 
 import { assert, describe, it } from 'vitest';
 import { getFactor } from '../others';
+import { migrateYaxisConfig } from '../migrate';
 
 interface ValueFactorType {
   type?: string | any,
@@ -14,6 +15,7 @@ interface ValueFactorType {
 };
 
 interface EntityConfig {
+  // value_factor?: number | ValueFactorType | any;  // ?
   y_axis?: "primary" | "secondary";
 };
 
@@ -21,7 +23,17 @@ interface ConfigType {
   value_factor?: number | ValueFactorType | any;
   value_factor_secondary?: number | ValueFactorType | any;
   entities?: EntityConfig[];
+  y_axis?: {
+    primary?: {
+      value_factor?: number | ValueFactorType | any;
+    },
+    secondary?: {
+      value_factor?: number | ValueFactorType | any;
+    },
+  },
 };
+
+const DELTA = 0.0001;
 
 const VALUES: number[] = [
   -2,
@@ -36,39 +48,572 @@ const VALUES: number[] = [
 describe("getFactor", () => {
   VALUES.forEach((value) => {
 
+    // Legacy syntax
     //////////////////////////////////////////////////////////////////////////
     // Testing value_factor non-object
 
-    it(`getFactor [value: ${value}]: value_factor: explicitly set to 0`, () => {
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor: explicitly set to 0`, () => {
       const config: ConfigType = {
         value_factor: 0,
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig);
+      const expectedValue = value;
+      assert.closeTo(
+        result,
+        expectedValue,
+        DELTA,
+      );
+    });
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor: exponent 2`, () => {
+      const exponent = 2;
+      const config: ConfigType = {
+        value_factor: exponent,
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig);
+      const expectedValue = value * (10 ** exponent);
+      assert.closeTo(
+        result,
+        expectedValue,
+        DELTA,
+      );
+    });
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor: invalid`, () => {
+      const config: ConfigType = {
+        value_factor: 'abc',
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig);
+      const expectedValue = value; // fallback to "factor = 1"
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor: undefined`, () => {
+      const config: ConfigType = {
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig);
+      const expectedValue = value; // fallback to "factor = 1"
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    //////////////////////////////////////////////////////////////////////////
+    // Testing value_factor_secondary
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor_secondary: explicitly set to 0 - still ignored since "index" in "getFactor()" is undefined`, () => {
+      const config: ConfigType = {
+        value_factor_secondary: 0,
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig);
+      const expectedValue = value; // fallback to "factor = 1"
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor_secondary: exponent 2 - still ignored since "index" in "getFactor()" is undefined`, () => {
+      const exponent = 2;
+      const config: ConfigType = {
+        value_factor_secondary: exponent,
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig);
+      const expectedValue = value; // fallback to "factor = 1"
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor_secondary: exponent 2, index -1`, () => {
+      const exponent = 2;
+      const config: ConfigType = {
+        value_factor_secondary: exponent,
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig, -1);
+      const expectedValue = value * (10 ** exponent);
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor_secondary: exponent 2, index 0 (y_axis: undefined)`, () => {
+      const exponent = 2;
+      const config: ConfigType = {
+        value_factor_secondary: exponent,
+        entities: [
+          {},
+          {y_axis: 'secondary'},
+        ],
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig, 0);
+      const expectedValue = value;  // fallback to "factor = 1"
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor_secondary: exponent 2, index 1 (y_axis: secondary)`, () => {
+      const exponent = 2;
+      const config: ConfigType = {
+        value_factor_secondary: exponent,
+        entities: [
+          {},
+          {y_axis: 'secondary'},
+        ],
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig, 1);
+      const expectedValue = value * (10 ** exponent);
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor_secondary: invalid`, () => {
+      const config: ConfigType = {
+        value_factor_secondary: 'abc',
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig);
+      const expectedValue = value; // fallback to "factor = 1"
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor_secondary: undefined`, () => {
+      const config: ConfigType = {
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig);
+      const expectedValue = value; // fallback to "factor = 1"
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    //////////////////////////////////////////////////////////////////////////
+    // Testing value_factor_secondary with value_factor
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor_secondary: explicitly set to 0 - ignored since "index" in "getFactor()" is undefined, value_factor 'exponent 3' is used instead`, () => {
+      const exponent = 3;
+      const config: ConfigType = {
+        value_factor: exponent,
+        value_factor_secondary: 0,
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig);
+      const expectedValue = value * (10 ** exponent);
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor_secondary: explicitly set to 0 - ignored since "index" in "getFactor()" is set to 0, and the 0th entity is not assigned to a 'secondary' y_axis; value_factor 'exponent 3' is used instead`, () => {
+      const exponent = 3;
+      const config: ConfigType = {
+        value_factor: exponent,
+        value_factor_secondary: 0,
+        entities: [
+          {},
+          {y_axis: 'secondary'},
+        ],
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig, 0);
+      const expectedValue = value * (10 ** exponent);
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor_secondary: explicitly set to 0, "index" in "getFactor()" is set to 1, and the 1st entity is assigned to a 'secondary' y_axis`, () => {
+      const exponent = 3;
+      const config: ConfigType = {
+        value_factor: exponent,
+        value_factor_secondary: 0,
+        entities: [
+          {},
+          {y_axis: 'secondary'},
+        ],
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig, 1);
+      const expectedValue = value;
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor_secondary: set to 4, "index" in "getFactor()" is set to 1, and the 1st entity is assigned to a 'secondary' y_axis`, () => {
+      const exponent = 3;
+      const exponent_secondary = 4;
+      const config: ConfigType = {
+        value_factor: exponent,
+        value_factor_secondary: exponent_secondary,
+        entities: [
+          {},
+          {y_axis: 'secondary'},
+        ],
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig, 1);
+      const expectedValue = value * (10 ** exponent_secondary);
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor_secondary undefined, "index" in "getFactor()" is set to 1, and the 1st entity is assigned to a 'secondary' y_axis; finally, a default value_factor = 1 is used`, () => {
+      const exponent = 3;
+      const config: ConfigType = {
+        value_factor: exponent,
+        entities: [
+          {},
+          {y_axis: 'secondary'},
+        ],
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig, 1);
+      const expectedValue = value;
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor_secondary: set to a wrong 'abc', "index" in "getFactor()" is set to 1, and the 1st entity is assigned to a 'secondary' y_axis; finally, a default value_factor = 1 is used`, () => {
+      const exponent = 3;
+      const exponent_secondary = 'abc';
+      const config: ConfigType = {
+        value_factor: exponent,
+        value_factor_secondary: exponent_secondary,
+        entities: [
+          {},
+          {y_axis: 'secondary'},
+        ],
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig, 1);
+      const expectedValue = value;
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    //////////////////////////////////////////////////////////////////////////
+    // Testing value_factor object
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor: value_factor = object, exponent 2`, () => {
+      const exponent = 2;
+      const config: ConfigType = {
+        value_factor: {
+          type: 'exponent',
+          factor: exponent,
+        },
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig);
+      const expectedValue = value * (10 ** exponent);
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor: value_factor = object, scale 2`, () => {
+      const scale = 2;
+      const config: ConfigType = {
+        value_factor: {
+          type: 'scale',
+          factor: scale,
+        },
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig);
+      const expectedValue = value * scale;
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    //////////////////////////////////////////////////////////////////////////
+    // Testing value_factor object, invalid data
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor: value_factor = object, type invalid`, () => {
+      const config: ConfigType = {
+        value_factor: {
+          type: 'abc',
+          factor: 2,
+        },
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig);
+      const expectedValue = value; // fallback to "exponent = 1"
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor: value_factor = object, type undefined`, () => {
+      const config: ConfigType = {
+        value_factor: {
+          factor: 2,
+        },
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig);
+      const expectedValue = value; // fallback to "exponent = 1"
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor: value_factor = object, exponent invalid`, () => {
+      const config: ConfigType = {
+        value_factor: {
+          type: 'exponent',
+          factor: 'abc',
+        },
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig);
+      const expectedValue = value; // fallback to "exponent = 1"
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor: value_factor = object, exponent = string`, () => {
+      const config: ConfigType = {
+        value_factor: {
+          type: 'exponent',
+          factor: '-2',
+        },
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig);
+      const expectedValue = value * (10 ** Number(config.value_factor.factor));
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor: value_factor = object, exponent undefined`, () => {
+      const config: ConfigType = {
+        value_factor: {
+          type: 'exponent',
+        },
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig);
+      const expectedValue = value; // fallback to "exponent = 1"
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor: value_factor = object, scale = string`, () => {
+      const config: ConfigType = {
+        value_factor: {
+          type: 'scale',
+          factor: '123',
+        },
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig);
+      const expectedValue = value * Number(config.value_factor.factor);
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor: value_factor = object, scale invalid`, () => {
+      const config: ConfigType = {
+        value_factor: {
+          type: 'scale',
+          factor: 'abc',
+        },
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig);
+      const expectedValue = value; // fallback to "exponent = 1"
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`(legacy syntax) getFactor [value: ${value}]: value_factor: value_factor = object, scale undefined`, () => {
+      const config: ConfigType = {
+        value_factor: {
+          type: 'scale',
+        },
+      };
+      const migratedConfig = migrateYaxisConfig(config);
+      const result = value * getFactor(migratedConfig);
+      const expectedValue = value; // fallback to "exponent = 1"
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // testing y_axis syntax
+
+    //////////////////////////////////////////////////////////////////////////
+    // Testing value_factor non-object
+    // Testing primary.value_factor
+
+    it(`getFactor [value: ${value}]: value_factor: explicitly set to 0`, () => {
+      const config: ConfigType = {
+        y_axis: {
+          primary: {value_factor: 0},
+        },
       };
       const result = value * getFactor(config);
       const expectedValue = value;
       assert.closeTo(
         result,
         expectedValue,
-        6, // number of digits adter a point
+        DELTA,
       );
     });
 
     it(`getFactor [value: ${value}]: value_factor: exponent 2`, () => {
       const exponent = 2;
       const config: ConfigType = {
-        value_factor: exponent,
+        y_axis: {
+          primary: {value_factor: exponent},
+        },
       };
       const result = value * getFactor(config);
       const expectedValue = value * (10 ** exponent);
       assert.closeTo(
         result,
         expectedValue,
-        6, // number of digits adter a point
+        DELTA,
+      );
+    });
+
+    it(`getFactor [value: ${value}]: value_factor: exponent 2, index = 0`, () => {
+      const exponent = 2;
+      const config: ConfigType = {
+        y_axis: {
+          primary: {value_factor: exponent},
+        },
+      };
+      const result = value * getFactor(config, 0);
+      const expectedValue = value * (10 ** exponent);
+      assert.closeTo(
+        result,
+        expectedValue,
+        DELTA,
+      );
+    });
+
+    it(`getFactor [value: ${value}]: value_factor: exponent 2, index = 1`, () => {
+      const exponent = 2;
+      const config: ConfigType = {
+        y_axis: {
+          primary: {value_factor: exponent},
+        },
+        entities: [
+          {y_axis: 'secondary'},
+          {},
+        ],
+      };
+      const result = value * getFactor(config, 1);
+      const expectedValue = value * (10 ** exponent);
+      assert.closeTo(
+        result,
+        expectedValue,
+        DELTA,
+      );
+    });
+
+    it(`getFactor [value: ${value}]: value_factor: exponent 2, index = 2 (wrong index)`, () => {
+      const exponent = 2;
+      const config: ConfigType = {
+        y_axis: {
+          primary: {value_factor: exponent},
+        },
+        entities: [
+          {y_axis: 'secondary'},
+          {},
+        ],
+      };
+      const result = value * getFactor(config, 2);
+      const expectedValue = value * (10 ** exponent);
+      assert.closeTo(
+        result,
+        expectedValue,
+        DELTA,
       );
     });
 
     it(`getFactor [value: ${value}]: value_factor: invalid`, () => {
       const config: ConfigType = {
-        value_factor: 'abc',
+        y_axis: {
+          primary: {value_factor: 'abc'},
+        },
       };
       const result = value * getFactor(config);
       const expectedValue = value; // fallback to "factor = 1"
@@ -81,6 +626,9 @@ describe("getFactor", () => {
 
     it(`getFactor [value: ${value}]: value_factor: undefined`, () => {
       const config: ConfigType = {
+        y_axis: {
+          primary: {},
+        },
       };
       const result = value * getFactor(config);
       const expectedValue = value; // fallback to "factor = 1"
@@ -92,11 +640,13 @@ describe("getFactor", () => {
     });
 
     //////////////////////////////////////////////////////////////////////////
-    // Testing value_factor_secondary
+    // Testing secondary.value_factor
 
     it(`getFactor [value: ${value}]: value_factor_secondary: explicitly set to 0 - still ignored since "index" in "getFactor()" is undefined`, () => {
       const config: ConfigType = {
-        value_factor_secondary: 0,
+        y_axis: {
+          secondary: {value_factor: 0},
+        },
       };
       const result = value * getFactor(config);
       const expectedValue = value; // fallback to "factor = 1"
@@ -110,7 +660,9 @@ describe("getFactor", () => {
     it(`getFactor [value: ${value}]: value_factor_secondary: exponent 2 - still ignored since "index" in "getFactor()" is undefined`, () => {
       const exponent = 2;
       const config: ConfigType = {
-        value_factor_secondary: exponent,
+        y_axis: {
+          secondary: {value_factor: exponent},
+        },
       };
       const result = value * getFactor(config);
       const expectedValue = value; // fallback to "factor = 1"
@@ -124,7 +676,9 @@ describe("getFactor", () => {
     it(`getFactor [value: ${value}]: value_factor_secondary: exponent 2, index -1`, () => {
       const exponent = 2;
       const config: ConfigType = {
-        value_factor_secondary: exponent,
+        y_axis: {
+          secondary: {value_factor: exponent},
+        },
       };
       const result = value * getFactor(config, -1);
       const expectedValue = value * (10 ** exponent);
@@ -138,7 +692,9 @@ describe("getFactor", () => {
     it(`getFactor [value: ${value}]: value_factor_secondary: exponent 2, index 0 (y_axis: undefined)`, () => {
       const exponent = 2;
       const config: ConfigType = {
-        value_factor_secondary: exponent,
+        y_axis: {
+          secondary: {value_factor: exponent},
+        },
         entities: [
           {},
           {y_axis: 'secondary'},
@@ -156,7 +712,9 @@ describe("getFactor", () => {
     it(`getFactor [value: ${value}]: value_factor_secondary: exponent 2, index 1 (y_axis: secondary)`, () => {
       const exponent = 2;
       const config: ConfigType = {
-        value_factor_secondary: exponent,
+        y_axis: {
+          secondary: {value_factor: exponent},
+        },
         entities: [
           {},
           {y_axis: 'secondary'},
@@ -173,7 +731,9 @@ describe("getFactor", () => {
 
     it(`getFactor [value: ${value}]: value_factor_secondary: invalid`, () => {
       const config: ConfigType = {
-        value_factor_secondary: 'abc',
+        y_axis: {
+          secondary: {value_factor: 'abc'},
+        },
       };
       const result = value * getFactor(config);
       const expectedValue = value; // fallback to "factor = 1"
@@ -186,6 +746,9 @@ describe("getFactor", () => {
 
     it(`getFactor [value: ${value}]: value_factor_secondary: undefined`, () => {
       const config: ConfigType = {
+        y_axis: {
+          secondary: {},
+        },
       };
       const result = value * getFactor(config);
       const expectedValue = value; // fallback to "factor = 1"
@@ -197,13 +760,15 @@ describe("getFactor", () => {
     });
 
     //////////////////////////////////////////////////////////////////////////
-    // Testing value_factor_secondary with value_factor
+    // Testing value_factor for secondary with value_factor
 
-    it(`getFactor [value: ${value}]: value_factor_secondary: explicitly set to 0 - ignored since "index" in "getFactor()" is undefined, value_factor 'exponent 3' is used instead`, () => {
+    it(`getFactor [value: ${value}]: secondary.value_factor: explicitly set to 0 - ignored since "index" in "getFactor()" is undefined, value_factor 'exponent 3' is used instead`, () => {
       const exponent = 3;
       const config: ConfigType = {
-        value_factor: exponent,
-        value_factor_secondary: 0,
+        y_axis: {
+          primary: {value_factor: exponent},
+          secondary: {value_factor: 0},
+        },
       };
       const result = value * getFactor(config);
       const expectedValue = value * (10 ** exponent);
@@ -214,11 +779,13 @@ describe("getFactor", () => {
       );
     });
 
-    it(`getFactor [value: ${value}]: value_factor_secondary: explicitly set to 0 - ignored since "index" in "getFactor()" is set to 0, and the 0th entity is not assigned to a 'secondary' y_axis; value_factor 'exponent 3' is used instead`, () => {
+    it(`getFactor [value: ${value}]: secondary.value_factor: explicitly set to 0 - ignored since "index" in "getFactor()" is set to 0, and the 0th entity is not assigned to a 'secondary' y_axis; value_factor 'exponent 3' is used instead`, () => {
       const exponent = 3;
       const config: ConfigType = {
-        value_factor: exponent,
-        value_factor_secondary: 0,
+        y_axis: {
+          primary: {value_factor: exponent},
+          secondary: {value_factor: 0},
+        },
         entities: [
           {},
           {y_axis: 'secondary'},
@@ -233,11 +800,13 @@ describe("getFactor", () => {
       );
     });
 
-    it(`getFactor [value: ${value}]: value_factor_secondary: explicitly set to 0, "index" in "getFactor()" is set to 1, and the 1st entity is assigned to a 'secondary' y_axis`, () => {
+    it(`getFactor [value: ${value}]: secondary.value_factor: explicitly set to 0, "index" in "getFactor()" is set to 1, and the 1st entity is assigned to a 'secondary' y_axis`, () => {
       const exponent = 3;
       const config: ConfigType = {
-        value_factor: exponent,
-        value_factor_secondary: 0,
+        y_axis: {
+          primary: {value_factor: exponent},
+          secondary: {value_factor: 0},
+        },
         entities: [
           {},
           {y_axis: 'secondary'},
@@ -252,12 +821,14 @@ describe("getFactor", () => {
       );
     });
 
-    it(`getFactor [value: ${value}]: value_factor_secondary: set to 4, "index" in "getFactor()" is set to 1, and the 1st entity is assigned to a 'secondary' y_axis`, () => {
+    it(`getFactor [value: ${value}]: secondary.value_factor: set to 4, "index" in "getFactor()" is set to 1, and the 1st entity is assigned to a 'secondary' y_axis`, () => {
       const exponent = 3;
       const exponent_secondary = 4;
       const config: ConfigType = {
-        value_factor: exponent,
-        value_factor_secondary: exponent_secondary,
+        y_axis: {
+          primary: {value_factor: exponent},
+          secondary: {value_factor: exponent_secondary},
+        },
         entities: [
           {},
           {y_axis: 'secondary'},
@@ -272,10 +843,12 @@ describe("getFactor", () => {
       );
     });
 
-    it(`getFactor [value: ${value}]: value_factor_secondary undefined, "index" in "getFactor()" is set to 1, and the 1st entity is assigned to a 'secondary' y_axis; finally, a default value_factor = 1 is used`, () => {
+    it(`getFactor [value: ${value}]: secondary.value_factor undefined, "index" in "getFactor()" is set to 1, and the 1st entity is assigned to a 'secondary' y_axis; finally, a default value_factor = 1 is used`, () => {
       const exponent = 3;
       const config: ConfigType = {
-        value_factor: exponent,
+        y_axis: {
+          primary: {value_factor: exponent},
+        },
         entities: [
           {},
           {y_axis: 'secondary'},
@@ -290,12 +863,14 @@ describe("getFactor", () => {
       );
     });
 
-    it(`getFactor [value: ${value}]: value_factor_secondary: set to a wrong 'abc', "index" in "getFactor()" is set to 1, and the 1st entity is assigned to a 'secondary' y_axis; finally, a default value_factor = 1 is used`, () => {
+    it(`getFactor [value: ${value}]: secondary.value_factor: set to a wrong 'abc', "index" in "getFactor()" is set to 1, and the 1st entity is assigned to a 'secondary' y_axis; finally, a default value_factor = 1 is used`, () => {
       const exponent = 3;
       const exponent_secondary = 'abc';
       const config: ConfigType = {
-        value_factor: exponent,
-        value_factor_secondary: exponent_secondary,
+        y_axis: {
+          primary: {value_factor: exponent},
+          secondary: {value_factor: exponent_secondary},
+        },
         entities: [
           {},
           {y_axis: 'secondary'},
@@ -313,12 +888,16 @@ describe("getFactor", () => {
     //////////////////////////////////////////////////////////////////////////
     // Testing value_factor object
 
-    it(`getFactor [value: ${value}]: value_factor: value_factor = object, exponent 2`, () => {
+    it(`getFactor [value: ${value}]: primary.value_factor: value_factor = object, exponent 2`, () => {
       const exponent = 2;
       const config: ConfigType = {
-        value_factor: {
-          type: 'exponent',
-          factor: exponent,
+        y_axis: {
+          primary: {
+            value_factor: {
+              type: 'exponent',
+              factor: exponent,
+            },
+          },
         },
       };
       const result = value * getFactor(config);
@@ -330,12 +909,16 @@ describe("getFactor", () => {
       );
     });
 
-    it(`getFactor [value: ${value}]: value_factor: value_factor = object, scale 2`, () => {
+    it(`getFactor [value: ${value}]: primary.value_factor: value_factor = object, scale 2`, () => {
       const scale = 2;
       const config: ConfigType = {
-        value_factor: {
-          type: 'scale',
-          factor: scale,
+        y_axis: {
+          primary: {
+            value_factor: {
+              type: 'scale',
+              factor: scale,
+            },
+          },
         },
       };
       const result = value * getFactor(config);
@@ -347,14 +930,142 @@ describe("getFactor", () => {
       );
     });
 
+    it(`getFactor [value: ${value}]: secondary.value_factor: value_factor = object, exponent 2`, () => {
+      const exponent = 2;
+      const config: ConfigType = {
+        y_axis: {
+          secondary: {
+            value_factor: {
+              type: 'exponent',
+              factor: exponent,
+            },
+          },
+        },
+      };
+      const result = value * getFactor(config, -1);
+      const expectedValue = value * (10 ** exponent);
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`getFactor [value: ${value}]: secondary.value_factor: value_factor = object, scale 2`, () => {
+      const scale = 2;
+      const config: ConfigType = {
+        y_axis: {
+          secondary: {
+            value_factor: {
+              type: 'scale',
+              factor: scale,
+            },
+          },
+        },
+      };
+      const result = value * getFactor(config, -1);
+      const expectedValue = value * scale;
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    // //////////////////////////////////////////////////////////////////////////
+    // Testing value_factor per-entity // ?
+
+    // // it(`getFactor [value: ${value}]: value_factor: exponent 2, index 0`, () => {
+    // //   const exponent = 2;
+    // //   const config: ConfigType = {
+    // //     entities: [],
+    // //     value_factor: exponent,
+    // //   };
+    // //   const index = 0;
+    // //   const result = value * getFactor(config, index);
+    // //   const expectedValue = value * (10 ** exponent);
+    // //   assert.closeTo(
+    // //     result,
+    // //     expectedValue,
+    // //     6, // number of digits after a point
+    // //   );
+    // // });
+
+    // // it(`getFactor [value: ${value}]: value_factor: exponent 2, index -1`, () => {
+    // //   const exponent = 2;
+    // //   const config: ConfigType = {
+    // //     entities: [],
+    // //     value_factor: exponent,
+    // //   };
+    // //   const index = -1;
+    // //   const result = value * getFactor(config, index);
+    // //   const expectedValue = value * (10 ** exponent);
+    // //   assert.closeTo(
+    // //     result,
+    // //     expectedValue,
+    // //     6, // number of digits after a point
+    // //   );
+    // // });
+
+    // // it(`getFactor [value: ${value}]: value_factor: exponent 2, index undefined`, () => {
+    // //   const exponent = 2;
+    // //   const config: ConfigType = {
+    // //     entities: [],
+    // //     value_factor: exponent,
+    // //   };
+    // //   const index = undefined;
+    // //   const result = value * getFactor(config, index);
+    // //   const expectedValue = value * (10 ** exponent);
+    // //   assert.closeTo(
+    // //     result,
+    // //     expectedValue,
+    // //     6, // number of digits after a point
+    // //   );
+    // // });
+
+    // // it(`getFactor [value: ${value}]: value_factor: index 0: exponent 1`, () => {
+    // //   const exponent = 1;
+    // //     const config: ConfigType = {
+    // //     entities: [{value_factor: exponent}],
+    // //   };
+    // //   const index = 0;
+    // //   const result = value * getFactor(config, index);
+    // //   const expectedValue = value * (10 ** exponent);
+    // //   assert.closeTo(
+    // //     result,
+    // //     expectedValue,
+    // //     6, // number of digits after a point
+    // //   );
+    // // });
+
+    // // it(`getFactor [value: ${value}]: value_factor: index 0: exponent 1`, () => {
+    // //   const exponent = 1;
+    // //     const config: ConfigType = {
+    // //     entities: [{value_factor: exponent}],
+    // //     value_factor: 2,
+    // //   };
+    // //   const index = 0;
+    // //   const result = value * getFactor(config, index);
+    // //   const expectedValue = value * (10 ** exponent);
+    // //   assert.closeTo(
+    // //     result,
+    // //     expectedValue,
+    // //     6, // number of digits after a point
+    // //   );
+    // // });
+
     //////////////////////////////////////////////////////////////////////////
     // Testing value_factor object, invalid data
 
-    it(`getFactor [value: ${value}]: value_factor: value_factor = object, type invalid`, () => {
+    it(`getFactor [value: ${value}]: primary.value_factor: value_factor = object, type invalid`, () => {
       const config: ConfigType = {
-        value_factor: {
-          type: 'abc',
-          factor: 2,
+        y_axis: {
+          primary: {
+            value_factor: {
+              type: 'abc',
+              factor: 2,
+            },
+          },
         },
       };
       const result = value * getFactor(config);
@@ -366,10 +1077,14 @@ describe("getFactor", () => {
       );
     });
 
-    it(`getFactor [value: ${value}]: value_factor: value_factor = object, type undefined`, () => {
+    it(`getFactor [value: ${value}]: primary.value_factor: value_factor = object, type undefined`, () => {
       const config: ConfigType = {
-        value_factor: {
-          factor: 2,
+        y_axis: {
+          primary: {
+            value_factor: {
+              factor: 2,
+            },
+          },
         },
       };
       const result = value * getFactor(config);
@@ -381,11 +1096,15 @@ describe("getFactor", () => {
       );
     });
 
-    it(`getFactor [value: ${value}]: value_factor: value_factor = object, exponent invalid`, () => {
+    it(`getFactor [value: ${value}]: primary.value_factor: value_factor = object, exponent invalid`, () => {
       const config: ConfigType = {
-        value_factor: {
-          type: 'exponent',
-          factor: 'abc',
+        y_axis: {
+          primary: {
+            value_factor: {
+              type: 'exponent',
+              factor: 'abc',
+            },
+          },
         },
       };
       const result = value * getFactor(config);
@@ -397,15 +1116,19 @@ describe("getFactor", () => {
       );
     });
 
-    it(`getFactor [value: ${value}]: value_factor: value_factor = object, exponent = string`, () => {
+    it(`getFactor [value: ${value}]: primary.value_factor: value_factor = object, exponent = string`, () => {
       const config: ConfigType = {
-        value_factor: {
-          type: 'exponent',
-          factor: '-2',
+        y_axis: {
+          primary: {
+            value_factor: {
+              type: 'exponent',
+              factor: '-2',
+            },
+          },
         },
       };
       const result = value * getFactor(config);
-      const expectedValue = value * (10 ** Number(config.value_factor.factor));
+      const expectedValue = value * (10 ** Number(config.y_axis!.primary!.value_factor.factor));
       assert.closeTo(
         result,
         expectedValue,
@@ -413,42 +1136,14 @@ describe("getFactor", () => {
       );
     });
 
-    it(`getFactor [value: ${value}]: value_factor: value_factor = object, exponent undefined`, () => {
+    it(`getFactor [value: ${value}]: primary.value_factor: value_factor = object, exponent undefined`, () => {
       const config: ConfigType = {
-        value_factor: {
-          type: 'exponent',
-        },
-      };
-      const result = value * getFactor(config);
-      const expectedValue = value; // fallback to "exponent = 1"
-      assert.closeTo(
-        result,
-        expectedValue,
-        6, // number of digits after a point
-      );
-    });
-
-    it(`getFactor [value: ${value}]: value_factor: value_factor = object, scale = string`, () => {
-      const config: ConfigType = {
-        value_factor: {
-          type: 'scale',
-          factor: '123',
-        },
-      };
-      const result = value * getFactor(config);
-      const expectedValue = value * Number(config.value_factor.factor);
-      assert.closeTo(
-        result,
-        expectedValue,
-        6, // number of digits after a point
-      );
-    });
-
-    it(`getFactor [value: ${value}]: value_factor: value_factor = object, scale invalid`, () => {
-      const config: ConfigType = {
-        value_factor: {
-          type: 'scale',
-          factor: 'abc',
+        y_axis: {
+          primary: {
+            value_factor: {
+              type: 'exponent',
+            },
+          },
         },
       };
       const result = value * getFactor(config);
@@ -460,10 +1155,54 @@ describe("getFactor", () => {
       );
     });
 
-    it(`getFactor [value: ${value}]: value_factor: value_factor = object, scale undefined`, () => {
+    it(`getFactor [value: ${value}]: primary.value_factor: value_factor = object, scale = string`, () => {
       const config: ConfigType = {
-        value_factor: {
-          type: 'scale',
+        y_axis: {
+          primary: {
+            value_factor: {
+              type: 'scale',
+              factor: '123',
+            },
+          },
+        },
+      };
+      const result = value * getFactor(config);
+      const expectedValue = value * Number(config.y_axis!.primary!.value_factor.factor);
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`getFactor [value: ${value}]: primary.value_factor: value_factor = object, scale invalid`, () => {
+      const config: ConfigType = {
+        y_axis: {
+          primary: {
+            value_factor: {
+              type: 'scale',
+              factor: 'abc',
+            },
+          },
+        },
+      };
+      const result = value * getFactor(config);
+      const expectedValue = value; // fallback to "exponent = 1"
+      assert.closeTo(
+        result,
+        expectedValue,
+        6, // number of digits after a point
+      );
+    });
+
+    it(`getFactor [value: ${value}]: primary.value_factor: value_factor = object, scale undefined`, () => {
+      const config: ConfigType = {
+        y_axis: {
+          primary: {
+            value_factor: {
+              type: 'scale',
+            },
+          },
         },
       };
       const result = value * getFactor(config);
