@@ -15,7 +15,8 @@ import {
  * @param {object} [params={}] Optional parameters
  * @param {number} [params.minBound] Optional minimum allowed value
  * @param {number} [params.maxBound] Optional maximum allowed value
- * @param {boolean} [params.allowString=false] Optional flag to allow string representations of numbers
+ * @param {boolean} [params.allowString=false] Optional flag
+ * to allow string representations of numbers
  * @param {string} [params.logOptionName] Optional custom option name for detailed log output
  * @returns {number} Cleared value
  */
@@ -37,7 +38,7 @@ const checkNumericOption = (
     allowString = false,
     logOptionName = undefined,
   } = params;
-  const displayOption = params.logOptionName || option;
+  const displayOption = logOptionName || option;
 
   if (isNumeric(value, allowString)) {
     // log a warning in case of a string presentation of a number
@@ -78,8 +79,9 @@ const checkNumericOption = (
  * @param {object} [params={}] Optional parameters
  * @param {number} [params.minBound] Optional minimum allowed value
  * @param {number} [params.maxBound] Optional maximum allowed value
- * @param {boolean} [params.allowString=false] Optional flag to allow string representations of numbers
- * @param {string} [params.logOptionName] Optional custom option name for detailed log output
+ * @param {boolean} [params.allowString=false] Optional flag
+ * to allow string representations of numbers
+ * @param {string} [params.] Optional custom option name for detailed log output
  * @returns {number} Cleared value
  */
 const checkIntegerOption = (
@@ -91,7 +93,7 @@ const checkIntegerOption = (
   const value = checkNumericOption(config, option, defaultValue, params);
   if (value !== undefined && !Number.isInteger(value)) {
     const roundedValue = Math.round(value) + 0; // prevent "-0" value
-    const displayOption = params.logOptionName || option;
+    const displayOption = params. || option;
     log(`Invalid integer option ${displayOption}: [${value}]; rounding value to ${roundedValue}`);
     return roundedValue;
   }
