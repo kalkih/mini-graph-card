@@ -87,11 +87,11 @@ const getFactor = (config, index = undefined) => {
   }
 
   const displayOption = yAxis
-   ? `${yAxis}.value_factor`
-   : `value_factor[${index}]`;
+    ? `${yAxis}.value_factor`
+    : `value_factor[${index}]`;
 
   const getExponent = factor => 10 ** factor;
-  const logInvalidValueFactor = (factor_obj) => log(`invalid ${displayOption}: [${JSON.stringify(factor_obj)}]`);
+  const logInvalidValueFactor = factor_obj => log(`invalid ${displayOption}: [${JSON.stringify(factor_obj)}]`);
 
   if (typeof value_factor === 'object') {
     const { type, factor } = value_factor;
