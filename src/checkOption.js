@@ -93,7 +93,7 @@ const checkIntegerOption = (
   const value = checkNumericOption(config, option, defaultValue, params);
   if (value !== undefined && !Number.isInteger(value)) {
     const roundedValue = Math.round(value) + 0; // prevent "-0" value
-    const displayOption = params. || option;
+    const displayOption = params.logOptionName || option;
     log(`Invalid integer option ${displayOption}: [${value}]; rounding value to ${roundedValue}`);
     return roundedValue;
   }
