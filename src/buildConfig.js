@@ -181,23 +181,23 @@ export default (config) => {
   conf.points_per_hour = checkNumericOption(conf, 'points_per_hour', DEFAULT_POINTS_PER_HOUR, { minBound: 0.001, allowString: true });
   conf.update_interval = checkNumericOption(conf, 'update_interval', undefined, { minBound: 0, allowString: true });
 
-    // axis options
+  // axis options
   if (conf.y_axis && conf.y_axis.primary) {
     const primaryBounds = checkBounds(conf.y_axis.primary, 'primary');
     conf.y_axis.primary.lower_bound = primaryBounds.lowerBound;
     conf.y_axis.primary.upper_bound = primaryBounds.upperBound;
 
     conf.y_axis.primary.min_bound_range = checkNumericOption(
-      conf.y_axis.primary, 
-      'min_bound_range', 
-      undefined, 
+      conf.y_axis.primary,
+      'min_bound_range',
+      undefined,
       { minBound: 0, allowString: true, logOptionName: 'primary.min_bound_range' },
     );
 
     conf.y_axis.primary.decimals = checkIntegerOption(
-      conf.y_axis.primary, 
-      'decimals', 
-      undefined, 
+      conf.y_axis.primary,
+      'decimals',
+      undefined,
       { minBound: 0, allowString: true, logOptionName: 'primary.decimals' },
     );
   }
@@ -206,17 +206,17 @@ export default (config) => {
     conf.y_axis.secondary.lower_bound = secondaryBounds.lowerBound;
     conf.y_axis.secondary.upper_bound = secondaryBounds.upperBound;
 
-     conf.y_axis.secondary.min_bound_range = checkNumericOption(
-      conf.y_axis.secondary, 
-      'min_bound_range', 
-      undefined, 
+    conf.y_axis.secondary.min_bound_range = checkNumericOption(
+      conf.y_axis.secondary,
+      'min_bound_range',
+      undefined,
       { minBound: 0, allowString: true, logOptionName: 'secondary.min_bound_range' },
     );
 
     conf.y_axis.secondary.decimals = checkIntegerOption(
-      conf.y_axis.secondary, 
-      'decimals', 
-      undefined, 
+      conf.y_axis.secondary,
+      'decimals',
+      undefined,
       { minBound: 0, allowString: true, logOptionName: 'secondary.decimals' },
     );
   }
