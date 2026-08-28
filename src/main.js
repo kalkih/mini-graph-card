@@ -1455,13 +1455,19 @@ class MiniGraphCard extends LitElement {
     // attempting to get "decimals" settings
     if (index === undefined) {
       // for a primary Y-axis
-      dec = this.config.decimals_primary_labels !== undefined
-        ? this.config.decimals_primary_labels
+      const primaryDecimals = this.config.y_axis 
+        && this.config.y_axis.primary 
+        && this.config.y_axis.primary.decimals;
+      dec = primaryDecimals !== undefined
+        ? primaryDecimals
         : this.config.decimals;
     } else if (index === -1) {
       // for a secondary Y-axis
-      dec = this.config.decimals_secondary_labels !== undefined
-        ? this.config.decimals_secondary_labels
+      const secondaryDecimals = this.config.y_axis 
+        && this.config.y_axis.secondary 
+        && this.config.y_axis.secondary.decimals;
+      dec = secondaryDecimals !== undefined
+        ? secondaryDecimals
         : this.config.decimals;
     } else {
       // for a state or attribute value
@@ -1762,20 +1768,32 @@ class MiniGraphCard extends LitElement {
   }
 
   updateBounds({ config } = this) {
+    const primaryAxis = config.y_axis && config.y_axis.primary;
+    const {
+      lower_bound: primaryLowerBound,
+      upper_bound: primaryUpperBound,
+      min_bound_range: primaryMinBoundRange,
+    } = primaryAxis || {};
     this.bound = this.getBoundaries(
       this.primaryYaxisSeries,
-      config.lower_bound,
-      config.upper_bound,
+      primaryLowerBound,
+      primaryUpperBound,
       this.bound,
-      config.min_bound_range,
+      primaryMinBoundRange,
     );
 
+    const secondaryAxis = config.y_axis && config.y_axis.secondary;
+    const {
+      lower_bound: secondaryLowerBound,
+      upper_bound: secondaryUpperBound,
+      min_bound_range: secondaryMinBoundRange,
+    } = secondaryAxis || {};
     this.boundSecondary = this.getBoundaries(
       this.secondaryYaxisSeries,
-      config.lower_bound_secondary,
-      config.upper_bound_secondary,
+      secondaryLowerBound,
+      secondaryUpperBound,
       this.boundSecondary,
-      config.min_bound_range_secondary,
+      secondaryMinBoundRange,
     );
   }
 
