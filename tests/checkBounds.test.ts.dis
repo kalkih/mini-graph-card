@@ -40,14 +40,14 @@ const VARIANTS: any[] = [
     expected: { lowerBound: '~123', upperBound: undefined },
   },
   {
-    description: 'invalid soft value for upper',
+    description: 'valid soft value for upper',
     config: { upper_bound: '~456' },
-    expected: { lowerBound: undefined, upperBound: undefined },
+    expected: { lowerBound: undefined, upperBound: '~456' },
   },
   {
-    description: 'valid soft value for lower, invalid soft value for upper',
+    description: 'valid soft value for lower, valid soft value for upper',
     config: { lower_bound: '~123', upper_bound: '~456' },
-    expected: { lowerBound: '~123', upperBound: undefined },
+    expected: { lowerBound: '~123', upperBound: '~456' },
   },
   {
     description: 'valid soft value for lower, valid value for upper',
@@ -60,8 +60,18 @@ const VARIANTS: any[] = [
     expected: { lowerBound: 123, upperBound: undefined },
   },
   {
+    description: 'lower = soft upper',
+    config: { lower_bound: 123, upper_bound: '~123' },
+    expected: { lowerBound: 123, upperBound: undefined },
+  },
+  {
     description: 'soft lower = upper',
     config: { lower_bound: '~123', upper_bound: 123 },
+    expected: { lowerBound: '~123', upperBound: undefined },
+  },
+  {
+    description: 'soft lower = soft upper',
+    config: { lower_bound: '~123', upper_bound: '~123' },
     expected: { lowerBound: '~123', upperBound: undefined },
   },
   {
@@ -90,6 +100,11 @@ const VARIANTS: any[] = [
     expected: { lowerBound: '~457', upperBound: undefined },
   },
   {
+    description: 'soft lower > soft upper',
+    config: { lower_bound: '~457', upper_bound: '~456' },
+    expected: { lowerBound: '~457', upperBound: undefined },
+  },
+  {
     description: 'soft lower > upper(string)',
     config: { lower_bound: '~457', upper_bound: '456' },
     expected: { lowerBound: '~457', upperBound: undefined },
@@ -99,7 +114,8 @@ const VARIANTS: any[] = [
 describe("checkBounds", () => {
   VARIANTS.forEach((variant) => {
     it(`checkBounds: check [${JSON.stringify(variant)}], ${variant.description}`, () => {
-      const result = checkBounds(variant.config);
+      const yAxis = 'primary';
+      const result = checkBounds(variant.config, yAxis);
       const expectedValue = variant.expected;
       assert.deepEqual(
         result,
