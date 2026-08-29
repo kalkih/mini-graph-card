@@ -21,6 +21,7 @@ import {
   checkLineStyle,
 } from './checkOption';
 import { getFactor } from './others';
+import { migrateYaxisConfig } from './migrate';
 
 /**
  * Starting from the given index, increment the index until an array element with a
@@ -137,6 +138,9 @@ export default (config) => {
       `"line_color_above/line_color_below" was removed, please use "color_thresholds".\n See ${URL_DOCS}`,
     );
 
+  // migrate legacy options, currently belonging to y_axis object
+  const migratedConfig = migrateYaxisConfig(config);
+
   const conf = {
     animate: false,
     font_size: DEFAULT_FONT_SIZE,
@@ -158,48 +162,79 @@ export default (config) => {
     tap_action: {
       action: 'more-info',
     },
-    ...JSON.parse(JSON.stringify(config)),
-    show: { ...DEFAULT_SHOW, ...config.show },
+    ...JSON.parse(JSON.stringify(migratedConfig)),
+    show: { ...DEFAULT_SHOW, ...migratedConfig.show },
   };
 
   // check numeric options for validity
-  conf.font_size = checkNumericOption(conf, 'font_size', 100, 0.1, undefined, true);
-  conf.font_size_header = checkNumericOption(conf, 'font_size_header', DEFAULT_FONT_SIZE_HEADER, 0.1, undefined, true);
+  conf.font_size = checkNumericOption(conf, 'font_size', 100, { minBound: 0.1, allowString: true });
+  conf.font_size_header = checkNumericOption(conf, 'font_size_header', DEFAULT_FONT_SIZE_HEADER, { minBound: 0.1, allowString: true });
 
-  conf.bar_spacing = checkNumericOption(conf, 'bar_spacing', DEFAULT_BAR_SPACING, -1, undefined, true);
-  conf.bar_spacing_group = checkNumericOption(conf, 'bar_spacing_group', undefined, 0, undefined, true);
+  conf.bar_spacing = checkNumericOption(conf, 'bar_spacing', DEFAULT_BAR_SPACING, { minBound: -1, allowString: true });
+  conf.bar_spacing_group = checkNumericOption(conf, 'bar_spacing_group', undefined, { minBound: 0, allowString: true });
 
-  conf.height = checkNumericOption(conf, 'height', DEFAULT_GRAPH_HEIGHT, 0, undefined, true);
+  conf.height = checkNumericOption(conf, 'height', DEFAULT_GRAPH_HEIGHT, { minBound: 0, allowString: true });
 
-  conf.line_width = checkNumericOption(conf, 'line_width', DEFAULT_MARGIN, 0, undefined, true);
+  conf.line_width = checkNumericOption(conf, 'line_width', DEFAULT_MARGIN, { minBound: 0, allowString: true });
 
-  conf.hours_to_show = checkNumericOption(conf, 'hours_to_show', DEFAULT_HOURS_TO_SHOW, 0.01, undefined, true);
-  conf.points_per_hour = checkNumericOption(conf, 'points_per_hour', DEFAULT_POINTS_PER_HOUR, 0.001, undefined, true);
-  conf.update_interval = checkNumericOption(conf, 'update_interval', undefined, 0, undefined, true);
+  conf.hours_to_show = checkNumericOption(conf, 'hours_to_show', DEFAULT_HOURS_TO_SHOW, { minBound: 0.01, allowString: true });
+  conf.points_per_hour = checkNumericOption(conf, 'points_per_hour', DEFAULT_POINTS_PER_HOUR, { minBound: 0.001, allowString: true });
+  conf.update_interval = checkNumericOption(conf, 'update_interval', undefined, { minBound: 0, allowString: true });
 
-  ({ lowerBound: conf.lower_bound, upperBound: conf.upper_bound } = checkBounds(conf));
+  // axis options
+  if (conf.y_axis && conf.y_axis.primary) {
+    const primaryBounds = checkBounds(conf.y_axis.primary, 'primary');
+    conf.y_axis.primary.lower_bound = primaryBounds.lowerBound;
+    conf.y_axis.primary.upper_bound = primaryBounds.upperBound;
 
-  conf.min_bound_range = checkNumericOption(conf, 'min_bound_range', undefined, 0, undefined, true);
-  conf.min_bound_range_secondary = checkNumericOption(conf, 'min_bound_range_secondary', undefined, 0, undefined, true);
+    conf.y_axis.primary.min_bound_range = checkNumericOption(
+      conf.y_axis.primary,
+      'min_bound_range',
+      undefined,
+      { minBound: 0, allowString: true, logOptionName: 'primary.min_bound_range' },
+    );
 
-  conf.decimals_primary_labels = checkIntegerOption(conf, 'decimals_primary_labels', undefined, 0, undefined, true);
-  conf.decimals_secondary_labels = checkIntegerOption(conf, 'decimals_secondary_labels', undefined, 0, undefined, true);
-  conf.decimals = checkIntegerOption(conf, 'decimals', undefined, 0, undefined, true);
+    conf.y_axis.primary.decimals = checkIntegerOption(
+      conf.y_axis.primary,
+      'decimals',
+      undefined,
+      { minBound: 0, allowString: true, logOptionName: 'primary.decimals' },
+    );
+  }
+  if (conf.y_axis && conf.y_axis.secondary) {
+    const secondaryBounds = checkBounds(conf.y_axis.secondary, 'secondary');
+    conf.y_axis.secondary.lower_bound = secondaryBounds.lowerBound;
+    conf.y_axis.secondary.upper_bound = secondaryBounds.upperBound;
+
+    conf.y_axis.secondary.min_bound_range = checkNumericOption(
+      conf.y_axis.secondary,
+      'min_bound_range',
+      undefined,
+      { minBound: 0, allowString: true, logOptionName: 'secondary.min_bound_range' },
+    );
+
+    conf.y_axis.secondary.decimals = checkIntegerOption(
+      conf.y_axis.secondary,
+      'decimals',
+      undefined,
+      { minBound: 0, allowString: true, logOptionName: 'secondary.decimals' },
+    );
+  }
+
+  conf.decimals = checkIntegerOption(conf, 'decimals', undefined, { minBound: 0, allowString: true });
 
   conf.static_value_label_offset = checkNumericOption(
     conf,
     'static_value_label_offset',
     DEFAULT_STATIC_VALUE_LABEL_OFFSET,
-    0,
-    100,
-    true,
+    { minBound: 0, maxBound: 100, allowString: true },
   );
   if (conf.static_value_label_offset === undefined
     || conf.static_value_label_offset === null) {
     conf.static_value_label_offset = DEFAULT_STATIC_VALUE_LABEL_OFFSET;
   }
 
-  conf.fill_baseline = checkNumericOption(conf, 'fill_baseline', undefined, undefined, undefined, true);
+  conf.fill_baseline = checkNumericOption(conf, 'fill_baseline', undefined, { allowString: true });
 
   // process per-entity configs
   /* eslint-disable no-param-reassign */
@@ -208,9 +243,24 @@ export default (config) => {
       conf.entities[i] = { entity };
     } else {
       // check numeric per-entity options for validity
-      entity.line_width = checkNumericOption(entity, 'line_width', conf.line_width, 0, undefined, true);
-      entity.decimals = checkIntegerOption(entity, 'decimals', conf.decimals, 0, undefined, true);
-      entity.fill_baseline = checkNumericOption(entity, 'fill_baseline', undefined, undefined, undefined, true);
+      entity.line_width = checkNumericOption(
+        entity,
+        'line_width',
+        conf.line_width,
+        { minBound: 0, allowString: true, logOptionName: `entities[${i}].line_width` },
+      );
+      entity.decimals = checkIntegerOption(
+        entity,
+        'decimals',
+        conf.decimals,
+        { minBound: 0, allowString: true, logOptionName: `entities[${i}].decimals` },
+      );
+      entity.fill_baseline = checkNumericOption(
+        entity,
+        'fill_baseline',
+        undefined,
+        { allowString: true, logOptionName: `entities[${i}].fill_baseline` },
+      );
 
       if (entity.color_thresholds) {
         // check color_thresholds

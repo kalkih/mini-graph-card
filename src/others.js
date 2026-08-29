@@ -38,14 +38,15 @@ const isNumeric = (value, allowString = false) => {
  */
 const logStringWarning = (value, option) => {
   if (typeof value === 'string') {
-    log(`Warning for option ${option}: [${value}] is configured as a string; please make it a number`);
+    log(`Warning for option "${option}": [${value}] is configured as a string; please make it a number`);
   }
 };
 
 /**
-  * Return a multiplying factor (exponental or scale) based on a "value_factor" option
+  * Return a multiplying factor (exponential or scale) based on a "value_factor" option
   * @param {object} config Card config
-  * @param {number} index Index of an entity in config.entities
+  * @param {number} [index] Index of an entity in config.entities
+  * (`undefined` stands for a primary Y-axis, `-1` - for a secondary Y-axis)
   * @returns {number} Multiplying factor
   */
 const getFactor = (config, index = undefined) => {
@@ -60,20 +61,24 @@ const getFactor = (config, index = undefined) => {
     && Array.isArray(config.entities)
     && config.entities[index];
 
+  let yAxis;
   if (validIndex && config.entities[index].value_factor !== undefined) {
     // provided a per-entity value_factor
     ({ value_factor } = config.entities[index]);
   } else if (validIndex && config.entities[index].y_axis === 'secondary') {
-    // use value_factor_secondary for entities with 'y_axis: secondary'
-    // if value_factor_secondary = undefined, then later it will fallback to 1
-    value_factor = config.value_factor_secondary;
+    // use value_factor for secondary Y-axis labels for entities with 'y_axis: secondary'
+    // if value_factor = undefined, then later it will fallback to 1
+    value_factor = config.y_axis && config.y_axis.secondary && config.y_axis.secondary.value_factor;
+    yAxis = 'secondary';
   } else if (index === -1) {
-    // use value_factor_secondary for secondary Y-axis labels
-    // if value_factor_secondary = undefined, then later it will fallback to 1
-    value_factor = config.value_factor_secondary;
+    // use value_factor for secondary Y-axis labels
+    // if value_factor = undefined, then later it will fallback to 1
+    value_factor = config.y_axis && config.y_axis.secondary && config.y_axis.secondary.value_factor;
+    yAxis = 'secondary';
   } else {
-    // use a global value_factor
-    ({ value_factor } = config);
+    // use value_factor for primary Y-axis labels
+    value_factor = config.y_axis && config.y_axis.primary && config.y_axis.primary.value_factor;
+    yAxis = 'primary';
   }
 
   if (value_factor === undefined || value_factor === null) {
@@ -81,20 +86,24 @@ const getFactor = (config, index = undefined) => {
     return 1;
   }
 
+  const displayOption = yAxis
+    ? `${yAxis}.value_factor`
+    : `entities[${index}].value_factor`;
+
   const getExponent = factor => 10 ** factor;
-  const logValueFactor = factor_obj => log(`invalid value_factor: [${JSON.stringify(factor_obj)}]`);
+  const logInvalidValueFactor = factor_obj => log(`invalid "${displayOption}": [${JSON.stringify(factor_obj)}]`);
 
   if (typeof value_factor === 'object') {
     const { type, factor } = value_factor;
     if (type === undefined || factor === undefined
       || typeof type !== 'string' || !isNumeric(factor, true)) {
       // invalid options, fallback to a default factor
-      logValueFactor(value_factor);
+      logInvalidValueFactor(value_factor);
       return 1;
     }
     if (type === 'exponent' || type === 'scale') {
       // log a warning in case of a string presentation of a number
-      logStringWarning(factor, 'factor');
+      logStringWarning(factor, displayOption);
       switch (type) {
         case 'exponent':
           return getExponent(Number(factor));
@@ -103,18 +112,18 @@ const getFactor = (config, index = undefined) => {
       }
     }
     // invalid 'type' option
-    logValueFactor(value_factor);
+    logInvalidValueFactor(value_factor);
     return 1;
   }
 
   if (isNumeric(value_factor, true)) {
     // log a warning in case of a string presentation of a number
-    logStringWarning(value_factor, 'value_factor');
+    logStringWarning(value_factor, displayOption);
     // use a legacy "exponent" way
     return getExponent(Number(value_factor));
   }
 
-  logValueFactor(value_factor);
+  logInvalidValueFactor(value_factor);
   // fallback to a default factor
   return 1;
 };
