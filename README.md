@@ -95,7 +95,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | group_by | string | `interval` | v0.8.0 | Specify type of grouping of data, dynamic `interval`, `date` or `hour`.
 | update_interval | number |  | v0.4.0 | Specify a custom update interval of the history data (in seconds), instead of on every state change.
 | cache | boolean | `true` | v0.9.0 | Enable/disable local caching of history data.
-| show | list |  | v0.2.0 | List of UI elements to display/hide, for available items see [available show options](#available-show-options).
+| show | [show object](#available-show-options) |  | v0.2.0 | UI elements display/hide options.
 | y_axis | [Y-axis config object](#y-axis-object) |  | v0.14.0 | Settings related to Y-axes.
 | animate | boolean | `false` | v0.2.0 | Add a reveal animation to the graph.
 | height | number | `150` | v0.0.1 | Set a custom height of the line graph.
