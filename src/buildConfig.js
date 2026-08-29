@@ -243,9 +243,24 @@ export default (config) => {
       conf.entities[i] = { entity };
     } else {
       // check numeric per-entity options for validity
-      entity.line_width = checkNumericOption(entity, 'line_width', conf.line_width, { minBound: 0, allowString: true });
-      entity.decimals = checkIntegerOption(entity, 'decimals', conf.decimals, { minBound: 0, allowString: true });
-      entity.fill_baseline = checkNumericOption(entity, 'fill_baseline', undefined, { allowString: true });
+      entity.line_width = checkNumericOption(
+        entity,
+        'line_width',
+        conf.line_width,
+        { minBound: 0, allowString: true, logOptionName: `entities[${i}].line_width` },
+      );
+      entity.decimals = checkIntegerOption(
+        entity,
+        'decimals',
+        conf.decimals,
+        { minBound: 0, allowString: true, logOptionName: `entities[${i}].decimals` },
+      );
+      entity.fill_baseline = checkNumericOption(
+        entity,
+        'fill_baseline',
+        undefined,
+        { allowString: true, logOptionName: `entities[${i}].fill_baseline` },
+      );
 
       if (entity.color_thresholds) {
         // check color_thresholds
