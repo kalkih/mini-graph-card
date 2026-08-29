@@ -65,7 +65,7 @@ const checkNumericOption = (
       errorDescr = `out of bounds, maximum allowed: ${maxBound}`;
     }
   }
-  log(`Invalid option ${displayOption}: [${invalidValue}] (${errorDescr}); adjusting value to ${clearedValue}`);
+  log(`Invalid option "${displayOption}": [${invalidValue}] (${errorDescr}); adjusting value to ${clearedValue}`);
   return clearedValue;
 };
 
@@ -94,7 +94,7 @@ const checkIntegerOption = (
   if (value !== undefined && !Number.isInteger(value)) {
     const roundedValue = Math.round(value) + 0; // prevent "-0" value
     const displayOption = params.logOptionName || option;
-    log(`Invalid integer option ${displayOption}: [${value}]; rounding value to ${roundedValue}`);
+    log(`Invalid integer option "${displayOption}": [${value}]; rounding value to ${roundedValue}`);
     return roundedValue;
   }
   return value;
@@ -132,7 +132,7 @@ const checkBoundOption = (config, option, logOptionName) => {
 
   // invalid type or value of the option
   const invalidValue = typeof value === 'object' ? JSON.stringify(value) : value;
-  log(`Invalid option ${logOptionName}: [${invalidValue}] (not a numeric value); adjusting value to undefined`);
+  log(`Invalid option "${logOptionName}": [${invalidValue}] (not a numeric value); adjusting value to undefined`);
   return undefined;
 };
 
@@ -161,7 +161,7 @@ const checkBounds = (config, yAxis) => {
   if (lowerBound !== undefined && upperBound !== undefined) {
     const cleanLowerBount = getBound(lowerBound).value;
     if (upperBound <= cleanLowerBount) {
-      log(`Invalid lower & upper bounds: [${lowerBound}, ${upperBound}]; unsetting value of upper_bound to undefined`);
+      log(`Invalid lower & upper bounds: [${lowerBound}, ${upperBound}]; unsetting value of "upper_bound" to undefined`);
       upperBound = undefined;
     }
   }
@@ -185,7 +185,7 @@ const checkColorThresholds = (config, configName) => {
 
   if (!Array.isArray(thresholds)) {
     // color_thresholds not a list
-    log(`Invalid option ${configName}.color_thresholds: expected a list; unsetting to []`);
+    log(`Invalid option "${configName}.color_thresholds": expected a list; unsetting to []`);
     config.color_thresholds = [];
     return;
   }
@@ -200,13 +200,13 @@ const checkColorThresholds = (config, configName) => {
         let { color, value } = threshold;
 
         if (color === undefined || typeof color !== 'string') {
-          log(`Invalid option ${configName}.color_thresholds[${idx}]: "color" is missing or not a string; adjusting to "var(--primary-text-color)"`);
+          log(`Invalid option "${configName}.color_thresholds[${idx}]": "color" is missing or not a string; adjusting to "var(--primary-text-color)"`);
           color = 'var(--primary-text-color)';
         }
 
         if (value !== undefined && value !== null) {
           if (!isNumeric(value, true)) {
-            log(`Invalid option ${configName}.color_thresholds[${idx}]: "value" is not a numeric value; unsetting to undefined`);
+            log(`Invalid option "${configName}.color_thresholds[${idx}]": "value" is not a numeric value; unsetting to undefined`);
             value = undefined;
           } else {
             // log a warning in case of a string presentation of a number
@@ -214,7 +214,7 @@ const checkColorThresholds = (config, configName) => {
             value = Number(value);
           }
         } else if (value === null) {
-          log(`Invalid option ${configName}.color_thresholds[${idx}]: "value" is null, unsetting to undefined`);
+          log(`Invalid option "${configName}.color_thresholds[${idx}]": "value" is null, unsetting to undefined`);
           value = undefined;
         }
 
@@ -222,7 +222,7 @@ const checkColorThresholds = (config, configName) => {
       }
 
       // other invalid content
-      log(`Invalid option ${configName}.color_thresholds[${idx}]: expected an object or color string; replacing with a default entry`);
+      log(`Invalid option "${configName}.color_thresholds[${idx}]": expected an object or a color string; replacing with a default entry`);
       return { color: 'var(--primary-text-color)' };
     });
 };
@@ -238,7 +238,7 @@ const checkLineStyle = (config) => {
       const hasLineStyle = (entity.line_style !== undefined && entity.line_style !== null)
         || (config.line_style !== undefined && config.line_style !== null);
       if (hasLineStyle) {
-        log(`Option 'line_style' will be ignored for entity[${index}] because animation is enabled for it`);
+        log(`Option "entities[${index}].line_style" will be ignored because animation is enabled for it`);
       }
     }
   });
