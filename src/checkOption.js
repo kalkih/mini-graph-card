@@ -151,17 +151,17 @@ const checkBounds = (config, yAxis) => {
     'lower_bound',
     `${yAxis}.lower_bound`,
   );
-  let upperBound = checkNumericOption(
+  let upperBound = checkBoundOption(
     config,
     'upper_bound',
-    undefined,
-    { allowString: true, logOptionName: `${yAxis}.upper_bound` },
+    `${yAxis}.upper_bound`,
   );
 
   if (lowerBound !== undefined && upperBound !== undefined) {
-    const cleanLowerBount = getBound(lowerBound).value;
-    if (upperBound <= cleanLowerBount) {
-      log(`Invalid lower & upper bounds: [${lowerBound}, ${upperBound}]; unsetting value of "upper_bound" to undefined`);
+    const cleanLowerBound = getBound(lowerBound).value;
+    const cleanUpperBound = getBound(upperBound).value;
+    if (cleanUpperBound <= cleanLowerBound) {
+      log(`Invalid ${yAxis} lower & upper bounds: [${lowerBound}, ${upperBound}]; unsetting value of "${yAxis}.upper_bound" to undefined`);
       upperBound = undefined;
     }
   }
