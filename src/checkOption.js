@@ -12,19 +12,19 @@ import {
  * @param {object} config Config object
  * @param {string} option Name of option to be checked
  * @param {number} defaultValue Default fallback value
- * @param {number} minBound Optional minimum allowed value
- * @param {number} maxBound Optional maximum allowed value
- * @param {boolean} [allowString=false] Optional flag
- * to allow string representations of numbers (like "123")
+ * @param {object} [params={}] Optional parameters
+ * @param {number} [params.minBound] Optional minimum allowed value
+ * @param {number} [params.maxBound] Optional maximum allowed value
+ * @param {boolean} [params.allowString=false] Optional flag
+ * to allow string representations of numbers
+ * @param {string} [params.logOptionName] Optional custom option name for detailed log output
  * @returns {number} Cleared value
  */
 const checkNumericOption = (
   config,
   option,
   defaultValue,
-  minBound = undefined,
-  maxBound = undefined,
-  allowString = false,
+  params = {},
 ) => {
   const value = config[option];
 
@@ -32,9 +32,17 @@ const checkNumericOption = (
     return undefined;
   }
 
+  const {
+    minBound = undefined,
+    maxBound = undefined,
+    allowString = false,
+    logOptionName = undefined,
+  } = params;
+  const displayOption = logOptionName || option;
+
   if (isNumeric(value, allowString)) {
     // log a warning in case of a string presentation of a number
-    logStringWarning(value, option);
+    logStringWarning(value, displayOption);
 
     const valueNumeric = Number(value);
     const isMinValid = minBound === undefined || valueNumeric >= minBound;
@@ -57,7 +65,7 @@ const checkNumericOption = (
       errorDescr = `out of bounds, maximum allowed: ${maxBound}`;
     }
   }
-  log(`Invalid option ${option}: [${invalidValue}] (${errorDescr}); adjusting value to ${clearedValue}`);
+  log(`Invalid option "${displayOption}": [${invalidValue}] (${errorDescr}); adjusting value to ${clearedValue}`);
   return clearedValue;
 };
 
@@ -68,24 +76,25 @@ const checkNumericOption = (
  * @param {object} config Config object
  * @param {string} option Name of option to be checked
  * @param {number} defaultValue Default fallback value
- * @param {number} minBound Optional minimum allowed value
- * @param {number} maxBound Optional maximum allowed value
- * @param {boolean} [allowString=false] Optional flag
- * to allow string representations of numbers (like "123")
+ * @param {object} [params={}] Optional parameters
+ * @param {number} [params.minBound] Optional minimum allowed value
+ * @param {number} [params.maxBound] Optional maximum allowed value
+ * @param {boolean} [params.allowString=false] Optional flag
+ * to allow string representations of numbers
+ * @param {string} [params.] Optional custom option name for detailed log output
  * @returns {number} Cleared value
  */
 const checkIntegerOption = (
   config,
   option,
   defaultValue,
-  minBound = undefined,
-  maxBound = undefined,
-  allowString = false,
+  params = {},
 ) => {
-  const value = checkNumericOption(config, option, defaultValue, minBound, maxBound, allowString);
+  const value = checkNumericOption(config, option, defaultValue, params);
   if (value !== undefined && !Number.isInteger(value)) {
     const roundedValue = Math.round(value) + 0; // prevent "-0" value
-    log(`Invalid integer option ${option}: [${value}]; rounding value to ${roundedValue}`);
+    const displayOption = params.logOptionName || option;
+    log(`Invalid integer option "${displayOption}": [${value}]; rounding value to ${roundedValue}`);
     return roundedValue;
   }
   return value;
@@ -95,9 +104,10 @@ const checkIntegerOption = (
  * Check if a bound option is valid (accounting for an optional "~" prefix).
  * @param {object} config Config object
  * @param {string} option Name of the option to be checked
- * @returns {number|string|undefined} Cleared value in its original format, or undefined
+ * @param {string} logOptionName Option name for detailed log output
+* @returns {number|string|undefined} Cleared value in its original format, or undefined
  */
-const checkBoundOption = (config, option) => {
+const checkBoundOption = (config, option, logOptionName) => {
   const value = config[option];
 
   if (value === undefined || value === null) {
@@ -110,11 +120,11 @@ const checkBoundOption = (config, option) => {
       if (!parsed.soft && typeof value === 'string') {
         // check for a "string number" since this will not be cleared below
         // log a warning in case of a string presentation of a number
-        logStringWarning(value, option);
+        logStringWarning(value, logOptionName);
       }
 
       const cfg = { [option]: parsed.value };
-      if (checkNumericOption(cfg, option, undefined) !== undefined) {
+      if (checkNumericOption(cfg, option, undefined, { logOptionName }) !== undefined) {
         return parsed.soft ? value : parsed.value;
       }
     }
@@ -122,33 +132,36 @@ const checkBoundOption = (config, option) => {
 
   // invalid type or value of the option
   const invalidValue = typeof value === 'object' ? JSON.stringify(value) : value;
-  log(`Invalid option ${option}: [${invalidValue}] (not a numeric value); adjusting value to undefined`);
+  log(`Invalid option "${logOptionName}": [${invalidValue}] (not a numeric value); adjusting value to undefined`);
   return undefined;
 };
 
 /**
  * Check both upper/lower bounds for valid values.
  * @param {object} config Config object
+ * @param {string} yAxis Y axis type (primary/secondary)
  * @returns {{
  *   lowerBound: string|number|undefined,
  *   upperBound: string|number|undefined
  * }} Cleared bounds
  */
-const checkBounds = (config) => {
-  const lowerBound = checkBoundOption(config, 'lower_bound');
+const checkBounds = (config, yAxis) => {
+  const lowerBound = checkBoundOption(
+    config,
+    'lower_bound',
+    `${yAxis}.lower_bound`,
+  );
   let upperBound = checkNumericOption(
     config,
     'upper_bound',
     undefined,
-    undefined,
-    undefined,
-    true, // allowString
+    { allowString: true, logOptionName: `${yAxis}.upper_bound` },
   );
 
   if (lowerBound !== undefined && upperBound !== undefined) {
     const cleanLowerBount = getBound(lowerBound).value;
     if (upperBound <= cleanLowerBount) {
-      log(`Invalid lower & upper bounds: [${lowerBound}, ${upperBound}]; unsetting value of upper_bound to undefined`);
+      log(`Invalid lower & upper bounds: [${lowerBound}, ${upperBound}]; unsetting value of "upper_bound" to undefined`);
       upperBound = undefined;
     }
   }
@@ -172,7 +185,7 @@ const checkColorThresholds = (config, configName) => {
 
   if (!Array.isArray(thresholds)) {
     // color_thresholds not a list
-    log(`Invalid option ${configName}.color_thresholds: expected a list; unsetting to []`);
+    log(`Invalid option "${configName}.color_thresholds": expected a list; unsetting to []`);
     config.color_thresholds = [];
     return;
   }
@@ -187,13 +200,13 @@ const checkColorThresholds = (config, configName) => {
         let { color, value } = threshold;
 
         if (color === undefined || typeof color !== 'string') {
-          log(`Invalid option ${configName}.color_thresholds[${idx}]: "color" is missing or not a string; adjusting to "var(--primary-text-color)"`);
+          log(`Invalid option "${configName}.color_thresholds[${idx}]": "color" is missing or not a string; adjusting to "var(--primary-text-color)"`);
           color = 'var(--primary-text-color)';
         }
 
         if (value !== undefined && value !== null) {
           if (!isNumeric(value, true)) {
-            log(`Invalid option ${configName}.color_thresholds[${idx}]: "value" is not a numeric value; unsetting to undefined`);
+            log(`Invalid option "${configName}.color_thresholds[${idx}]": "value" is not a numeric value; unsetting to undefined`);
             value = undefined;
           } else {
             // log a warning in case of a string presentation of a number
@@ -201,7 +214,7 @@ const checkColorThresholds = (config, configName) => {
             value = Number(value);
           }
         } else if (value === null) {
-          log(`Invalid option ${configName}.color_thresholds[${idx}]: "value" is null, unsetting to undefined`);
+          log(`Invalid option "${configName}.color_thresholds[${idx}]": "value" is null, unsetting to undefined`);
           value = undefined;
         }
 
@@ -209,7 +222,7 @@ const checkColorThresholds = (config, configName) => {
       }
 
       // other invalid content
-      log(`Invalid option ${configName}.color_thresholds[${idx}]: expected an object or color string; replacing with a default entry`);
+      log(`Invalid option "${configName}.color_thresholds[${idx}]": expected an object or a color string; replacing with a default entry`);
       return { color: 'var(--primary-text-color)' };
     });
 };
@@ -225,7 +238,7 @@ const checkLineStyle = (config) => {
       const hasLineStyle = (entity.line_style !== undefined && entity.line_style !== null)
         || (config.line_style !== undefined && config.line_style !== null);
       if (hasLineStyle) {
-        log(`Option 'line_style' will be ignored for entity[${index}] because animation is enabled for it`);
+        log(`Option "entities[${index}].line_style" will be ignored because animation is enabled for it`);
       }
     }
   });
