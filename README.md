@@ -95,7 +95,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | group_by | string | `interval` | v0.8.0 | Specify type of grouping of data, dynamic `interval`, `date` or `hour`.
 | update_interval | number |  | v0.4.0 | Specify a custom update interval of the history data (in seconds), instead of on every state change.
 | cache | boolean | `true` | v0.9.0 | Enable/disable local caching of history data.
-| show | list |  | v0.2.0 | List of UI elements to display/hide, for available items see [available show options](#available-show-options).
+| show | [show object](#available-show-options) |  | v0.2.0 | UI elements display/hide options.
 | y_axis | [Y-axis config object](#y-axis-object) |  | v0.14.0 | Settings related to Y-axes.
 | animate | boolean | `false` | v0.2.0 | Add a reveal animation to the graph.
 | height | number | `150` | v0.0.1 | Set a custom height of the line graph.
@@ -129,7 +129,7 @@ These options are legacy and moved into [Y-axis config object](#y-axis-object):
 | upper_bound | number *or* string |  | v0.2.3 | Set a fixed upper bound for the graph Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
 | min_bound_range | number |  | v0.x.x | Applied after everything, makes sure there's a minimum range that the Y-axis will have. Useful for not making small changes look large because of scale.
 | lower_bound_secondary | number *or* string |  | v0.5.0 | Set a fixed lower bound for the graph secondary Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
-| upper_bound_secondary | number *or* string |  | v0.5.0 | Set a fixed upper bound for the graph secondary Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
+| upper_bound_secondary | number *or* string |  | v0.5.0 | Set a fixed upper bound for the graph secondary Y-axis.
 | min_bound_range_secondary | number |  | v0.x.x | Applied after everything, makes sure there's a minimum range that the secondary Y-axis will have. Useful for not making small changes look large because of scale.
 | value_factor | number or object |   | v0.9.4<br>v0.14.0-dev.1 | Scale a value, see [Value factor](#value-factor).
 | value_factor_secondary | number or object |   | v0.14.0-dev.1  | Scale a value, see [Value factor](#value-factor).
