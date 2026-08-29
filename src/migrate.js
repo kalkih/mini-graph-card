@@ -51,7 +51,7 @@ const migrateYaxisConfig = (config) => {
         conf.y_axis[axis][newKey] = oldValue;
 
         log(`option "${oldKey}" is deprecated and has been automatically migrated. `
-          + `Please update your YAML configuration to: "y_axis.${axis}.${newKey}": ${JSON.stringify(oldValue)}`);
+          + `Please update your YAML configuration to "y_axis.${axis}.${newKey}"`);
       } else {
         // new option is also present
         // legacy option is ignored in favor of the new option
