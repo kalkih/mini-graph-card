@@ -50,16 +50,13 @@ const migrateYaxisConfig = (config) => {
         // copy a value
         conf.y_axis[axis][newKey] = oldValue;
 
-        log(`option "${oldKey}" is deprecated and has been automatically migrated. ` +
-          `Please update your YAML configuration to: "y_axis.${axis}.${newKey}": ${JSON.stringify(oldValue)}`
-        );
+        log(`option "${oldKey}" is deprecated and has been automatically migrated. `
+          + `Please update your YAML configuration to: "y_axis.${axis}.${newKey}": ${JSON.stringify(oldValue)}`);
       } else {
         // new option is also present
         // legacy option is ignored in favor of the new option
-        log(
-          `Option "${oldKey}" is ignored ` +
-          `because you have already configured "y_axis.${axis}.${newKey}". Please remove "${oldKey}" from your YAML`
-        );
+        log(`option "${oldKey}" is ignored `
+          + `because you have already configured "y_axis.${axis}.${newKey}". Please remove "${oldKey}" from your YAML`);
       }
 
       // remove old option
