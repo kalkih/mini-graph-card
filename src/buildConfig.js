@@ -143,7 +143,6 @@ export default (config) => {
 
   const conf = {
     animate: false,
-    font_size: DEFAULT_FONT_SIZE,
     font_size_header: DEFAULT_FONT_SIZE_HEADER,
     height: DEFAULT_GRAPH_HEIGHT,
     hours_to_show: DEFAULT_HOURS_TO_SHOW,
@@ -167,7 +166,7 @@ export default (config) => {
   };
 
   // check numeric options for validity
-  conf.font_size = checkNumericOption(conf, 'font_size', 100, { minBound: 0.1, allowString: true });
+  conf.font_size = checkNumericOption(migratedConfig, 'font_size', 100, { minBound: 0.1, allowString: true });
   conf.font_size_header = checkNumericOption(conf, 'font_size_header', DEFAULT_FONT_SIZE_HEADER, { minBound: 0.1, allowString: true });
 
   conf.bar_spacing = checkNumericOption(conf, 'bar_spacing', DEFAULT_BAR_SPACING, { minBound: -1, allowString: true });
@@ -292,7 +291,7 @@ export default (config) => {
   if (typeof config.line_color === 'string')
     conf.line_color = [config.line_color, ...DEFAULT_COLORS];
 
-  conf.font_size = (config.font_size / 100) * DEFAULT_FONT_SIZE || DEFAULT_FONT_SIZE;
+  conf.font_size = (conf.font_size / 100) * DEFAULT_FONT_SIZE;
 
   // check color_thresholds
   checkColorThresholds(conf, 'config');
