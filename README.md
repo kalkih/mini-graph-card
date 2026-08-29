@@ -96,6 +96,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | update_interval | number |  | v0.4.0 | Specify a custom update interval of the history data (in seconds), instead of on every state change.
 | cache | boolean | `true` | v0.9.0 | Enable/disable local caching of history data.
 | show | list |  | v0.2.0 | List of UI elements to display/hide, for available items see [available show options](#available-show-options).
+| y_axis | [Y-axis config object](#y-axis-object) |  | v0.14.0 | Settings related to Y-axes.
 | animate | boolean | `false` | v0.2.0 | Add a reveal animation to the graph.
 | height | number | `150` | v0.0.1 | Set a custom height of the line graph.
 | bar_spacing | number | `4` | v0.9.0 | Set the spacing between bars in bar graph. Value `-1` is used to place bars on each other. See [examples](#bar-spacing-examples).
@@ -106,8 +107,6 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | color_thresholds | list |  | v0.2.3 | Set thresholds for dynamic graph colors, see [Line color object](#line-color-object).
 | color_thresholds_transition | string | `smooth` | v0.4.3 | Color threshold transition, `smooth` or `hard`.
 | decimals | integer |  | v0.0.9 | Specify the exact number of decimals to show for number values, see [Number format](#number-format).
-| decimals_primary_labels | integer |  | v0.14.0 | Specify the exact number of decimals to show for primary Y-axis labels, see [Number format](#number-format).
-| decimals_secondary_labels | integer |  | v0.14.0 | Specify the exact number of decimals to show for secondary Y-axis labels, see [Number format](#number-format).
 | hour24 | boolean |  | v0.2.1 | Set to `true` to display times in 24-hour format. See more details [here](#custom-format-for-datetime-values).
 | datetime_format | string | | v.0.14.0 | Set a custom [format](#custom-format-for-datetime-values) for datetime values.
 | font_size | number | `100` | v0.0.3 | Adjust the font size of the state, as percentage of the original size.
@@ -115,19 +114,25 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | align_header | string |  | v0.2.0 | Set the alignment of the name in the header, `left`, `right` or `center`. See more details [here](#alignment-for-name--icon-elements).
 | align_icon | string | `right` | v0.2.0 | Set the alignment of the icon, `left`, `right` or `state`. See more details [here](#alignment-for-name--icon-elements).
 | align_state | string | `left` | v0.2.0 | Set the alignment of the current state, `left`, `right` or `center`.
+| smoothing | boolean | `true` | v0.8.0 | Whether to make graph line smooth.
+| state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert (order matters as position becomes a value on the graph).
+| logarithmic | boolean | `false` | v0.10.0 | Use a logarithmic scale for the graph (see [Logarithmic options](#logarithmic-options)).
+| fill_baseline | number |  | v0.14.0 | Set a custom baseline for the graph (see [Baseline](#baseline)).
+
+These options are legacy and moved into [Y-axis config object](#y-axis-object):
+
+| Name | Type | Default | Since | Description |
+|------|:----:|:-------:|:-----:|-------------|
+| decimals_primary_labels | integer |  | v0.14.0-dev.1  | Specify the exact number of decimals to show for primary Y-axis labels, see [Number format](#number-format).
+| decimals_secondary_labels | integer |  | v0.14.0-dev.1  | Specify the exact number of decimals to show for secondary Y-axis labels, see [Number format](#number-format).
 | lower_bound | number *or* string |  | v0.2.3 | Set a fixed lower bound for the graph Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
 | upper_bound | number *or* string |  | v0.2.3 | Set a fixed upper bound for the graph Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
 | min_bound_range | number |  | v0.x.x | Applied after everything, makes sure there's a minimum range that the Y-axis will have. Useful for not making small changes look large because of scale.
 | lower_bound_secondary | number *or* string |  | v0.5.0 | Set a fixed lower bound for the graph secondary Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
 | upper_bound_secondary | number *or* string |  | v0.5.0 | Set a fixed upper bound for the graph secondary Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
 | min_bound_range_secondary | number |  | v0.x.x | Applied after everything, makes sure there's a minimum range that the secondary Y-axis will have. Useful for not making small changes look large because of scale.
-| smoothing | boolean | `true` | v0.8.0 | Whether to make graph line smooth.
-| state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert (order matters as position becomes a value on the graph).
-| value_factor | number or object |   | v0.9.4<br>v0.14.0 | Scale a value, see [Value factor](#value-factor).
-| value_factor_secondary | number or object |   | v0.14.0 | Scale a value, see [Value factor](#value-factor).
-| logarithmic | boolean | `false` | v0.10.0 | Use a logarithmic scale for the graph (see [Logarithmic options](#logarithmic-options)).
-| fill_baseline | number |  | v0.14.0 | Set a custom baseline for the graph (see [Baseline](#baseline)).
-
+| value_factor | number or object |   | v0.9.4<br>v0.14.0-dev.1 | Scale a value, see [Value factor](#value-factor).
+| value_factor_secondary | number or object |   | v0.14.0-dev.1  | Scale a value, see [Value factor](#value-factor).
 
 
 #### Entities object
@@ -197,6 +202,34 @@ All properties are optional.
 | icon_adaptive_color | `false` | `true` / `false` | Make the icon color adapt with the primary entity/static value color.
 | loading_indicator | `true` | `true` / `false` | Show loading indicator while attempting to retrieve a history.
 | graphs_order | `direct` | `direct` / `reversed` | Define an order of displaying graphs (see [Graphs order](#graphs-order)).
+
+#### Y-axis object
+
+The object has a tree-like structure with optional `primary` & `secondary` keys. Each key may contain optional properties listed below:
+
+| Name | Type | Default | Description |
+|------|:----:|:-------:|-------------|
+| decimals | integer |  | Specify the exact number of decimals to show for primary Y-axis labels, see [Number format](#number-format).
+| value_factor | number or object |   | Scale a value, see [Value factor](#value-factor).
+| lower_bound | number *or* string |   | Set a fixed lower bound for the graph Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
+| upper_bound | number *or* string |   | Set a fixed upper bound for the graph Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
+| min_bound_range | number |   | Applied after everything, makes sure there's a minimum range that the Y-axis will have. Useful for not making small changes look large because of scale.
+
+```yaml
+y_axis:
+  primary:
+    decimals: ...
+    value_factor: ...
+    lower_bound: ...
+    upper_bound: ...
+    min_bound_range: ...
+  secondary:
+    decimals: ...
+    value_factor: ...
+    lower_bound: ...
+    upper_bound: ...
+    min_bound_range: ...
+```
 
 
 #### Line color object
@@ -275,12 +308,12 @@ By default, tapping on an element opens a `more-info` dialog:
 
 #### Value factor
 
-Defines a coefficent (factor) applied to displayed values (including Y-axis labels).
-There are two available options - `value_factor` & `value_factor_secondary`:
+Defines a coefficient (factor) applied to displayed values (including Y-axis labels).
+There are two available options per each Y-axis - `y_axis.primary.value_factor` & `y_axis.secondary.value_factor`:
 1. If none option is defined, a default "1" factor is used (values are shown w/o any conversion).
-2. If only `value_factor` is defined - it is applied to all entities.
-3. If only `value_factor_secondary` is defined - it is applied to all entities with `y_axis: secondary`.
-4. If both `value_factor` & `value_factor_secondary` are defined - they are applied to entities without `y_axis: secondary` & with `y_axis: secondary` correspondingly.
+2. If only `y_axis.primary.value_factor` is defined - it is applied to all entities except entities with `y_axis: secondary`; for other entities a default "1" factor is used.
+3. If only `y_axis.secondary.value_factor` is defined - it is applied to all entities with `y_axis: secondary`; for other entities a default "1" factor is used.
+4. If both `y_axis.primary.value_factor` & `y_axis.secondary.value_factor` are defined - they are applied to entities without `y_axis: secondary` & with `y_axis: secondary` correspondingly.
 
 Each option can be defined either as a `number` or an `object` (see below).
 
@@ -344,20 +377,20 @@ See examples [below](#displaying-static-lines).
 Options `decimals` defined "card-wide" and/or for some entity/[static value](#static-lines) are used to set an exact number of decimals according to the following rules:
 1. For state & attribute values, static values:
 - if none `decimals` option is defined - a default presentation (see a note below) is used;
-- if "card-wide" `decimals` is defined - this value is used;
-- if `decimals` for some entity is defined - this value is used for this entity.
+- if `decimals` for some entity is defined - this value is used for this entity;
+- if "card-wide" `decimals` is defined - this value is used.
 2. For extrema & average values (supported for the 1st entity only):
 - if none `decimals` option is defined - a default presentation is used;
-- if "card-wide" `decimals` is defined - this value is used;
-- if `decimals` is defined for the 1st entity - this value is used.
+- if `decimals` is defined for the 1st entity - this value is used;
+- if "card-wide" `decimals` is defined - this value is used.
 3. For primary Y-axis labels:
-- if "card-wide" `decimals` & `decimals_primary_labels` options are not defined - a default presentation is used;
-- if "card-wide" `decimals` option is defined - this value is used;
-- if "card-wide" `decimals_primary_labels` option is defined - this value is used.
+- if "card-wide" `decimals` & `y_axis.primary.decimals` options are not defined - a default presentation is used;
+- if `y_axis.primary.decimals` option is defined - this value is used;
+- if "card-wide" `decimals` option is defined - this value is used.
 4. For secondary Y-axis labels:
-- if "card-wide" `decimals` & `decimals_secondary_labels` options are not defined - a default presentation is used;
-- if "card-wide" `decimals` option is defined - this value is used;
-- if "card-wide" `decimals_secondary_labels` option is defined - this value is used.
+- if "card-wide" `decimals` & `y_axis.secondary.decimals` options are not defined - a default presentation is used;
+- if `y_axis.secondary.decimals` option is defined - this value is used;
+- if "card-wide" `decimals` option is defined - this value is used.
   
 A "default presentation" refers to a default look in HA:
 1. For a state value (also for extrema & average): if accuracy settings are defined for an entity - these settings are used, otherwise some default HA settings (depend on many factors incl. a `device_class`; for template sensors - a user-defined accuracy set in jinja templates is used).
@@ -701,7 +734,9 @@ entities:
     line_width: 1
     line_style: 4,7
     color: red
-lower_bound: ~0
+y_axis:
+  primary:
+    lower_bound: ~0
 show:
   labels: true
 ```
@@ -744,7 +779,9 @@ entities:
     line_style: 4,7
     color: red
     show_static_inactive: true
-lower_bound: ~0
+y_axis:
+  primary:
+    lower_bound: ~0
 points_per_hour: 60
 hours_to_show: 3
 height: 200
