@@ -38,7 +38,7 @@ const isNumeric = (value, allowString = false) => {
  */
 const logStringWarning = (value, option) => {
   if (typeof value === 'string') {
-    log(`Warning for option ${option}: [${value}] is configured as a string; please make it a number`);
+    log(`Warning for option "${option}": [${value}] is configured as a string; please make it a number`);
   }
 };
 
@@ -91,7 +91,7 @@ const getFactor = (config, index = undefined) => {
     : `entities[${index}].value_factor`;
 
   const getExponent = factor => 10 ** factor;
-  const logInvalidValueFactor = factor_obj => log(`invalid ${displayOption}: [${JSON.stringify(factor_obj)}]`);
+  const logInvalidValueFactor = factor_obj => log(`invalid "${displayOption}": [${JSON.stringify(factor_obj)}]`);
 
   if (typeof value_factor === 'object') {
     const { type, factor } = value_factor;
