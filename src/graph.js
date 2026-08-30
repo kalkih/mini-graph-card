@@ -68,7 +68,8 @@ export default class Graph {
   set history(data) { this._history = data; }
 
   /**
-   * Update the graph data: group history into time buckets, calculate coordinates, define new value boundaries
+   * Update the graph data: group history into time buckets,
+   * calculate coordinates, define new value boundaries
    * @param {Array} [history] Array of historical data
    * @returns {void}
    */
@@ -168,7 +169,8 @@ export default class Graph {
   /**
    * Recalculates a point's coords based on min & max thresholds
    * @param {Array<Array<number>>} coords Array of X, Y, Value
-   * @returns {Array<Array<number>>} Array of X, Y, Value, where Y - recalculated based on min/max thresholds
+   * @returns {Array<Array<number>>} Array of X, Y, Value,
+   * where Y - recalculated based on min/max thresholds
    */
   calcY(coords) {
     // account for logarithmic graph
@@ -190,13 +192,13 @@ export default class Graph {
    * @returns {Array<Array<number>>} Array of points [X, Y, Value, index]
    */
   getPoints() {
-    let coords = this.calcY(this.coords);  // set Y coord
+    const coords = this.calcY(this.coords); // set Y coord
     if (this._smoothing) {
       let last = coords[0];
       coords.shift();
       return coords.map((point, i) => {
         const Z = this._midPoint(last[X], last[Y], point[X], point[Y]);
-        const sum = (last[V] + point[V]) / 2;  // 2-points smoothing
+        const sum = (last[V] + point[V]) / 2; // 2-points smoothing
         last = point;
         return [Z[X], Z[Y], sum, i + 1];
       });
