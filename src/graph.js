@@ -194,9 +194,9 @@ export default class Graph {
   getPoints() {
     const coords = this.calcY(this.coords); // set Y coord
     if (this._smoothing) {
-      let last = coords[0];
-      coords.shift();
-      return coords.map((point, i) => {
+      const [first, ...rest] = coords;
+      let last = first;
+      return rest.map((point, i) => {
         const Z = this._midPoint(last[X], last[Y], point[X], point[Y]);
         const sum = (last[V] + point[V]) / 2; // 2-points smoothing
         last = point;
