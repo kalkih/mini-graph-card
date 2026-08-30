@@ -67,12 +67,12 @@ export default class Graph {
 
   set history(data) { this._history = data; }
 
-  update(history = undefined) {
+  update(history = undefined, endTime = undefined) {
     if (history) {
       this._history = history;
     }
     if (!this._history) return;
-    this._updateEndTime();
+    this._updateEndTime(endTime);
 
     const histGroups = this._history.reduce((res, item) => this._reducer(res, item), []);
 
@@ -327,7 +327,11 @@ export default class Graph {
     }
   }
 
-  _updateEndTime() {
+  _updateEndTime(endTime = undefined) {
+    if (endTime) {
+      this._endTime = new Date(endTime);
+      return;
+    }
     this._endTime = new Date();
     switch (this._groupBy) {
       case 'month':
