@@ -215,16 +215,19 @@ export default class Graph {
     let next; let Z;
     let path = '';
     let last = coords[0];
-    path += `M${last[X]},${last[Y]}`;
+    path += `M${last[X]},${last[Y]}`; // move to 1st point
 
     coords.forEach((point) => {
       next = point;
-      Z = this._smoothing ? this._midPoint(last[X], last[Y], next[X], next[Y]) : next;
-      path += ` ${Z[X]},${Z[Y]}`;
+      Z = this._smoothing
+        ? this._midPoint(last[X], last[Y], next[X], next[Y])
+        : next;
+      path += ` ${Z[X]},${Z[Y]}`; // either a midPoint (smoothing = true) or "next"
+      // does not affect if "next" was added before, otherwise makes a quadratic curve
       path += ` Q ${next[X]},${next[Y]}`;
       last = next;
     });
-    path += ` ${next[X]},${next[Y]}`;
+    path += ` ${next[X]},${next[Y]}`; // add last point
     return path;
   }
 
