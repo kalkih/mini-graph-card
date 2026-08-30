@@ -169,7 +169,8 @@ export default class Graph {
   /**
    * Recalculates a point's coords based on min & max thresholds
    * @param {Array<Array<number>>} coords Array of X, Y, Value
-   * @returns {Array<Array<number>>} Array of X, Y, Value, where Y - recalculated based on min/max thresholds
+   * @returns {Array<Array<number>>} Array of X, Y, Value,
+   * where Y - recalculated based on min/max thresholds
    */
   calcY(coords) {
     // account for logarithmic graph
