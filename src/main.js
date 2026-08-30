@@ -177,11 +177,13 @@ class MiniGraphCard extends LitElement {
 
     // check if an entry is a static value
     this._isStaticValue = this.config.entities.map(
-      (entity) => entity && typeof entity === 'object' && isNumeric(entity.static_value));
+      entity => entity && typeof entity === 'object' && isNumeric(entity.static_value),
+    );
 
     // check if an entry represents a static_value with `show_static_inactive: true`
     this._isShowStaticInactive = this.config.entities.map(
-      (entity, index) => this._isStaticValue[index] && entity.show_static_inactive === true);
+      (entity, index) => this._isStaticValue[index] && entity.show_static_inactive === true,
+    );
 
     this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
     const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
