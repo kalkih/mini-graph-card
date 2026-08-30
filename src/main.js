@@ -64,12 +64,14 @@ class MiniGraphCard extends LitElement {
     this.initial = true;
     this._md5Config = undefined;
 
-    // array of flags: true if an entity config contains a valid `static_value` option, false - otherwise
+    // array of flags: true if an entity config contains a valid `static_value` option,
+    // false - otherwise
     this._isStaticValue = [];
     // set once to "true" when a history is set for a particular entry[index] with static_value
     this._staticValueUpdated = [];
 
-    // array of flags: true if an entry represents a static_value with `show_static_inactive: true`, false - otherwise
+    // array of flags: true if an entry represents a static_value with `show_static_inactive: true`,
+    // false - otherwise
     this._isShowStaticInactive = [];
 
     // update datetime settings periodically
@@ -174,14 +176,12 @@ class MiniGraphCard extends LitElement {
     } = buildConfig(config));
 
     // check if an entry is a static value
-    this._isStaticValue = this.config.entities.map((entity) => {
-      return entity && typeof entity === 'object' && isNumeric(entity.static_value);
-    });
+    this._isStaticValue = this.config.entities.map(
+      (entity) => entity && typeof entity === 'object' && isNumeric(entity.static_value));
 
     // check if an entry represents a static_value with `show_static_inactive: true`
-    this._isShowStaticInactive = this.config.entities.map((entity, index) => {
-      return this._isStaticValue[index] && entity.show_static_inactive === true;
-    });
+    this._isShowStaticInactive = this.config.entities.map(
+      (entity, index) => this._isStaticValue[index] && entity.show_static_inactive === true);
 
     this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
     const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
