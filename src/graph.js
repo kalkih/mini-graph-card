@@ -67,6 +67,11 @@ export default class Graph {
 
   set history(data) { this._history = data; }
 
+  /**
+   * Update the graph data: group history into time buckets, calculate coordinates, define new value boundaries
+   * @param {Array} [history] Array of historical data
+   * @returns {void}
+   */
   update(history = undefined) {
     if (history) {
       this._history = history;
@@ -74,45 +79,87 @@ export default class Graph {
     if (!this._history) return;
     this._updateEndTime();
 
+    // group history into time buckets
     const histGroups = this._history.reduce((res, item) => this._reducer(res, item), []);
 
     // extend length to fill missing history
     const requiredNumOfPoints = Math.ceil(this._hours_to_show * this._points_per_hour);
     histGroups.length = requiredNumOfPoints;
 
+    // calculate coordinates
     this.coords = this._calcPoints(histGroups);
+
+    // define new value boundaries
     this.min = Math.min(...this.coords.map(item => Number(item[V])));
     this.max = Math.max(...this.coords.map(item => Number(item[V])));
   }
 
+  /**
+   * Group historical data into time buckets based on their age
+   * @param {Array} res Array of time buckets being populated
+   * @param {Object} item Current history item
+   * @returns {Array} Updated array of grouped time buckets
+   */
   _reducer(res, item) {
     const age = this._endTime - new Date(item.last_changed).getTime();
-    const interval = (age / ONE_HOUR * this._points_per_hour)
-      - this._hours_to_show * this._points_per_hour;
+    // interval = distance in hours from the beginning of the timespan to the "last_changed" moment
+    // (is a negative value if a point is inside the timespan)
+    const interval = (age / ONE_HOUR) - this._hours_to_show;
     if (interval < 0) {
-      const key = Math.floor(Math.abs(interval));
-      if (!res[key]) res[key] = [];
+      let key = Math.floor(Math.abs(interval * this._points_per_hour));
+      const maxKey = Math.ceil(this._hours_to_show * this._points_per_hour) - 1;
+      if (key > maxKey) {
+        // cannot exceed a possible value
+        key = maxKey;
+      }
+      if (!res[key]) {
+        res[key] = [];
+      }
       res[key].push(item);
     } else {
-      res[0] = [item];
+      // points from "before a timespan" moments are placed into the 1st bucket
+      if (!res[0]) {
+        res[0] = [];
+      }
+      res[0].push(item);
     }
     return res;
   }
 
+  /**
+   * Сalculate coordinates (X, Y = 0, aggregated Value)
+   * @param {Array} history Array of grouped time buckets
+   * @returns {Array<Array<number>>} Array of [X, Y, Value] coordinates
+   */
   _calcPoints(history) {
-    let xRatio = this._width / (this._hours_to_show * this._points_per_hour - 1);
-    xRatio = Number.isFinite(xRatio) ? xRatio : this._width;
+    let xRatio = this._width / history.length;
+    xRatio = Number.isFinite(xRatio) ? xRatio : this._width; // prevent "divide by 0"
 
     const coords = [];
-    let last = history.filter(Boolean)[0];
+    let lastValue = 0;
     let x;
-    for (let i = 0; i < history.length; i += 1) {
+
+    for (let i = 0; i <= history.length; i += 1) {
       x = xRatio * i + this._margin[X];
-      if (history[i]) {
-        last = history[i];
-        coords.push([x, 0, this._calcPoint(last)]);
+
+      if (i === 0) {
+        // left border
+        const firstBucket = history[0];
+        if (firstBucket && firstBucket[0]) {
+          const zeroStartFuncs = ['sum', 'delta', 'diff'];
+          if (zeroStartFuncs.includes(this._aggregateFuncName)) {
+            lastValue = 0;
+          } else {
+            lastValue = parseFloat(firstBucket[0].state);
+          }
+        }
+        coords.push([x, 0, lastValue]);
       } else {
-        coords.push([x, 0, this._lastValue(last)]);
+        const bucket = history[i - 1];
+        if (bucket && bucket.length > 0) {
+          lastValue = this._calcPoint(bucket);
+        }
+        coords.push([x, 0, lastValue]);
       }
     }
     return coords;
@@ -120,8 +167,8 @@ export default class Graph {
 
   /**
    * Recalculates a point's coords based on min & max thresholds
-   * @param coords Array of X, Y, Value
-   * @returns Array of X, Y, Value, where Y - recalculated based on min/max thresholds
+   * @param {Array<Array<number>>} coords Array of X, Y, Value
+   * @returns {Array<Array<number>>} Array of X, Y, Value, where Y - recalculated based on min/max thresholds
    */
   calcY(coords) {
     // account for logarithmic graph
@@ -138,18 +185,18 @@ export default class Graph {
     return coords2;
   }
 
+  /**
+   * Get points with scaled Y-coordinates and handles line smoothing
+   * @returns {Array<Array<number>>} Array of points [X, Y, Value, index]
+   */
   getPoints() {
-    let { coords } = this;
-    if (coords.length === 1) {
-      coords[1] = [this._width + this._margin[X], 0, coords[0][V]];
-    }
-    coords = this.calcY(this.coords);
+    let coords = this.calcY(this.coords);  // set Y coord
     if (this._smoothing) {
       let last = coords[0];
       coords.shift();
       return coords.map((point, i) => {
         const Z = this._midPoint(last[X], last[Y], point[X], point[Y]);
-        const sum = (last[V] + point[V]) / 2;
+        const sum = (last[V] + point[V]) / 2;  // 2-points smoothing
         last = point;
         return [Z[X], Z[Y], sum, i + 1];
       });
@@ -158,13 +205,13 @@ export default class Graph {
     }
   }
 
-
+  /**
+   * Get SVG path for line chart with optional smoothing
+   * @returns {string} SVG path
+   */
   getPath() {
-    let { coords } = this;
-    if (coords.length === 1) {
-      coords[1] = [this._width + this._margin[X], 0, coords[0][V]];
-    }
-    coords = this.calcY(this.coords);
+    const coords = this.calcY(this.coords); // set Y coord
+
     let next; let Z;
     let path = '';
     let last = coords[0];
@@ -181,6 +228,11 @@ export default class Graph {
     return path;
   }
 
+  /**
+   * Returns a gradient used to set a gradiented color for a line & fill
+   * @param {Array<Object>} thresholds color_thresholds array
+   * @returns {Array<Object>} Gradient
+   */
   computeGradient(thresholds) {
     const scale = this._logarithmic
       ? Math.log10(Math.max(1, this._max)) - Math.log10(Math.max(1, this._min))
@@ -214,8 +266,8 @@ export default class Graph {
 
   /**
    * Get an SVG path for a fill
-   * @param path SVG path for a line
-   * @returns SVG path for a fill
+   * @param {string} path SVG path for a line
+   * @returns {string} SVG path for a fill
    */
   getFill(path) {
     let height = this._height + this._margin[Y] * 4;
@@ -234,17 +286,18 @@ export default class Graph {
    * Get bars for an entity
    * @param {number} position Index of a bar (0,1,..)
    * (i.e. index of an entity with a shown bar graph)
-   * @returns Bars for an entity to be shown at a `position` index
+   * @returns {Array<Object>} Bars for an entity to be shown at a `position` index
    */
   getBars(position) {
     const spacing = this._bar_spacing;
     const spacing_group = this._bar_spacing_group;
     const total = this._total_bars_in_group;
 
-    const coords = this.calcY(this.coords);
+    let coords = this.calcY(this.coords); // set Y coord
+    coords = coords.slice(1); // remove left border
 
     // number of measures
-    const total_groups = Math.ceil(this._hours_to_show * this._points_per_hour);
+    const total_groups = coords.length;
 
     // width of a group of bars
     const group_width = (this._width - spacing_group * (total_groups - 1))
@@ -333,6 +386,7 @@ export default class Graph {
       case 'month':
         this._endTime.setMonth(this._endTime.getMonth() + 1);
         this._endTime.setDate(1);
+        this._endTime.setHours(0, 0, 0, 0);
         break;
       case 'date':
         this._endTime.setDate(this._endTime.getDate() + 1);
