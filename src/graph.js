@@ -169,15 +169,21 @@ export default class Graph {
   /**
    * Recalculates a point's coords based on min & max thresholds
    * @param {Array<Array<number>>} coords Array of X, Y, Value
-   * @returns {Array<Array<number>>} Array of X, Y, Value,
-   * where Y - recalculated based on min/max thresholds
+   * @returns {Array<Array<number>>} Array of X, Y, Value, where Y - recalculated based on min/max thresholds
    */
   calcY(coords) {
     // account for logarithmic graph
     const max = this._logarithmic ? Math.log10(Math.max(1, this.max)) : this.max;
     const min = this._logarithmic ? Math.log10(Math.max(1, this.min)) : this.min;
 
-    const yRatio = ((max - min) / this._height) || 1;
+    const delta = Math.abs(max - min);
+    const scaleRef = max !== 0 ? Math.abs(max) : Math.abs(min);
+    let yRatio;
+    if (max === min || (delta / scaleRef) < 0.001) {
+      yRatio = 1;
+    } else {
+      yRatio = delta / this._height;
+    }
     const coords2 = coords.map((coord) => {
       const val = this._logarithmic ? Math.log10(Math.max(1, coord[V])) : coord[V];
       const coordY = this._height - ((val - min) / yRatio) + this._margin[Y] * 2;
