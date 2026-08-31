@@ -83,7 +83,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | type ***(required)*** | string |  | v0.0.1 | `custom:mini-graph-card`.
 | entities ***(required)*** | list |  | v0.2.0 | One or more sensor entities (along with [static values](#static-lines)) in a list, see [entities object](#entities-object) for additional entity/static value options.
 | icon | string |  | v0.0.1 | Set a custom icon from any of the available mdi icons.
-| icon_color | string |  | v0.14.0 | Set a custom icon color. Takes precedence over `icon_adaptive_color`. See [Supported color formats](supported-color-formats).
+| icon_color | string |  | v0.14.0 | Set a custom icon color. Takes precedence over `icon_adaptive_color`. See [Supported color formats](#supported-color-formats).
 | icon_image | string |  | v0.12.0 | Override icon with an image url.
 | name | string |  | v0.0.1 | Set a custom name which is displayed beside the icon.
 | unit | string |  | v0.0.1 | Set a custom unit of measurement (`''` value for an empty unit).
@@ -103,7 +103,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | bar_spacing_group | number |   | 0.14.0 | Set an additional spacing between bar groups (multiple entities) in bar graph. Fallback to `bar_spacing` if undefined; if `bar_spacing: -1` - then a default `4` value is used. See [examples](#bar-spacing-examples).
 | line_width | number | `5` | v0.0.1 | Set the thickness of the line.
 | line_style | string |  | v0.14.0 | Set the style of the line (see [Line styles](#line-styles)).
-| line_color | string/list | `var(--accent-color)` | v0.0.1 | Set a custom color for the graph line, provide a list of colors for multiple graph entries. See [Supported color formats](supported-color-formats).
+| line_color | string/list | `var(--accent-color)` | v0.0.1 | Set a custom color for the graph line, provide a list of colors for multiple graph entries. See [Supported color formats](#supported-color-formats).
 | color_thresholds | list |  | v0.2.3 | Set thresholds for dynamic graph colors, see [Line color object](#line-color-object).
 | color_thresholds_transition | string | `smooth` | v0.4.3 | Color threshold transition, `smooth` or `hard`.
 | decimals | integer |  | v0.0.9 | Specify the exact number of decimals to show for number values, see [Number format](#number-format).
@@ -148,7 +148,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | animate    | boolean |        | Override for a reveal animation to the graph.
 | line_width | number |         | Override for a thickness of the line.
 | line_style | string |   | Override the style of the line (see [Line styles](#line-styles)).
-| color | string |         | Set a custom color, overrides all other color options including thresholds. See [Supported color formats](supported-color-formats).
+| color | string |         | Set a custom color, overrides all other color options including thresholds. See [Supported color formats](#supported-color-formats).
 | color_thresholds | list |  | v0.14.0 | Override the thresholds for dynamic graph colors.
 | color_thresholds_transition | string |  | v0.14.0 | Override the color threshold transition.
 | unit | string |         | Set a custom unit of measurement, overrides `unit` set in base config (`''` value for an empty unit).
@@ -238,7 +238,7 @@ See [dynamic line color](#dynamic-line-color) for example usage.
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
 | value ***(required [except in interpolation (see below)](#line-color-interpolation-of-stop-values))*** | number |  | The threshold for the color stop.
-| color ***(required)*** | string |  | Color. See [Supported color formats](supported-color-formats).
+| color ***(required)*** | string |  | Color. See [Supported color formats](#supported-color-formats).
 
 ##### Line color interpolation of stop values
 As long as the first and last threshold stops have `value` properties, intermediate stops can exclude `value`; they will be interpolated linearly. For example, given stops like:
