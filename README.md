@@ -468,7 +468,7 @@ With `graph_order: reversed`, bars for the 1st entity/static value become topmos
 
 ### Supported color formats
 Color can be defined as:
-- `red` (available web colors);
+- `red` (available web colors)
 - `#ff0000` (HEX format, values must be provided in quotes)
 - `#ff000055` (HEX format with opacity, values must be provided in quotes)
 - `rgb(255, 0, 0)` (RGB format)
