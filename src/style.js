@@ -1,12 +1,11 @@
 import { css } from 'lit-element';
 
 const style = css`
-  :host {
+  ha-card {
     display: flex;
     flex-direction: column;
-  }
-  ha-card {
-    flex-direction: column;
+    height: 100%;
+    min-height: 0;
     flex: 1;
     padding: 16px 0 0 0;
     position: relative;
@@ -18,10 +17,6 @@ const style = css`
   ha-card > div:last-child {
     padding-bottom: 0;
   }
-  ha-card .graph {
-    padding: 0;
-    order: 10;
-  }
   ha-card[points] .line--points,
   ha-card[labels] .graph__labels.--primary,
   ha-card[labels-secondary] .graph__labels.--secondary {
@@ -32,11 +27,15 @@ const style = css`
   ha-card[points]:hover .line--points,
   ha-card:hover .graph__labels.--primary,
   ha-card:hover .graph__labels.--secondary {
-      opacity: 1;
+    opacity: 1;
   }
   ha-card[fill] path {
     stroke-linecap: initial;
     stroke-linejoin: initial;
+  }
+  path {
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
   .graph__legend {
     order: -1;
@@ -246,36 +245,52 @@ const style = css`
     left: initial;
     right: 0;
   }
+  .graph.graph--custom-height,
+  .graph.graph--custom-height .graph__container,
+  .graph.graph--custom-height .graph__container svg {
+    flex-grow: 0;
+    flex-shrink: 0;
+    height: auto;
+  }
+  .graph.graph--auto-height {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-height: 0;
+  }
+  .graph.graph--auto-height .graph__container {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-height: 0;
+    position: relative;
+  }
+  .graph.graph--auto-height .graph__container svg {
+    flex-grow: 0;
+    flex-shrink: 1;
+    min-height: 0;
+    height: auto;
+    width: 100%;
+    position: static;
+  }    
   .graph {
-    align-self: flex-end;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     margin-top: auto;
     width: 100%;
+    padding: 0;
+    order: 10;
   }
   .graph__container {
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr;
+    display: flex;
+    flex-direction: column;
     align-items: stretch;
-  }
-  .graph__container__svg {
-    cursor: default;
     position: relative;
-    display: block;
     width: 100%;
-    height: 100%;
-    grid-column: 1;
-    grid-row: 1;
   }
-  svg {
+  .graph__container svg {
     overflow: hidden;
     display: block;
-  }
-  path {
-    stroke-linecap: round;
-    stroke-linejoin: round;
+    cursor: default;
   }
   .fill[anim="false"] {
     animation: reveal .25s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
@@ -349,14 +364,12 @@ const style = css`
     padding: .6em;
     pointer-events: none;
     opacity: var(--mcg-label-axis-opacity, .75);
-    grid-column: 1;
-    grid-row: 1;
-    position: relative;
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 0; right: 0;
   }
   .graph__labels.--secondary {
     align-items: flex-end;
-    grid-column: 1;
-    grid-row: 1;
   }
   .graph__labels > span {
     cursor: pointer;
@@ -364,8 +377,8 @@ const style = css`
   }
   .graph__static_value_labels {
     font-size: calc(.15em + 8.5px);
-    position: absolute;
     pointer-events: none;
+    position: absolute;
     top: 0; bottom: 0;
     left: 0; right: 0;
   }

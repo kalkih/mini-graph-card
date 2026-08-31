@@ -82,6 +82,27 @@ class MiniGraphCard extends LitElement {
     // for a currently unavailable entity
     this._preservedUom = [];
     this._preservedOrder = [];
+
+    // resizing
+    this._computedHeight = undefined;
+    this._graphResizeObserver = undefined;
+    this._graphContainer = undefined;
+    // last SVG sizes
+    this._lastPxWidth = undefined;
+    this._lastPxHeight = undefined;
+
+    // track orientation change events on a mobile client
+    this._handleOrientationResize = () => {
+      if (this.config && (this.config.height === undefined || this.config.height === null)) {
+        this._computedHeight = undefined;
+        this.length = [];
+        setTimeout(() => {
+          if (this.line) {
+            this.line = [...this.line];
+          }
+        }, 300);
+      }
+    };
   }
 
   static get styles() {
@@ -199,46 +220,70 @@ class MiniGraphCard extends LitElement {
     this._updateHour24 = config.hour24 === undefined;
     this._updateDateTimeFormat = config.datetime_format === undefined;
 
+    const {
+      min: min_line_width,
+      max: max_line_width,
+    } = this.getMinMaxLineWidth();
+    this._graphMargin = this.config.show.graph === 'bar'
+      ? [DEFAULT_MARGIN, DEFAULT_MARGIN]
+      : this.config.show.fill
+        ? [0, max_line_width]
+        : [min_line_width, max_line_width];
+
     if (!this.Graph || entitiesChanged) {
-      if (this._hass) this.hass = this._hass;
-      const {
-        min: min_line_width,
-        max: max_line_width,
-      } = this.getMinMaxLineWidth();
-      const margin = this.config.show.graph === 'bar'
-        ? [DEFAULT_MARGIN, DEFAULT_MARGIN]
-        : this.config.show.fill
-          ? [0, max_line_width]
-          : [min_line_width, max_line_width];
-      this.Graph = this.config.entities.map(
-        (entity, index) => new Graph({
-          width: 500,
-          height: this.config.height,
-          margin,
-          hours_to_show: this.config.hours_to_show,
-          points_per_hour: this.config.points_per_hour,
-          aggregateFuncName: entity.aggregate_func || this.config.aggregate_func,
-          groupBy: this.config.group_by,
-          smoothing: getFirstDefinedItem(
-            entity.smoothing,
-            this.config.smoothing,
-            this.getDefaultSmoothing(index),
-          ),
-          logarithmic: getFirstDefinedItem(
-            entity.logarithmic,
-            this.config.logarithmic,
-            false,
-          ),
-          bar_spacing: this.config.bar_spacing,
-          bar_spacing_group: this.config.bar_spacing_group,
-          total_bars_in_group: this.visibleEntities.length,
-          fill_baseline: getFirstDefinedItem(
-            entity.fill_baseline,
-            this.config.fill_baseline,
-          ),
-        }),
-      );
+      if (this._hass) {
+        this.hass = this._hass;
+      }
+      this.Graph = this.createGraph(this.getGraphHeight());
     }
+  }
+
+  /**
+   * Create an array of Graph objects
+   * @param {number} height Graph's height
+   * @returns {Array} Array of Graph objects
+   */
+  createGraph(height) {
+    return this.config.entities.map(
+      (entity, index) => new Graph({
+        width: 500,
+        height,
+        margin: this._graphMargin,
+        hours_to_show: this.config.hours_to_show,
+        points_per_hour: this.config.points_per_hour,
+        aggregateFuncName: entity.aggregate_func || this.config.aggregate_func,
+        groupBy: this.config.group_by,
+        smoothing: getFirstDefinedItem(
+          entity.smoothing,
+          this.config.smoothing,
+          this.getDefaultSmoothing(index),
+        ),
+        logarithmic: getFirstDefinedItem(
+          entity.logarithmic,
+          this.config.logarithmic,
+          false,
+        ),
+        bar_spacing: this.config.bar_spacing,
+        bar_spacing_group: this.config.bar_spacing_group,
+        total_bars_in_group: this.visibleEntities.length,
+        fill_baseline: getFirstDefinedItem(
+          entity.fill_baseline,
+          this.config.fill_baseline,
+        ),
+      }),
+    );
+  }
+
+  /**
+   * Safely return a graph's height.
+   * @returns {number} Graph's height
+   */
+  getGraphHeight() {
+    return this.config.height !== undefined
+      ? this.config.height
+      : this._computedHeight !== undefined
+        ? this._computedHeight
+        : DEFAULT_GRAPH_HEIGHT;
   }
 
   /**
@@ -291,6 +336,118 @@ class MiniGraphCard extends LitElement {
     }
   }
 
+  /**
+   * Initialize ResizeObserver to track container's height changes
+   * @returns {void}
+   */
+  observeGraphHeight() {
+    if (this.config.show.graph === false
+      || (this.config.height !== undefined && this.config.height !== null)) {
+      // no need to track
+      return;
+    }
+
+    const graphContainer = this.shadowRoot.querySelector('.graph__container');
+    if (!graphContainer) {
+      // graph__container not created yet
+      return;
+    }
+
+    const isContainerChanged = this._graphContainer !== graphContainer;
+    const oldGraphContainer = this._graphContainer;
+    this._graphContainer = graphContainer;
+
+    if (this._graphResizeObserver) {
+      if (isContainerChanged) {
+        // graph__container is changed, reconnect observer
+        // disconnect from the old container
+        this._graphResizeObserver.unobserve(oldGraphContainer);
+        // connect to the new container
+        this._graphResizeObserver.observe(graphContainer);
+      } else {
+        // do not do anything, just ignore
+      }
+      return;
+    }
+
+    this._graphResizeObserver = new window.ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) {
+        return;
+      }
+
+      let pxWidth = entry.contentRect.width;
+      let pxHeight = entry.contentRect.height;
+
+      const isShrinking = this._lastPxWidth !== undefined
+        && (pxWidth < this._lastPxWidth || pxHeight < this._lastPxHeight);
+      const svgElement = graphContainer.querySelector('svg');
+      if (svgElement && isShrinking) {
+        // hide a graph, then measure an empty container, then unhide a graph
+        svgElement.style.display = 'none';
+        pxWidth = graphContainer.clientWidth;
+        pxHeight = graphContainer.clientHeight;
+        svgElement.style.display = 'block';
+      }
+
+      this._lastPxWidth = pxWidth;
+      this._lastPxHeight = pxHeight;
+
+      if (pxWidth > 0 && pxHeight > 0) {
+        let newHeight = 500 * (pxHeight / pxWidth);
+        newHeight = Math.max(DEFAULT_GRAPH_HEIGHT, newHeight);
+        newHeight = parseInt(newHeight, 10);
+
+        if (this._computedHeight === undefined && newHeight === DEFAULT_GRAPH_HEIGHT) {
+          this._computedHeight = newHeight;
+          // do not do anything, just exit
+          return;
+        }
+
+        // difference in height
+        const heightDelta = this._computedHeight !== undefined
+          ? Math.abs(newHeight - this._computedHeight)
+          : Infinity;
+
+        // re-create Graph only if a difference is significant
+        if (this._computedHeight === undefined || heightDelta > 3) {
+          this._computedHeight = newHeight;
+          this.length = []; // re-initiate animation
+
+          window.requestAnimationFrame(() => {
+            // save histories
+            const savedHistories = this.Graph.map(graph => (graph ? graph.history : undefined));
+            // re-create Graph objects
+            this.Graph = this.createGraph(newHeight);
+            // upload histories
+            this.Graph.forEach((graph, index) => {
+              if (graph && savedHistories[index]) {
+                /* eslint-disable no-param-reassign */
+                graph.history = savedHistories[index];
+                /* eslint-enable no-param-reassign */
+              }
+            });
+            this.updateData();
+          });
+        }
+      }
+    });
+
+    this._graphResizeObserver.observe(graphContainer);
+  }
+
+  /**
+   * Disconnect and clean up ResizeObserver.
+   * @returns {void}
+   */
+  unobserveGraphHeight() {
+    if (this._graphResizeObserver) {
+      this._graphResizeObserver.disconnect();
+      this._graphResizeObserver = undefined;
+      this._graphContainer = undefined;
+    }
+  }
+
   connectedCallback() {
     super.connectedCallback();
     if (this.config.update_interval) {
@@ -302,11 +459,19 @@ class MiniGraphCard extends LitElement {
         this.config.update_interval * 1000,
       );
     }
+    // track orientation change events on a mobile client
+    window.addEventListener('resize', this._handleOrientationResize);
   }
 
   disconnectedCallback() {
     if (this.interval) {
       clearInterval(this.interval);
+    }
+    // disconnect resize observer
+    this.unobserveGraphHeight();
+    // remove listener for orientation change events
+    if (this._handleOrientationResize) {
+      window.removeEventListener('resize', this._handleOrientationResize);
     }
     super.disconnectedCallback();
   }
@@ -322,13 +487,17 @@ class MiniGraphCard extends LitElement {
     }
   }
 
-  firstUpdated() {
+  firstUpdated(changedProperties) {
+    super.firstUpdated(changedProperties);
     this.initial = false;
     this.updateFormatFromLocale(true);
   }
 
   updated(changedProperties) {
     super.updated(changedProperties);
+
+    // track a graph container's height
+    this.observeGraphHeight();
 
     const hasAnimation = this.config.entities.some(
       (_, index) => isEntryAnimated(this.config, index),
@@ -634,18 +803,18 @@ class MiniGraphCard extends LitElement {
           && this.config.entities[index].show_graph !== false,
       ))
     || this.config.show.loading_indicator === false;
-
+    const graphAdditionalClass = this.config.height === undefined || this.config.height === null
+      ? 'graph--auto-height'
+      : 'graph--custom-height';
     /* eslint-disable indent */
     return this.config.show.graph
       ? html`
-          <div class="graph">
+          <div class="graph ${graphAdditionalClass}">
             ${ready
               ? html`
                   <div class="graph__container">
-                    <div class="graph__container__svg">
-                      ${this.renderSvg()}
-                      ${this.renderStaticLabels()}
-                    </div>
+                    ${this.renderSvg()}
+                    ${this.renderStaticLabels()}
                     ${this.renderLabels()}
                     ${this.renderLabelsSecondary()}
                   </div>
@@ -728,8 +897,7 @@ class MiniGraphCard extends LitElement {
       return html``;
     }
 
-    const graphHeight = this.config.height !== undefined
-      ? this.config.height : DEFAULT_GRAPH_HEIGHT;
+    const graphHeight = this.getGraphHeight();
     if (!isNumeric(graphHeight) || graphHeight <= 0) {
       return html``;
     }
@@ -842,6 +1010,7 @@ class MiniGraphCard extends LitElement {
         stroke-dasharray=${strokeDashArray} stroke-dashoffset=${strokeDashOffset}
         stroke=${'white'}
         stroke-width=${lineWidth}
+        vector-effect="non-scaling-stroke"
         d=${this.line[index]}
       />`;
     return svg`
@@ -870,6 +1039,7 @@ class MiniGraphCard extends LitElement {
         stroke=${color}
         fill=${color}
         cx=${point[X]} cy=${point[Y]} r=${radius}
+        vector-effect="non-scaling-stroke"
         @mouseover=${() => this.setTooltip(index, point[3], point[V])}
         @mouseout=${() => (this.tooltip = {})}
       />
@@ -991,16 +1161,13 @@ class MiniGraphCard extends LitElement {
   renderSvgBars(bars, index) {
     if (!bars) return;
     const isAnimated = isEntryAnimated(this.config, index);
-    const graphHeight = this.config.height;
     const items = bars.map((bar, i) => {
-      const barsStyle = isAnimated
-        ? `transform-origin: ${bar.x}px ${graphHeight}px;`
-        : '';
+      const barStyle = isAnimated ? 'transform-origin: 50% 100%;' : '';
       const color = this.computeColor(bar.value, index);
       return svg`
         <rect class='bar' x=${bar.x} y=${bar.y}
           height=${bar.height} width=${bar.width} fill=${color}
-          style=${barsStyle}
+          style=${barStyle}
           @mouseover=${() => this.setTooltip(index, i, bar.value)}
           @mouseout=${() => (this.tooltip = {})}>
         </rect>`;
@@ -1043,10 +1210,12 @@ class MiniGraphCard extends LitElement {
   * @returns {SVGTemplateResult} SVG element
   */
   renderSvg() {
-    const { height, show } = this.config;
+    const height = this.getGraphHeight();
+    const { show } = this.config;
     const reversed = show.graph_order === 'reversed';
     return svg`
       <svg width='100%' height=${height !== 0 ? '100%' : 0} viewBox='0 0 500 ${height}'
+        preserveAspectRatio="xMidYMin meet"
         @click=${e => e.stopPropagation()}>
         <g>
           <defs>
