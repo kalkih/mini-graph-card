@@ -262,12 +262,18 @@ export default class Graph {
       let offset;
       if (scale <= 0) {
         offset = 0;
-      } else if (this._logarithmic) {
-        offset = (Math.log10(Math.max(1, this._max))
-          - Math.log10(Math.max(1, stop.value)))
-          * (100 / scale);
       } else {
-        offset = (this._max - stop.value) * (100 / scale);
+        // limit stopValue within max/min
+        const stopValue = (stop.value >= this._max)
+          ? this._max
+          : (stop.value <= this._min)
+            ? this._min
+            : stop.value;
+        // get Y coord for stopValue
+        const [stopCoord] = this._calcY([[0, 0, stopValue]]);
+        const [, coordY] = stopCoord;
+        // calculate absolute offset
+        offset = coordY / (this.height + this.margin[Y] * 4) * 100;
       }
       return {
         color: color || stop.color,
