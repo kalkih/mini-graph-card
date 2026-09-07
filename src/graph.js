@@ -345,14 +345,13 @@ export default class Graph {
 
     return coords.map((coord, i) => {
       let y;
-      // let growDown;
       const realY = coord[Y];
       if (realY <= baselineY) {
+        // grow up
         y = realY;
-        // growDown = false;
       } else {
+        // grow down
         y = baselineY;
-        // growDown = true;
       }
       const height = Math.abs(baselineY - realY);
 
