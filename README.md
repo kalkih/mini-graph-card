@@ -438,7 +438,7 @@ This can be useful to show a deviation of a value near some basis (like for enti
 
 For a bar graph: with the `baseline` option set, a bar graph has bars growing upward or downward from the defined baseline. Typically, this can be used with `baseline: 0` to show deviations from zero (positive & negative), although any non-zero value can be defined.
 
-Additionally, the `baseline` option can be set individually for entities.
+Additionally, the `baseline` option can be set individually for entities; may not be meaningful for bar graphs.
 
 See examples [below](#custom-baseline).
 
