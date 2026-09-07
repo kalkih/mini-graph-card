@@ -18,7 +18,7 @@ import {
  * @param {boolean} [params.allowString=false] Optional flag
  * to allow string representations of numbers
  * @param {string} [params.logOptionName] Optional custom option name for detailed log output
- * @returns {number} Cleared value
+ * @returns {number|undefined} Cleared value, or undefined
  */
 const checkNumericOption = (
   config,
@@ -82,7 +82,7 @@ const checkNumericOption = (
  * @param {boolean} [params.allowString=false] Optional flag
  * to allow string representations of numbers
  * @param {string} [params.] Optional custom option name for detailed log output
- * @returns {number} Cleared value
+ * @returns {number|undefined} Cleared value, or undefined
  */
 const checkIntegerOption = (
   config,
@@ -105,7 +105,7 @@ const checkIntegerOption = (
  * @param {object} config Config object
  * @param {string} option Name of the option to be checked
  * @param {string} logOptionName Option name for detailed log output
-* @returns {number|string|undefined} Cleared value in its original format, or undefined
+ * @returns {number|string|undefined} Cleared value in its original format, or undefined
  */
 const checkBoundOption = (config, option, logOptionName) => {
   const value = config[option];
@@ -174,6 +174,7 @@ const checkBounds = (config, yAxis) => {
  * Check color_thresholds array.
  * @param {object} config Config object containing color_thresholds
  * @param {string} configName Name of a config object
+ * @returns {void}
  */
 const checkColorThresholds = (config, configName) => {
   const thresholds = config.color_thresholds;
@@ -231,6 +232,7 @@ const checkColorThresholds = (config, configName) => {
 /**
  * Warn if line_style is defined along with animate=true.
  * @param {object} config Config object
+ * @returns {void}
  */
 const checkLineStyle = (config) => {
   config.entities.forEach((entity, index) => {
