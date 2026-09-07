@@ -270,10 +270,10 @@ export default class Graph {
             ? this._min
             : stop.value;
         // get Y coord for stopValue
-        const [stopCoord] = this._calcY([[0, 0, stopValue]]);
+        const [stopCoord] = this.calcY([[0, 0, stopValue]]);
         const [, coordY] = stopCoord;
         // calculate absolute offset
-        offset = coordY / (this.height + this.margin[Y] * 4) * 100;
+        offset = coordY / (this._height + this._margin[Y] * 4) * 100;
       }
       return {
         color: color || stop.color,
