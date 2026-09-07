@@ -1756,7 +1756,15 @@ class MiniGraphCard extends LitElement {
    * @param {number} minRange Constraint to define a minimal range
    * @returns {Array<number>} Calculated boundaries
    */
-  getBoundaries(series, lowerBound, upperBound, isSoftLowerBound, isSoftUpperBound, fallback, minRange) {
+  getBoundaries(
+    series,
+    lowerBound,
+    upperBound,
+    isSoftLowerBound,
+    isSoftUpperBound,
+    fallback,
+    minRange,
+  ) {
     // calculate max/min boundaries
     let boundary = [
       this.getBoundary('min', series, lowerBound, isSoftLowerBound, fallback[0]),
@@ -1802,10 +1810,10 @@ class MiniGraphCard extends LitElement {
    */
   updateBounds({ config } = this) {
     // function to extract user-defined bounds
-    const extract = (boundObj) => [
+    const extract = boundObj => ([
       boundObj ? boundObj.value : undefined,
       boundObj ? boundObj.soft : false,
-    ];
+    ]);
     // user-defined bounds
     const [pLower, pIsSoftLower] = extract(this._axisBoundsParsed[0].lowerBound);
     const [pUpper, pIsSoftUpper] = extract(this._axisBoundsParsed[0].upperBound);
