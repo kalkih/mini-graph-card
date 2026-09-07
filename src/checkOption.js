@@ -105,8 +105,8 @@ const checkIntegerOption = (
  * @param {object} config Config object
  * @param {string} option Name of the option to be checked
  * @param {string} logOptionName Option name for detailed log output
- * @returns {number|string|undefined} Cleared value in its original format, or undefined
- */
+ * @returns {{ value: number, soft: boolean }|undefined} Cleared parsed value, or undefined
+  */
 const checkBoundOption = (config, option, logOptionName) => {
   const value = config[option];
 
@@ -114,20 +114,16 @@ const checkBoundOption = (config, option, logOptionName) => {
     return undefined;
   }
 
-  if (typeof value === 'number' || typeof value === 'string') {
-    const parsed = getBound(value);
-    if (parsed !== undefined && isNumeric(parsed.value)) {
-      if (!parsed.soft && typeof value === 'string') {
-        // check for a "string number" since this will not be cleared below
-        // log a warning in case of a string presentation of a number
-        logStringWarning(value, logOptionName);
-      }
-
-      const cfg = { [option]: parsed.value };
-      if (checkNumericOption(cfg, option, undefined, { logOptionName }) !== undefined) {
-        return parsed.soft ? value : parsed.value;
-      }
+  // getBound() can handle wrong data types
+  const parsed = getBound(value);
+  if (parsed !== undefined) {
+    // getBound() returns a valid numeric bound with a boolean 'soft' flag
+    if (!parsed.soft && typeof value === 'string') {
+      // check for a "string number"
+      // log a warning in case of a string presentation of a number
+      logStringWarning(value, logOptionName);
     }
+    return parsed;
   }
 
   // invalid type or value of the option
@@ -142,31 +138,42 @@ const checkBoundOption = (config, option, logOptionName) => {
  * @param {string} yAxis Y axis type (primary/secondary)
  * @returns {{
  *   lowerBound: string|number|undefined,
- *   upperBound: string|number|undefined
- * }} Cleared bounds
+ *   upperBound: string|number|undefined,
+ *   lowerBoundParsed: { value: number, soft: boolean }|undefined,
+ *   upperBoundParsed: { value: number, soft: boolean }|undefined,
+ * }} Cleared bounds & their parsed components
  */
 const checkBounds = (config, yAxis) => {
-  const lowerBound = checkBoundOption(
+  const lowerBoundParsed = checkBoundOption(
     config,
     'lower_bound',
     `${yAxis}.lower_bound`,
   );
-  let upperBound = checkBoundOption(
+  let upperBoundParsed = checkBoundOption(
     config,
     'upper_bound',
     `${yAxis}.upper_bound`,
   );
 
-  if (lowerBound !== undefined && upperBound !== undefined) {
-    const cleanLowerBound = getBound(lowerBound).value;
-    const cleanUpperBound = getBound(upperBound).value;
+  // merge value & soft into a proper string
+  const formatBound = bound => bound.soft ? `~${bound.value}` : bound.value;
+
+  if (lowerBoundParsed !== undefined && upperBoundParsed !== undefined) {
+    const cleanLowerBound = lowerBoundParsed.value;
+    const cleanUpperBound = upperBoundParsed.value;
     if (cleanUpperBound <= cleanLowerBound) {
-      log(`Invalid ${yAxis} lower & upper bounds: [${lowerBound}, ${upperBound}]; unsetting value of "${yAxis}.upper_bound" to undefined`);
-      upperBound = undefined;
+      log(`Invalid ${yAxis} lower & upper bounds: [${formatBound(lowerBoundParsed)}, ${formatBound(upperBoundParsed)}];`
+        + ` unsetting value of "${yAxis}.upper_bound" to undefined`);
+      upperBoundParsed = undefined;
     }
   }
 
-  return { lowerBound, upperBound };
+  return {
+    lowerBound: lowerBoundParsed && formatBound(lowerBoundParsed),
+    upperBound: upperBoundParsed && formatBound(upperBoundParsed),
+    lowerBoundParsed,
+    upperBoundParsed,
+  };
 };
 
 /* eslint-disable no-param-reassign */
