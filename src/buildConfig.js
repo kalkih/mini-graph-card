@@ -181,10 +181,13 @@ export default (config) => {
   conf.update_interval = checkNumericOption(conf, 'update_interval', undefined, { minBound: 0, allowString: true });
 
   // axis options
+  const boundsParsed = [{}, {}];
   if (conf.y_axis && conf.y_axis.primary) {
     const primaryBounds = checkBounds(conf.y_axis.primary, 'primary');
     conf.y_axis.primary.lower_bound = primaryBounds.lowerBound;
     conf.y_axis.primary.upper_bound = primaryBounds.upperBound;
+    boundsParsed[0].lowerBound = primaryBounds.lowerBoundParsed;
+    boundsParsed[0].upperBound = primaryBounds.upperBoundParsed;
 
     conf.y_axis.primary.min_bound_range = checkNumericOption(
       conf.y_axis.primary,
@@ -204,6 +207,8 @@ export default (config) => {
     const secondaryBounds = checkBounds(conf.y_axis.secondary, 'secondary');
     conf.y_axis.secondary.lower_bound = secondaryBounds.lowerBound;
     conf.y_axis.secondary.upper_bound = secondaryBounds.upperBound;
+    boundsParsed[1].lowerBound = secondaryBounds.lowerBoundParsed;
+    boundsParsed[1].upperBound = secondaryBounds.upperBoundParsed;
 
     conf.y_axis.secondary.min_bound_range = checkNumericOption(
       conf.y_axis.secondary,
@@ -333,6 +338,7 @@ export default (config) => {
 
   return {
     config: conf,
+    boundsParsed,
     entityFactors,
     axisFactors,
   };

@@ -171,6 +171,7 @@ class MiniGraphCard extends LitElement {
   setConfig(config) {
     ({
       config: this.config,
+      boundsParsed: this._axisBoundsParsed, // parsed Y-axis bounds
       entityFactors: this._entityFactors, // predefined factors
       axisFactors: this._axisFactors, // predefined factors
     } = buildConfig(config));
@@ -1714,38 +1715,75 @@ class MiniGraphCard extends LitElement {
     this.setNextUpdate();
   }
 
-  getBoundary(type, series, configVal, fallback) {
+  /**
+   * Calculate a boundary
+   * @param {'min'|'max'} type Type of boundary
+   * @param {Array<Object>} series Array of Graph objects
+   * @param {number|undefined} configVal User-defined boundary (clean number)
+   * @param {boolean} isSoft True if the boundary is soft, false otherwise
+   * @param {number} fallback Default boundary if series is empty
+   * @returns {number} Calculated boundary
+   */
+  getBoundary(type, series, configVal, isSoft, fallback) {
     if (!(type in Math)) {
       throw new Error(`The type "${type}" is not present on the Math object`);
     }
 
     if (configVal === undefined) {
       // dynamic boundary depending on values
+      // take a max/min value out of ["max/min value of each Graph object"]
       return Math[type](...series.map(ele => ele[type])) || fallback;
     }
-    if (configVal[0] !== '~') {
+    if (!isSoft) {
       // fixed boundary
+      // take a user defined boundary
       return configVal;
     }
     // soft boundary (respecting out of range values)
-    return Math[type](Number(configVal.substr(1)), ...series.map(ele => ele[type]));
+    // take a max/min value out of ["user-defined boundary", "max/min value of each Graph object"]
+    return Math[type](configVal, ...series.map(ele => ele[type]));
   }
 
-  getBoundaries(series, min, max, fallback, minRange) {
+  /**
+   * Calculate boundaries for a particular Y-axis
+   * @param {Array<Object>} series Array of Graph objects
+   * associated with a particular Y-axis
+   * @param {number|undefined} lowerBound User-defined min boundary (clean number)
+   * @param {number|undefined} upperBound User-defined max boundary (clean number)
+   * @param {boolean} isSoftLowerBound "Soft" flag for user-defined min boundary
+   * @param {boolean} isSoftUpperBound "Soft" flag for user-defined max boundary
+   * @param {Array<number>} fallback Default boundaries if series is empty
+   * @param {number} minRange Constraint to define a minimal range
+   * @returns {Array<number>} Calculated boundaries
+   */
+  getBoundaries(
+    series,
+    lowerBound,
+    upperBound,
+    isSoftLowerBound,
+    isSoftUpperBound,
+    fallback,
+    minRange,
+  ) {
+    // calculate max/min boundaries
     let boundary = [
-      this.getBoundary('min', series, min, fallback[0]),
-      this.getBoundary('max', series, max, fallback[1]),
+      this.getBoundary('min', series, lowerBound, isSoftLowerBound, fallback[0]),
+      this.getBoundary('max', series, upperBound, isSoftUpperBound, fallback[1]),
     ];
 
+    // re-calculate boundaries using a defined constraint
     if (minRange) {
       const currentRange = Math.abs(boundary[0] - boundary[1]);
       const diff = parseFloat(minRange) - currentRange;
 
-      // Doesn't matter if minBoundRange is NaN because this will be false if so
       if (diff > 0) {
         const weights = [
-          min !== undefined && min[0] !== '~' || max === undefined ? 0 : 1,
-          max !== undefined && max[0] !== '~' || min === undefined ? 0 : 1,
+          lowerBound !== undefined && !isSoftLowerBound || upperBound === undefined
+            ? 0
+            : 1,
+          upperBound !== undefined && !isSoftUpperBound || lowerBound === undefined
+            ? 0
+            : 1,
         ];
         const sum = weights[0] + weights[1];
         if (sum > 0) {
@@ -1765,31 +1803,45 @@ class MiniGraphCard extends LitElement {
     return boundary;
   }
 
+  /**
+   * Update boundaries for all Y-axes
+   * @param {object} config Config object
+   * @returns {void}
+   */
   updateBounds({ config } = this) {
+    // function to extract user-defined bounds
+    const extract = boundObj => ([
+      boundObj ? boundObj.value : undefined,
+      boundObj ? boundObj.soft : false,
+    ]);
+    // user-defined bounds
+    const [pLower, pIsSoftLower] = extract(this._axisBoundsParsed[0].lowerBound);
+    const [pUpper, pIsSoftUpper] = extract(this._axisBoundsParsed[0].upperBound);
+    const [sLower, sIsSoftLower] = extract(this._axisBoundsParsed[1].lowerBound);
+    const [sUpper, sIsSoftUpper] = extract(this._axisBoundsParsed[1].upperBound);
+
+    // update bounds for a primary Y-axis
     const primaryAxis = config.y_axis && config.y_axis.primary;
     const {
-      lower_bound: primaryLowerBound,
-      upper_bound: primaryUpperBound,
       min_bound_range: primaryMinBoundRange,
     } = primaryAxis || {};
     this.bound = this.getBoundaries(
       this.primaryYaxisSeries,
-      primaryLowerBound,
-      primaryUpperBound,
+      pLower, pUpper,
+      pIsSoftLower, pIsSoftUpper,
       this.bound,
       primaryMinBoundRange,
     );
 
+    // update bounds for a secondary Y-axis
     const secondaryAxis = config.y_axis && config.y_axis.secondary;
     const {
-      lower_bound: secondaryLowerBound,
-      upper_bound: secondaryUpperBound,
       min_bound_range: secondaryMinBoundRange,
     } = secondaryAxis || {};
     this.boundSecondary = this.getBoundaries(
       this.secondaryYaxisSeries,
-      secondaryLowerBound,
-      secondaryUpperBound,
+      sLower, sUpper,
+      sIsSoftLower, sIsSoftUpper,
       this.boundSecondary,
       secondaryMinBoundRange,
     );

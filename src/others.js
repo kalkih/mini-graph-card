@@ -130,34 +130,27 @@ const getFactor = (config, index = undefined) => {
 
 /**
   * Parse a bound value accounting for an optional "~" prefix.
-  * @param {number|string} bound Bound with a possible "~" prefix
-  * @returns {{value: number, soft: boolean}|undefined} Parsed value
+  * @param {any} bound Bound with a possible "~" prefix
+  * @returns {{value: number, soft: boolean}|undefined} Parsed value, or undefined
   */
 const getBound = (bound) => {
-  if (bound === undefined || bound === null || typeof bound === 'object') {
+  if (typeof bound !== 'number' && typeof bound !== 'string') {
     return undefined;
   }
 
   const strBound = String(bound).trim();
-  if (strBound.startsWith('~')) {
-    // soft bound
-    const value = strBound.slice(1);
-    if (isNumeric(value, true)) {
-      return {
-        value: Number(value),
-        soft: true,
-      };
-    }
-    return undefined;
-  }
+  const isSoft = strBound.startsWith('~');
+  const rawValue = isSoft
+    ? strBound.slice(1)
+    : strBound;
 
-  // fixed bound
-  if (isNumeric(strBound, true)) {
+  if (isNumeric(rawValue, true)) {
     return {
-      value: Number(strBound),
-      soft: false,
+      value: Number(rawValue),
+      soft: isSoft,
     };
   }
+
   return undefined;
 };
 
