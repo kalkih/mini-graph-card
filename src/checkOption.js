@@ -156,7 +156,7 @@ const checkBounds = (config, yAxis) => {
   );
 
   // merge value & soft into a proper string
-  const formatBound = bound => bound.soft ? `~${bound.value}` : bound.value;
+  const formatBound = bound => (bound.soft ? `~${bound.value}` : bound.value);
 
   if (lowerBoundParsed !== undefined && upperBoundParsed !== undefined) {
     const cleanLowerBound = lowerBoundParsed.value;
