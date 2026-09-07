@@ -117,7 +117,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | smoothing | boolean | `true` | v0.8.0 | Whether to make graph line smooth.
 | state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert (order matters as position becomes a value on the graph).
 | logarithmic | boolean | `false` | v0.10.0 | Use a logarithmic scale for the graph (see [Logarithmic options](#logarithmic-options)).
-| fill_baseline | number |  | v0.14.0 | Set a custom baseline for the graph (see [Baseline](#baseline)).
+| baseline | number |  | v0.14.0 | Set a custom baseline for the graph (see [Baseline](#baseline)).
 
 These options are legacy and moved into [Y-axis config object](#y-axis-object):
 
@@ -168,7 +168,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | fixed_value | boolean |         | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 | smoothing | boolean |         | Override for a flag indicating whether to make graph line smooth.
 | logarithmic | boolean |         | Override logarithmic scaling for this entity only (see [Logarithmic options](#logarithmic-options)).
-| fill_baseline | number |   | Set a custom baseline for the graph or override a global `fill_baseline` option (see [Baseline](#baseline)).
+| baseline | number |   | Set a custom baseline for the graph or override a global `baseline` option (see [Baseline](#baseline)).
 
 Note: the "points" term is only applicable to a "line" graph, not to a "bar" graph.
 
@@ -430,13 +430,13 @@ Warning: the `line_style` option is not accounted if `animation: true` option is
 
 ### Baseline
 
-The `fill_baseline` option is only meaningful for linear graphs with a fill.
+The `baseline` option is only meaningful for linear graphs with a fill.
 
 By default, a fill is applied to an area between a curve and a bottom edge.
-With the `fill_baseline` option set, areas between a curve & a baseline are filled.
-This can be useful to show a deviation of a value near some basis (like for entities which can be both positive & nagitive).
+With the `baseline` option set, areas between a curve & a baseline are filled.
+This can be useful to show a deviation of a value near some basis (like for entities which can be both positive & negitive).
 
-Additionally, the `fill_baseline` option can be set individually for entities.
+Additionally, the `baseline` option can be set individually for entities.
 
 See examples [below](#custom-baseline).
 
@@ -811,7 +811,7 @@ Baseline is set to 0:
 type: custom:mini-graph-card
 entities:
   - entity: sensor.xxx
-fill_baseline: 0
+baseline: 0
 show:
   labels: true
 ```
@@ -824,7 +824,7 @@ Individual baselines for entities (along with displaying static lines):
 type: custom:mini-graph-card
 entities:
   - entity: sensor.xiaomi_cg_1_co2
-    fill_baseline: 660
+    baseline: 660
     color: orange
     name: Room 1
   - static_value: 660
@@ -833,7 +833,7 @@ entities:
     color: orange
     show_legend: false
   - entity: sensor.xiaomi_cg_2_co2
-    fill_baseline: 740
+    baseline: 740
     color: green
     name: Room 2
   - static_value: 740
