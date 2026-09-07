@@ -993,7 +993,7 @@ class MiniGraphCard extends LitElement {
     if (!bars) return;
     const isAnimated = isEntryAnimated(this.config, index);
     const items = bars.map((bar, i) => {
-      const barsStyle = isAnimated
+      const barStyle = isAnimated
         ? `transform-origin: 50% ${bar.baselineY}px;`
         : '';
       const color = this.computeColor(bar.value, index);
