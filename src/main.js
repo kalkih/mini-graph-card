@@ -233,9 +233,9 @@ class MiniGraphCard extends LitElement {
           bar_spacing: this.config.bar_spacing,
           bar_spacing_group: this.config.bar_spacing_group,
           total_bars_in_group: this.visibleEntities.length,
-          fill_baseline: getFirstDefinedItem(
-            entity.fill_baseline,
-            this.config.fill_baseline,
+          baseline: getFirstDefinedItem(
+            entity.baseline,
+            this.config.baseline,
           ),
         }),
       );
