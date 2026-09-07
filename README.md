@@ -430,11 +430,13 @@ Warning: the `line_style` option is not accounted if `animation: true` option is
 
 ### Baseline
 
-The `baseline` option is only meaningful for linear graphs with a fill.
+The `baseline` option is only meaningful for linear graphs with a fill and bar graphs.
 
-By default, a fill is applied to an area between a curve and a bottom edge.
+For a linear graph: by default, a fill is applied to an area between a curve and a bottom edge.
 With the `baseline` option set, areas between a curve & a baseline are filled.
-This can be useful to show a deviation of a value near some basis (like for entities which can be both positive & negitive).
+This can be useful to show a deviation of a value near some basis (like for entities which can be both positive & negative).
+
+For a bar graph: with the `baseline` option set, a bar graph has bars growing upward or downward from the defined baseline. Typically, this can be used with `baseline: 0` to show deviations from zero (positive & negative), although any non-zero value can be defined.
 
 Additionally, the `baseline` option can be set individually for entities.
 
@@ -847,6 +849,24 @@ show:
   name: false
   icon: false
   state: false
+```
+
+Bar graph with a baseline set to 0:
+
+<img width="474" height="265" alt="image" src="https://github.com/user-attachments/assets/1bd4029b-d086-4748-add0-f7408551f147" />
+
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.xxx
+baseline: 0
+height: 200
+show:
+  graph: bar
+  name: false
+  icon: false
+  labels: true
 ```
 
 #### Grouping by date
