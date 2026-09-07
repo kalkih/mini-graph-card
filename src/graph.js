@@ -333,15 +333,42 @@ export default class Graph {
       }
     }
 
-    return coords.map((coord, i) => ({
-      x: this._margin[X]
+    // calculate a baseline; by default it is a bottom edge
+    let baselineY = this._height + this._margin[Y] * 4;
+    // re-calculate in case of a "baseline" option is defined
+    if (this._baseline !== undefined) {
+      const [baselineCoord] = this.calcY([[0, 0, this._baseline]]);
+      [, baselineY] = baselineCoord;
+    }
+
+    return coords.map((coord, i) => {
+      let y;
+      let height;
+
+      const realY = coord[Y];
+      if (realY <= baselineY) {
+        // grow down
+        y = realY;
+        height = baselineY - realY;
+      } else {
+        // grow up
+        y = baselineY;
+        height = realY - baselineY;
+      }
+
+      const x = this._margin[X]
         + (group_width + spacing_group) * i
-        + (spacing === -1 ? 0 : (bar_width + spacing) * position),
-      y: coord[Y],
-      height: this._height - coord[Y] + this._margin[Y] * 4,
-      width: bar_width,
-      value: coord[V],
-    }));
+        + (spacing === -1 ? 0 : (bar_width + spacing) * position);
+
+      return ({
+        x,
+        y,
+        height,
+        width: bar_width,
+        value: coord[V],
+        baselineY,
+      });
+    });
   }
 
   _midPoint(Ax, Ay, Bx, By) {
