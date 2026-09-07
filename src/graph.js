@@ -20,7 +20,7 @@ export default class Graph {
     bar_spacing = DEFAULT_BAR_SPACING, // spacing between bars
     bar_spacing_group = DEFAULT_BAR_SPACING, // spacing between groups of bars
     total_bars_in_group = 1, // number of bars (i.e. number of entities with a shown bar graph)
-    fill_baseline,
+    baseline,
   }) {
     const aggregateFuncMap = {
       avg: this._average,
@@ -52,7 +52,7 @@ export default class Graph {
     this._total_bars_in_group = total_bars_in_group;
     this._groupBy = groupBy;
     this._endTime = 0;
-    this._fill_baseline = fill_baseline;
+    this._baseline = baseline;
   }
 
   get max() { return this._max; }
@@ -289,8 +289,8 @@ export default class Graph {
    */
   getFill(path) {
     let height = this._height + this._margin[Y] * 4;
-    if (this._fill_baseline !== undefined) {
-      const [baselineCoord] = this.calcY([[0, 0, this._fill_baseline]]);
+    if (this._baseline !== undefined) {
+      const [baselineCoord] = this.calcY([[0, 0, this._baseline]]);
       [, height] = baselineCoord;
     }
     let fill = path;
