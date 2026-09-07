@@ -333,8 +333,10 @@ export default class Graph {
       }
     }
 
-    // calculate a baseline; by default it is a bottom edge
-    let baselineY = this._height + this._margin[Y] * 4;
+    // calculate a baseline; by default it is either a bottom edge or a top edge (if inverted)
+    let baselineY = this._invert
+      ? 0
+      : this._height + this._margin[Y] * 4;
     // re-calculate in case of a "baseline" option is defined
     if (this._baseline !== undefined) {
       const [baselineCoord] = this.calcY([[0, 0, this._baseline]]);
@@ -343,18 +345,16 @@ export default class Graph {
 
     return coords.map((coord, i) => {
       let y;
-      let height;
-
+      // let growDown;
       const realY = coord[Y];
       if (realY <= baselineY) {
-        // grow down
         y = realY;
-        height = baselineY - realY;
+        // growDown = false;
       } else {
-        // grow up
         y = baselineY;
-        height = realY - baselineY;
+        // growDown = true;
       }
+      const height = Math.abs(baselineY - realY);
 
       const x = this._margin[X]
         + (group_width + spacing_group) * i
@@ -366,6 +366,7 @@ export default class Graph {
         height,
         width: bar_width,
         value: coord[V],
+        // growDown,
         baselineY,
       });
     });
