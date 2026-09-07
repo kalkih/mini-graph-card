@@ -365,7 +365,6 @@ export default class Graph {
         height,
         width: bar_width,
         value: coord[V],
-        // growDown,
         baselineY,
       });
     });
