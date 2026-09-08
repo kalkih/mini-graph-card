@@ -73,7 +73,6 @@ export default class Graph {
       const [baselineCoord] = this.calcY([[0, 0, this._baseline]]);
       [, baselineY] = baselineCoord;
     }
-
     return baselineY;
   }
 
