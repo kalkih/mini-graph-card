@@ -194,9 +194,8 @@ class MiniGraphCard extends LitElement {
 
     // check if an entry's graph is "bars"
     // (will be revised in future when combined "lines & bars" config is supported)
-    this._isBarGraph = this.config.entities.map((__) => {
-      return this.config.show.graph === 'bar';
-    });
+    // eslint-disable-next-line no-unused-vars
+    this._isBarGraph = this.config.entities.map(entity => this.config.show.graph === 'bar');
 
     // check if an entry's graph must be vertically inverted
     this._isInverted = this.config.entities.map((entity) => {
