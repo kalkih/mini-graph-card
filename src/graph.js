@@ -8,6 +8,7 @@ import { log } from './utils';
 
 export default class Graph {
   constructor({
+    graphType = 'line',
     width,
     height,
     margin,
@@ -35,6 +36,7 @@ export default class Graph {
       diff: this._diff,
     };
 
+    this._graphType = graphType;
     this._history = undefined;
     this.coords = [];
     this._width = width - margin[X] * 2;
@@ -137,6 +139,11 @@ export default class Graph {
 
     // calculate coordinates
     this.coords = this._calcPoints(histGroups);
+
+    // reduce for bars
+    if (this._graphType === 'bar') {
+      this.coords = this.coords.slice(1);
+    }
 
     // define new value boundaries
     this.min = Math.min(...this.coords.map(item => Number(item[V])));
@@ -365,7 +372,6 @@ export default class Graph {
     const total = this._total_bars_in_group;
 
     let coords = this.calcY(this.coords); // set Y coord
-    coords = coords.slice(1); // remove left border
 
     // number of measures
     const total_groups = coords.length;
