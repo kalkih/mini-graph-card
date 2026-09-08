@@ -371,7 +371,7 @@ export default class Graph {
     const spacing_group = this._bar_spacing_group;
     const total = this._total_bars_in_group;
 
-    let coords = this.calcY(this.coords); // set Y coord
+    const coords = this.calcY(this.coords); // set Y coord
 
     // number of measures
     const total_groups = coords.length;
