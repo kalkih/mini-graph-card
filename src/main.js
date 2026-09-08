@@ -233,9 +233,9 @@ class MiniGraphCard extends LitElement {
           bar_spacing: this.config.bar_spacing,
           bar_spacing_group: this.config.bar_spacing_group,
           total_bars_in_group: this.visibleEntities.length,
-          fill_baseline: getFirstDefinedItem(
-            entity.fill_baseline,
-            this.config.fill_baseline,
+          baseline: getFirstDefinedItem(
+            entity.baseline,
+            this.config.baseline,
           ),
         }),
       );
@@ -790,11 +790,21 @@ class MiniGraphCard extends LitElement {
     const isAnimated = isEntryAnimated(this.config, index);
     const fade = this.config.show.fill === 'fade';
     const init = this.length[index] || this.config.entities[index].show_line === false;
+    const { baselineRatio } = this.Graph[index];
+    const gradientStops = baselineRatio === undefined
+      ? svg`
+          <stop stop-color='white' offset='0%' stop-opacity='1'/>
+          <stop stop-color='white' offset='100%' stop-opacity='0.15'/>
+        `
+      : svg`
+          <stop stop-color='white' offset='0%' stop-opacity='1'/>
+          <stop stop-color='white' offset="${baselineRatio * 100}%" stop-opacity='0.15'/>
+          <stop stop-color='white' offset='100%' stop-opacity='1'/>
+        `;
     return svg`
       <defs>
         <linearGradient id=${`fill-grad-${this.id}-${index}`} x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop stop-color='white' offset='0%' stop-opacity='1'/>
-          <stop stop-color='white' offset='100%' stop-opacity='.15'/>
+          ${gradientStops}
         </linearGradient>
         <mask id=${`fill-grad-mask-${this.id}-${index}`}>
           <rect width="100%" height="100%" fill=${`url(#fill-grad-${this.id}-${index})`} />
@@ -990,18 +1000,17 @@ class MiniGraphCard extends LitElement {
   * @param {number} index Index of an entry in config.entities
   */
   renderSvgBars(bars, index) {
-    if (!bars) return;
+    if (!bars || !bars.items) return;
     const isAnimated = isEntryAnimated(this.config, index);
-    const graphHeight = this.config.height;
-    const items = bars.map((bar, i) => {
-      const barsStyle = isAnimated
-        ? `transform-origin: ${bar.x}px ${graphHeight}px;`
-        : '';
+    const { width: barWidth, items } = this.bar[index]; // bars
+    const { baselineY } = this.Graph[index];
+    const barStyle = isAnimated ? `transform-origin: 50% ${baselineY}px;` : '';
+    const renderedItems = items.map((bar, i) => {
       const color = this.computeColor(bar.value, index);
       return svg`
         <rect class='bar' x=${bar.x} y=${bar.y}
-          height=${bar.height} width=${bar.width} fill=${color}
-          style=${barsStyle}
+          height=${bar.height} width=${barWidth} fill=${color}
+          style=${barStyle}
           @mouseover=${() => this.setTooltip(index, i, bar.value)}
           @mouseout=${() => (this.tooltip = {})}>
         </rect>`;
@@ -1014,7 +1023,7 @@ class MiniGraphCard extends LitElement {
         class='bars'
         ?anim=${isAnimated}
         ?inactive=${inactive}
-      >${items}</g>`;
+      >${renderedItems}</g>`;
   }
 
   /** Returns a rendered SVG part (fill, line, bars, points)

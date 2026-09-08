@@ -117,7 +117,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | smoothing | boolean | `true` | v0.8.0 | Whether to make graph line smooth.
 | state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert (order matters as position becomes a value on the graph).
 | logarithmic | boolean | `false` | v0.10.0 | Use a logarithmic scale for the graph (see [Logarithmic options](#logarithmic-options)).
-| fill_baseline | number |  | v0.14.0 | Set a custom baseline for the graph (see [Baseline](#baseline)).
+| baseline | number |  | v0.14.0 | Set a custom baseline for the graph (see [Baseline](#baseline)).
 
 These options are legacy and moved into [Y-axis config object](#y-axis-object):
 
@@ -168,7 +168,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | fixed_value | boolean |         | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 | smoothing | boolean |         | Override for a flag indicating whether to make graph line smooth.
 | logarithmic | boolean |         | Override logarithmic scaling for this entity only (see [Logarithmic options](#logarithmic-options)).
-| fill_baseline | number |   | Set a custom baseline for the graph or override a global `fill_baseline` option (see [Baseline](#baseline)).
+| baseline | number |   | Set a custom baseline for the graph or override a global `baseline` option (see [Baseline](#baseline)).
 
 Note: the "points" term is only applicable to a "line" graph, not to a "bar" graph.
 
@@ -430,13 +430,15 @@ Warning: the `line_style` option is not accounted if `animation: true` option is
 
 ### Baseline
 
-The `fill_baseline` option is only meaningful for linear graphs with a fill.
+The `baseline` option is only meaningful for linear graphs with a fill and bar graphs.
 
-By default, a fill is applied to an area between a curve and a bottom edge.
-With the `fill_baseline` option set, areas between a curve & a baseline are filled.
-This can be useful to show a deviation of a value near some basis (like for entities which can be both positive & nagitive).
+For a linear graph: by default, a fill is applied to an area between a curve and a bottom edge.
+With the `baseline` option set, areas between a curve & a baseline are filled.
+This can be useful to show a deviation of a value near some basis (like for entities which can be both positive & negative).
 
-Additionally, the `fill_baseline` option can be set individually for entities.
+For a bar graph: with the `baseline` option set, a bar graph has bars growing upward or downward from the defined baseline. Typically, this can be used with `baseline: 0` to show deviations from zero (positive & negative), although any non-zero value can be defined.
+
+Additionally, the `baseline` option can be set individually for entities; may not be meaningful for bar graphs.
 
 See examples [below](#custom-baseline).
 
@@ -805,48 +807,73 @@ show:
 
 Baseline is set to 0:
 
-<img width="497" height="217" alt="изображение" src="https://github.com/user-attachments/assets/c755d398-bbe8-435a-8571-ee4947483b56" />
+<img width="480" height="402" alt="image" src="https://github.com/user-attachments/assets/3b38e7dd-d5e6-4b9c-b75c-b6b53c07f04c" />
 
 ```yaml
 type: custom:mini-graph-card
 entities:
   - entity: sensor.xxx
-fill_baseline: 0
+baseline: 0
+height: 400
 show:
   labels: true
+  name: false
+  icon: false
+  state: false
+  fill: fade
 ```
 
 Individual baselines for entities (along with displaying static lines):
 
-<img width="498" height="264" alt="изображение" src="https://github.com/user-attachments/assets/43a39c0b-4ca2-40ad-8443-2e8821aa987b" />
+<img width="483" height="249" alt="image" src="https://github.com/user-attachments/assets/d1bd9cc8-78a4-4428-8642-182ab15aa2dd" />
 
 ```yaml
 type: custom:mini-graph-card
 entities:
   - entity: sensor.xiaomi_cg_1_co2
-    fill_baseline: 660
+    baseline: 660
     color: orange
     name: Room 1
   - static_value: 660
-    show_fill: false
     line_width: 1
     color: orange
+    show_fill: false
     show_legend: false
+    show_static_inactive: true
   - entity: sensor.xiaomi_cg_2_co2
-    fill_baseline: 740
+    baseline: 690
     color: green
     name: Room 2
-  - static_value: 740
-    show_fill: false
+  - static_value: 690
     line_width: 1
     color: green
+    show_fill: false
     show_legend: false
+    show_static_inactive: true
 height: 200
 show:
   static_value_labels: left
   name: false
   icon: false
   state: false
+```
+
+Bar graph with a baseline set to 0:
+
+<img width="474" height="265" alt="image" src="https://github.com/user-attachments/assets/1bd4029b-d086-4748-add0-f7408551f147" />
+
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.xxx
+baseline: 0
+height: 200
+show:
+  graph: bar
+  name: false
+  icon: false
+  labels: true
 ```
 
 #### Grouping by date

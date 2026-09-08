@@ -238,7 +238,7 @@ export default (config) => {
     conf.static_value_label_offset = DEFAULT_STATIC_VALUE_LABEL_OFFSET;
   }
 
-  conf.fill_baseline = checkNumericOption(conf, 'fill_baseline', undefined, { allowString: true });
+  conf.baseline = checkNumericOption(conf, 'baseline', undefined, { allowString: true });
 
   // process per-entity configs
   /* eslint-disable no-param-reassign */
@@ -259,11 +259,11 @@ export default (config) => {
         conf.decimals,
         { minBound: 0, allowString: true, logOptionName: `entities[${i}].decimals` },
       );
-      entity.fill_baseline = checkNumericOption(
+      entity.baseline = checkNumericOption(
         entity,
-        'fill_baseline',
+        'baseline',
         undefined,
-        { allowString: true, logOptionName: `entities[${i}].fill_baseline` },
+        { allowString: true, logOptionName: `entities[${i}].baseline` },
       );
 
       if (entity.color_thresholds) {

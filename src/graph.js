@@ -20,7 +20,7 @@ export default class Graph {
     bar_spacing = DEFAULT_BAR_SPACING, // spacing between bars
     bar_spacing_group = DEFAULT_BAR_SPACING, // spacing between groups of bars
     total_bars_in_group = 1, // number of bars (i.e. number of entities with a shown bar graph)
-    fill_baseline,
+    baseline,
   }) {
     const aggregateFuncMap = {
       avg: this._average,
@@ -52,7 +52,7 @@ export default class Graph {
     this._total_bars_in_group = total_bars_in_group;
     this._groupBy = groupBy;
     this._endTime = 0;
-    this._fill_baseline = fill_baseline;
+    this._baseline = baseline;
   }
 
   get max() { return this._max; }
@@ -62,6 +62,31 @@ export default class Graph {
   get min() { return this._min; }
 
   set min(min) { this._min = min; }
+
+  /**
+   * Get the current Y-coord for a baseline
+   * @returns {number} Y-coord of a baseline
+   */
+  get baselineY() {
+    let baselineY = this._height + this._margin[Y] * 4;
+    if (this._baseline !== undefined) {
+      const [baselineCoord] = this.calcY([[0, 0, this._baseline]]);
+      [, baselineY] = baselineCoord;
+    }
+    return baselineY;
+  }
+
+  /**
+   * Get a relative ratio of the baseline position (0..1)
+   * @returns {number|undefined} Baseline position ratio from the top,
+   * or undefined if no baseline is customized
+   */
+  get baselineRatio() {
+    if (this._baseline === undefined) {
+      return undefined;
+    }
+    return this.baselineY / (this._height + this._margin[Y] * 4);
+  }
 
   get history() { return this._history; }
 
@@ -288,11 +313,7 @@ export default class Graph {
    * @returns {string} SVG path for a fill
    */
   getFill(path) {
-    let height = this._height + this._margin[Y] * 4;
-    if (this._fill_baseline !== undefined) {
-      const [baselineCoord] = this.calcY([[0, 0, this._fill_baseline]]);
-      [, height] = baselineCoord;
-    }
+    const height = this.baselineY;
     let fill = path;
     // note that currently this._margin[X] = 0 when fill is defined
     fill += ` L ${this._width + this._margin[X]}, ${height}`;
@@ -333,15 +354,34 @@ export default class Graph {
       }
     }
 
-    return coords.map((coord, i) => ({
-      x: this._margin[X]
+    const { baselineY } = this;
+
+    const items = coords.map((coord, i) => {
+      let y;
+      const realY = coord[Y];
+      if (realY <= baselineY) {
+        y = realY;
+      } else {
+        y = baselineY;
+      }
+      const height = Math.abs(baselineY - realY);
+
+      const x = this._margin[X]
         + (group_width + spacing_group) * i
-        + (spacing === -1 ? 0 : (bar_width + spacing) * position),
-      y: coord[Y],
-      height: this._height - coord[Y] + this._margin[Y] * 4,
+        + (spacing === -1 ? 0 : (bar_width + spacing) * position);
+
+      return {
+        x,
+        y,
+        height,
+        value: coord[V],
+      };
+    });
+
+    return {
       width: bar_width,
-      value: coord[V],
-    }));
+      items,
+    };
   }
 
   _midPoint(Ax, Ay, Bx, By) {
