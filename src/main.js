@@ -88,6 +88,11 @@ class MiniGraphCard extends LitElement {
     // for a currently unavailable entity
     this._preservedUom = [];
     this._preservedOrder = [];
+
+    // data prepared by buildConfig()
+    this._axisBoundsParsed = undefined; // parsed Y-axis bounds
+    this._entityFactors = undefined; // predefined factors
+    this._axisFactors = undefined; // predefined factors
   }
 
   static get styles() {
