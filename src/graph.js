@@ -68,11 +68,32 @@ export default class Graph {
    * @returns {number} Y-coord of a baseline
    */
   get baselineY() {
-    let baselineY = this._height + this._margin[Y] * 4;
+    const absoluteTop = 0;
+    const absoluteBottom = this._height + this._margin[Y] * 4;
+    let baselineY = this._invert
+      ? absoluteTop
+      : absoluteBottom;
+
     if (this._baseline !== undefined) {
+      // calculate Y coord
       const [baselineCoord] = this.calcY([[0, 0, this._baseline]]);
       [, baselineY] = baselineCoord;
+
+      // if the baseline is inside a top "margins area"
+      // - then shift the baseline to the top edge (0)
+      const gridTop = this._margin[Y] * 2;
+      if (baselineY <= gridTop) {
+        baselineY = absoluteTop;
+      }
+
+      // if the baseline is inside a bottom "margins area"
+      // - then shift the baseline to the bottom edge
+      const gridBottom = this._height + this._margin[Y] * 2;
+      if (baselineY >= gridBottom) {
+        baselineY = absoluteBottom;
+      }
     }
+
     return baselineY;
   }
 
