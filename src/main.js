@@ -74,6 +74,9 @@ class MiniGraphCard extends LitElement {
     // false - otherwise
     this._isShowStaticInactive = [];
 
+    // array of flags: true if an entity graph is "bars", false - otherwise
+    this._isBarGraph = [];
+
     // array of flags: true if a graph for the entry must be vertically inverted, false - otherwise
     this._isInverted = [];
 
@@ -189,6 +192,10 @@ class MiniGraphCard extends LitElement {
       (entity, index) => this._isStaticValue[index] && entity.show_static_inactive === true,
     );
 
+    // check if an entry's graph is "bars"
+    // (will be revised in future when combined "lines & bars" config is supported)
+    this._isBarGraph = this.config.entities.map((_entity) => (this.config.show.graph === 'bar'));
+
     // check if an entry's graph must be vertically inverted
     this._isInverted = this.config.entities.map((entity) => {
       const axisType = entity && entity.y_axis === 'secondary'
@@ -228,6 +235,7 @@ class MiniGraphCard extends LitElement {
           : [min_line_width, max_line_width];
       this.Graph = this.config.entities.map(
         (entity, index) => new Graph({
+          graphType: this._isBarGraph[index] ? 'bar' : 'line',
           width: 500,
           height: this.config.height,
           margin,
@@ -1724,10 +1732,12 @@ class MiniGraphCard extends LitElement {
           return;
         const bound = config.entities[i].y_axis === 'secondary' ? this.boundSecondary : this.bound;
         [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
-        if (config.show.graph === 'bar') {
+        if (this._isBarGraph[i]) {
+          // bar graph
           this.bar[i] = this.Graph[i].getBars(graphPos);
           graphPos += 1;
         } else {
+          // line graph
           const line = this.Graph[i].getPath();
           if (config.entities[i].show_line !== false) this.line[i] = line;
           if (config.show.fill
