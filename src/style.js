@@ -353,6 +353,9 @@ const style = css`
     grid-row: 1;
     position: relative;
   }
+  .graph__labels[invert] {
+    flex-direction: column-reverse;
+  }
   .graph__labels.--secondary {
     align-items: flex-end;
     grid-column: 1;

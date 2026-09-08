@@ -74,6 +74,9 @@ class MiniGraphCard extends LitElement {
     // false - otherwise
     this._isShowStaticInactive = [];
 
+    // array of flags: true if a graph for the entry must be vertically inverted, false - otherwise
+    this._isInverted = [];
+
     // update datetime settings periodically
     this._updateHour24 = true;
     this._updateDateTimeFormat = true;
@@ -186,6 +189,18 @@ class MiniGraphCard extends LitElement {
       (entity, index) => this._isStaticValue[index] && entity.show_static_inactive === true,
     );
 
+    // check if an entry's graph must be vertically inverted
+    this._isInverted = this.config.entities.map((entity) => {
+      const axisType = entity && entity.y_axis === 'secondary'
+        ? 'secondary'
+        : 'primary';
+      return (
+        this.config.y_axis
+        && this.config.y_axis[axisType]
+        && this.config.y_axis[axisType].invert
+      ) || false;
+    });
+
     this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
     const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
 
@@ -237,6 +252,7 @@ class MiniGraphCard extends LitElement {
             entity.baseline,
             this.config.baseline,
           ),
+          invert: this._isInverted[index],
         }),
       );
     }
@@ -790,11 +806,14 @@ class MiniGraphCard extends LitElement {
     const isAnimated = isEntryAnimated(this.config, index);
     const fade = this.config.show.fill === 'fade';
     const init = this.length[index] || this.config.entities[index].show_line === false;
+    const isInverted = this._isInverted && this._isInverted[index];
+    const opacityTop = isInverted ? '0.15' : '1';
+    const opacityBottom = isInverted ? '1' : '0.15';
     const { baselineRatio } = this.Graph[index];
     const gradientStops = baselineRatio === undefined
       ? svg`
-          <stop stop-color='white' offset='0%' stop-opacity='1'/>
-          <stop stop-color='white' offset='100%' stop-opacity='0.15'/>
+          <stop stop-color='white' offset='0%' stop-opacity="${opacityTop}"/>
+          <stop stop-color='white' offset='100%' stop-opacity="${opacityBottom}"/>
         `
       : svg`
           <stop stop-color='white' offset='0%' stop-opacity='1'/>
@@ -1132,8 +1151,11 @@ class MiniGraphCard extends LitElement {
       return html``;
     }
     // index is not passed into computeState() for a primary axis
+    const invert = this.config.y_axis
+      && this.config.y_axis.primary
+      && this.config.y_axis.primary.invert;
     return html`
-      <div class="graph__labels --primary flex">
+      <div class="graph__labels --primary flex" ?invert=${invert}>
         <span class="label--max">${this.computeState(this.bound[1])}</span>
         <span class="label--min">${this.computeState(this.bound[0])}</span>
       </div>
@@ -1150,8 +1172,11 @@ class MiniGraphCard extends LitElement {
       return html``;
     }
     // index "-1" is passed into computeState() for a secondary axis
+    const invert = this.config.y_axis
+      && this.config.y_axis.secondary
+      && this.config.y_axis.secondary.invert;
     return html`
-      <div class="graph__labels --secondary flex">
+      <div class="graph__labels --secondary flex" ?invert=${invert}>
         <span class="label--max">${this.computeState(this.boundSecondary[1], -1)}</span>
         <span class="label--min">${this.computeState(this.boundSecondary[0], -1)}</span>
       </div>

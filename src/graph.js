@@ -21,6 +21,7 @@ export default class Graph {
     bar_spacing_group = DEFAULT_BAR_SPACING, // spacing between groups of bars
     total_bars_in_group = 1, // number of bars (i.e. number of entities with a shown bar graph)
     baseline,
+    invert = false,
   }) {
     const aggregateFuncMap = {
       avg: this._average,
@@ -53,6 +54,7 @@ export default class Graph {
     this._groupBy = groupBy;
     this._endTime = 0;
     this._baseline = baseline;
+    this._invert = invert;
   }
 
   get max() { return this._max; }
@@ -68,7 +70,9 @@ export default class Graph {
    * @returns {number} Y-coord of a baseline
    */
   get baselineY() {
-    let baselineY = this._height + this._margin[Y] * 4;
+    let baselineY = this._invert
+      ? 0
+      : this._height + this._margin[Y] * 4;
     if (this._baseline !== undefined) {
       const [baselineCoord] = this.calcY([[0, 0, this._baseline]]);
       [, baselineY] = baselineCoord;
@@ -212,7 +216,12 @@ export default class Graph {
     }
     const coords2 = coords.map((coord) => {
       const val = this._logarithmic ? Math.log10(Math.max(1, coord[V])) : coord[V];
-      const coordY = this._height - ((val - min) / yRatio) + this._margin[Y] * 2;
+      let coordY;
+      if (this._invert) {
+        coordY = ((val - min) / yRatio) + this._margin[Y] * 2;
+      } else {
+        coordY = this._height - ((val - min) / yRatio) + this._margin[Y] * 2;
+      }
       return [coord[X], coordY, coord[V]];
     });
 
@@ -275,7 +284,7 @@ export default class Graph {
       ? Math.log10(Math.max(1, this._max)) - Math.log10(Math.max(1, this._min))
       : this._max - this._min;
 
-    return thresholds.map((stop, index, arr) => {
+    const gradientStops = thresholds.map((stop, index, arr) => {
       let color;
       if (stop.value > this._max && arr[index + 1]) {
         const factor = (this._max - arr[index + 1].value) / (stop.value - arr[index + 1].value);
@@ -305,6 +314,10 @@ export default class Graph {
         offset,
       };
     });
+
+    return this._invert
+      ? gradientStops.reverse()
+      : gradientStops;
   }
 
   /**
