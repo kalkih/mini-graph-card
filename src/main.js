@@ -790,7 +790,7 @@ class MiniGraphCard extends LitElement {
     const isAnimated = isEntryAnimated(this.config, index);
     const fade = this.config.show.fill === 'fade';
     const init = this.length[index] || this.config.entities[index].show_line === false;
-    const baselineRatio = this.Graph[index].baselineRatio;
+    const { baselineRatio } = this.Graph[index];
     const gradientStops = baselineRatio === undefined
       ? svg`
           <stop stop-color='white' offset='0%' stop-opacity='1'/>
@@ -1003,7 +1003,7 @@ class MiniGraphCard extends LitElement {
     if (!bars || !bars.items) return;
     const isAnimated = isEntryAnimated(this.config, index);
     const { width: barWidth, items } = this.bar[index]; // bars
-    const baselineY = this.Graph[index].baselineY;
+    const { baselineY } = this.Graph[index];
     const barStyle = isAnimated ? `transform-origin: 50% ${baselineY}px;` : '';
     const renderedItems = items.map((bar, i) => {
       const color = this.computeColor(bar.value, index);
@@ -1015,6 +1015,9 @@ class MiniGraphCard extends LitElement {
           @mouseout=${() => (this.tooltip = {})}>
         </rect>`;
     });
+    const inactive = this.tooltip.entity !== undefined
+      && this.tooltip.entity !== index
+      && !this._isShowStaticInactive[index];
     return svg`
       <g
         class='bars'
