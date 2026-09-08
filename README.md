@@ -209,10 +209,11 @@ The object has a tree-like structure with optional `primary` & `secondary` keys.
 
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
-| decimals | integer |  | Specify the exact number of decimals to show for primary Y-axis labels, see [Number format](#number-format).
+| invert | boolean |  | Make the Y-axis inverted, see [Inverted graphs](#inverted-graphs).
+| decimals | integer |  | Specify the exact number of decimals to show for the Y-axis labels, see [Number format](#number-format).
 | value_factor | number or object |   | Scale a value, see [Value factor](#value-factor).
-| lower_bound | number *or* string |   | Set a fixed lower bound for the graph Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
-| upper_bound | number *or* string |   | Set a fixed upper bound for the graph Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
+| lower_bound | number *or* string |   | Set a fixed lower bound for the Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
+| upper_bound | number *or* string |   | Set a fixed upper bound for the Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
 | min_bound_range | number |   | Applied after everything, makes sure there's a minimum range that the Y-axis will have. Useful for not making small changes look large because of scale.
 
 ```yaml
@@ -442,6 +443,15 @@ Additionally, the `baseline` option can be set individually for entities; may no
 
 See examples [below](#custom-baseline).
 
+### Inverted graphs
+
+An inverted graph has a vertically flipped Y-scale: lower values are shown at the top, higher values are shown at the bottom.
+
+This type of graph is mainly used when smaller values need to be shown at the top of the scale.
+
+Examples: a ping value (smaller ping is better), a water level in a well (0 level means "well is full", higher values mean "well is empty").
+
+See an example [below](#inverted-y-axis).
 
 ### Graphs order
 
@@ -873,6 +883,28 @@ show:
   graph: bar
   name: false
   icon: false
+  labels: true
+```
+
+#### Inverted Y-axis
+
+Water level in a well: a 0 value means "well is full", a higher value - "well is depleted/empty":
+
+<img width="477" height="272" alt="image" src="https://github.com/user-attachments/assets/446013ca-eca8-4344-85e4-d20d18c189f3" />
+
+```
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.water_level
+    baseline: 100
+height: 200
+y_axis:
+  primary:
+    invert: true
+show:
+  name: false
+  icon: false
+  state: true
   labels: true
 ```
 
