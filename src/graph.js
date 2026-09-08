@@ -63,6 +63,32 @@ export default class Graph {
 
   set min(min) { this._min = min; }
 
+  /**
+   * Get the current Y-coord for a baseline
+   * @returns {number} Y-coord of a baseline
+   */
+  get baselineY() {
+    let baselineY = this._height + this._margin[Y] * 4;
+    if (this._baseline !== undefined) {
+      const [baselineCoord] = this.calcY([[0, 0, this._baseline]]);
+      [, baselineY] = baselineCoord;
+    }
+
+    return baselineY;
+  }
+
+  /**
+   * Get a relative ratio of the baseline position (0..1)
+   * @returns {number|undefined} Baseline position ratio from the top,
+   * or undefined if no baseline is customized
+   */
+  get baselineRatio() {
+    if (this._baseline === undefined) {
+      return undefined;
+    }
+    return this.baselineY / (this._height + this._margin[Y] * 4);
+  }
+
   get history() { return this._history; }
 
   set history(data) { this._history = data; }
@@ -288,11 +314,7 @@ export default class Graph {
    * @returns {string} SVG path for a fill
    */
   getFill(path) {
-    let height = this._height + this._margin[Y] * 4;
-    if (this._baseline !== undefined) {
-      const [baselineCoord] = this.calcY([[0, 0, this._baseline]]);
-      [, height] = baselineCoord;
-    }
+    const height = this.baselineY;
     let fill = path;
     // note that currently this._margin[X] = 0 when fill is defined
     fill += ` L ${this._width + this._margin[X]}, ${height}`;
@@ -333,24 +355,14 @@ export default class Graph {
       }
     }
 
-    // calculate a baseline; by default it is either a bottom edge or a top edge (if inverted)
-    let baselineY = this._invert
-      ? 0
-      : this._height + this._margin[Y] * 4;
-    // re-calculate in case of a "baseline" option is defined
-    if (this._baseline !== undefined) {
-      const [baselineCoord] = this.calcY([[0, 0, this._baseline]]);
-      [, baselineY] = baselineCoord;
-    }
+    const { baselineY } = this;
 
-    return coords.map((coord, i) => {
+    const items = coords.map((coord, i) => {
       let y;
       const realY = coord[Y];
       if (realY <= baselineY) {
-        // grow up
         y = realY;
       } else {
-        // grow down
         y = baselineY;
       }
       const height = Math.abs(baselineY - realY);
@@ -359,15 +371,18 @@ export default class Graph {
         + (group_width + spacing_group) * i
         + (spacing === -1 ? 0 : (bar_width + spacing) * position);
 
-      return ({
+      return {
         x,
         y,
         height,
-        width: bar_width,
         value: coord[V],
-        baselineY,
-      });
+      };
     });
+
+    return {
+      width: bar_width,
+      items,
+    };
   }
 
   _midPoint(Ax, Ay, Bx, By) {
