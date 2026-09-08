@@ -451,7 +451,7 @@ This type of graph is mainly used when smaller values need to be shown at the to
 
 Examples: a ping value (smaller ping is better), a water level in a well (0 level means "well is full", higher values mean "well is empty").
 
-See an example [below](#inverted-y-axis).
+See examples [below](#inverted-y-axis).
 
 ### Graphs order
 
