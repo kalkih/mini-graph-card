@@ -807,20 +807,25 @@ show:
 
 Baseline is set to 0:
 
-<img width="497" height="217" alt="изображение" src="https://github.com/user-attachments/assets/c755d398-bbe8-435a-8571-ee4947483b56" />
+<img width="480" height="402" alt="image" src="https://github.com/user-attachments/assets/3b38e7dd-d5e6-4b9c-b75c-b6b53c07f04c" />
 
 ```yaml
 type: custom:mini-graph-card
 entities:
   - entity: sensor.xxx
 baseline: 0
+height: 400
 show:
   labels: true
+  name: false
+  icon: false
+  state: false
+  fill: fade
 ```
 
 Individual baselines for entities (along with displaying static lines):
 
-<img width="498" height="264" alt="изображение" src="https://github.com/user-attachments/assets/43a39c0b-4ca2-40ad-8443-2e8821aa987b" />
+<img width="483" height="249" alt="image" src="https://github.com/user-attachments/assets/d1bd9cc8-78a4-4428-8642-182ab15aa2dd" />
 
 ```yaml
 type: custom:mini-graph-card
@@ -830,19 +835,21 @@ entities:
     color: orange
     name: Room 1
   - static_value: 660
-    show_fill: false
     line_width: 1
     color: orange
+    show_fill: false
     show_legend: false
+    show_static_inactive: true
   - entity: sensor.xiaomi_cg_2_co2
-    baseline: 740
+    baseline: 690
     color: green
     name: Room 2
-  - static_value: 740
-    show_fill: false
+  - static_value: 690
     line_width: 1
     color: green
+    show_fill: false
     show_legend: false
+    show_static_inactive: true
 height: 200
 show:
   static_value_labels: left
