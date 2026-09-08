@@ -74,6 +74,9 @@ class MiniGraphCard extends LitElement {
     // false - otherwise
     this._isShowStaticInactive = [];
 
+    // array of flags: true if an entity graph is "bars", false - otherwise
+    this._isBarGraph = [];
+
     // array of flags: true if a graph for the entry must be vertically inverted, false - otherwise
     this._isInverted = [];
 
@@ -85,6 +88,11 @@ class MiniGraphCard extends LitElement {
     // for a currently unavailable entity
     this._preservedUom = [];
     this._preservedOrder = [];
+
+    // data prepared by buildConfig()
+    this._axisBoundsParsed = undefined; // parsed Y-axis bounds
+    this._entityFactors = undefined; // predefined factors
+    this._axisFactors = undefined; // predefined factors
   }
 
   static get styles() {
@@ -189,6 +197,11 @@ class MiniGraphCard extends LitElement {
       (entity, index) => this._isStaticValue[index] && entity.show_static_inactive === true,
     );
 
+    // check if an entry's graph is "bars"
+    // (will be revised in future when combined "lines & bars" config is supported)
+    // eslint-disable-next-line no-unused-vars
+    this._isBarGraph = this.config.entities.map(entity => this.config.show.graph === 'bar');
+
     // check if an entry's graph must be vertically inverted
     this._isInverted = this.config.entities.map((entity) => {
       const axisType = entity && entity.y_axis === 'secondary'
@@ -228,6 +241,7 @@ class MiniGraphCard extends LitElement {
           : [min_line_width, max_line_width];
       this.Graph = this.config.entities.map(
         (entity, index) => new Graph({
+          graphType: this._isBarGraph[index] ? 'bar' : 'line',
           width: 500,
           height: this.config.height,
           margin,
@@ -559,7 +573,7 @@ class MiniGraphCard extends LitElement {
     const entityConfig = this.config.entities[index];
     if (this.config.show.state === 'last' && this.config.show.graph === 'bar') {
       // last "bar" value
-      return this.bar[index][this.bar[index].length - 1].value;
+      return this.bar[index].items[this.bar[index].items.length - 1].value;
     } else if (this.config.show.state === 'last' && this.points[index] && this.points[index].length) {
       // last "point" value
       // only if "points" exist (show_points: true)
@@ -1574,7 +1588,7 @@ class MiniGraphCard extends LitElement {
   /**
   * Returns settings defining an order of a state/attribute value presentation;
   * fallback to default settings in case of a static_value
-  * @returns {Object}
+  * @returns {object}
   * directOrder - true: "value literal unit", false: "unit literal value";
   *
   * delimiter - an optional literal separator between value & unit
@@ -1724,10 +1738,12 @@ class MiniGraphCard extends LitElement {
           return;
         const bound = config.entities[i].y_axis === 'secondary' ? this.boundSecondary : this.bound;
         [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
-        if (config.show.graph === 'bar') {
+        if (this._isBarGraph[i]) {
+          // bar graph
           this.bar[i] = this.Graph[i].getBars(graphPos);
           graphPos += 1;
         } else {
+          // line graph
           const line = this.Graph[i].getPath();
           if (config.entities[i].show_line !== false) this.line[i] = line;
           if (config.show.fill
