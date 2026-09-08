@@ -1588,7 +1588,7 @@ class MiniGraphCard extends LitElement {
   /**
   * Returns settings defining an order of a state/attribute value presentation;
   * fallback to default settings in case of a static_value
-  * @returns {Object}
+  * @returns {object}
   * directOrder - true: "value literal unit", false: "unit literal value";
   *
   * delimiter - an optional literal separator between value & unit
