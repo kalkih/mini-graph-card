@@ -892,7 +892,7 @@ Water level in a well: a 0 value means "well is full", a higher value - "well is
 
 <img width="477" height="272" alt="image" src="https://github.com/user-attachments/assets/446013ca-eca8-4344-85e4-d20d18c189f3" />
 
-```
+```yaml
 type: custom:mini-graph-card
 entities:
   - entity: sensor.water_level
@@ -907,6 +907,29 @@ show:
   state: true
   labels: true
 ```
+
+Example for a bar graph:
+
+<img width="480" height="274" alt="image" src="https://github.com/user-attachments/assets/25c95530-a71d-4b3f-81c0-f4ca594ae9cf" />
+
+```yaml
+
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.water_level
+height: 200
+y_axis:
+  primary:
+    invert: true
+show:
+  name: false
+  icon: false
+  state: true
+  labels: true
+  graph: bar
+```
+
+
 
 #### Grouping by date
 
