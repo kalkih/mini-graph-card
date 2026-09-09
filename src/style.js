@@ -71,21 +71,38 @@ const style = css`
     min-width: 0;
   }
   .header {
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr) minmax(0, auto);
+    grid-template-rows: 1fr;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
   }
-  .header[loc="center"] {
-    justify-content: space-around;
-  }
-  .header[loc="left"] {
-    align-self: flex-start;
-  }
-  .header[loc="right"] {
-    align-self: flex-end;
+  .header > * {
+    grid-row: 1;
   }
   .name {
-    align-items: center;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     min-width: 0;
+    width: 100%;
     letter-spacing: var(--mcg-title-letter-spacing, normal);
+    overflow: hidden;
+  }
+  .name[loc="left"] {
+    grid-column: 1 / 3;
+    justify-self: start;
+    text-align: left;
+  }
+  .name[loc="center"] {
+    grid-column: 1 / 4;
+    justify-self: center;
+    text-align: center;
+  }
+  .name[loc="right"]  {
+    grid-column: 2 / 4;
+    justify-self: end;
+    text-align: right;
   }
   .name > span {
     font-size: 1.2em;
@@ -96,21 +113,18 @@ const style = css`
   }
   .icon {
     color: var(--state-icon-color, #44739e);
-    display: inline-block;
-    flex: 0 0 1.7em;
-    text-align: center;
   }
   .icon > ha-icon {
     height: 1.7em;
     width: 1.7em;
   }
   .icon[loc="left"] {
-    order: -1;
-    margin-right: .6em;
-    margin-left: 0;
+    grid-column: 1;
+    justify-self: start;
   }
   .icon[loc="right"] {
-    margin-left: auto;
+    grid-column: 3;
+    justify-self: end;
   }
   .icon[loc="state"] {
     align-self: center;
@@ -296,14 +310,17 @@ const style = css`
   .bars {
     animation: pop .25s cubic-bezier(0.215, 0.61, 0.355, 1);
   }
+  .bars[anim] .bar {
+    animation: growbar .6s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+  }
   .bars[anim] {
-    animation: bars .5s cubic-bezier(0.215, 0.61, 0.355, 1);
+    animation: pop .4s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   }
   .bar {
     transition: opacity .25s cubic-bezier(0.215, 0.61, 0.355, 1);
   }
   .bar:hover {
-    opacity: .5;
+    opacity: .5 !important;
     cursor: pointer;
   }
   path,
@@ -331,10 +348,13 @@ const style = css`
     font-size: calc(.15em + 8.5px);
     padding: .6em;
     pointer-events: none;
-    opacity: .75;
+    opacity: var(--mcg-label-axis-opacity, .75);
     grid-column: 1;
     grid-row: 1;
     position: relative;
+  }
+  .graph__labels[invert] {
+    flex-direction: column-reverse;
   }
   .graph__labels.--secondary {
     align-items: flex-end;
@@ -343,6 +363,7 @@ const style = css`
   }
   .graph__labels > span {
     cursor: pointer;
+    border-radius: var(--mcg-label-axis-border-radius, 1em);
   }
   .graph__static_value_labels {
     font-size: calc(.15em + 8.5px);
@@ -354,7 +375,6 @@ const style = css`
   .graph__labels > span,
   .graph__static_value_labels > span {
     background: var(--primary-background-color, white);
-    border-radius: 1em;
     padding: .2em .6em;
     box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.24);
     white-space: nowrap;
@@ -362,7 +382,8 @@ const style = css`
     user-select: none;
   }
   .graph__static_value_labels > span {
-    opacity: 0.75;
+    border-radius: var(--mcg-label-static-border-radius, 1em);
+    opacity: var(--mcg-label-static-opacity, .75);
     position: absolute;
     transform: translate(-50%, -50%);
   }
@@ -438,18 +459,13 @@ const style = css`
     0% { opacity: 0; }
     100% { opacity: 1; }
   }
-  @keyframes bars {
-    0% { opacity: 0; }
-    50% { opacity: 0; }
-    100% { opacity: 1; }
+  @keyframes growbar {
+    0% { transform: scaleY(0); }
+    100% { transform: scaleY(1); }
   }
   @keyframes dash {
-    0% {
-      opacity: 0;
-    }
-    25% {
-      opacity: 1;
-    }
+    0% { opacity: 0; }
+    25% { opacity: 1; }
     100% {
       opacity: 1;
       stroke-dashoffset: 0;
