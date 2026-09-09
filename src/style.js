@@ -299,6 +299,9 @@ const style = css`
   .graph__static_value_labels > span[inactive] {
     opacity: 0;
   }
+  .line--rect {
+    pointer-events: none;
+  }
   .line--point {
     cursor: pointer;
     fill: var(--primary-background-color, white);
