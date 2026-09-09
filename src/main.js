@@ -584,13 +584,13 @@ class MiniGraphCard extends LitElement {
   * @param {number} index Index of an entry in config.entities
   */
   getEntityState(index) {
-    const config = this.config;
+    const { config } = this;
     const entityConfig = config.entities[index];
     const isStateLast = config.show.state === 'last';
 
     // process "last" value
     if (isStateLast) {
-      if(this._isBarGraph[index]) {
+      if (this._isBarGraph[index]) {
         // bar graph
         if (!this.bar || !this.bar[index]
           || !this.bar[index].items || !this.bar[index].items.length) {
