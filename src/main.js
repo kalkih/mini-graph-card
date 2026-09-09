@@ -1109,21 +1109,35 @@ class MiniGraphCard extends LitElement {
       </svg>`;
   }
 
-  setTooltip(entity, index, value, label = null) {
+  /** Set a tooltip - an object used to display
+  * either a current value or a value for a selected point/bar
+  * @param {number} entityIndex Index of an entry in config.entities
+  * @param {number} bucketIndex Index of a point/bar
+  * @param {any} value Value
+  * @param {string|null} label Optional label
+  * @returns {void}
+  */
+  setTooltip(entityIndex, bucketIndex, value, label = null) {
     const {
       group_by,
       points_per_hour,
       hours_to_show,
     } = this.config;
 
-    // time units in milliseconds in this function
+    // time units in milliseconds in an interval
     const interval = getMilli(1 / points_per_hour);
-    const n_points = Math.ceil(hours_to_show * points_per_hour);
+    // number of intervals in the defined timespan
+    const nIntervals = Math.ceil(hours_to_show * points_per_hour);
+    // number of buckets in the defined timespan
+    const nBuckets = this._isBarGraph[entityIndex]
+      ? nIntervals
+      : nIntervals + 1; // including the 1st point on a left boundary
 
-    // index is 0 (oldest) to n_points-1 (most recent ~= now)
-    // count of intervals from now to end of bin
-    // count is 0 (now) to n_points-1 (oldest)
-    const count = (n_points - 1) - index;
+    // bucketIndex is 0 (oldest) to nBuckets-1 (most recent ~= now)
+    // count - number of intervals from "now" to end of the timespan
+    // count is 0 (the last point) to nBuckets-1 (oldest)
+    // "now" - time of a processed point
+    const count = (nBuckets - 1) - bucketIndex;
 
     // offset end by a minute, if grouped by, e.g., date or hour
     const oneMinute = group_by !== 'interval' ? 60000 : 0;
@@ -1152,9 +1166,9 @@ class MiniGraphCard extends LitElement {
     this.tooltip = {
       value,
       count,
-      entity,
+      entityIndex,
       time: [start, end],
-      index,
+      bucketIndex,
       label,
     };
   }
