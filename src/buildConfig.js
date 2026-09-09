@@ -1,6 +1,5 @@
 import {
   URL_DOCS,
-  MAX_BARS,
   DEFAULT_FONT_SIZE,
   DEFAULT_FONT_SIZE_HEADER,
   DEFAULT_BAR_SPACING,
@@ -12,7 +11,6 @@ import {
   DEFAULT_COLORS,
   DEFAULT_SHOW,
 } from './const';
-import { log } from './utils';
 import {
   checkNumericOption,
   checkIntegerOption,
@@ -326,14 +324,6 @@ export default (config) => {
       break;
     default:
       break;
-  }
-
-  if (conf.show.graph === 'bar') {
-    const entities = conf.entities.length;
-    if (conf.hours_to_show * conf.points_per_hour * entities > MAX_BARS) {
-      conf.points_per_hour = MAX_BARS / (conf.hours_to_show * entities);
-      log(`Not enough space, adjusting points_per_hour to ${conf.points_per_hour}`);
-    }
   }
 
   return {
