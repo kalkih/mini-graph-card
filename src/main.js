@@ -594,7 +594,7 @@ class MiniGraphCard extends LitElement {
     // process "last" value
     if (isStateLast) {
       if (this._isBarGraph[index]) {
-        // bar graph
+        // process bar graph
         if (!this.bar || !this.bar[index]
           || !this.bar[index].items || !this.bar[index].items.length) {
           // data not ready yet
@@ -604,12 +604,12 @@ class MiniGraphCard extends LitElement {
         return this.bar[index].items[this.bar[index].items.length - 1].value;
       }
 
+      // process line graph
       if (this.points && this.points[index] && this.points[index].length) {
         // last "point" value
         // only if "points" exist (show_points: true)
         return this.points[index][this.points[index].length - 1][V];
       }
-
       const showPoints = config.show.points && entityConfig.show_points !== false;
       if (showPoints) {
         // data not ready yet
@@ -632,7 +632,6 @@ class MiniGraphCard extends LitElement {
       // current attribute value
       return this.getObjectAttr(stateObj.attributes, entityConfig.attribute);
     }
-
     // process current state's value
     return stateObj.state;
   }
