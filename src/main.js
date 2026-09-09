@@ -218,11 +218,12 @@ class MiniGraphCard extends LitElement {
     const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
 
     // initialize memoized data
-    this._datetimeFormatFromCfgParsedCache = null;
-    this._visibleEntitiesCache = null;
-    this._primaryYaxisEntitiesCache = null;
-    this._secondaryYaxisEntitiesCache = null;
-    this._visibleLegendsCache = null;
+    this._datetimeFormatFromCfgParsedCache = undefined;
+    this._visibleEntitiesCache = undefined;
+    this._visibleBarEntitiesCache = undefined;
+    this._primaryYaxisEntitiesCache = undefined;
+    this._secondaryYaxisEntitiesCache = undefined;
+    this._visibleLegendsCache = undefined;
 
     // check a possibility to draw bars; adjust points_per_hour if needed
     const barGraphsCount = this.visibleBarEntities.length;
@@ -304,7 +305,7 @@ class MiniGraphCard extends LitElement {
   }
 
   get datetimeFormatFromCfgParsed() {
-    if (!this._datetimeFormatFromCfgParsedCache) {
+    if (this._datetimeFormatFromCfgParsedCache === undefined) {
       // parse a possibly defined "datetime_format" option from config
       this._datetimeFormatFromCfgParsedCache = parseDateTimeFormatFromCfg(
         this.config.datetime_format,
@@ -1301,7 +1302,7 @@ class MiniGraphCard extends LitElement {
   }
 
   get visibleEntities() {
-    if (!this._visibleEntitiesCache) {
+    if (this._visibleEntitiesCache === undefined) {
       this._visibleEntitiesCache = this.config.entities
         .filter(entity => entity.show_graph !== false);
     }
@@ -1309,7 +1310,7 @@ class MiniGraphCard extends LitElement {
   }
 
   get visibleBarEntities() {
-    if (!this._visibleBarEntitiesCache) {
+    if (this._visibleBarEntitiesCache === undefined) {
       this._visibleBarEntitiesCache = this.config.entities
         .filter((_, index) => this._isBarGraph[index]);
     }
@@ -1317,7 +1318,7 @@ class MiniGraphCard extends LitElement {
   }
 
   get primaryYaxisEntities() {
-    if (!this._primaryYaxisEntitiesCache) {
+    if (this._primaryYaxisEntitiesCache === undefined) {
       this._primaryYaxisEntitiesCache = this.visibleEntities
         .filter(entity => entity.y_axis === undefined || entity.y_axis === 'primary');
     }
@@ -1325,7 +1326,7 @@ class MiniGraphCard extends LitElement {
   }
 
   get secondaryYaxisEntities() {
-    if (!this._secondaryYaxisEntitiesCache) {
+    if (this._secondaryYaxisEntitiesCache === undefined) {
       this._secondaryYaxisEntitiesCache = this.visibleEntities
         .filter(entity => entity.y_axis === 'secondary');
     }
@@ -1333,7 +1334,7 @@ class MiniGraphCard extends LitElement {
   }
 
   get visibleLegends() {
-    if (!this._visibleLegendsCache) {
+    if (this._visibleLegendsCache === undefined) {
       this._visibleLegendsCache = this.visibleEntities
         .filter(entity => entity.show_legend !== false);
     }
