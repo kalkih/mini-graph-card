@@ -250,7 +250,7 @@ class MiniGraphCard extends LitElement {
         min: min_line_width,
         max: max_line_width,
       } = this.getMinMaxLineWidth();
-      this._graphMargin = this.visibleBarEntities.length
+      this._graphMargin = this.visibleBarEntities.length === this.visibleEntities.length
         ? [DEFAULT_MARGIN, DEFAULT_MARGIN]
         : this.config.show.fill
           ? [0, max_line_width]
