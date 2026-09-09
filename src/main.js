@@ -90,6 +90,9 @@ class MiniGraphCard extends LitElement {
     this._preservedUom = [];
     this._preservedOrder = [];
 
+    // margins for a graph container
+    this._graphMargin = [DEFAULT_MARGIN, DEFAULT_MARGIN];
+
     // data prepared by buildConfig()
     this._axisBoundsParsed = undefined; // parsed Y-axis bounds
     this._entityFactors = undefined; // predefined factors
