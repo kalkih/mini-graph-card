@@ -936,6 +936,7 @@ class MiniGraphCard extends LitElement {
     const color = this.computeColor(state, index);
     const inactive = this.tooltip.entity !== undefined
       && this.tooltip.entity !== index
+      && !(this._isBarGraph[this.tooltip.entity] && this.tooltip.index !== -1)
       && !this._isShowStaticInactive[index];
     const radius = getFirstDefinedItem(
       this.config.entities[index].line_width,
@@ -988,6 +989,7 @@ class MiniGraphCard extends LitElement {
       : this.computeColor(state, index);
     const inactive = this.tooltip.entity !== undefined
       && this.tooltip.entity !== index
+      && !(this._isBarGraph[this.tooltip.entity] && this.tooltip.index !== -1)
       && !this._isShowStaticInactive[index];
     return svg`
       <rect class='line--rect'
@@ -1016,6 +1018,7 @@ class MiniGraphCard extends LitElement {
       : this.computeColor(state, index);
     const inactive = this.tooltip.entity !== undefined
       && this.tooltip.entity !== index
+      && !(this._isBarGraph[this.tooltip.entity] && this.tooltip.index !== -1)
       && !this._isShowStaticInactive[index];
     return svg`
       <rect class='fill--rect'
@@ -1050,6 +1053,7 @@ class MiniGraphCard extends LitElement {
     });
     const inactive = this.tooltip.entity !== undefined
       && this.tooltip.entity !== index
+      && !(this._isBarGraph[this.tooltip.entity] && this.tooltip.index !== -1)
       && !this._isShowStaticInactive[index];
     return svg`
       <g
