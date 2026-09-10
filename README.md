@@ -146,6 +146,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | static_value | number |         | Set a value for a [static line](#static-lines). Either `entity` or `static_value` must be defined.
 | name | string |         | Set a custom display name, defaults to entity's friendly_name or a `Static` label for a [static value](#static-lines).
 | animate    | boolean |        | Override for a reveal animation to the graph.
+| graph | string |         | Override for a graph type ('line', 'bar'). See [Graph types](graph-types).
 | line_width | number |         | Override for a thickness of the line.
 | line_style | string |   | Override the style of the line (see [Line styles](#line-styles)).
 | color | string |         | Set a custom color, overrides all other color options including thresholds. See [Supported color formats](#supported-color-formats).
@@ -189,7 +190,7 @@ All properties are optional.
 | name | `true` | `true` / `false` | Display name.
 | icon | `true` | `true` / `false` | Display icon.
 | state | `true` | `true` / `false` / `last` | Display current state. `last` will show the last graph point's or bar's value (fallback to `true` if points are not shown for a line graph).
-| graph | `line` | `line` / `bar` / `false` | Display option for the graph. If set to `bar` a maximum of `96` bars will be displayed.
+| graph | `line` | `line` / `bar` / `false` | Display option for the graph. If set to `bar` a maximum of `96` bars will be displayed. See [Graph types](graph-types).
 | fill | `true` | `true` / `false` / `fade` | Display the line graph fill.
 | points | `hover` | `true` / `false` / `hover` | Display graph data points (for a line graph only).
 | legend | `true` | `true` / `false` / `below` | Display the graph legend (only shown when graph contains multiple entities); `below` - place below a graph.
@@ -202,6 +203,19 @@ All properties are optional.
 | icon_adaptive_color | `false` | `true` / `false` | Make the icon color adapt with the primary entity/static value color.
 | loading_indicator | `true` | `true` / `false` | Show loading indicator while attempting to retrieve a history.
 | graphs_order | `direct` | `direct` / `reversed` | Define an order of displaying graphs (see [Graphs order](#graphs-order)).
+
+#### Graph types
+
+Two graph types are supported - linear & bars.
+
+By default, all graphs have a 'line' type.
+
+To set a common type for all graphs - use a `show.graph` option (see [Available show options](#available-show-options)).
+
+To set an individual type for a particular graph, use a per-entity `graph` option (see [Entities object](#entities-object)).
+
+See examples [below](#different-graph-types).
+
 
 #### Y-axis object
 
@@ -455,7 +469,7 @@ See examples [below](#inverted-y-axis).
 
 ### Graphs order
 
-Note: this section only applies to line graphs & stacked bars graphs (with `bar_spacing: -1`).
+Note: this section only applies to line graphs & overlapping bars graphs (with `bar_spacing: -1`).
 
 For each entity/[static value](#static-lines), a `line` graph consists of 3 basic parts: a "line" part (curve), a "fill" part (if displaying a fill is configured), a "points" part (if displaying points is configured).
 
@@ -472,7 +486,7 @@ I.e. the last entity's/static value's graph will be shown as topmost.
 
 This can be altered by setting a `graph_order` option: `direct` (default) stands for the described default order, `reversed` stands for "1st entity's/static value's graph is topmost".
 
-Similarly for stacked bars graphs (when `bar_spacing: -1`): by default (or with `graph_order: direct`), bars for each point are processed in the following order:
+Similarly for overlapping bars graphs (when `bar_spacing: -1`): by default (or with `graph_order: direct`), bars for each point are processed in the following order:
 1. First, a bar for the 1st entity/static value in the `entities` list is processed.
 2. Last, a bar for the last entity/static value in the `entities` list is processed.
 
@@ -544,7 +558,11 @@ entities:
   - sensor.server_received
 ```
 
-#### Bar chart card
+#### Different graph types
+
+See above for simple "Only linear graphs" examples.
+
+Bar chart card:
 
 ![Bar chart card](https://user-images.githubusercontent.com/457678/52970286-985e7300-33b3-11e9-89bc-1278c4e2ecf2.png)
 
@@ -556,6 +574,33 @@ name: ENERGY CONSUMPTION
 show:
   graph: bar
 ```
+
+Linear & bar graphs:
+
+<img width="483" height="307" alt="image" src="https://github.com/user-attachments/assets/1e8d139a-c331-46b6-ac2c-ac0f2060e5da" />
+
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.system_monitor_memory_use
+  - entity: sensor.system_monitor_processor_use
+    show_state: true
+    y_axis: secondary
+    graph: bar
+height: 200
+y_axis:
+  secondary:
+    lower_bound: 0
+points_per_hour: 2
+bar_spacing: 1
+show:
+  labels: true
+  labels_secondary: true
+  name: false
+  icon: false
+```
+
 
 #### Bar spacing
 
