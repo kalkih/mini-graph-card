@@ -455,7 +455,7 @@ class MiniGraphCard extends LitElement {
 
   /**
   * Renders an icon
-  * @param {string} iconLoc Location of an icon in a header (left/right)
+  * @param {string} iconLoc Location of an icon (left/right/state)
   * @returns {TemplateResult} Lit template result
   */
   renderIcon(iconLoc) {
@@ -538,7 +538,7 @@ class MiniGraphCard extends LitElement {
         <div class="states--secondary">
           ${this.config.entities.slice(1).map((entityConfig, i) => this.renderState(i + 1))}
         </div>
-        ${this.config.align_icon === 'state' ? this.renderIcon() : html``}
+        ${this.config.align_icon === 'state' ? this.renderIcon('state') : html``}
       </div>
     `;
   }
