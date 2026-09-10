@@ -1173,6 +1173,7 @@ class MiniGraphCard extends LitElement {
       const smoothingType = this._graphSmoothing[entityIndex];
       const isFirstPointAnInterval = isBar || smoothingType === true;
 
+      // note that for a "2-points" smoothed line graph - bucketIndex is always >0
       if (bucketIndex > 0 || isFirstPointAnInterval) {
         now.setMilliseconds(now.getMilliseconds() + oneMinute - interval);
         start = formatDateTime(
