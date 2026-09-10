@@ -81,6 +81,9 @@ class MiniGraphCard extends LitElement {
     // array of flags: true if a graph for the entry must be vertically inverted, false - otherwise
     this._isInverted = [];
 
+    // array of "smoothing" values for each graph
+    this._graphSmoothing = [];
+
     // update datetime settings periodically
     this._updateHour24 = true;
     this._updateDateTimeFormat = true;
@@ -217,6 +220,16 @@ class MiniGraphCard extends LitElement {
       ) || false;
     });
 
+    // array of "smoothing" values for each graph
+    this._graphSmoothing = this.config.entities.map((entityConfig, index) => {
+      if (this._isBarGraph[index]) return false;
+      return getFirstDefinedItem(
+        entityConfig.smoothing,
+        this.config.smoothing,
+        this.getDefaultSmoothing(index),
+      );
+    });
+
     this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
     const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
 
@@ -266,11 +279,7 @@ class MiniGraphCard extends LitElement {
           points_per_hour: this.config.points_per_hour,
           aggregateFuncName: entityConfig.aggregate_func || this.config.aggregate_func,
           groupBy: this.config.group_by,
-          smoothing: getFirstDefinedItem(
-            entityConfig.smoothing,
-            this.config.smoothing,
-            this.getDefaultSmoothing(index),
-          ),
+          smoothing: this._graphSmoothing[index],
           logarithmic: getFirstDefinedItem(
             entityConfig.logarithmic,
             this.config.logarithmic,
@@ -322,7 +331,7 @@ class MiniGraphCard extends LitElement {
   * on every render
   * @param {boolean|undefined} forced True to forcibly update a format
   */
-  updateFormatFromLocale(forced) {
+  updateFormatFromLocale(forced = undefined) {
     if (this._updateDateTimeFormat || forced) {
       this._datetimeFormatDateOptions = getDateFormat(
         this.config,
@@ -364,7 +373,7 @@ class MiniGraphCard extends LitElement {
       this.color = this.computeColor(
         this.tooltip.value !== undefined
           ? this.tooltip.value : this.getEntityState(0),
-        this.tooltip.entity || 0,
+        this.tooltip.entityIndex || 0,
       );
       return true;
     }
@@ -519,8 +528,8 @@ class MiniGraphCard extends LitElement {
       return html``;
     }
 
-    const name = this.tooltip.entity !== undefined
-      ? this.computeName(this.tooltip.entity)
+    const name = this.tooltip.entityIndex !== undefined
+      ? this.computeName(this.tooltip.entityIndex)
       : this.config.name || this.computeName(0);
     const color = this.config.show.name_adaptive_color
       ? `opacity: 1; color: ${this.color};`
@@ -687,16 +696,17 @@ class MiniGraphCard extends LitElement {
     if (this.tooltip.value === undefined) {
       return html``;
     }
+    /* eslint-disable indent */
     return html`
       <div class="state__time">
-        ${this.tooltip.label ? html`
-          <span class="tooltip--label">${this.tooltip.label}</span>
-        ` : html`
-          <span>${this.tooltip.time[0]}</span> -
-          <span>${this.tooltip.time[1]}</span>
-        `}
+        ${this.tooltip.label
+          ? html`<span class="tooltip--label">${this.tooltip.label}</span>`
+          : this.tooltip.time[0]
+            ? html`<span>${this.tooltip.time[0]}</span> - <span>${this.tooltip.time[1]}</span>`
+            : html`<span>${this.tooltip.time[1]}</span>`}
       </div>
     `;
+     /* eslint-enable indent */
   }
 
   /**
@@ -839,7 +849,7 @@ class MiniGraphCard extends LitElement {
 
           return html`<span
             id="static-label-${index}"
-            ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== index
+            ?inactive=${this.tooltip.entityIndex !== undefined && this.tooltip.entityIndex !== index
               && !this._isShowStaticInactive[index]}
             style="
               color: ${color};
@@ -955,7 +965,7 @@ class MiniGraphCard extends LitElement {
     return svg`
       <circle
         class='line--point'
-        ?inactive=${this.tooltip.index !== point[3]}
+        ?inactive=${this.tooltip.bucketIndex !== point[3]}
         style=${`--mcg-hover: ${color};`}
         stroke=${color}
         fill=${color}
@@ -980,9 +990,9 @@ class MiniGraphCard extends LitElement {
         ? this.config.entities[index].static_value
         : undefined;
     const color = this.computeColor(state, index);
-    const inactive = this.tooltip.entity !== undefined
-      && this.tooltip.entity !== index
-      && !(this._isBarGraph[this.tooltip.entity] && this.tooltip.index !== -1)
+    const inactive = this.tooltip.entityIndex !== undefined
+      && this.tooltip.entityIndex !== index
+      && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.bucketIndex !== -1)
       && !this._isShowStaticInactive[index];
     const radius = getFirstDefinedItem(
       this.config.entities[index].line_width,
@@ -991,7 +1001,7 @@ class MiniGraphCard extends LitElement {
     const isAnimated = isEntryAnimated(this.config, index);
     return svg`
       <g class='line--points'
-        ?tooltip=${this.tooltip.entity === index}
+        ?tooltip=${this.tooltip.entityIndex === index}
         ?inactive=${inactive}
         ?init=${this.length[index]}
         anim=${isAnimated && this.config.show.points !== 'hover'}
@@ -1033,9 +1043,9 @@ class MiniGraphCard extends LitElement {
     const fill = this.gradient[index]
       ? `url(#grad-${this.id}-${index})`
       : this.computeColor(state, index);
-    const inactive = this.tooltip.entity !== undefined
-      && this.tooltip.entity !== index
-      && !(this._isBarGraph[this.tooltip.entity] && this.tooltip.index !== -1)
+    const inactive = this.tooltip.entityIndex !== undefined
+      && this.tooltip.entityIndex !== index
+      && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.bucketIndex !== -1)
       && !this._isShowStaticInactive[index];
     return svg`
       <rect class='line--rect'
@@ -1062,9 +1072,9 @@ class MiniGraphCard extends LitElement {
     const svgFill = this.gradient[index]
       ? `url(#grad-${this.id}-${index})`
       : this.computeColor(state, index);
-    const inactive = this.tooltip.entity !== undefined
-      && this.tooltip.entity !== index
-      && !(this._isBarGraph[this.tooltip.entity] && this.tooltip.index !== -1)
+    const inactive = this.tooltip.entityIndex !== undefined
+      && this.tooltip.entityIndex !== index
+      && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.bucketIndex !== -1)
       && !this._isShowStaticInactive[index];
     return svg`
       <rect class='fill--rect'
@@ -1097,9 +1107,9 @@ class MiniGraphCard extends LitElement {
           @mouseout=${() => (this.tooltip = {})}>
         </rect>`;
     });
-    const inactive = this.tooltip.entity !== undefined
-      && this.tooltip.entity !== index
-      && !(this._isBarGraph[this.tooltip.entity] && this.tooltip.index !== -1)
+    const inactive = this.tooltip.entityIndex !== undefined
+      && this.tooltip.entityIndex !== index
+      && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.bucketIndex !== -1)
       && !this._isShowStaticInactive[index];
     return svg`
       <g
@@ -1155,52 +1165,82 @@ class MiniGraphCard extends LitElement {
       </svg>`;
   }
 
-  setTooltip(entity, index, value, label = null) {
-    const {
-      group_by,
-      points_per_hour,
-      hours_to_show,
-    } = this.config;
+  /** Set a tooltip - an object used to display
+   * either a current value or a value for a selected point/bar
+  * @param {number} entityIndex Index of an entry in config.entities
+  * @param {number} bucketIndex Index of a point/bar
+  * @param {any} value Value
+  * @param {string|null} label Optional label
+  * @returns {void}
+  */
+  setTooltip(entityIndex, bucketIndex, value, label = null) {
+    let start;
+    let end;
+    let count;
 
-    // time units in milliseconds in this function
-    const interval = getMilli(1 / points_per_hour);
-    const n_points = Math.ceil(hours_to_show * points_per_hour);
+    // ignore when bucketIndex = -1
+    if (bucketIndex >= 0) {
+      const {
+        group_by,
+        points_per_hour,
+        hours_to_show,
+      } = this.config;
 
-    // index is 0 (oldest) to n_points-1 (most recent ~= now)
-    // count of intervals from now to end of bin
-    // count is 0 (now) to n_points-1 (oldest)
-    const count = (n_points - 1) - index;
+      const isBar = this._isBarGraph[entityIndex];
 
-    // offset end by a minute, if grouped by, e.g., date or hour
-    const oneMinute = group_by !== 'interval' ? 60000 : 0;
+      // time units in milliseconds in an interval
+      const interval = getMilli(1 / points_per_hour);
+      // number of intervals in the defined timespan
+      const nIntervals = Math.ceil(hours_to_show * points_per_hour);
+      // number of buckets in the defined timespan
+      const nBuckets = isBar
+        ? nIntervals
+        : nIntervals + 1; // including the 1st point on a left boundary
 
-    const now = this.getEndDate();
+      // bucketIndex is 0 (oldest) to nBuckets-1 (most recent ~= now)
+      // count - number of intervals from "now" to end of the timespan
+      // count is 0 (the last point) to nBuckets-1 (oldest)
+      // "now" - time of a processed point
+      count = (nBuckets - 1) - bucketIndex;
 
-    now.setMilliseconds(now.getMilliseconds() - oneMinute - interval * count);
-    const end = formatDateTime(
-      now,
-      this.config,
-      this.datetimeFormatFromCfgParsed,
-      this._datetimeFormatDateOptions,
-      this._datetimeFormatTimeOptions,
-      this._hass,
-    );
-    now.setMilliseconds(now.getMilliseconds() + oneMinute - interval);
-    const start = formatDateTime(
-      now,
-      this.config,
-      this.datetimeFormatFromCfgParsed,
-      this._datetimeFormatDateOptions,
-      this._datetimeFormatTimeOptions,
-      this._hass,
-    );
+      // offset end by a minute, if grouped by, e.g., date or hour
+      const oneMinute = group_by !== 'interval' ? 60000 : 0;
+
+      const now = this.getEndDate();
+
+      now.setMilliseconds(now.getMilliseconds() - oneMinute - interval * count);
+      end = formatDateTime(
+        now,
+        this.config,
+        this.datetimeFormatFromCfgParsed,
+        this._datetimeFormatDateOptions,
+        this._datetimeFormatTimeOptions,
+        this._hass,
+      );
+
+      const smoothingType = this._graphSmoothing[entityIndex];
+      const isFirstPointAnInterval = isBar || smoothingType === true;
+
+      // note that for a "2-points" smoothed line graph - bucketIndex is always >0
+      if (bucketIndex > 0 || isFirstPointAnInterval) {
+        now.setMilliseconds(now.getMilliseconds() + oneMinute - interval);
+        start = formatDateTime(
+          now,
+          this.config,
+          this.datetimeFormatFromCfgParsed,
+          this._datetimeFormatDateOptions,
+          this._datetimeFormatTimeOptions,
+          this._hass,
+        );
+      }
+    }
 
     this.tooltip = {
       value,
       count,
-      entity,
+      entityIndex,
       time: [start, end],
-      index,
+      bucketIndex,
       label,
     };
   }
