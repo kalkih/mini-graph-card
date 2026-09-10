@@ -219,14 +219,14 @@ class MiniGraphCard extends LitElement {
 
     // array of "smoothing" values for each graph
     this._graphSmoothing = this.config.entities.map(
-      (entityConfig, index) => (this._isBarGraph[index]
-        ? false
-        : getFirstDefinedItem(
-            entityConfig.smoothing,
-            this.config.smoothing,
-            this.getDefaultSmoothing(index),
-          )),
-    );
+      (entityConfig, index) => {
+        if (this._isBarGraph[index]) return false;
+        return getFirstDefinedItem(
+          entityConfig.smoothing,
+          this.config.smoothing,
+          this.getDefaultSmoothing(index),
+        );
+      });
 
     this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
     const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
@@ -650,7 +650,7 @@ class MiniGraphCard extends LitElement {
     if (this.tooltip.value === undefined) {
       return html``;
     }
-     /* eslint-disable indent */
+    /* eslint-disable indent */
     return html`
       <div class="state__time">
         ${this.tooltip.label
