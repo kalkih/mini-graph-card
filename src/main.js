@@ -21,6 +21,7 @@ import {
   UPDATE_PROPS,
   X, Y, V,
   ONE_HOUR,
+  MAX_BARS,
   DEFAULT_GRAPH_HEIGHT,
   DEFAULT_MARGIN,
   NBSP,
@@ -91,6 +92,9 @@ class MiniGraphCard extends LitElement {
     // for a currently unavailable entity
     this._preservedUom = [];
     this._preservedOrder = [];
+
+    // margins for a graph container
+    this._graphMargin = [DEFAULT_MARGIN, DEFAULT_MARGIN];
 
     // data prepared by buildConfig()
     this._axisBoundsParsed = undefined; // parsed Y-axis bounds
@@ -201,9 +205,8 @@ class MiniGraphCard extends LitElement {
     );
 
     // check if an entry's graph is "bars"
-    // (will be revised in future when combined "lines & bars" config is supported)
-    // eslint-disable-next-line no-unused-vars
-    this._isBarGraph = this.config.entities.map(entityConfig => this.config.show.graph === 'bar');
+    this._isBarGraph = this.config.entities.map(entityConfig => (entityConfig.graph === 'bar'
+      || (this.config.show.graph === 'bar' && entityConfig.graph !== 'line')));
 
     // check if an entry's graph must be vertically inverted
     this._isInverted = this.config.entities.map((entityConfig) => {
@@ -231,11 +234,22 @@ class MiniGraphCard extends LitElement {
     const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
 
     // initialize memoized data
-    this._datetimeFormatFromCfgParsedCache = null;
-    this._visibleEntitiesCache = null;
-    this._primaryYaxisEntitiesCache = null;
-    this._secondaryYaxisEntitiesCache = null;
-    this._visibleLegendsCache = null;
+    this._datetimeFormatFromCfgParsedCache = undefined;
+    this._visibleEntitiesCache = undefined;
+    this._visibleBarEntitiesCache = undefined;
+    this._primaryYaxisEntitiesCache = undefined;
+    this._secondaryYaxisEntitiesCache = undefined;
+    this._visibleLegendsCache = undefined;
+
+    // check a possibility to draw bars; adjust points_per_hour if needed
+    const barGraphsCount = this.visibleBarEntities.length;
+    if (barGraphsCount) {
+      // number of bar graphs
+      if (this.config.hours_to_show * this.config.points_per_hour * barGraphsCount > MAX_BARS) {
+        this.config.points_per_hour = MAX_BARS / (this.config.hours_to_show * barGraphsCount);
+        log(`Not enough space to draw bars, adjusting points_per_hour to ${this.config.points_per_hour}`);
+      }
+    }
 
     // update datetime settings periodically
     this._updateHour24 = config.hour24 === undefined;
@@ -243,21 +257,24 @@ class MiniGraphCard extends LitElement {
 
     if (!this.Graph || entitiesChanged) {
       if (this._hass) this.hass = this._hass;
+
+      // calculate margins for a graph container
       const {
         min: min_line_width,
         max: max_line_width,
       } = this.getMinMaxLineWidth();
-      const margin = this.config.show.graph === 'bar'
+      this._graphMargin = this.visibleBarEntities.length === this.visibleEntities.length
         ? [DEFAULT_MARGIN, DEFAULT_MARGIN]
         : this.config.show.fill
           ? [0, max_line_width]
           : [min_line_width, max_line_width];
+
       this.Graph = this.config.entities.map(
         (entityConfig, index) => new Graph({
           graphType: this._isBarGraph[index] ? 'bar' : 'line',
           width: 500,
           height: this.config.height,
-          margin,
+          margin: this._graphMargin,
           hours_to_show: this.config.hours_to_show,
           points_per_hour: this.config.points_per_hour,
           aggregateFuncName: entityConfig.aggregate_func || this.config.aggregate_func,
@@ -300,7 +317,7 @@ class MiniGraphCard extends LitElement {
   }
 
   get datetimeFormatFromCfgParsed() {
-    if (!this._datetimeFormatFromCfgParsedCache) {
+    if (this._datetimeFormatFromCfgParsedCache === undefined) {
       // parse a possibly defined "datetime_format" option from config
       this._datetimeFormatFromCfgParsedCache = parseDateTimeFormatFromCfg(
         this.config.datetime_format,
@@ -579,23 +596,53 @@ class MiniGraphCard extends LitElement {
   * @param {number} index Index of an entry in config.entities
   */
   getEntityState(index) {
-    const entityConfig = this.config.entities[index];
-    if (this.config.show.state === 'last' && this.config.show.graph === 'bar') {
-      // last "bar" value
-      return this.bar[index].items[this.bar[index].items.length - 1].value;
-    } else if (this.config.show.state === 'last' && this.points[index] && this.points[index].length) {
-      // last "point" value
-      // only if "points" exist (show_points: true)
-      return this.points[index][this.points[index].length - 1][V];
-    } else if (this._isStaticValue[index]) {
-      return this.config.entities[index].static_value;
-    } else if (entityConfig.attribute) {
-      // current attribute value
-      return this.getObjectAttr(this.entity[index].attributes, entityConfig.attribute);
-    } else {
-      // current state value
-      return this.entity[index].state;
+    const { config } = this;
+    const entityConfig = config.entities[index];
+    const isStateLast = config.show.state === 'last';
+
+    // process "last" value
+    if (isStateLast) {
+      if (this._isBarGraph[index]) {
+        // process bar graph
+        if (!this.bar || !this.bar[index]
+          || !this.bar[index].items || !this.bar[index].items.length) {
+          // data not ready yet
+          return undefined;
+        }
+        // last "bar" value
+        return this.bar[index].items[this.bar[index].items.length - 1].value;
+      }
+
+      // process line graph
+      if (this.points && this.points[index] && this.points[index].length) {
+        // last "point" value
+        // only if "points" exist (show_points: true)
+        return this.points[index][this.points[index].length - 1][V];
+      }
+      const showPoints = config.show.points && entityConfig.show_points !== false;
+      if (showPoints) {
+        // data not ready yet
+        return undefined;
+      }
     }
+
+    // process static value
+    if (this._isStaticValue[index]) {
+      return entityConfig.static_value;
+    }
+
+    // process current value
+    const stateObj = this.entity && this.entity[index];
+    if (!stateObj) {
+      return undefined;
+    }
+    // process current attribute's value
+    if (entityConfig.attribute) {
+      // current attribute value
+      return this.getObjectAttr(stateObj.attributes, entityConfig.attribute);
+    }
+    // process current state's value
+    return stateObj.state;
   }
 
   /**
@@ -780,7 +827,8 @@ class MiniGraphCard extends LitElement {
       <div class="graph__static_value_labels">
         ${this.config.entities.map((entityConfig, index) => {
           if (!this._isStaticValue[index]
-            || entityConfig.show_static_value_label === false) {
+            || entityConfig.show_static_value_label === false
+            || this._isBarGraph[index]) {
             return html``;
           }
           const staticValue = this.config.entities[index].static_value;
@@ -1109,9 +1157,9 @@ class MiniGraphCard extends LitElement {
           </defs>
           ${this.renderSvgPart(this.fill, this.renderSvgFill, reversed)}
           ${this.renderSvgPart(this.fill, this.renderSvgFillRect, reversed)}
+          ${this.renderSvgPart(this.bar, this.renderSvgBars, this.config.bar_spacing === -1 && reversed)}
           ${this.renderSvgPart(this.line, this.renderSvgLine, reversed)}
           ${this.renderSvgPart(this.line, this.renderSvgLineRect, reversed)}
-          ${this.renderSvgPart(this.bar, this.renderSvgBars, this.config.bar_spacing === -1 && reversed)}
         </g>
         ${this.renderSvgPart(this.points, this.renderSvgPoints, reversed)}
       </svg>`;
@@ -1294,15 +1342,23 @@ class MiniGraphCard extends LitElement {
   }
 
   get visibleEntities() {
-    if (!this._visibleEntitiesCache) {
+    if (this._visibleEntitiesCache === undefined) {
       this._visibleEntitiesCache = this.config.entities
         .filter(entityConfig => entityConfig.show_graph !== false);
     }
     return this._visibleEntitiesCache;
   }
 
+  get visibleBarEntities() {
+    if (this._visibleBarEntitiesCache === undefined) {
+      this._visibleBarEntitiesCache = this.config.entities
+        .filter((_, index) => this._isBarGraph[index]);
+    }
+    return this._visibleBarEntitiesCache;
+  }
+
   get primaryYaxisEntities() {
-    if (!this._primaryYaxisEntitiesCache) {
+    if (this._primaryYaxisEntitiesCache === undefined) {
       this._primaryYaxisEntitiesCache = this.visibleEntities
         .filter(entityConfig => entityConfig.y_axis === undefined || entityConfig.y_axis === 'primary');
     }
@@ -1310,7 +1366,7 @@ class MiniGraphCard extends LitElement {
   }
 
   get secondaryYaxisEntities() {
-    if (!this._secondaryYaxisEntitiesCache) {
+    if (this._secondaryYaxisEntitiesCache === undefined) {
       this._secondaryYaxisEntitiesCache = this.visibleEntities
         .filter(entityConfig => entityConfig.y_axis === 'secondary');
     }
@@ -1318,7 +1374,7 @@ class MiniGraphCard extends LitElement {
   }
 
   get visibleLegends() {
-    if (!this._visibleLegendsCache) {
+    if (this._visibleLegendsCache === undefined) {
       this._visibleLegendsCache = this.visibleEntities
         .filter(entityConfig => entityConfig.show_legend !== false);
     }
