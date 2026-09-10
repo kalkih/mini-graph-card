@@ -218,13 +218,13 @@ class MiniGraphCard extends LitElement {
     });
 
     // array of "smoothing" values for each graph
-    this._graphSmoothing = this.config.entities.map((entityConfig, index) => this._isBarGraph[index]
+    this._graphSmoothing = this.config.entities.map((entityConfig, index) => (this._isBarGraph[index]
       ? false
       : getFirstDefinedItem(
           entityConfig.smoothing,
           this.config.smoothing,
           this.getDefaultSmoothing(index),
-        )
+        ))
     );
 
     this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
