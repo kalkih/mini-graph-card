@@ -190,7 +190,7 @@ All properties are optional.
 | name | `true` | `true` / `false` | Display name.
 | icon | `true` | `true` / `false` | Display icon.
 | state | `true` | `true` / `false` / `last` | Display current state. `last` will show the last graph point's or bar's value (fallback to `true` if points are not shown for a line graph).
-| graph | `line` | `line` / `bar` / `false` | Display option for the graph. If set to `bar` a maximum of `96` bars will be displayed. See [Graph types](#graph-types).
+| graph | `line` | `line` / `bar` / `false` | Display option for the graph. If set to `bar` a maximum of `96` bars will be displayed (see [Graph types](#graph-types)).
 | fill | `true` | `true` / `false` / `fade` | Display the line graph fill.
 | points | `hover` | `true` / `false` / `hover` | Display graph data points (for a line graph only).
 | legend | `true` | `true` / `false` / `below` | Display the graph legend (only shown when graph contains multiple entities); `below` - place below a graph.
@@ -207,11 +207,8 @@ All properties are optional.
 #### Graph types
 
 Two graph types are supported - linear & bars.
-
-By default, all graphs have a 'line' type.
-
+By default, all graphs have a `line` type.
 To set a common type for all graphs - use a `show.graph` option (see [Available show options](#available-show-options)).
-
 To set an individual type for a particular graph, use a per-entity `graph` option (see [Entities object](#entities-object)).
 
 See examples [below](#different-graph-types).
