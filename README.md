@@ -577,8 +577,7 @@ show:
 
 Linear & bar graphs:
 
-<img width="483" height="307" alt="image" src="https://github.com/user-attachments/assets/1e8d139a-c331-46b6-ac2c-ac0f2060e5da" />
-
+<img width="479" height="305" alt="image" src="https://github.com/user-attachments/assets/0e0874f5-8e5d-4854-be58-8a65e14b4fbb" />
 
 ```yaml
 type: custom:mini-graph-card
