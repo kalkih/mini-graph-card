@@ -118,6 +118,8 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert (order matters as position becomes a value on the graph).
 | logarithmic | boolean | `false` | v0.10.0 | Use a logarithmic scale for the graph (see [Logarithmic options](#logarithmic-options)).
 | baseline | number |  | v0.14.0 | Set a custom baseline for the graph (see [Baseline](#baseline)).
+| static_value_label_offset | number |  `20` | v0.14.0 | Set a custom horizontal offset for the static value line label (see [Static lines](#static-lines)), as percentage of the graph area's width.
+
 
 These options are legacy and moved into [Y-axis config object](#y-axis-object):
 
@@ -163,8 +165,9 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | show_fill | boolean |         | Set to false to hide the fill.
 | show_points | boolean |         | Set to false to hide the points (see a note below).
 | show_legend | boolean |         | Set to false to turn hide from the legend.
+| show_static_value_label | boolean | v0.14.0 | Set to false to hide the static value line label (see [Static lines](#static-lines)).
 | show_static_inactive | boolean |         | Set to true to disable hiding the line when a point of a line of another entity selected; meaningful for a [static line](#static-lines) only.
-| state_adaptive_color | boolean |         | Make the color of the state adapt to the entity/static value color.
+| state_adaptive_color | boolean |         | Make the color of the state & the [static value line label](#static-lines) adapt to the entity/static value color.
 | y_axis | string |         | If 'secondary', displays using the secondary Y-axis on the right.
 | fixed_value | boolean |         | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 | smoothing | boolean |         | Override for a flag indicating whether to make graph line smooth.
@@ -199,6 +202,7 @@ All properties are optional.
 | info_hide_unit | `false` | `true` / `false` | Do not show a unit for the average & max/min information.
 | labels | `hover` | `true` / `false` / `hover` | Display Y-axis labels.
 | labels_secondary | `hover` | `true` / `false` / `hover` | Display secondary Y-axis labels.
+| static_value_labels | `false` | `left` / `right` / `false` | Display static value lines labels (see [Static lines](#static-lines)) either on the left or right side, or do not display.
 | name_adaptive_color | `false` | `true` / `false` | Make the name color adapt with the primary entity/static value color.
 | icon_adaptive_color | `false` | `true` / `false` | Make the icon color adapt with the primary entity/static value color.
 | loading_indicator | `true` | `true` / `false` | Show loading indicator while attempting to retrieve a history.
@@ -381,6 +385,7 @@ Notes:
 1. Like a dynamic graph for an entity (defined by an `entity` option), a static line (defined by a `static_value` option) can use other applicable options: `name`, `line_width`, `line_style`, `color`, `unit`, `decimals`, `show_...`, `state_adaptive_color`, `y_axis`.
 2. When `graph: bar`, a `static_value` entry is rendered as a set of constant bars.
 3. Displaying extrema/average values is not supported for `static_value` entries.
+4. It is possible to display a static value's badge on a corresponding static line: the `show.static_value_labels` option (see [Available show options](#available-show-options)) allows to display the badge either on the left or on the right side of the card; the per-entity `show_static_value_label` option (see [Entities object](#entities-object)) can be used to hide a label for a particular static line; the `static_value_label_offset` global option can be used to define a custom horizontal offset for the static value line label.
 
 See examples [below](#displaying-static-lines).
 
@@ -782,7 +787,7 @@ entities:
 
 #### Displaying static lines
 
-Example with a threshold line:
+Threshold line:
 
 <img width="485" height="257" alt="image" src="https://github.com/user-attachments/assets/7d668913-1811-48e8-9a24-d6bed93f7ee9" />
 
@@ -807,7 +812,7 @@ show:
   labels: true
 ```
 
-Example with a zeroth X-axis:
+Zeroth X-axis:
 
 <img width="480" height="219" alt="image" src="https://github.com/user-attachments/assets/2fe260f2-439c-4652-b817-feec461cbee8" />
 
@@ -826,7 +831,7 @@ show:
   labels: true
 ```
 
-Example with a static line which is not hidden when a point of a line of another entity selected:
+Static line which is not hidden when a point of a line of another entity selected:
 
 <img width="481" height="353" alt="изображение" src="https://github.com/user-attachments/assets/bc11d3c1-c557-46e0-afe9-b7d2e17b35be" />
 
@@ -855,6 +860,53 @@ show:
   labels: true
   fill: false
 ```
+
+Static line with labels:
+
+<img width="481" height="306" alt="image" src="https://github.com/user-attachments/assets/405e3e3a-ef84-46b0-a48b-67fbf40c79ce" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.system_monitor_processor_use
+    color: red
+  - static_value: 10
+    unit: "%"
+    show_fill: false
+    show_points: false
+    show_legend: false
+    color: red
+    line_width: 1
+    line_style: 4,7
+    state_adaptive_color: true
+  - entity: sensor.system_monitor_memory_use
+    color: green
+    show_state: true
+    y_axis: secondary
+  - static_value: 1700
+    unit: MiB
+    show_fill: false
+    show_points: false
+    show_legend: false
+    color: green
+    line_width: 1
+    line_style: 4,7
+    state_adaptive_color: true
+    y_axis: secondary
+hours_to_show: 3
+points_per_hour: 120
+height: 200
+static_value_label_offset: 7
+show:
+  name: false
+  icon: false
+  legend: true
+  fill: false
+  static_value_labels: right
+  labels: true
+  labels_secondary: true
+```
+
 
 #### Custom baseline
 
