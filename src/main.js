@@ -909,7 +909,7 @@ class MiniGraphCard extends LitElement {
     return svg`
       <circle
         class='line--point'
-        ?inactive=${this.tooltip.index !== point[3]}
+        ?inactive=${this.tooltip.bucketIndex !== point[3]}
         style=${`--mcg-hover: ${color};`}
         stroke=${color}
         fill=${color}
@@ -936,7 +936,7 @@ class MiniGraphCard extends LitElement {
     const color = this.computeColor(state, index);
     const inactive = this.tooltip.entityIndex !== undefined
       && this.tooltip.entityIndex !== index
-      && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.index !== -1)
+      && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.bucketIndex !== -1)
       && !this._isShowStaticInactive[index];
     const radius = getFirstDefinedItem(
       this.config.entities[index].line_width,
@@ -989,7 +989,7 @@ class MiniGraphCard extends LitElement {
       : this.computeColor(state, index);
     const inactive = this.tooltip.entityIndex !== undefined
       && this.tooltip.entityIndex !== index
-      && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.index !== -1)
+      && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.bucketIndex !== -1)
       && !this._isShowStaticInactive[index];
     return svg`
       <rect class='line--rect'
@@ -1018,7 +1018,7 @@ class MiniGraphCard extends LitElement {
       : this.computeColor(state, index);
     const inactive = this.tooltip.entityIndex !== undefined
       && this.tooltip.entityIndex !== index
-      && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.index !== -1)
+      && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.bucketIndex !== -1)
       && !this._isShowStaticInactive[index];
     return svg`
       <rect class='fill--rect'
@@ -1053,7 +1053,7 @@ class MiniGraphCard extends LitElement {
     });
     const inactive = this.tooltip.entityIndex !== undefined
       && this.tooltip.entityIndex !== index
-      && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.index !== -1)
+      && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.bucketIndex !== -1)
       && !this._isShowStaticInactive[index];
     return svg`
       <g
