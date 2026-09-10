@@ -559,7 +559,7 @@ entities:
 
 See above for simple "Only linear graphs" examples.
 
-Bar chart card:
+Bar graph:
 
 ![Bar chart card](https://user-images.githubusercontent.com/457678/52970286-985e7300-33b3-11e9-89bc-1278c4e2ecf2.png)
 
@@ -596,6 +596,8 @@ show:
   name: false
   icon: false
 ```
+
+
 
 
 #### Bar spacing
