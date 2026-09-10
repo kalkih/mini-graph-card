@@ -610,7 +610,7 @@ class MiniGraphCard extends LitElement {
       const state = this.getEntityState(index);
       // use tooltip data for main entry state element, if tooltip is active
       // "tooltip" - a selected point/bar
-      const { entity: tooltipEntityIndex, value: tooltipValue } = this.tooltip;
+      const { entityIndex: tooltipEntityIndex, value: tooltipValue } = this.tooltip;
       const isTooltip = isPrimary && tooltipEntityIndex !== undefined;
       // either a state/attr/static_value for a selected point/bar
       // - or a "native" state/attr/static_value
