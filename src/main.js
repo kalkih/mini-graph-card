@@ -347,7 +347,7 @@ class MiniGraphCard extends LitElement {
       this.color = this.computeColor(
         this.tooltip.value !== undefined
           ? this.tooltip.value : this.getEntityState(0),
-        this.tooltip.entity || 0,
+        this.tooltip.entityIndex || 0,
       );
       return true;
     }
@@ -502,8 +502,8 @@ class MiniGraphCard extends LitElement {
       return html``;
     }
 
-    const name = this.tooltip.entity !== undefined
-      ? this.computeName(this.tooltip.entity)
+    const name = this.tooltip.entityIndex !== undefined
+      ? this.computeName(this.tooltip.entityIndex)
       : this.config.name || this.computeName(0);
     const color = this.config.show.name_adaptive_color
       ? `opacity: 1; color: ${this.color};`
@@ -793,7 +793,7 @@ class MiniGraphCard extends LitElement {
 
           return html`<span
             id="static-label-${index}"
-            ?inactive=${this.tooltip.entity !== undefined && this.tooltip.entity !== index
+            ?inactive=${this.tooltip.entityIndex !== undefined && this.tooltip.entityIndex !== index
               && !this._isShowStaticInactive[index]}
             style="
               color: ${color};
@@ -934,9 +934,9 @@ class MiniGraphCard extends LitElement {
         ? this.config.entities[index].static_value
         : undefined;
     const color = this.computeColor(state, index);
-    const inactive = this.tooltip.entity !== undefined
-      && this.tooltip.entity !== index
-      && !(this._isBarGraph[this.tooltip.entity] && this.tooltip.index !== -1)
+    const inactive = this.tooltip.entityIndex !== undefined
+      && this.tooltip.entityIndex !== index
+      && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.index !== -1)
       && !this._isShowStaticInactive[index];
     const radius = getFirstDefinedItem(
       this.config.entities[index].line_width,
@@ -945,7 +945,7 @@ class MiniGraphCard extends LitElement {
     const isAnimated = isEntryAnimated(this.config, index);
     return svg`
       <g class='line--points'
-        ?tooltip=${this.tooltip.entity === index}
+        ?tooltip=${this.tooltip.entityIndex === index}
         ?inactive=${inactive}
         ?init=${this.length[index]}
         anim=${isAnimated && this.config.show.points !== 'hover'}
@@ -987,9 +987,9 @@ class MiniGraphCard extends LitElement {
     const fill = this.gradient[index]
       ? `url(#grad-${this.id}-${index})`
       : this.computeColor(state, index);
-    const inactive = this.tooltip.entity !== undefined
-      && this.tooltip.entity !== index
-      && !(this._isBarGraph[this.tooltip.entity] && this.tooltip.index !== -1)
+    const inactive = this.tooltip.entityIndex !== undefined
+      && this.tooltip.entityIndex !== index
+      && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.index !== -1)
       && !this._isShowStaticInactive[index];
     return svg`
       <rect class='line--rect'
@@ -1016,9 +1016,9 @@ class MiniGraphCard extends LitElement {
     const svgFill = this.gradient[index]
       ? `url(#grad-${this.id}-${index})`
       : this.computeColor(state, index);
-    const inactive = this.tooltip.entity !== undefined
-      && this.tooltip.entity !== index
-      && !(this._isBarGraph[this.tooltip.entity] && this.tooltip.index !== -1)
+    const inactive = this.tooltip.entityIndex !== undefined
+      && this.tooltip.entityIndex !== index
+      && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.index !== -1)
       && !this._isShowStaticInactive[index];
     return svg`
       <rect class='fill--rect'
@@ -1051,9 +1051,9 @@ class MiniGraphCard extends LitElement {
           @mouseout=${() => (this.tooltip = {})}>
         </rect>`;
     });
-    const inactive = this.tooltip.entity !== undefined
-      && this.tooltip.entity !== index
-      && !(this._isBarGraph[this.tooltip.entity] && this.tooltip.index !== -1)
+    const inactive = this.tooltip.entityIndex !== undefined
+      && this.tooltip.entityIndex !== index
+      && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.index !== -1)
       && !this._isShowStaticInactive[index];
     return svg`
       <g
