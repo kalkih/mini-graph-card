@@ -305,7 +305,7 @@ class MiniGraphCard extends LitElement {
   * on every render
   * @param {boolean|undefined} forced True to forcibly update a format
   */
-  updateFormatFromLocale(forced) {
+  updateFormatFromLocale(forced = undefined) {
     if (this._updateDateTimeFormat || forced) {
       this._datetimeFormatDateOptions = getDateFormat(
         this.config,
