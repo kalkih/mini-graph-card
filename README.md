@@ -930,26 +930,27 @@ show:
 
 Individual baselines for entities (along with displaying static lines):
 
-<img width="483" height="249" alt="image" src="https://github.com/user-attachments/assets/d1bd9cc8-78a4-4428-8642-182ab15aa2dd" />
+<img width="488" height="309" alt="image" src="https://github.com/user-attachments/assets/a93ddf8f-eaf3-4d63-8e15-720e69fe3470" />
 
 ```yaml
 type: custom:mini-graph-card
 entities:
   - entity: sensor.xiaomi_cg_1_co2
-    baseline: 660
+    baseline: 800
     color: orange
     name: Room 1
-  - static_value: 660
+  - static_value: 800
     line_width: 1
     color: orange
     show_fill: false
     show_legend: false
     show_static_inactive: true
   - entity: sensor.xiaomi_cg_2_co2
-    baseline: 690
+    show_state: true
+    baseline: 1000
     color: green
     name: Room 2
-  - static_value: 690
+  - static_value: 1000
     line_width: 1
     color: green
     show_fill: false
@@ -960,7 +961,7 @@ show:
   static_value_labels: left
   name: false
   icon: false
-  state: false
+  labels: true
 ```
 
 Bar graph with a baseline set to 0:
