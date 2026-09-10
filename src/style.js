@@ -126,9 +126,6 @@ const style = css`
     grid-column: 3;
     justify-self: end;
   }
-  .icon[loc="state"] {
-    align-self: center;
-  }
   .states {
     align-items: flex-start;
     font-weight: 300;
