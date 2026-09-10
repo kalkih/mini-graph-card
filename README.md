@@ -81,7 +81,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | Name | Type | Default | Since | Description |
 |------|:----:|:-------:|:-----:|-------------|
 | type ***(required)*** | string |  | v0.0.1 | `custom:mini-graph-card`.
-| entities ***(required)*** | list |  | v0.2.0 | One or more sensor entities (along with [static values](#static-lines)) in a list, see [entities object](#entities-object) for additional entity/static value options.
+| entities ***(required)*** | list |  | v0.2.0 | One or more sensor entities (along with [static values](#static-values)) in a list, see [entities object](#entities-object) for additional entity/static value options.
 | icon | string |  | v0.0.1 | Set a custom icon from any of the available mdi icons.
 | icon_color | string |  | v0.14.0 | Set a custom icon color. Takes precedence over `icon_adaptive_color`. See [Supported color formats](#supported-color-formats).
 | icon_image | string |  | v0.12.0 | Override icon with an image url.
@@ -118,7 +118,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert (order matters as position becomes a value on the graph).
 | logarithmic | boolean | `false` | v0.10.0 | Use a logarithmic scale for the graph (see [Logarithmic options](#logarithmic-options)).
 | baseline | number |  | v0.14.0 | Set a custom baseline for the graph (see [Baseline](#baseline)).
-| static_value_label_offset | number |  `20` | v0.14.0 | Set a custom horizontal offset for the static value line label (see [Static lines](#static-lines)), as percentage of the graph area's width.
+| static_value_label_offset | number |  `20` | v0.14.0 | Set a custom horizontal offset for the [static value line label](#static-values), as percentage of the graph area's width.
 
 
 These options are legacy and moved into [Y-axis config object](#y-axis-object):
@@ -145,8 +145,8 @@ properties of the Entity object detailed in the following table (as per `sensor.
 |------|:----:|:-------:|-------------|
 | entity ***(required)*** | string |         | Entity id of the sensor. Either `entity` or `static_value` must be defined.
 | attribute | string |         | Retrieves an attribute or [sub-attribute (attr1.attr2...)](#accessing-attributes-in-complex-structures) instead of the state
-| static_value | number |         | Set a value for a [static line](#static-lines). Either `entity` or `static_value` must be defined.
-| name | string |         | Set a custom display name, defaults to entity's friendly_name or a `Static` label for a [static value](#static-lines).
+| static_value | number |         | Set a value for a [static line or bar](#static-values). Either `entity` or `static_value` must be defined.
+| name | string |         | Set a custom display name, defaults to entity's friendly_name or a `Static` label for a [static value](#static-values).
 | animate    | boolean |        | Override for a reveal animation to the graph.
 | graph | string |         | Override for a graph type, `line` or `bar` (see [Graph types](#graph-types)).
 | line_width | number |         | Override for a thickness of the line.
@@ -165,9 +165,9 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | show_fill | boolean |         | Set to false to hide the fill.
 | show_points | boolean |         | Set to false to hide the points (see a note below).
 | show_legend | boolean |         | Set to false to turn hide from the legend.
-| show_static_value_label | boolean | v0.14.0 | Set to false to hide the static value line label (see [Static lines](#static-lines)).
-| show_static_inactive | boolean |         | Set to true to disable hiding the line when a point of a line of another entity selected; meaningful for a [static line](#static-lines) only.
-| state_adaptive_color | boolean |         | Make the color of the state & the [static value line label](#static-lines) adapt to the entity/static value color.
+| show_static_value_label | boolean | v0.14.0 | Set to false to hide the [static value line label](#static-values).
+| show_static_inactive | boolean |         | Set to true to disable hiding the line when a point of a line of another entity selected; meaningful for a [static value](#static-values) only.
+| state_adaptive_color | boolean |         | Make the color of the state & the [static value line label](#static-values) adapt to the entity/static value color.
 | y_axis | string |         | If 'secondary', displays using the secondary Y-axis on the right.
 | fixed_value | boolean |         | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 | smoothing | boolean |         | Override for a flag indicating whether to make graph line smooth.
@@ -202,7 +202,7 @@ All properties are optional.
 | info_hide_unit | `false` | `true` / `false` | Do not show a unit for the average & max/min information.
 | labels | `hover` | `true` / `false` / `hover` | Display Y-axis labels.
 | labels_secondary | `hover` | `true` / `false` / `hover` | Display secondary Y-axis labels.
-| static_value_labels | `false` | `left` / `right` / `false` | Display static value lines labels (see [Static lines](#static-lines)) either on the left or right side, or do not display.
+| static_value_labels | `false` | `left` / `right` / `false` | Display [static value lines labels](#static-values) either on the left or right side, or do not display.
 | name_adaptive_color | `false` | `true` / `false` | Make the name color adapt with the primary entity/static value color.
 | icon_adaptive_color | `false` | `true` / `false` | Make the icon color adapt with the primary entity/static value color.
 | loading_indicator | `true` | `true` / `false` | Show loading indicator while attempting to retrieve a history.
@@ -303,9 +303,9 @@ As a shorthand, you can just use a color string for the stops that you want inte
 
 All card's area - except a graph part - supports processing of actions.
 By default, tapping on an element opens a `more-info` dialog:
-1. For "state" elements - the dialog is opened for a corresponding graph entity (not processed for a [static value](#static-lines)).
+1. For "state" elements - the dialog is opened for a corresponding graph entity (not processed for a [static value](#static-values)).
 2. For "legend" elements - same as above.
-3. For other card's areas (except a graph part) - the dialog is opened for the 1st graph entity (not processed for a [static value](#static-lines)).
+3. For other card's areas (except a graph part) - the dialog is opened for the 1st graph entity (not processed for a [static value](#static-values)).
 
 | Name | Type | Default | Options | Description |
 |------|:----:|:-------:|:-----------:|-------------|
@@ -376,22 +376,22 @@ Depending on the configuration, the "name" & "icon" elements are aligned as foll
 
 
 
-### Static lines
+### Static values
 
 A static horizontal line is drawn for a user-defined static value.
 Can be used in various applications like drawing a threshold line or a zeroth X-axis.
 
 Notes:
-1. Like a dynamic graph for an entity (defined by an `entity` option), a static line (defined by a `static_value` option) can use other applicable options: `name`, `line_width`, `line_style`, `color`, `unit`, `decimals`, `show_...`, `state_adaptive_color`, `y_axis`.
-2. When `graph: bar`, a `static_value` entry is rendered as a set of constant bars.
+1. Like a dynamic graph for an entity (defined by an `entity` option), a static value (defined by a `static_value` option) can use other applicable options: `name`, `line_width`, `line_style`, `color`, `unit`, `decimals`, `show_...`, `state_adaptive_color`, `y_axis`.
+2. When a `static_value` entry has a `bar` type (either individually set or inherited from a global `show.graph` option), a `static_value` entry is rendered as a set of constant bars.
 3. Displaying extrema/average values is not supported for `static_value` entries.
-4. It is possible to display a static value's badge on a corresponding static line: the `show.static_value_labels` option (see [Available show options](#available-show-options)) allows to display the badge either on the left or on the right side of the card; the per-entity `show_static_value_label` option (see [Entities object](#entities-object)) can be used to hide a label for a particular static line; the `static_value_label_offset` global option can be used to define a custom horizontal offset for the static value line label.
+4. It is possible to display a static value's badge on a corresponding static line: the `show.static_value_labels` option (see [Available show options](#available-show-options)) allows to display the badge either on the left or on the right side of the card; the per-entity `show_static_value_label` option (see [Entities object](#entities-object)) can be used to hide a label for a particular static line; the `static_value_label_offset` global option can be used to define a custom horizontal offset for the static value line label. Also, if a `static_value` entry has a `bar` type (either individually set or inherited from a global `show.graph` option) then a static label cannot not displayed.
 
-See examples [below](#displaying-static-lines).
+See examples [below](#displaying-static-values).
 
 ### Number format
 
-Options `decimals` defined "card-wide" and/or for some entity/[static value](#static-lines) are used to set an exact number of decimals according to the following rules:
+Options `decimals` defined "card-wide" and/or for some entity/[static value](#static-values) are used to set an exact number of decimals according to the following rules:
 1. For state & attribute values, static values:
 - if none `decimals` option is defined - a default presentation (see a note below) is used;
 - if `decimals` for some entity is defined - this value is used for this entity;
@@ -412,7 +412,7 @@ Options `decimals` defined "card-wide" and/or for some entity/[static value](#st
 A "default presentation" refers to a default look in HA:
 1. For a state value (also for extrema & average): if accuracy settings are defined for an entity - these settings are used, otherwise some default HA settings (depend on many factors incl. a `device_class`; for template sensors - a user-defined accuracy set in jinja templates is used).
 2. For an attribute value (also for extrema & average): default HA settings are used (for template sensors - a user-defined accuracy set in jinja templates is used).
-3. For Y-axis labels, [static values](#static-lines): "maximum 2 decimals" accuracy is used.
+3. For Y-axis labels, [static values](#static-values): "maximum 2 decimals" accuracy is used.
 And for all values, HA number format settings (like `xxxx.xx` or `x xxx.x` or `x,xxx.x`) are used.
 
 
@@ -473,7 +473,7 @@ See examples [below](#inverted-y-axis).
 
 Note: this section only applies to line graphs & overlapping bars graphs (with `bar_spacing: -1`).
 
-For each entity/[static value](#static-lines), a `line` graph consists of 3 basic parts: a "line" part (curve), a "fill" part (if displaying a fill is configured), a "points" part (if displaying points is configured).
+For each entity/[static value](#static-values), a `line` graph consists of 3 basic parts: a "line" part (curve), a "fill" part (if displaying a fill is configured), a "points" part (if displaying points is configured).
 
 By default, graphs are shown in the following order:
 1. All "fill" parts are shown (if configured).
@@ -785,7 +785,7 @@ entities:
     line_style: 6,6
 ```
 
-#### Displaying static lines
+#### Displaying static values
 
 Threshold line:
 
