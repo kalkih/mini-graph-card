@@ -655,8 +655,7 @@ class MiniGraphCard extends LitElement {
           ? html`<span class="tooltip--label">${this.tooltip.label}</span>`
           : this.tooltip.time[0]
             ? html`<span>${this.tooltip.time[0]}</span> - <span>${this.tooltip.time[1]}</span>`
-            : html`<span>${this.tooltip.time[1]}</span>`
-        }
+            : html`<span>${this.tooltip.time[1]}</span>`}
       </div>
     `;
   }
