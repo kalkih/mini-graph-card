@@ -1108,7 +1108,7 @@ class MiniGraphCard extends LitElement {
   }
 
   /** Set a tooltip - an object used to display
-  * either a current value or a value for a selected point/bar
+   * either a current value or a value for a selected point/bar
   * @param {number} entityIndex Index of an entry in config.entities
   * @param {number} bucketIndex Index of a point/bar
   * @param {any} value Value
@@ -1116,50 +1116,65 @@ class MiniGraphCard extends LitElement {
   * @returns {void}
   */
   setTooltip(entityIndex, bucketIndex, value, label = null) {
-    const {
-      group_by,
-      points_per_hour,
-      hours_to_show,
-    } = this.config;
+    let start;
+    let end;
+    let count;
 
-    // time units in milliseconds in an interval
-    const interval = getMilli(1 / points_per_hour);
-    // number of intervals in the defined timespan
-    const nIntervals = Math.ceil(hours_to_show * points_per_hour);
-    // number of buckets in the defined timespan
-    const nBuckets = this._isBarGraph[entityIndex]
-      ? nIntervals
-      : nIntervals + 1; // including the 1st point on a left boundary
+    // ignore when bucketIndex = -1
+    if (bucketIndex >= 0) {
+      const {
+        group_by,
+        points_per_hour,
+        hours_to_show,
+      } = this.config;
 
-    // bucketIndex is 0 (oldest) to nBuckets-1 (most recent ~= now)
-    // count - number of intervals from "now" to end of the timespan
-    // count is 0 (the last point) to nBuckets-1 (oldest)
-    // "now" - time of a processed point
-    const count = (nBuckets - 1) - bucketIndex;
+      const isBar = this._isBarGraph[entityIndex];
 
-    // offset end by a minute, if grouped by, e.g., date or hour
-    const oneMinute = group_by !== 'interval' ? 60000 : 0;
+      // time units in milliseconds in an interval
+      const interval = getMilli(1 / points_per_hour);
+      // number of intervals in the defined timespan
+      const nIntervals = Math.ceil(hours_to_show * points_per_hour);
+      // number of buckets in the defined timespan
+      const nBuckets = isBar
+        ? nIntervals
+        : nIntervals + 1; // including the 1st point on a left boundary
 
-    const now = this.getEndDate();
+      // bucketIndex is 0 (oldest) to nBuckets-1 (most recent ~= now)
+      // count - number of intervals from "now" to end of the timespan
+      // count is 0 (the last point) to nBuckets-1 (oldest)
+      // "now" - time of a processed point
+      count = (nBuckets - 1) - bucketIndex;
 
-    now.setMilliseconds(now.getMilliseconds() - oneMinute - interval * count);
-    const end = formatDateTime(
-      now,
-      this.config,
-      this.datetimeFormatFromCfgParsed,
-      this._datetimeFormatDateOptions,
-      this._datetimeFormatTimeOptions,
-      this._hass,
-    );
-    now.setMilliseconds(now.getMilliseconds() + oneMinute - interval);
-    const start = formatDateTime(
-      now,
-      this.config,
-      this.datetimeFormatFromCfgParsed,
-      this._datetimeFormatDateOptions,
-      this._datetimeFormatTimeOptions,
-      this._hass,
-    );
+      // offset end by a minute, if grouped by, e.g., date or hour
+      const oneMinute = group_by !== 'interval' ? 60000 : 0;
+
+      const now = this.getEndDate();
+
+      now.setMilliseconds(now.getMilliseconds() - oneMinute - interval * count);
+      end = formatDateTime(
+        now,
+        this.config,
+        this.datetimeFormatFromCfgParsed,
+        this._datetimeFormatDateOptions,
+        this._datetimeFormatTimeOptions,
+        this._hass,
+      );
+
+      const smoothingType = this._graphSmoothing[entityIndex];
+      const isFirstPointAnInterval = isBar || smoothingType === true;
+
+      if (bucketIndex > 0 || isFirstPointAnInterval) {
+        now.setMilliseconds(now.getMilliseconds() + oneMinute - interval);
+        start = formatDateTime(
+          now,
+          this.config,
+          this.datetimeFormatFromCfgParsed,
+          this._datetimeFormatDateOptions,
+          this._datetimeFormatTimeOptions,
+          this._hass,
+        );
+      }
+    }
 
     this.tooltip = {
       value,
