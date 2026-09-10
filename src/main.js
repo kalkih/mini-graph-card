@@ -80,6 +80,9 @@ class MiniGraphCard extends LitElement {
     // array of flags: true if a graph for the entry must be vertically inverted, false - otherwise
     this._isInverted = [];
 
+    // array of "smoothing" values for each graph
+    this._graphSmoothing = [];
+
     // update datetime settings periodically
     this._updateHour24 = true;
     this._updateDateTimeFormat = true;
@@ -214,6 +217,16 @@ class MiniGraphCard extends LitElement {
       ) || false;
     });
 
+    // array of "smoothing" values for each graph
+    this._graphSmoothing = this.config.entities.map((entityConfig, index) => this._isBarGraph[index]
+      ? false
+      : getFirstDefinedItem(
+          entityConfig.smoothing,
+          this.config.smoothing,
+          this.getDefaultSmoothing(index),
+        )
+    );
+
     this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
     const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
 
@@ -249,11 +262,7 @@ class MiniGraphCard extends LitElement {
           points_per_hour: this.config.points_per_hour,
           aggregateFuncName: entityConfig.aggregate_func || this.config.aggregate_func,
           groupBy: this.config.group_by,
-          smoothing: getFirstDefinedItem(
-            entityConfig.smoothing,
-            this.config.smoothing,
-            this.getDefaultSmoothing(index),
-          ),
+          smoothing: this._graphSmoothing[index],
           logarithmic: getFirstDefinedItem(
             entityConfig.logarithmic,
             this.config.logarithmic,
