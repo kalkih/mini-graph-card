@@ -650,6 +650,7 @@ class MiniGraphCard extends LitElement {
     if (this.tooltip.value === undefined) {
       return html``;
     }
+     /* eslint-disable indent */
     return html`
       <div class="state__time">
         ${this.tooltip.label
@@ -659,6 +660,7 @@ class MiniGraphCard extends LitElement {
             : html`<span>${this.tooltip.time[1]}</span>`}
       </div>
     `;
+     /* eslint-enable indent */
   }
 
   /**
