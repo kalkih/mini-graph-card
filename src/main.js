@@ -226,7 +226,8 @@ class MiniGraphCard extends LitElement {
           this.config.smoothing,
           this.getDefaultSmoothing(index),
         );
-      });
+      }
+    );
 
     this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
     const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
