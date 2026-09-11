@@ -25,7 +25,7 @@ export default {
   plugins: [
     commonjs(),
     json({
-      include: 'package.json',
+      include: ['package.json', 'src/localize/languages/*'],
       preferConst: true,
     }),
     resolve(),
