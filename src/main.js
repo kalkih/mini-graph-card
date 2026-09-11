@@ -1105,11 +1105,11 @@ class MiniGraphCard extends LitElement {
     const strokeWidth = isZeroSpacing
       ? 'var(--mcg-bar-seam-width, 0.5px)'
       : '0px';
-    const barStyle = (isAnimated ? `transform-origin: 50% ${baselineY}px; ` : '')
-      + 'paint-order: fill stroke; '
-      + `stroke: ${strokeColor}; `
-      + `stroke-width: ${strokeWidth}; `
-      + 'stroke-opacity: var(--mcg-bar-seam-opacity, 0.3);';
+    let barStyle = isAnimated ? `transform-origin: 50% ${baselineY}px; ` : '';
+    barStyle += 'paint-order: fill stroke; ';
+    barStyle += `stroke: ${strokeColor}; `;
+    barStyle += `stroke-width: ${strokeWidth}; `;
+    barStyle += 'stroke-opacity: var(--mcg-bar-seam-opacity, 0.3);';
 
     const renderedItems = items.map((bar, i) => {
       const color = this.computeColor(bar.value, index);
