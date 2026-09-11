@@ -1096,12 +1096,27 @@ class MiniGraphCard extends LitElement {
     const isAnimated = isEntryAnimated(this.config, index);
     const { width: barWidth, items } = this.bar[index]; // bars
     const { baselineY } = this.Graph[index];
-    const barStyle = isAnimated ? `transform-origin: 50% ${baselineY}px;` : '';
+
+    // use a semi-transparent border in case of "bar_spacing: 0"
+    const isZeroSpacing = this.config.bar_spacing === 0;
+    const strokeColor = isZeroSpacing
+      ? 'var(--card-background-color, white)'
+      : 'none';
+    const strokeWidth = isZeroSpacing
+      ? 'var(--mcg-bar-seam-width, 0.5px)'
+      : '0px';
+    let barStyle = isAnimated ? `transform-origin: 50% ${baselineY}px; ` : '';
+    barStyle += 'paint-order: fill stroke; ';
+    barStyle += `stroke: ${strokeColor}; `;
+    barStyle += `stroke-width: ${strokeWidth}; `;
+    barStyle += 'stroke-opacity: var(--mcg-bar-seam-opacity, 0.3);';
+
     const renderedItems = items.map((bar, i) => {
       const color = this.computeColor(bar.value, index);
       return svg`
         <rect class='bar' x=${bar.x} y=${bar.y}
           height=${bar.height} width=${barWidth} fill=${color}
+          vector-effect="non-scaling-stroke"
           style=${barStyle}
           @mouseover=${() => this.setTooltip(index, i, bar.value)}
           @mouseout=${() => (this.tooltip = {})}>
