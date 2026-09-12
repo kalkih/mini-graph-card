@@ -35,7 +35,6 @@ import {
   getMilli,
   compress, decompress,
   getFirstDefinedItem,
-  compareArray,
   log,
 } from './utils';
 
@@ -231,7 +230,6 @@ class MiniGraphCard extends LitElement {
     });
 
     this._md5Config = SparkMD5.hash(JSON.stringify(this.config));
-    const entitiesChanged = !compareArray(this.config.entities || [], config.entities);
 
     // initialize memoized data
     this._datetimeFormatFromCfgParsedCache = undefined;
@@ -255,47 +253,55 @@ class MiniGraphCard extends LitElement {
     this._updateHour24 = config.hour24 === undefined;
     this._updateDateTimeFormat = config.datetime_format === undefined;
 
-    if (!this.Graph || entitiesChanged) {
-      if (this._hass) this.hass = this._hass;
+    if (this._hass) this.hass = this._hass; // call "set hass()"
 
-      // calculate margins for a graph container
-      const {
-        min: min_line_width,
-        max: max_line_width,
-      } = this.getMinMaxLineWidth();
-      this._graphMargin = this.visibleBarEntities.length === this.visibleEntities.length
-        ? [DEFAULT_MARGIN, DEFAULT_MARGIN]
-        : this.config.show.fill
-          ? [0, max_line_width]
-          : [min_line_width, max_line_width];
+    // calculate margins for a graph container
+    const {
+      min: min_line_width,
+      max: max_line_width,
+    } = this.getMinMaxLineWidth();
+    this._graphMargin = this.visibleBarEntities.length === this.visibleEntities.length
+      ? [DEFAULT_MARGIN, DEFAULT_MARGIN]
+      : this.config.show.fill
+        ? [0, max_line_width]
+        : [min_line_width, max_line_width];
 
-      this.Graph = this.config.entities.map(
-        (entityConfig, index) => new Graph({
-          graphType: this._isBarGraph[index] ? 'bar' : 'line',
-          width: 500,
-          height: this.config.height,
-          margin: this._graphMargin,
-          hours_to_show: this.config.hours_to_show,
-          points_per_hour: this.config.points_per_hour,
-          aggregateFuncName: entityConfig.aggregate_func || this.config.aggregate_func,
-          groupBy: this.config.group_by,
-          smoothing: this._graphSmoothing[index],
-          logarithmic: getFirstDefinedItem(
-            entityConfig.logarithmic,
-            this.config.logarithmic,
-            false,
-          ),
-          bar_spacing: this.config.bar_spacing,
-          bar_spacing_group: this.config.bar_spacing_group,
-          total_bars_in_group: this.visibleBarEntities.length,
-          baseline: getFirstDefinedItem(
-            entityConfig.baseline,
-            this.config.baseline,
-          ),
-          invert: this._isInverted[index],
-        }),
-      );
-    }
+    // create Graph objects
+    this.Graph = this.createGraph(this.config.height);
+  }
+
+  /**
+   * Create an array of Graph objects
+   * @param {number} height Graph's height
+   * @returns {Array} Array of Graph objects
+   */
+  createGraph(height) {
+    return this.config.entities.map(
+      (entityConfig, index) => new Graph({
+        graphType: this._isBarGraph[index] ? 'bar' : 'line',
+        width: 500,
+        height,
+        margin: this._graphMargin,
+        hours_to_show: this.config.hours_to_show,
+        points_per_hour: this.config.points_per_hour,
+        aggregateFuncName: entityConfig.aggregate_func || this.config.aggregate_func,
+        groupBy: this.config.group_by,
+        smoothing: this._graphSmoothing[index],
+        logarithmic: getFirstDefinedItem(
+          entityConfig.logarithmic,
+          this.config.logarithmic,
+          false,
+        ),
+        bar_spacing: this.config.bar_spacing,
+        bar_spacing_group: this.config.bar_spacing_group,
+        total_bars_in_group: this.visibleBarEntities.length,
+        baseline: getFirstDefinedItem(
+          entityConfig.baseline,
+          this.config.baseline,
+        ),
+        invert: this._isInverted[index],
+      }),
+    );
   }
 
   /**
