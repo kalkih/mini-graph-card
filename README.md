@@ -85,7 +85,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | icon | string |  | v0.0.1 | Set a custom icon from any of the available mdi icons.
 | icon_color | string |  | v0.14.0 | Set a custom icon color. Takes precedence over `icon_adaptive_color`. See [Supported color formats](#supported-color-formats).
 | icon_image | string |  | v0.12.0 | Override icon with an image url.
-| name | string |  | v0.0.1 | Set a custom name which is displayed beside the icon.
+| name | string / list |  | v0.0.1 | Set a custom name which is displayed beside the icon. Accepts a [structured name](#structured-names) on Home Assistant 2026.4 and later.
 | unit | string |  | v0.0.1 | Set a custom unit of measurement (`''` value for an empty unit).
 | tap_action | [action object](#action-object-options) |  | v0.7.0 | Action on click/tap.
 | group | boolean | `false` | v0.2.0 | Disable paddings and box-shadow, useful when nesting the card.
@@ -146,7 +146,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | entity ***(required)*** | string |         | Entity id of the sensor. Either `entity` or `static_value` must be defined.
 | attribute | string |         | Retrieves an attribute or [sub-attribute (attr1.attr2...)](#accessing-attributes-in-complex-structures) instead of the state
 | static_value | number |         | Set a value for a [static line or bar](#static-values). Either `entity` or `static_value` must be defined.
-| name | string |         | Set a custom display name, defaults to entity's friendly_name or a `Static` label for a [static value](#static-values).
+| name | string / list |         | Set a custom display name, defaults to entity's friendly_name or a `Static` label for a [static value](#static-values). Accepts a [structured name](#structured-names) on Home Assistant 2026.4 and later.
 | animate    | boolean |        | Override for a reveal animation to the graph.
 | graph | string |         | Override for a graph type, `line` or `bar` (see [Graph types](#graph-types)).
 | line_width | number |         | Override for a thickness of the line.
@@ -375,6 +375,32 @@ Depending on the configuration, the "name" & "icon" elements are aligned as foll
 7. If `align_header` is not defined & `align_icon` is defined — the "icon" is aligned to the left/right depending on `align_icon`, and the "name" is placed on the left (if `align_icon: right`) or on the right (if `align_icon: left`).
 
 
+
+### Structured names
+
+*Requires Home Assistant 2026.4 or later. On earlier versions a structured `name` falls back to the entity's friendly name.*
+
+Home Assistant composes an entity's display name out of its registry context
+(entity, device, area, floor) rather than one `friendly_name` string. A `name`
+option can be a list of those parts instead of a plain string, so the name keeps
+following renames and matches what the built-in cards show:
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.living_room_thermostat_temperature
+    name:
+      - type: area
+      - type: entity
+```
+
+Available part types are `entity`, `device`, `parent_device`, `area`, `floor`,
+and `text` (a literal, written as `{type: text, text: 'Indoor'}`). Parts that
+resolve to nothing are dropped, so the surrounding parts still render. A plain
+string `name` keeps working exactly as before.
+
+See the [Home Assistant developer documentation](https://developers.home-assistant.io/docs/frontend/data#hassformatentitynamestateobj-name-options)
+for the full list.
 
 ### Static values
 

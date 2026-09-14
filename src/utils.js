@@ -19,6 +19,30 @@ const decompress = data => (typeof data === 'string' ? JSON.parse(lzStringDecomp
 const getFirstDefinedItem = (...collection) => collection
   .find(item => item !== undefined && item !== null);
 
+// hass.formatEntityName only accepts a card's `name` option (a user string, a
+// structured name, or undefined) from HA 2026.4. Earlier versions expose the
+// same helper with an incompatible signature, so feature detection is not
+// enough - the version has to be checked.
+const supportsEntityNames = (hass) => {
+  const version = hass && hass.config && hass.config.version;
+  if (!version) return false;
+  const [major, minor] = version.split('.', 2);
+  return Number(major) > 2026 || (Number(major) === 2026 && Number(minor) >= 4);
+};
+
+// Resolves a `name` option against the entity's registry context (entity,
+// device, area, floor). Falls back to the friendly name on older HA versions,
+// where a structured name cannot be resolved.
+const computeEntityName = (hass, stateObj, name) => {
+  if (supportsEntityNames(hass)) {
+    return hass.formatEntityName(stateObj, name);
+  }
+  if (name !== undefined && name !== null && typeof name !== 'object') {
+    return String(name);
+  }
+  return stateObj.attributes.friendly_name;
+};
+
 const log = (message) => {
   // eslint-disable-next-line no-console
   console.warn('mini-graph-card: ', message);
@@ -27,4 +51,5 @@ const log = (message) => {
 export {
   getMin, getAvg, getMax, getMilli, compress, decompress, log,
   getFirstDefinedItem,
+  computeEntityName,
 };
