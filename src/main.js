@@ -36,6 +36,7 @@ import {
   compress, decompress,
   getFirstDefinedItem,
   computeEntityName,
+  entityNamesChanged,
   log,
 } from './utils';
 
@@ -384,6 +385,10 @@ class MiniGraphCard extends LitElement {
       );
       return true;
     }
+    if (changedProps.has('_hass')) {
+      return entityNamesChanged(changedProps.get('_hass'), this._hass);
+    }
+    return false;
   }
 
   firstUpdated() {

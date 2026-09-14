@@ -43,6 +43,17 @@ const computeEntityName = (hass, stateObj, name) => {
   return stateObj.attributes.friendly_name;
 };
 
+// formatEntityName resolves against the entity/device/area/floor registries, and
+// HA swaps the real formatter in asynchronously once translations load. Neither
+// shows up as an entity state change, so without this a rename (or that swap)
+// leaves rendered names stale until some unrelated state change forces a render.
+const NAME_SOURCES = ['formatEntityName', 'entities', 'devices', 'areas', 'floors'];
+
+const entityNamesChanged = (oldHass, newHass) => {
+  if (!oldHass || !newHass) return false;
+  return NAME_SOURCES.some(key => oldHass[key] !== newHass[key]);
+};
+
 const log = (message) => {
   // eslint-disable-next-line no-console
   console.warn('mini-graph-card: ', message);
@@ -52,4 +63,5 @@ export {
   getMin, getAvg, getMax, getMilli, compress, decompress, log,
   getFirstDefinedItem,
   computeEntityName,
+  entityNamesChanged,
 };
