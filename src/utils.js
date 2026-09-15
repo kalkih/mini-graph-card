@@ -24,6 +24,10 @@ const getFirstDefinedItem = (...collection) => collection
 // same helper with an incompatible signature, so feature detection is not
 // enough - the version has to be checked.
 const supportsEntityNames = (hass) => {
+  // A hass can report a recent version without carrying the helper (a test
+  // harness, or a hass that has not finished initialising), and calling it
+  // then throws - so the version gate alone is not enough.
+  if (!hass || typeof hass.formatEntityName !== 'function') return false;
   const version = hass && hass.config && hass.config.version;
   if (!version) return false;
   const [major, minor] = version.split('.', 2);
