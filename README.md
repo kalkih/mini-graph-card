@@ -394,7 +394,7 @@ entities:
       - type: entity
 ```
 
-Available part types are `entity`, `device`, `parent_device`, `area`, `floor`,
+Available part types are `entity`, `device`, `area`, `floor`,
 and `text` (a literal, written as `{type: text, text: 'Indoor'}`). Parts that
 resolve to nothing are dropped, so the surrounding parts still render. A plain
 string `name` keeps working exactly as before.
