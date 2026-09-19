@@ -382,6 +382,10 @@ class MiniGraphCard extends LitElement {
       window.requestAnimationFrame(() => {
         this.updateOnInterval();
       });
+      // remove the timer if it was created before
+      if (this.interval) {
+        clearInterval(this.interval);
+      }
       // set the timer - call updateOnInterval() periodically
       // dependently on the "update_interval" value
       this.interval = setInterval(
