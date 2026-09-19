@@ -127,9 +127,11 @@ class MiniGraphCard extends LitElement {
     });
     if (updated) {
       this.stateChanged = true;
+      // initiate an immediate refresh of a "state" label, do not wait for readiness of a graph
       this.entity = [...this.entity];
       if (!this.config.update_interval && !this.updating) {
         setTimeout(() => {
+          // gather asyncronously collected updates
           this.updateQueue = [...queue, ...this.updateQueue];
           this.updateData();
         }, this.initial ? 0 : 1000);
@@ -349,9 +351,11 @@ class MiniGraphCard extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     if (this.config.update_interval) {
+      // call updateOnInterval() right at the 1st rendering, and then periodically
       window.requestAnimationFrame(() => {
         this.updateOnInterval();
       });
+      // set the timer - call updateOnInterval() periodically dependently on the "update_interval" value
       this.interval = setInterval(
         () => this.updateOnInterval(),
         this.config.update_interval * 1000,
@@ -1815,6 +1819,17 @@ class MiniGraphCard extends LitElement {
     }
   }
 
+  /**
+   * Update line/points/bars/gradient data for a further card's rendering:
+   * - initiate fetching a history for every updated entity;
+   * - prepare Graph objects;
+   * - calculate max/min bounds accounting bounds from Graph objects;
+   * - pass updated max/min bounds back to Graph objects;
+   * - compute line/points/bars/gradient data;
+   * - initiate a next card's rendering;
+   * - schedule a next update (if update_interval is not defined)
+   * @returns {void}
+   */
   async updateData({ config } = this) {
     this.updating = true;
 
@@ -1822,6 +1837,7 @@ class MiniGraphCard extends LitElement {
     const start = new Date(end);
     start.setMilliseconds(start.getMilliseconds() - getMilli(config.hours_to_show));
 
+    // fetch histories for all changed entities
     try {
       const promise = this.entity.map((stateObj, i) => this.updateEntity(stateObj, i, start, end));
       await Promise.all(promise);
@@ -1829,17 +1845,22 @@ class MiniGraphCard extends LitElement {
       log(err);
     }
 
-
     if (config.show.graph) {
       this.entity.forEach((stateObj, i) => {
         if (stateObj
           || (!stateObj && this._isStaticValue[i])
         ) {
+          // prepare Graph objects:
+          // - reduce history arrays;
+          // - calc coords[] data;
+          // - calc max/min values
           this.Graph[i].update();
         }
       });
     }
 
+    // update bounds - analyze max/min values from Graph objects,
+    // account user-defined lower/upper_bound values
     this.updateBounds();
 
     if (config.show.graph) {
@@ -1849,8 +1870,11 @@ class MiniGraphCard extends LitElement {
         if ((!stateObj && !this._isStaticValue[i])
           || this.Graph[i].coords.length === 0)
           return;
+
+        // renew max/min values in Graph[i] object
         const bound = config.entities[i].y_axis === 'secondary' ? this.boundSecondary : this.bound;
         [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
+
         if (this._isBarGraph[i]) {
           // bar graph
           this.bar[i] = this.Graph[i].getBars(graphPos);
@@ -1875,6 +1899,8 @@ class MiniGraphCard extends LitElement {
       this.line = [...this.line]; // force the card's re-rendering
     }
     this.updating = false;
+
+    // schedule a next update (if update_interval is not defined)
     this.setNextUpdate();
   }
 
@@ -1968,7 +1994,8 @@ class MiniGraphCard extends LitElement {
   }
 
   /**
-   * Update boundaries for all Y-axes
+   * Update boundaries for all Y-axes: analyze max/min values from Graph objects,
+   * account user-defined lower/upper_bound values
    * @param {object} config Config object
    * @returns {void}
    */
