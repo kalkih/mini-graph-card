@@ -470,12 +470,9 @@ class MiniGraphCard extends LitElement {
     if (!config || !this.entity || !this._hass) {
       return html``;
     }
-    if (this.config.entities.some(
-      (_, index) => this.entity[index] === undefined && !this._isStaticValue[index],
-    )) {
-      return this.renderWarnings();
-    }
+
     this.updateFormatFromLocale();
+
     return html`
       <ha-card
         class="flex"
@@ -491,19 +488,6 @@ class MiniGraphCard extends LitElement {
         ${this.renderHeader()} ${this.renderStates()} ${this.renderGraph()} ${this.renderInfo()}
       </ha-card>
     `;
-  }
-
-  renderWarnings() {
-    /* eslint-disable indent */
-    return html`
-      <hui-warning>
-        <div>mini-graph-card</div>
-        ${this.config.entities.map((entityConfig, index) => (!this.entity[index] && !this._isStaticValue[index]
-          ? html`<div>Entity not available: ${entityConfig.entity}</div>`
-          : html``))}
-      </hui-warning>
-    `;
-    /* eslint-enable indent */
   }
 
   /**
