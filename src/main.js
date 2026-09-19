@@ -18,7 +18,6 @@ import './initialize';
 import { version } from '../package.json';
 import {
   ICONS,
-  UPDATE_PROPS,
   X, Y, V,
   ONE_HOUR,
   MAX_BARS,
@@ -142,19 +141,12 @@ class MiniGraphCard extends LitElement {
 
   static get properties() {
     return {
-      id: String, // do not remove (unless a "this.id" property is renamed)
-      _hass: {},
-      config: {},
+      id: String, // in case "id" is changed somehow from outside
+      _hass: {}, // update when a hass object (incl. a locale) is changed
       entity: [],
-      Graph: [],
       line: [],
-      shadow: [],
-      length: Number,
-      bound: [],
-      boundSecondary: [],
-      abs: [],
-      tooltip: {},
-      updateQueue: [],
+      length: Number, // process animation
+      tooltip: {}, // update on selecting a point/bar/legend entry
       color: String,
     };
   }
@@ -375,14 +367,16 @@ class MiniGraphCard extends LitElement {
   }
 
   shouldUpdate(changedProps) {
-    if (UPDATE_PROPS.some(prop => changedProps.has(prop))) {
+    if (changedProps.has('tooltip')
+      || changedProps.has('line')
+      || changedProps.has('entity')) {
       this.color = this.computeColor(
         this.tooltip.value !== undefined
           ? this.tooltip.value : this.getEntityState(0),
         this.tooltip.entityIndex || 0,
       );
-      return true;
     }
+    return true;
   }
 
   firstUpdated() {
