@@ -63,6 +63,9 @@ class MiniGraphCard extends LitElement {
     this.initial = true;
     this._md5Config = undefined;
 
+    // array of erroneous entity_ids
+    this._loggedEntityErrors = [];
+
     // array of flags: true if an entity config contains a valid `static_value` option,
     // false - otherwise
     this._isStaticValue = [];
@@ -112,6 +115,27 @@ class MiniGraphCard extends LitElement {
     this.config.entities.forEach((entityConfig, index) => {
       this.config.entities[index].index = index; // Required for filtered views
       const stateObj = hass && entityConfig.entity && hass.states[entityConfig.entity] || undefined;
+
+      // log invalid entity_ids (once per error to prevent spam)
+      if (hass && entityConfig.entity) {
+        const errorIndex = this._loggedEntityErrors.indexOf(entityConfig.entity);
+        if (!stateObj) {
+          // invalid entity
+          // check if the error was already handled
+          if (errorIndex === -1) {
+            // not handled yet - save the error & log it
+            this._loggedEntityErrors.push(entityConfig.entity);
+            log(`Server returned 'undefined' for entity '${entityConfig.entity}'. Check entity_id`);
+          }
+        } else {
+          // if this valid entity was erroneous earlier - remove it from _loggedEntityErrors
+          if (errorIndex !== -1) {
+            // remove earlier saved entity_id
+            this._loggedEntityErrors.splice(errorIndex, 1);
+          }
+        }
+      }
+
       // initiate an update if stateObj changed
       if (stateObj && this.entity[index] !== stateObj) {
         this.entity[index] = stateObj;
