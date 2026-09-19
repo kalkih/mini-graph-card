@@ -19,8 +19,12 @@ const checkEntities = (configEntities) => {
     throw new Error(`Please provide the "entities" option as a list.\n See ${URL_DOCS}`);
 
   configEntities.forEach((entityConfig, index) => {
-    const hasEntity = entityConfig && typeof entityConfig.entity === 'string' && entityConfig.entity.trim() !== '';
-    const hasStaticValue = entityConfig && entityConfig.static_value !== undefined && isNumeric(entityConfig.static_value);
+    const hasEntity = entityConfig
+      && typeof entityConfig.entity === 'string'
+      && entityConfig.entity.trim() !== '';
+    const hasStaticValue = entityConfig
+      && entityConfig.static_value !== undefined
+      && isNumeric(entityConfig.static_value);
     if (!hasEntity && !hasStaticValue) {
       throw new Error(`Invalid configuration at index ${index}: Either "entity" or "static_value" must be specified`);
     }
