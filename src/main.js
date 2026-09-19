@@ -119,6 +119,7 @@ class MiniGraphCard extends LitElement {
       // log invalid entity_ids (once per error to prevent spam)
       if (hass && entityConfig.entity) {
         const errorIndex = this._loggedEntityErrors.indexOf(entityConfig.entity);
+        // eslint-disable-next-line no-lonely-if
         if (!stateObj) {
           // invalid entity
           // check if the error was already handled
