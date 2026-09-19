@@ -2283,13 +2283,13 @@ class MiniGraphCard extends LitElement {
   setNextUpdate() {
     // if update_interval is not defined - then update dependently on "points_per_hour"
     if (!this.config.update_interval) {
-      const interval = 1 / this.config.points_per_hour;
+      const interval = ONE_HOUR / this.config.points_per_hour;
       // clear the timer if was set earlier
       clearInterval(this.interval);
       // set new periodic action
       this.interval = setInterval(() => {
         if (!this.updating) this.updateData();
-      }, interval * ONE_HOUR);
+      }, interval);
     }
   }
 
