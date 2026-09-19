@@ -2262,13 +2262,17 @@ class MiniGraphCard extends LitElement {
   getEndDate() {
     const date = new Date();
     switch (this.config.group_by) {
+      case 'month':
+        date.setMonth(date.getMonth() + 1);
+        date.setDate(1);
+        date.setHours(0, 0, 0, 0);
+        break;
       case 'date':
         date.setDate(date.getDate() + 1);
-        date.setHours(0, 0, 0);
+        date.setHours(0, 0, 0, 0);
         break;
       case 'hour':
-        date.setHours(date.getHours() + 1);
-        date.setMinutes(0, 0);
+        date.setHours(date.getHours() + 1, 0, 0, 0);
         break;
       default:
         break;

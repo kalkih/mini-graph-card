@@ -486,8 +486,7 @@ export default class Graph {
         this._endTime.setHours(0, 0, 0, 0);
         break;
       case 'hour':
-        this._endTime.setHours(this._endTime.getHours() + 1);
-        this._endTime.setMinutes(0, 0, 0);
+        this._endTime.setHours(this._endTime.getHours() + 1, 0, 0, 0);
         break;
       default:
         break;
