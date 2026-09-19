@@ -384,6 +384,34 @@ class MiniGraphCard extends LitElement {
         this.tooltip.entityIndex || 0,
       );
     }
+
+    // check for changes in _hass
+    if (changedProps.size === 1 && changedProps.has('_hass')) {
+      const oldHass = changedProps.get('_hass');
+      const newHass = this._hass;
+
+      // 1st run
+      if (!oldHass) return true;
+
+      const oldLocale = oldHass.locale;
+      const newLocale = newHass.locale;
+
+      if (!oldLocale || !newLocale) return true;
+
+      const oldServerTz = oldHass.config && oldHass.config.time_zone;
+      const newServerTz = newHass.config && newHass.config.time_zone;
+
+      const configChanged =
+        oldLocale.language !== newLocale.language ||
+        oldLocale.number_format !== newLocale.number_format ||
+        oldLocale.time_format !== newLocale.time_format ||
+        oldLocale.date_format !== newLocale.date_format ||
+        oldLocale.time_zone !== newLocale.time_zone ||
+        oldServerTz !== newServerTz;
+
+      return configChanged;
+    }
+
     return true;
   }
 
