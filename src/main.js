@@ -550,6 +550,7 @@ class MiniGraphCard extends LitElement {
         <span
           class="ellipsis"
           style=${color}
+          title=${name}
         >${name}</span>
       </div>
     `;
