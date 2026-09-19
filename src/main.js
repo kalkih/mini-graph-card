@@ -2092,7 +2092,7 @@ class MiniGraphCard extends LitElement {
     let skipInitialState = false;
 
     const history = this.config.cache
-      ? await this.getCache(`${stateObj.entity_id}_${index}`, this.config.useCompress)
+      ? await this.getCache(`${stateObj.entity_id}_${index}`, this.config.compress)
       : undefined;
     if (history && history.hours_to_show === this.config.hours_to_show) {
       // process a cached history
@@ -2199,7 +2199,7 @@ class MiniGraphCard extends LitElement {
             last_fetched: new Date(),
             data: stateHistory,
             version,
-          }, this.config.useCompress)
+          }, this.config.compress)
           .catch((err) => {
             log(err);
             localForage.clear();
