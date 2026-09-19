@@ -125,10 +125,13 @@ class MiniGraphCard extends LitElement {
         updated = true;
       }
     });
+
     if (updated) {
       this.stateChanged = true;
+
       // initiate an immediate refresh of a "state" label, do not wait for readiness of a graph
       this.entity = [...this.entity];
+
       if (!this.config.update_interval && !this.updating) {
         setTimeout(() => {
           // gather asyncronously collected updates
