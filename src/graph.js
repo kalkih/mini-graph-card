@@ -174,10 +174,7 @@ export default class Graph {
       res[key].push(item);
     } else {
       // points from "before a timespan" moments are placed into the 1st bucket
-      if (!res[0]) {
-        res[0] = [];
-      }
-      res[0].push(item);
+      res[0] = [item];
     }
     return res;
   }
