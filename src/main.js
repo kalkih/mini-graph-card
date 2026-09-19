@@ -18,7 +18,6 @@ import './initialize';
 import { version } from '../package.json';
 import {
   ICONS,
-  UPDATE_PROPS,
   X, Y, V,
   ONE_HOUR,
   MAX_BARS,
@@ -126,11 +125,16 @@ class MiniGraphCard extends LitElement {
         updated = true;
       }
     });
+
     if (updated) {
       this.stateChanged = true;
+
+      // initiate an immediate refresh of a "state" label, do not wait for readiness of a graph
       this.entity = [...this.entity];
+
       if (!this.config.update_interval && !this.updating) {
         setTimeout(() => {
+          // gather asyncronously collected updates
           this.updateQueue = [...queue, ...this.updateQueue];
           this.updateData();
         }, this.initial ? 0 : 1000);
@@ -142,19 +146,12 @@ class MiniGraphCard extends LitElement {
 
   static get properties() {
     return {
-      id: String, // do not remove (unless a "this.id" property is renamed)
-      _hass: {},
-      config: {},
+      id: String, // in case "id" is changed somehow from outside
+      _hass: {}, // update when a hass object (incl. a locale) is changed
       entity: [],
-      Graph: [],
       line: [],
-      shadow: [],
-      length: Number,
-      bound: [],
-      boundSecondary: [],
-      abs: [],
-      tooltip: {},
-      updateQueue: [],
+      length: Number, // process animation
+      tooltip: {}, // update on selecting a point/bar/legend entry
       color: String,
     };
   }
@@ -357,9 +354,12 @@ class MiniGraphCard extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     if (this.config.update_interval) {
+      // call updateOnInterval() right at the 1st rendering, and then periodically
       window.requestAnimationFrame(() => {
         this.updateOnInterval();
       });
+      // set the timer - call updateOnInterval() periodically
+      // dependently on the "update_interval" value
       this.interval = setInterval(
         () => this.updateOnInterval(),
         this.config.update_interval * 1000,
@@ -375,14 +375,16 @@ class MiniGraphCard extends LitElement {
   }
 
   shouldUpdate(changedProps) {
-    if (UPDATE_PROPS.some(prop => changedProps.has(prop))) {
+    if (changedProps.has('tooltip')
+      || changedProps.has('line')
+      || changedProps.has('entity')) {
       this.color = this.computeColor(
         this.tooltip.value !== undefined
           ? this.tooltip.value : this.getEntityState(0),
         this.tooltip.entityIndex || 0,
       );
-      return true;
     }
+    return true;
   }
 
   firstUpdated() {
@@ -1821,6 +1823,17 @@ class MiniGraphCard extends LitElement {
     }
   }
 
+  /**
+   * Update line/points/bars/gradient data for a further card's rendering:
+   * - initiate fetching a history for every updated entity;
+   * - prepare Graph objects;
+   * - calculate max/min bounds (accounting bounds from Graph objects);
+   * - pass updated max/min bounds back to Graph objects;
+   * - compute line/points/bars/gradient data;
+   * - initiate a next card's rendering;
+   * - schedule a next update (if update_interval is not defined)
+   * @returns {void}
+   */
   async updateData({ config } = this) {
     this.updating = true;
 
@@ -1828,6 +1841,7 @@ class MiniGraphCard extends LitElement {
     const start = new Date(end);
     start.setMilliseconds(start.getMilliseconds() - getMilli(config.hours_to_show));
 
+    // fetch histories for all changed entities
     try {
       const promise = this.entity.map((stateObj, i) => this.updateEntity(stateObj, i, start, end));
       await Promise.all(promise);
@@ -1835,17 +1849,22 @@ class MiniGraphCard extends LitElement {
       log(err);
     }
 
-
     if (config.show.graph) {
       this.entity.forEach((stateObj, i) => {
         if (stateObj
           || (!stateObj && this._isStaticValue[i])
         ) {
+          // prepare Graph objects:
+          // - reduce history arrays;
+          // - calc coords[] data;
+          // - calc max/min values
           this.Graph[i].update();
         }
       });
     }
 
+    // update bounds - analyze max/min values from Graph objects,
+    // account user-defined lower/upper_bound values
     this.updateBounds();
 
     if (config.show.graph) {
@@ -1853,10 +1872,16 @@ class MiniGraphCard extends LitElement {
       let graphPos = 0;
       this.entity.forEach((stateObj, i) => {
         if ((!stateObj && !this._isStaticValue[i])
-          || this.Graph[i].coords.length === 0)
+          || this.Graph[i].coords.length === 0) {
           return;
-        const bound = config.entities[i].y_axis === 'secondary' ? this.boundSecondary : this.bound;
+        }
+
+        // renew max/min values in Graph[i] object
+        const bound = config.entities[i].y_axis === 'secondary'
+          ? this.boundSecondary
+          : this.bound;
         [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
+
         if (this._isBarGraph[i]) {
           // bar graph
           this.bar[i] = this.Graph[i].getBars(graphPos);
@@ -1881,6 +1906,8 @@ class MiniGraphCard extends LitElement {
       this.line = [...this.line]; // force the card's re-rendering
     }
     this.updating = false;
+
+    // schedule a next update (if update_interval is not defined)
     this.setNextUpdate();
   }
 
@@ -1974,7 +2001,8 @@ class MiniGraphCard extends LitElement {
   }
 
   /**
-   * Update boundaries for all Y-axes
+   * Update boundaries for all Y-axes: analyze max/min values from Graph objects,
+   * account user-defined lower/upper_bound values
    * @param {object} config Config object
    * @returns {void}
    */
@@ -2028,77 +2056,130 @@ class MiniGraphCard extends LitElement {
       : localForage.setItem(`${key}_${this._md5Config}_raw`, data);
   }
 
-  async updateEntity(stateObj, index, initStart, end) {
+  /**
+   * Retrieve history data for an entity/static value
+   * @param {object} stateObj stateObj for an entity
+   * @param {number} index Index of an entry in config.entities
+   * @param {Date} start Start of time interval
+   * @param {Date} end End of time interval
+   * @returns {void}
+   */
+  async updateEntity(stateObj, index, start, end) {
+    const entityConfig = this.config.entities[index];
+
     if ((!stateObj && !this._isStaticValue[index])
+      // skip static values which are not queued
       || (!stateObj && this._isStaticValue[index] && !this.updateQueue.includes(`static_value-${index}`))
+      // skip entities which are not queued
       || (stateObj && !this.updateQueue.includes(`${stateObj.entity_id}-${index}`))
-      || this.config.entities[index].show_graph === false
+      // do not process a history if no graph is displayed
+      || entityConfig.show_graph === false
     ) return;
 
     if (this._isStaticValue[index]) {
-      // process a fake static_value history
-      const staticValue = this.config.entities[index].static_value;
+      // process a static value
+      const staticValue = entityConfig.static_value;
+      // create a fake history
       this.Graph[index].history = [{ state: staticValue }, { state: staticValue }];
+      // remove a corresponding entry from a queue for a processed static value
       this.updateQueue = this.updateQueue.filter(entry => entry !== `static_value-${index}`);
       return;
     }
 
+    // process an entity
+    // remove a corresponding entry from a queue for a processed entity
     this.updateQueue = this.updateQueue.filter(entry => entry !== `${stateObj.entity_id}-${index}`);
 
     let stateHistory = [];
-    let start = initStart;
+    let fetchStart = start;
     let skipInitialState = false;
 
     const history = this.config.cache
-      ? await this.getCache(`${stateObj.entity_id}_${index}`, this.config.useCompress)
+      ? await this.getCache(`${stateObj.entity_id}_${index}`, this.config.compress)
       : undefined;
     if (history && history.hours_to_show === this.config.hours_to_show) {
+      // process a cached history
       stateHistory = history.data;
 
-      let currDataIndex = stateHistory.findIndex(item => new Date(item.last_changed) > initStart);
+      let currDataIndex = stateHistory.findIndex(item => new Date(item.last_changed) > start);
       if (currDataIndex !== -1) {
         if (currDataIndex > 0) {
           // include previous item
           currDataIndex -= 1;
           // but change it's last changed time
-          stateHistory[currDataIndex].last_changed = initStart;
+          stateHistory[currDataIndex].last_changed = start;
         }
 
-        stateHistory = stateHistory.slice(currDataIndex, stateHistory.length);
+        stateHistory = stateHistory.slice(currDataIndex);
         // skip initial state when fetching recent/not-cached data
         skipInitialState = true;
+
+        const lastFetched = new Date(history.last_fetched);
+        if (lastFetched > fetchStart) {
+          fetchStart = new Date(lastFetched - 1);
+        }
       } else {
         // there were no states which could be used in current graph so clearing
         stateHistory = [];
       }
-
-      const lastFetched = new Date(history.last_fetched);
-      if (lastFetched > start) {
-        start = new Date(lastFetched - 1);
-      }
     }
 
-    let newStateHistory = await this.fetchRecent(
+    // fetch recent history
+    let fetchedHistory = await this.fetchRecent(
       stateObj.entity_id,
-      start,
+      fetchStart,
       end,
-      this.config.entities[index].attribute ? false : skipInitialState,
-      !!this.config.entities[index].attribute,
+      entityConfig.attribute ? false : skipInitialState,
+      !!entityConfig.attribute,
     );
-    if (newStateHistory[0] && newStateHistory[0].length > 0) {
+
+    // just in case
+    if (!fetchedHistory || fetchedHistory.length === 0 || fetchedHistory[0].length === 0) {
+      fetchedHistory = [[]];
+    }
+
+    // check if the latest point corresponds to the current state
+    const lastHistoryItem = fetchedHistory[0].length > 0
+      ? fetchedHistory[0][fetchedHistory[0].length - 1]
+      : (stateHistory.length > 0 ? stateHistory[stateHistory.length - 1] : null);
+    // current value of state/attribute
+    const currentValue = entityConfig.attribute
+      ? this.getObjectAttr(stateObj.attributes, entityConfig.attribute)
+      : stateObj.state;
+    // last value of state/attribute from history
+    const lastHistoryValue = lastHistoryItem
+      ? entityConfig.attribute && lastHistoryItem.attributes
+        ? this.getObjectAttr(lastHistoryItem.attributes, entityConfig.attribute)
+        : lastHistoryItem.state
+      : null;
+    // if the latest record from the history does not correspond to the current state/attribute
+    // - add the current state/attribute to the history
+    // (may happen since data in recorder may be not ready yet)
+    if (lastHistoryValue !== currentValue) {
+      fetchedHistory[0].push({
+        entity_id: stateObj.entity_id,
+        state: stateObj.state,
+        last_changed: stateObj.last_changed,
+        last_updated: stateObj.last_updated,
+        attributes: stateObj.attributes,
+      });
+    }
+
+    if (fetchedHistory[0] && fetchedHistory[0].length > 0) {
       /**
       * hack because HA doesn't return anything if skipInitialState is false
       * when retrieving for attributes so we retrieve it and we remove it.*
       */
-      if (this.config.entities[index].attribute && skipInitialState) {
-        newStateHistory[0].shift();
+      if (entityConfig.attribute && skipInitialState) {
+        fetchedHistory[0].shift();
       }
+
       // check if we should convert states to numeric values
-      if (this.config.state_map.length > 0 || this.config.entities[index].attribute) {
-        newStateHistory[0].forEach((item) => {
-          if (this.config.entities[index].attribute) {
+      if (this.config.state_map.length > 0 || entityConfig.attribute) {
+        fetchedHistory[0].forEach((item) => {
+          if (entityConfig.attribute) {
             // eslint-disable-next-line no-param-reassign
-            item.state = this.getObjectAttr(item.attributes, this.config.entities[index].attribute);
+            item.state = this.getObjectAttr(item.attributes, entityConfig.attribute);
             // eslint-disable-next-line no-param-reassign
             delete item.attributes;
           }
@@ -2107,12 +2188,12 @@ class MiniGraphCard extends LitElement {
         });
       }
 
-      newStateHistory = newStateHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
-      newStateHistory = newStateHistory.map(item => ({
-        last_changed: this.config.entities[index].attribute ? item.last_updated : item.last_changed,
+      fetchedHistory = fetchedHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
+      fetchedHistory = fetchedHistory.map(item => ({
+        last_changed: entityConfig.attribute ? item.last_updated : item.last_changed,
         state: item.state,
       }));
-      stateHistory = [...stateHistory, ...newStateHistory];
+      stateHistory = [...stateHistory, ...fetchedHistory];
 
       if (this.config.cache) {
         this
@@ -2121,7 +2202,7 @@ class MiniGraphCard extends LitElement {
             last_fetched: new Date(),
             data: stateHistory,
             version,
-          }, this.config.useCompress)
+          }, this.config.compress)
           .catch((err) => {
             log(err);
             localForage.clear();
@@ -2135,7 +2216,7 @@ class MiniGraphCard extends LitElement {
       this.updateExtrema(stateHistory);
     }
 
-    if (this.config.entities[index].fixed_value === true) {
+    if (entityConfig.fixed_value === true) {
       const last = stateHistory[stateHistory.length - 1];
       this.Graph[index].history = [last, last];
     } else {
@@ -2202,13 +2283,20 @@ class MiniGraphCard extends LitElement {
     return date;
   }
 
+  /**
+  * Schedule an update in "ONE_HOUR/points_per_hour" milliseconds
+  * @returns {void}
+  */
   setNextUpdate() {
+    // if update_interval is not defined - then update dependently on "points_per_hour"
     if (!this.config.update_interval) {
-      const interval = 1 / this.config.points_per_hour;
+      const interval = ONE_HOUR / this.config.points_per_hour;
+      // clear the timer if was set earlier
       clearInterval(this.interval);
+      // set new periodic action
       this.interval = setInterval(() => {
         if (!this.updating) this.updateData();
-      }, interval * ONE_HOUR);
+      }, interval);
     }
   }
 
