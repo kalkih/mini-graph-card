@@ -1868,11 +1868,14 @@ class MiniGraphCard extends LitElement {
       let graphPos = 0;
       this.entity.forEach((stateObj, i) => {
         if ((!stateObj && !this._isStaticValue[i])
-          || this.Graph[i].coords.length === 0)
+          || this.Graph[i].coords.length === 0) {
           return;
+        }
 
         // renew max/min values in Graph[i] object
-        const bound = config.entities[i].y_axis === 'secondary' ? this.boundSecondary : this.bound;
+        const bound = config.entities[i].y_axis === 'secondary'
+          ? this.boundSecondary
+          : this.bound;
         [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
 
         if (this._isBarGraph[i]) {
@@ -2273,10 +2276,17 @@ class MiniGraphCard extends LitElement {
     return date;
   }
 
+  /**
+  * Schedule an update in "ONE_HOUR/points_per_hour" milliseconds
+  * @returns {void}
+  */
   setNextUpdate() {
+    // if update_interval is not defined - then update dependently on "points_per_hour"
     if (!this.config.update_interval) {
       const interval = 1 / this.config.points_per_hour;
+      // clear the timer if was set earlier
       clearInterval(this.interval);
+      // set new periodic action
       this.interval = setInterval(() => {
         if (!this.updating) this.updateData();
       }, interval * ONE_HOUR);
