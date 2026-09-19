@@ -1901,7 +1901,8 @@ class MiniGraphCard extends LitElement {
     if (configVal === undefined) {
       // dynamic boundary depending on values
       // take a max/min value out of ["max/min value of each Graph object"]
-      return Math[type](...series.map(ele => ele[type])) || fallback;
+      const computed = Math[type](...series.map(ele => ele[type]));
+      return isNumeric(computed) ? computed : fallback;
     }
     if (!isSoft) {
       // fixed boundary
