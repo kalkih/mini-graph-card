@@ -38,7 +38,6 @@ const DEFAULT_COLORS = [
   '#2980b9',
   '#8e44ad',
 ];
-const UPDATE_PROPS = ['entity', 'line', 'length', 'fill', 'points', 'tooltip', 'abs', 'config'];
 const DEFAULT_SHOW = {
   name: true,
   icon: true,
@@ -72,7 +71,6 @@ export {
   ICONS,
   DEFAULT_COLORS,
   DEFAULT_SHOW,
-  UPDATE_PROPS,
   X,
   Y,
   V,
