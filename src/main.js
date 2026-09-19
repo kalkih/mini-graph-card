@@ -1827,7 +1827,7 @@ class MiniGraphCard extends LitElement {
    * Update line/points/bars/gradient data for a further card's rendering:
    * - initiate fetching a history for every updated entity;
    * - prepare Graph objects;
-   * - calculate max/min bounds accounting bounds from Graph objects;
+   * - calculate max/min bounds (accounting bounds from Graph objects);
    * - pass updated max/min bounds back to Graph objects;
    * - compute line/points/bars/gradient data;
    * - initiate a next card's rendering;
