@@ -152,7 +152,7 @@ export default (config) => {
     color_thresholds_transition: 'smooth',
     line_width: DEFAULT_MARGIN,
     bar_spacing: DEFAULT_BAR_SPACING,
-    compress: true,
+    compress: false,
     smoothing: true,
     state_map: [],
     cache: true,
