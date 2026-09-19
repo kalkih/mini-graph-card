@@ -119,7 +119,6 @@ class MiniGraphCard extends LitElement {
       // log invalid entity_ids (once per error to prevent spam)
       if (hass && entityConfig.entity) {
         const errorIndex = this._loggedEntityErrors.indexOf(entityConfig.entity);
-        // eslint-disable-next-line no-lonely-if
         if (!stateObj) {
           // invalid entity
           // check if the error was already handled
@@ -130,6 +129,7 @@ class MiniGraphCard extends LitElement {
           }
         } else {
           // if this valid entity was erroneous earlier - remove it from _loggedEntityErrors
+          // eslint-disable-next-line no-lonely-if
           if (errorIndex !== -1) {
             // remove earlier saved entity_id
             this._loggedEntityErrors.splice(errorIndex, 1);
