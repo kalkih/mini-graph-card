@@ -2049,91 +2049,145 @@ class MiniGraphCard extends LitElement {
       : localForage.setItem(`${key}_${this._md5Config}_raw`, data);
   }
 
-  async updateEntity(stateObj, index, initStart, end) {
+  /**
+   * Retrieve history data for an entity/static value
+   * @param {object} stateObj stateObj for an entity
+   * @param {number} index Index of an entry in config.entities
+   * @param {Date} start Start of time interval
+   * @param {Date} end End of time interval
+   * @returns {void}
+   */
+  async updateEntity(stateObj, index, start, end) {
+    const entityConfig = this.config.entities[index];
+
     if ((!stateObj && !this._isStaticValue[index])
+      // skip static values which are not queued
       || (!stateObj && this._isStaticValue[index] && !this.updateQueue.includes(`static_value-${index}`))
+      // skip entities which are not queued
       || (stateObj && !this.updateQueue.includes(`${stateObj.entity_id}-${index}`))
-      || this.config.entities[index].show_graph === false
+      // do not process a history if no graph is displayed
+      || entityConfig.show_graph === false
     ) return;
 
     if (this._isStaticValue[index]) {
-      // process a fake static_value history
-      const staticValue = this.config.entities[index].static_value;
+      // process a static value
+      const staticValue = entityConfig.static_value;
+      // create a fake history
       this.Graph[index].history = [{ state: staticValue }, { state: staticValue }];
+      // remove a corresponding entry from a queue for a processed static value
       this.updateQueue = this.updateQueue.filter(entry => entry !== `static_value-${index}`);
       return;
     }
 
+    // process an entity
+    // remove a corresponding entry from a queue for a processed entity
     this.updateQueue = this.updateQueue.filter(entry => entry !== `${stateObj.entity_id}-${index}`);
 
     let stateHistory = [];
-    let start = initStart;
+    let fetchStart = start;
     let skipInitialState = false;
 
     const history = this.config.cache
       ? await this.getCache(`${stateObj.entity_id}_${index}`, this.config.useCompress)
       : undefined;
     if (history && history.hours_to_show === this.config.hours_to_show) {
+      // process a cached history
       stateHistory = history.data;
 
-      let currDataIndex = stateHistory.findIndex(item => new Date(item.last_changed) > initStart);
+      let currDataIndex = stateHistory.findIndex(item => new Date(item.last_changed) > start);
       if (currDataIndex !== -1) {
         if (currDataIndex > 0) {
           // include previous item
           currDataIndex -= 1;
           // but change it's last changed time
-          stateHistory[currDataIndex].last_changed = initStart;
+          stateHistory[currDataIndex].last_changed = start;
         }
 
-        stateHistory = stateHistory.slice(currDataIndex, stateHistory.length);
+        stateHistory = stateHistory.slice(currDataIndex);
         // skip initial state when fetching recent/not-cached data
         skipInitialState = true;
+
+        const lastFetched = new Date(history.last_fetched);
+        if (lastFetched > fetchStart) {
+          fetchStart = new Date(lastFetched - 1);
+        }
       } else {
         // there were no states which could be used in current graph so clearing
         stateHistory = [];
       }
-
-      const lastFetched = new Date(history.last_fetched);
-      if (lastFetched > start) {
-        start = new Date(lastFetched - 1);
-      }
     }
 
-    let newStateHistory = await this.fetchRecent(
+    // fetch recent history
+    let fetchedHistory = await this.fetchRecent(
       stateObj.entity_id,
-      start,
+      fetchStart,
       end,
-      this.config.entities[index].attribute ? false : skipInitialState,
-      !!this.config.entities[index].attribute,
+      entityConfig.attribute ? false : skipInitialState,
+      !!entityConfig.attribute,
     );
-    if (newStateHistory[0] && newStateHistory[0].length > 0) {
+    console.log("hist: fetchedHistory", fetchedHistory);
+
+    // just in case
+    if (!fetchedHistory || fetchedHistory.length === 0 || fetchedHistory[0].length === 0) {
+      fetchedHistory = [[]];
+    }
+
+    // check if the latest point corresponds to the current state
+    const lastHistoryItem = fetchedHistory[0].length > 0
+      ? fetchedHistory[0][fetchedHistory[0].length - 1]
+      : (stateHistory.length > 0 ? stateHistory[stateHistory.length - 1] : null);
+    // current value of state/attribute
+    const currentValue = entityConfig.attribute
+      ? this.getObjectAttr(stateObj.attributes, entityConfig.attribute)
+      : stateObj.state;
+    // last value of state/attribute from history
+    const lastHistoryValue = lastHistoryItem
+      ? entityConfig.attribute && lastHistoryItem.attributes
+        ? this.getObjectAttr(lastHistoryItem.attributes, entityConfig.attribute)
+        : lastHistoryItem.state
+      : null;
+    // if the latest record from the history does not correspond to the current state/attribute
+    // - add the current state/attribute to the history
+    // (may happen since data in recorder may be not ready yet)
+    if (lastHistoryValue !== currentValue) {
+      fetchedHistory[0].push({
+        entity_id: stateObj.entity_id,
+        state: stateObj.state,
+        last_changed: stateObj.last_changed,
+        last_updated: stateObj.last_updated,
+        attributes: stateObj.attributes,
+      });
+    }
+
+    if (fetchedHistory[0] && fetchedHistory[0].length > 0) {
       /**
       * hack because HA doesn't return anything if skipInitialState is false
       * when retrieving for attributes so we retrieve it and we remove it.*
       */
-      if (this.config.entities[index].attribute && skipInitialState) {
-        newStateHistory[0].shift();
+      if (entityConfig.attribute && skipInitialState) {
+        fetchedHistory[0].shift();
       }
+
       // check if we should convert states to numeric values
-      if (this.config.state_map.length > 0 || this.config.entities[index].attribute) {
-        newStateHistory[0].forEach((item) => {
-          if (this.config.entities[index].attribute) {
+      if (this.config.state_map.length > 0 || entityConfig.attribute) {
+        fetchedHistory[0].forEach((item) => {
+          if (entityConfig.attribute) {
             // eslint-disable-next-line no-param-reassign
-            item.state = this.getObjectAttr(item.attributes, this.config.entities[index].attribute);
+            item.state = this.getObjectAttr(item.attributes, entityConfig.attribute);
             // eslint-disable-next-line no-param-reassign
             delete item.attributes;
           }
           if (this.config.state_map.length > 0)
-            this._convertState(item);
+            this._convertState(item); // ?????????????????????
         });
       }
 
-      newStateHistory = newStateHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
-      newStateHistory = newStateHistory.map(item => ({
-        last_changed: this.config.entities[index].attribute ? item.last_updated : item.last_changed,
+      fetchedHistory = fetchedHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
+      fetchedHistory = fetchedHistory.map(item => ({
+        last_changed: entityConfig.attribute ? item.last_updated : item.last_changed,
         state: item.state,
       }));
-      stateHistory = [...stateHistory, ...newStateHistory];
+      stateHistory = [...stateHistory, ...fetchedHistory];
 
       if (this.config.cache) {
         this
@@ -2156,7 +2210,7 @@ class MiniGraphCard extends LitElement {
       this.updateExtrema(stateHistory);
     }
 
-    if (this.config.entities[index].fixed_value === true) {
+    if (entityConfig.fixed_value === true) {
       const last = stateHistory[stateHistory.length - 1];
       this.Graph[index].history = [last, last];
     } else {
