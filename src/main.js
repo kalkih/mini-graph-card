@@ -401,13 +401,12 @@ class MiniGraphCard extends LitElement {
       const oldServerTz = oldHass.config && oldHass.config.time_zone;
       const newServerTz = newHass.config && newHass.config.time_zone;
 
-      const configChanged =
-        oldLocale.language !== newLocale.language ||
-        oldLocale.number_format !== newLocale.number_format ||
-        oldLocale.time_format !== newLocale.time_format ||
-        oldLocale.date_format !== newLocale.date_format ||
-        oldLocale.time_zone !== newLocale.time_zone ||
-        oldServerTz !== newServerTz;
+      const configChanged = oldLocale.language !== newLocale.language
+        || oldLocale.number_format !== newLocale.number_format
+        || oldLocale.time_format !== newLocale.time_format
+        || oldLocale.date_format !== newLocale.date_format
+        || oldLocale.time_zone !== newLocale.time_zone
+        || oldServerTz !== newServerTz;
 
       return configChanged;
     }
