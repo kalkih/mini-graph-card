@@ -355,7 +355,8 @@ class MiniGraphCard extends LitElement {
       window.requestAnimationFrame(() => {
         this.updateOnInterval();
       });
-      // set the timer - call updateOnInterval() periodically dependently on the "update_interval" value
+      // set the timer - call updateOnInterval() periodically
+      // dependently on the "update_interval" value
       this.interval = setInterval(
         () => this.updateOnInterval(),
         this.config.update_interval * 1000,
@@ -2128,7 +2129,6 @@ class MiniGraphCard extends LitElement {
       entityConfig.attribute ? false : skipInitialState,
       !!entityConfig.attribute,
     );
-    console.log("hist: fetchedHistory", fetchedHistory);
 
     // just in case
     if (!fetchedHistory || fetchedHistory.length === 0 || fetchedHistory[0].length === 0) {
