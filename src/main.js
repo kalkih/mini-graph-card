@@ -2184,7 +2184,7 @@ class MiniGraphCard extends LitElement {
             delete item.attributes;
           }
           if (this.config.state_map.length > 0)
-            this._convertState(item); // ?????????????????????
+            this._convertState(item);
         });
       }
 
