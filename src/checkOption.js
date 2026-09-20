@@ -12,8 +12,11 @@ import {
  * @returns {void}
  */
 const checkEntities = (configEntities) => {
-  if (!Array.isArray(configEntities))
-    throw new Error(`Please provide the "entities" option as a list`);
+  if (!Array.isArray(configEntities)) {
+    const error = `Please provide the "entities" option as a list`;
+    log(error);
+    throw new Error(error);
+  }
 
   configEntities.forEach((entityConfig, index) => {
     const isShorthandString = typeof entityConfig === 'string'
@@ -25,7 +28,9 @@ const checkEntities = (configEntities) => {
       && entityConfig.static_value !== undefined
       && isNumeric(entityConfig.static_value);
     if (!isShorthandString && !hasEntity && !hasStaticValue) {
-      throw new Error(`Invalid configuration at index ${index}: Either "entity" or "static_value" must be specified`);
+      const error = `Invalid configuration at index ${index}: Either "entity" or "static_value" must be specified`;
+      log(error);
+      throw new Error(error);
     }
   });
 };
