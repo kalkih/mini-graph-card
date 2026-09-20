@@ -430,7 +430,7 @@ export default class Graph {
   }
 
   _median(items) {
-    const itemsDup = [...items].sort((a, b) => parseFloat(a) - parseFloat(b));
+    const itemsDup = [...items].sort((a, b) => parseFloat(a.state) - parseFloat(b.state));
     const mid = Math.floor((itemsDup.length - 1) / 2);
     if (itemsDup.length % 2 === 1)
       return parseFloat(itemsDup[mid].state);
