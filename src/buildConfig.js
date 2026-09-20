@@ -20,6 +20,7 @@ import {
 } from './checkOption';
 import { getFactor } from './others';
 import { migrateYaxisConfig } from './migrate';
+import { log } from './utils';
 
 /**
  * Starting from the given index, increment the index until an array element with a
