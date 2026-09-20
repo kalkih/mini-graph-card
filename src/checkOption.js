@@ -13,7 +13,7 @@ import {
  */
 const checkEntities = (configEntities) => {
   if (!Array.isArray(configEntities)) {
-    const error = `Please provide the "entities" option as a list`;
+    const error = 'Please provide the "entities" option as a list';
     log(error);
     throw new Error(error);
   }
