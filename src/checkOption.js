@@ -5,9 +5,6 @@ import {
   getBound,
   isEntryAnimated,
 } from './others';
-import {
-  URL_DOCS,
-} from './const';
 
 /**
  * Check if entities are properly defined.
@@ -16,7 +13,7 @@ import {
  */
 const checkEntities = (configEntities) => {
   if (!Array.isArray(configEntities))
-    throw new Error(`Please provide the "entities" option as a list.\n See ${URL_DOCS}`);
+    throw new Error(`Please provide the "entities" option as a list`);
 
   configEntities.forEach((entityConfig, index) => {
     const isShorthandString = typeof entityConfig === 'string'
