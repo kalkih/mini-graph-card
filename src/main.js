@@ -1318,12 +1318,19 @@ class MiniGraphCard extends LitElement {
         || !this.bound || this.primaryYaxisSeries.length === 0) {
       return html``;
     }
-    // index is not passed into computeState() for a primary axis
+    const inactive = this.tooltip.entityIndex !== undefined
+      && this.config.entities[this.tooltip.entityIndex].y_axis === 'secondary'
+      && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.bucketIndex !== -1);
     const invert = this.config.y_axis
       && this.config.y_axis.primary
       && this.config.y_axis.primary.invert;
+    // index is not passed into computeState() for a primary axis
     return html`
-      <div class="graph__labels --primary flex" ?invert=${invert}>
+      <div
+        class="graph__labels --primary flex"
+        ?invert=${invert}
+        ?inactive=${inactive}
+      >
         <span class="label--max">${this.computeState(this.bound[1])}</span>
         <span class="label--min">${this.computeState(this.bound[0])}</span>
       </div>
@@ -1339,12 +1346,19 @@ class MiniGraphCard extends LitElement {
         || !this.boundSecondary || this.secondaryYaxisSeries.length === 0) {
       return html``;
     }
-    // index "-1" is passed into computeState() for a secondary axis
+    const inactive = this.tooltip.entityIndex !== undefined
+      && this.config.entities[this.tooltip.entityIndex].y_axis !== 'secondary'
+      && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.bucketIndex !== -1);
     const invert = this.config.y_axis
       && this.config.y_axis.secondary
       && this.config.y_axis.secondary.invert;
+    // index "-1" is passed into computeState() for a secondary axis
     return html`
-      <div class="graph__labels --secondary flex" ?invert=${invert}>
+      <div
+        class="graph__labels --secondary flex"
+        ?invert=${invert}
+        ?inactive=${inactive}
+      >
         <span class="label--max">${this.computeState(this.boundSecondary[1], -1)}</span>
         <span class="label--min">${this.computeState(this.boundSecondary[0], -1)}</span>
       </div>
