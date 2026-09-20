@@ -136,10 +136,12 @@ export default (config) => {
   // check config.entities option
   checkEntities(config.entities);
 
-  if (config.line_color_above || config.line_color_below)
-    throw new Error(
+  // warn about outdated config options
+  if (config.line_color_above || config.line_color_below) {
+    log(
       '"line_color_above/line_color_below" was removed, please use "color_thresholds"',
     );
+  }
 
   // migrate legacy options, currently belonging to y_axis object
   const migratedConfig = migrateYaxisConfig(config);
