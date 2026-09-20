@@ -1,5 +1,4 @@
 import {
-  URL_DOCS,
   DEFAULT_FONT_SIZE,
   DEFAULT_FONT_SIZE_HEADER,
   DEFAULT_BAR_SPACING,
@@ -21,6 +20,7 @@ import {
 } from './checkOption';
 import { getFactor } from './others';
 import { migrateYaxisConfig } from './migrate';
+import { log } from './utils';
 
 /**
  * Starting from the given index, increment the index until an array element with a
@@ -36,10 +36,11 @@ const findFirstValuedIndex = (stops, startIndex) => {
       return i;
     }
   }
-  throw new Error(
-    'Error in threshold interpolation: could not find right-nearest valued stop. '
-    + 'Do the first and last thresholds have a set "value"?',
-  );
+
+  const error = 'Error in threshold interpolation: could not find right-nearest valued stop. '
+    + 'Do the first and last thresholds have a set "value"?';
+  log(error);
+  throw new Error(error);
 };
 
 /**
@@ -66,7 +67,9 @@ const interpolateStops = (stops) => {
     return stops;
   }
   if (stops[0].value == null || stops[stops.length - 1].value == null) {
-    throw new Error(`The first and last thresholds must have a set "value".\n See ${URL_DOCS}`);
+    const error = 'The first and last thresholds must have a set "value"';
+    log(error);
+    throw new Error(error);
   }
 
   let leftValuedIndex = 0;
@@ -133,10 +136,12 @@ export default (config) => {
   // check config.entities option
   checkEntities(config.entities);
 
-  if (config.line_color_above || config.line_color_below)
-    throw new Error(
-      `"line_color_above/line_color_below" was removed, please use "color_thresholds".\n See ${URL_DOCS}`,
+  // warn about outdated config options
+  if (config.line_color_above || config.line_color_below) {
+    log(
+      '"line_color_above/line_color_below" was removed, please use "color_thresholds"',
     );
+  }
 
   // migrate legacy options, currently belonging to y_axis object
   const migratedConfig = migrateYaxisConfig(config);
