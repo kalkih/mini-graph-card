@@ -1963,7 +1963,9 @@ class MiniGraphCard extends LitElement {
    */
   getBoundary(type, series, configVal, isSoft, fallback) {
     if (!(type in Math)) {
-      throw new Error(`The type "${type}" is not present on the Math object`);
+      const error = `The type "${type}" is not present on the Math object`;
+      log(error);
+      throw new Error(error);
     }
 
     if (configVal === undefined) {
