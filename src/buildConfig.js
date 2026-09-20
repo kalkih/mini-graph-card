@@ -1,5 +1,4 @@
 import {
-  URL_DOCS,
   DEFAULT_FONT_SIZE,
   DEFAULT_FONT_SIZE_HEADER,
   DEFAULT_BAR_SPACING,
@@ -66,7 +65,7 @@ const interpolateStops = (stops) => {
     return stops;
   }
   if (stops[0].value == null || stops[stops.length - 1].value == null) {
-    throw new Error(`The first and last thresholds must have a set "value".\n See ${URL_DOCS}`);
+    throw new Error(`The first and last thresholds must have a set "value"`);
   }
 
   let leftValuedIndex = 0;
@@ -135,7 +134,7 @@ export default (config) => {
 
   if (config.line_color_above || config.line_color_below)
     throw new Error(
-      `"line_color_above/line_color_below" was removed, please use "color_thresholds".\n See ${URL_DOCS}`,
+      `"line_color_above/line_color_below" was removed, please use "color_thresholds"`,
     );
 
   // migrate legacy options, currently belonging to y_axis object
