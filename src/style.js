@@ -32,7 +32,13 @@ const style = css`
   ha-card[points]:hover .line--points,
   ha-card:hover .graph__labels.--primary,
   ha-card:hover .graph__labels.--secondary {
-      opacity: 1;
+    opacity: 1;
+  }
+  .graph__labels.--primary[inactive],
+  .graph__labels.--secondary[inactive] {
+    opacity: 0 !important; /* override 'ha-card:hover .graph__labels' styles */
+    transition: opacity .25s;
+    animation: none;
   }
   ha-card[fill] path {
     stroke-linecap: initial;
