@@ -35,10 +35,11 @@ const findFirstValuedIndex = (stops, startIndex) => {
       return i;
     }
   }
-  throw new Error(
-    'Error in threshold interpolation: could not find right-nearest valued stop. '
-    + 'Do the first and last thresholds have a set "value"?',
-  );
+
+  const error = 'Error in threshold interpolation: could not find right-nearest valued stop. '
+    + 'Do the first and last thresholds have a set "value"?';
+  log(error);
+  throw new Error(error);
 };
 
 /**
@@ -65,7 +66,9 @@ const interpolateStops = (stops) => {
     return stops;
   }
   if (stops[0].value == null || stops[stops.length - 1].value == null) {
-    throw new Error(`The first and last thresholds must have a set "value"`);
+    const error = `The first and last thresholds must have a set "value"`;
+    log(error);
+    throw new Error(error);
   }
 
   let leftValuedIndex = 0;
