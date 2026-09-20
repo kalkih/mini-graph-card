@@ -67,7 +67,7 @@ const interpolateStops = (stops) => {
     return stops;
   }
   if (stops[0].value == null || stops[stops.length - 1].value == null) {
-    const error = `The first and last thresholds must have a set "value"`;
+    const error = 'The first and last thresholds must have a set "value"';
     log(error);
     throw new Error(error);
   }
@@ -138,7 +138,7 @@ export default (config) => {
 
   if (config.line_color_above || config.line_color_below)
     throw new Error(
-      `"line_color_above/line_color_below" was removed, please use "color_thresholds"`,
+      '"line_color_above/line_color_below" was removed, please use "color_thresholds"',
     );
 
   // migrate legacy options, currently belonging to y_axis object
