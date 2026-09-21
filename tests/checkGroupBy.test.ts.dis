@@ -42,6 +42,73 @@ const VARIANTS: any[] = [
   },
   ///////////////////////////////////////////////////////////////////
   {
+    description: 'group_by=15min, hours_to_show: 0.5',
+    config: { hours_to_show: 0.5, group_by: '15min' },
+    expected: '15min',
+  },
+  {
+    description: 'group_by=15min, hours_to_show: 0.25',
+    config: { hours_to_show: 0.25, group_by: '15min' },
+    expected: '15min',
+  },
+  {
+    description: 'group_by=15min, hours_to_show: 24',
+    config: { hours_to_show: 24, group_by: '15min' },
+    expected: '15min',
+  },
+  {
+    description: 'group_by=15min, hours_to_show: 24.75',
+    config: { hours_to_show: 24.75, group_by: '15min' },
+    expected: '15min',
+  },
+  {
+    description: 'group_by=15min, hours_to_show: 24.1',
+    config: { hours_to_show: 24.1, group_by: '15min' },
+    expected: 'interval',
+  },
+  {
+    description: 'group_by=15min, hours_to_show: 0.1',
+    config: { hours_to_show: 0.1, group_by: '15min' },
+    expected: 'interval',
+  },
+  ///////////////////////////////////////////////////////////////////
+  {
+    description: 'group_by=30min, hours_to_show: 0.5',
+    config: { hours_to_show: 0.5, group_by: '30min' },
+    expected: '30min',
+  },
+  {
+    description: 'group_by=30min, hours_to_show: 1',
+    config: { hours_to_show: 1, group_by: '30min' },
+    expected: '30min',
+  },
+  {
+    description: 'group_by=30min, hours_to_show: 24',
+    config: { hours_to_show: 24, group_by: '30min' },
+    expected: '30min',
+  },
+  {
+    description: 'group_by=30min, hours_to_show: 0.49',
+    config: { hours_to_show: 0.49, group_by: '30min' },
+    expected: 'interval',
+  },
+  {
+    description: 'group_by=30min, hours_to_show: 0.25',
+    config: { hours_to_show: 0.25, group_by: '30min' },
+    expected: 'interval',
+  },
+  {
+    description: 'group_by=30min, hours_to_show: 1.25',
+    config: { hours_to_show: 1.25, group_by: '30min' },
+    expected: 'interval',
+  },
+  {
+    description: 'group_by=30min, hours_to_show: 24.5',
+    config: { hours_to_show: 24.5, group_by: '30min' },
+    expected: '30min',
+  },
+  ///////////////////////////////////////////////////////////////////
+  {
     description: 'group_by=hour, hours_to_show: 0.5',
     config: { hours_to_show: 0.5, group_by: 'hour' },
     expected: 'interval',
