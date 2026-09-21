@@ -194,6 +194,18 @@ const getIntervalEndDate = (groupBy) => {
     case 'hour':
       date.setHours(date.getHours() + 1, 0, 0, 0);
       break;
+    case '30min': {
+      const minutes = date.getMinutes();
+      const newMinutes = Math.ceil((minutes + 1) / 30) * 30;
+      date.setMinutes(newMinutes, 0, 0);
+      break;
+    }
+    case '15min': {
+      const minutes = date.getMinutes();
+      const newMinutes = Math.ceil((minutes + 1) / 15) * 15;
+      date.setMinutes(newMinutes, 0, 0);
+      break;
+    }
     default:
       break;
   }
