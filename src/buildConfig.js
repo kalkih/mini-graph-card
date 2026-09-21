@@ -17,6 +17,8 @@ import {
   checkBounds,
   checkColorThresholds,
   checkLineStyle,
+  checkGroupBy,
+  checkPointsPerHour,
 } from './checkOption';
 import { getFactor } from './others';
 import { migrateYaxisConfig } from './migrate';
@@ -185,7 +187,7 @@ export default (config) => {
   conf.points_per_hour = checkNumericOption(conf, 'points_per_hour', DEFAULT_POINTS_PER_HOUR, { minBound: 0.001, allowString: true });
   conf.update_interval = checkNumericOption(conf, 'update_interval', undefined, { minBound: 0, allowString: true });
 
-  // axis options
+  // axis options - check them & prepare parsed bounds data
   const boundsParsed = [{}, {}];
   if (conf.y_axis && conf.y_axis.primary) {
     const primaryBounds = checkBounds(conf.y_axis.primary, 'primary');
@@ -321,17 +323,11 @@ export default (config) => {
   // warn if line_style is defined along with animate=true
   checkLineStyle(conf);
 
-  // override points per hour to mach group_by function
-  switch (conf.group_by) {
-    case 'date':
-      conf.points_per_hour = 1 / 24;
-      break;
-    case 'hour':
-      conf.points_per_hour = 1;
-      break;
-    default:
-      break;
-  }
+  // check if group_by & hours_to_show fit together
+  conf.group_by = checkGroupBy(conf);
+
+  // override points_per_hour to match group_by option
+  conf.points_per_hour = checkPointsPerHour(conf);
 
   return {
     config: conf,
