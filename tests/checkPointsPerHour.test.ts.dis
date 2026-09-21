@@ -1,0 +1,98 @@
+/**
+ * Tests for checkPointsPerHour().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it } from 'vitest';
+import { checkPointsPerHour } from '../checkOption';
+
+interface ConfigType {
+  group_by?: string | undefined | null;
+  hours_to_show: number;
+};
+
+const VARIANTS: any[] = [
+  {
+    description: 'undefined group_by',
+    config: { points_per_hour: 1 },
+    expected: 1,
+  },
+  {
+    description: 'string "undefined" group_by',
+    config: { points_per_hour: 1, group_by: 'undefined' },
+    expected: 1,
+  },
+  {
+    description: 'null group_by',
+    config: { points_per_hour: 1, group_by: null },
+    expected: 1,
+  },
+  ///////////////////////////////////////////////////////////////////
+  {
+    description: 'group_by=interval',
+    config: { points_per_hour: 1, group_by: 'interval' },
+    expected: 1,
+  },
+  ///////////////////////////////////////////////////////////////////
+  {
+    description: 'group_by=hour, points_per_hour=0.5',
+    config: { points_per_hour: 0.5, group_by: 'hour' },
+    expected: 1,
+  },
+  {
+    description: 'group_by=hour, points_per_hour=1',
+    config: { points_per_hour: 1, group_by: 'hour' },
+    expected: 1,
+  },
+  {
+    description: 'group_by=hour, points_per_hour=2',
+    config: { points_per_hour: 2, group_by: 'hour' },
+    expected: 1,
+  },
+  ///////////////////////////////////////////////////////////////////
+  {
+    description: 'group_by=date, points_per_hour=1',
+    config: { points_per_hour: 1, group_by: 'date' },
+    expected: 1/24,
+  },
+  {
+    description: 'group_by=date, points_per_hour=1/24',
+    config: { points_per_hour: 1/24, group_by: 'date' },
+    expected: 1/24,
+  },
+  {
+    description: 'group_by=date, points_per_hour=1/48',
+    config: { points_per_hour: 1/48, group_by: 'date' },
+    expected: 1/24,
+  },
+  ///////////////////////////////////////////////////////////////////
+  {
+    description: 'group_by=week, points_per_hour=1',
+    config: { points_per_hour: 1, group_by: 'week' },
+    expected: 1/24/7,
+  },
+  {
+    description: 'group_by=week, points_per_hour=1/24/7',
+    config: { points_per_hour: 1/24/7, group_by: 'week' },
+    expected: 1/24/7,
+  },
+  {
+    description: 'group_by=week, points_per_hour=1/24/8',
+    config: { points_per_hour: 1/24/8, group_by: 'week' },
+    expected: 1/24/7,
+  },
+
+];
+
+describe("checkPointsPerHour", () => {
+  VARIANTS.forEach((variant) => {
+    it(`checkPointsPerHour: check [${JSON.stringify(variant)}], ${variant.description}`, () => {
+      const result = checkPointsPerHour(variant.config);
+      const expectedValue = variant.expected;
+      expect(result).toEqual(expectedValue);
+    });
+  });
+
+});
