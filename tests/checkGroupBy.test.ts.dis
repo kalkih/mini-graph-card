@@ -1,0 +1,141 @@
+/**
+ * Tests for checkGroupBy().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it } from 'vitest';
+import { checkGroupBy } from '../checkOption';
+
+interface ConfigType {
+  group_by?: string | undefined | null;
+  hours_to_show: number;
+};
+
+const VARIANTS: any[] = [
+  {
+    description: 'undefined group_by',
+    config: { hours_to_show: 1 },
+    expected: 'interval',
+  },
+  {
+    description: 'string "undefined" group_by',
+    config: { hours_to_show: 1, group_by: 'undefined' },
+    expected: 'interval',
+  },
+  {
+    description: 'null group_by',
+    config: { hours_to_show: 1, group_by: null },
+    expected: 'interval',
+  },
+  ///////////////////////////////////////////////////////////////////
+  {
+    description: 'group_by=hour, hours_to_show: 0.5',
+    config: { hours_to_show: 0.5, group_by: 'hour' },
+    expected: 'interval',
+  },
+  {
+    description: 'group_by=hour, hours_to_show: 1',
+    config: { hours_to_show: 1, group_by: 'hour' },
+    expected: 'hour',
+  },
+  {
+    description: 'group_by=hour, hours_to_show: 1.5',
+    config: { hours_to_show: 1.5, group_by: 'hour' },
+    expected: 'interval',
+  },
+  {
+    description: 'group_by=hour, hours_to_show: 5',
+    config: { hours_to_show: 5, group_by: 'hour' },
+    expected: 'hour',
+  },
+  {
+    description: 'group_by=hour, hours_to_show: 5.5',
+    config: { hours_to_show: 5.5, group_by: 'hour' },
+    expected: 'interval',
+  },
+  ///////////////////////////////////////////////////////////////////
+  {
+    description: 'group_by=date, hours_to_show: 0.5',
+    config: { hours_to_show: 0.5, group_by: 'date' },
+    expected: 'interval',
+  },
+  {
+    description: 'group_by=date, hours_to_show: 23',
+    config: { hours_to_show: 23, group_by: 'date' },
+    expected: 'interval',
+  },
+  {
+    description: 'group_by=date, hours_to_show: 24',
+    config: { hours_to_show: 24, group_by: 'date' },
+    expected: 'date',
+  },
+  {
+    description: 'group_by=date, hours_to_show: 24.1',
+    config: { hours_to_show: 24.1, group_by: 'date' },
+    expected: 'interval',
+  },
+  {
+    description: 'group_by=date, hours_to_show: 48',
+    config: { hours_to_show: 48, group_by: 'date' },
+    expected: 'date',
+  },
+  {
+    description: 'group_by=date, hours_to_show: 60',
+    config: { hours_to_show: 60, group_by: 'date' },
+    expected: 'interval',
+  },
+  ///////////////////////////////////////////////////////////////////
+  {
+    description: 'group_by=week, hours_to_show: 0.5',
+    config: { hours_to_show: 0.5, group_by: 'week' },
+    expected: 'interval',
+  },
+  {
+    description: 'group_by=week, hours_to_show: 23',
+    config: { hours_to_show: 23, group_by: 'week' },
+    expected: 'interval',
+  },
+  {
+    description: 'group_by=week, hours_to_show: 24',
+    config: { hours_to_show: 24, group_by: 'week' },
+    expected: 'interval',
+  },
+  {
+    description: 'group_by=week, hours_to_show: 48',
+    config: { hours_to_show: 48, group_by: 'week' },
+    expected: 'interval',
+  },
+  {
+    description: 'group_by=week, hours_to_show: 167',
+    config: { hours_to_show: 167, group_by: 'week' },
+    expected: 'interval',
+  },
+  {
+    description: 'group_by=week, hours_to_show: 168',
+    config: { hours_to_show: 168, group_by: 'week' },
+    expected: 'week',
+  },
+  {
+    description: 'group_by=week, hours_to_show: 169',
+    config: { hours_to_show: 169, group_by: 'week' },
+    expected: 'interval',
+  },
+  {
+    description: 'group_by=week, hours_to_show: 336',
+    config: { hours_to_show: 336, group_by: 'week' },
+    expected: 'week',
+  },
+];
+
+describe("checkGroupBy", () => {
+  VARIANTS.forEach((variant) => {
+    it(`checkGroupBy: check [${JSON.stringify(variant)}], ${variant.description}`, () => {
+      const result = checkGroupBy(variant.config);
+      const expectedValue = variant.expected;
+      expect(result).toEqual(expectedValue);
+    });
+  });
+
+});
