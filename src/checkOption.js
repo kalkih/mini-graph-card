@@ -282,6 +282,81 @@ const checkLineStyle = (config) => {
   });
 };
 
+/**
+ * Check group_by option for a compatibility with hours_to_show
+ * @param {object} config Config object
+ * @returns {string} Cleared group_by value
+ */
+export const checkGroupBy = (config) => {
+  const { group_by: groupBy, hours_to_show: hoursToShow } = config;
+
+  if (groupBy === null || groupBy === 'undefined') {
+    log(`group_by is ${groupBy}, resetting group_by to "interval"`);
+    return 'interval';
+  }
+  if (groupBy === undefined) {
+    return 'interval';
+  }
+
+  const logReset = (requiredUnit) => {
+    log(`group_by "${groupBy}" requires hours_to_show to be a multiple of ${requiredUnit} `
+      + `(current: ${hoursToShow}); resetting group_by to "interval"`);
+  };
+
+  if (groupBy === 'week') {
+    if (hoursToShow < 168 || hoursToShow % 168 !== 0) {
+      logReset('168 (1 week)');
+      return 'interval';
+    }
+  } else if (groupBy === 'date') {
+    if (hoursToShow < 24 || hoursToShow % 24 !== 0) {
+      logReset('24 (1 day)');
+      return 'interval';
+    }
+  } else if (groupBy === 'hour') {
+    if (hoursToShow < 1 || hoursToShow % 1 !== 0) {
+      logReset('1 (1 hour)');
+      return 'interval';
+    }
+  }
+
+  return groupBy;
+};
+
+/**
+ * Adjust points_per_hour value based on the group_by parameter
+ * @param {object} config Config object
+ * @returns {number} Possibly adjusted value of points_per_hour
+ */
+const checkPointsPerHour = (config) => {
+  const prevPointsPerHour = config.points_per_hour;
+  let newPointsPerHour = prevPointsPerHour;
+  let pointsPerHourAdjusted = false;
+
+  switch (config.group_by) {
+    case 'week':
+      newPointsPerHour = 1 / 24 / 7;
+      pointsPerHourAdjusted = true;
+      break;
+    case 'date':
+      newPointsPerHour = 1 / 24;
+      pointsPerHourAdjusted = true;
+      break;
+    case 'hour':
+      newPointsPerHour = 1;
+      pointsPerHourAdjusted = true;
+      break;
+    default:
+      break;
+  }
+  if (pointsPerHourAdjusted
+    && Math.abs(newPointsPerHour - prevPointsPerHour) > Number.EPSILON) {
+    log(`group_by "${config.group_by}": points_per_hour ${prevPointsPerHour}; adjusting value to ${newPointsPerHour}`);
+  }
+
+  return newPointsPerHour;
+};
+
 export {
   checkEntities,
   checkNumericOption,
@@ -290,4 +365,6 @@ export {
   checkBounds,
   checkColorThresholds,
   checkLineStyle,
+  checkGroupBy,
+  checkPointsPerHour,
 };
