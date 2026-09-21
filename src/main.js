@@ -28,6 +28,7 @@ import {
 import {
   isNumeric,
   isEntryAnimated,
+  getIntervalEndDate,
 } from './others';
 import {
   getMin, getAvg, getMax,
@@ -1283,7 +1284,7 @@ class MiniGraphCard extends LitElement {
       // offset end by a minute, if grouped by, e.g., date or hour
       const oneMinute = group_by !== 'interval' ? 60000 : 0;
 
-      const now = this.getEndDate();
+      const now = getIntervalEndDate(this.config.group_by);
 
       now.setMilliseconds(now.getMilliseconds() - oneMinute - interval * count);
       end = formatDateTime(
@@ -1905,7 +1906,7 @@ class MiniGraphCard extends LitElement {
   async updateData({ config } = this) {
     this.updating = true;
 
-    const end = this.getEndDate();
+    const end = getIntervalEndDate(this.config.group_by);
     const start = new Date(end);
     start.setMilliseconds(start.getMilliseconds() - getMilli(config.hours_to_show));
 
@@ -2330,27 +2331,6 @@ class MiniGraphCard extends LitElement {
     }
 
     res.state = resultIndex;
-  }
-
-  getEndDate() {
-    const date = new Date();
-    switch (this.config.group_by) {
-      case 'month':
-        date.setMonth(date.getMonth() + 1);
-        date.setDate(1);
-        date.setHours(0, 0, 0, 0);
-        break;
-      case 'date':
-        date.setDate(date.getDate() + 1);
-        date.setHours(0, 0, 0, 0);
-        break;
-      case 'hour':
-        date.setHours(date.getHours() + 1, 0, 0, 0);
-        break;
-      default:
-        break;
-    }
-    return date;
   }
 
   /**
