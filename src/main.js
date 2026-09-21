@@ -348,42 +348,6 @@ class MiniGraphCard extends LitElement {
   }
 
   /**
-   * Create an array of Graph objects
-   * @param {number} height Graph's height
-   * @returns {Array} Array of Graph objects
-   */
-  createGraph(height) {
-    return this.config.entities.map(
-      (entity, index) => new Graph({
-        width: 500,
-        height,
-        margin: this._graphMargin,
-        hours_to_show: this.config.hours_to_show,
-        points_per_hour: this.config.points_per_hour,
-        aggregateFuncName: entity.aggregate_func || this.config.aggregate_func,
-        groupBy: this.config.group_by,
-        smoothing: getFirstDefinedItem(
-          entity.smoothing,
-          this.config.smoothing,
-          this.getDefaultSmoothing(index),
-        ),
-        logarithmic: getFirstDefinedItem(
-          entity.logarithmic,
-          this.config.logarithmic,
-          false,
-        ),
-        bar_spacing: this.config.bar_spacing,
-        bar_spacing_group: this.config.bar_spacing_group,
-        total_bars_in_group: this.visibleEntities.length,
-        fill_baseline: getFirstDefinedItem(
-          entity.fill_baseline,
-          this.config.fill_baseline,
-        ),
-      }),
-    );
-  }
-
-  /**
    * Safely return a graph's height.
    * @returns {number} Graph's height
    */
