@@ -206,4 +206,5 @@ export {
   getFactor,
   getBound,
   isEntryAnimated,
+  getIntervalEndDate,
 };
