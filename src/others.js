@@ -168,6 +168,38 @@ const isEntryAnimated = (config, index) => {
   return config.animate === true;
 };
 
+const getDaysUntilNextMonday = day => (day === 0 ? 1 : 8 - day);
+
+/**
+ * Get a datetime of the interval's end
+ * @param {string} groupBy Type of grouping
+ * @returns {Date} Datetime of the interval's end
+ */
+const getIntervalEndDate = (groupBy) => {
+  const date = new Date();
+  switch (groupBy) {
+    // case 'month': // Not supported yet officially
+    //   date.setMonth(date.getMonth() + 1);
+    //   date.setDate(1);
+    //   date.setHours(0, 0, 0, 0);
+    //   break;
+    case 'week':
+      date.setDate(date.getDate() + getDaysUntilNextMonday(date.getDay()));
+      date.setHours(0, 0, 0, 0);
+      break;
+    case 'date':
+      date.setDate(date.getDate() + 1);
+      date.setHours(0, 0, 0, 0);
+      break;
+    case 'hour':
+      date.setHours(date.getHours() + 1, 0, 0, 0);
+      break;
+    default:
+      break;
+  }
+  return date;
+}
+
 export {
   isNumeric,
   logStringWarning,
