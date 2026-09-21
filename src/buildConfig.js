@@ -1,6 +1,4 @@
 import {
-  URL_DOCS,
-  MAX_BARS,
   DEFAULT_FONT_SIZE,
   DEFAULT_FONT_SIZE_HEADER,
   DEFAULT_BAR_SPACING,
@@ -11,8 +9,8 @@ import {
   DEFAULT_COLORS,
   DEFAULT_SHOW,
 } from './const';
-import { log } from './utils';
 import {
+  checkEntities,
   checkNumericOption,
   checkIntegerOption,
   checkBounds,
@@ -21,6 +19,7 @@ import {
 } from './checkOption';
 import { getFactor } from './others';
 import { migrateYaxisConfig } from './migrate';
+import { log } from './utils';
 
 /**
  * Starting from the given index, increment the index until an array element with a
@@ -36,10 +35,11 @@ const findFirstValuedIndex = (stops, startIndex) => {
       return i;
     }
   }
-  throw new Error(
-    'Error in threshold interpolation: could not find right-nearest valued stop. '
-    + 'Do the first and last thresholds have a set "value"?',
-  );
+
+  const error = 'Error in threshold interpolation: could not find right-nearest valued stop. '
+    + 'Do the first and last thresholds have a set "value"?';
+  log(error);
+  throw new Error(error);
 };
 
 /**
@@ -66,7 +66,9 @@ const interpolateStops = (stops) => {
     return stops;
   }
   if (stops[0].value == null || stops[stops.length - 1].value == null) {
-    throw new Error(`The first and last thresholds must have a set "value".\n See ${URL_DOCS}`);
+    const error = 'The first and last thresholds must have a set "value"';
+    log(error);
+    throw new Error(error);
   }
 
   let leftValuedIndex = 0;
@@ -130,19 +132,21 @@ const computeThresholds = (stops, type) => {
 };
 
 export default (config) => {
-  if (!Array.isArray(config.entities))
-    throw new Error(`Please provide the "entities" option as a list.\n See ${URL_DOCS}`);
-  if (config.line_color_above || config.line_color_below)
-    throw new Error(
-      `"line_color_above/line_color_below" was removed, please use "color_thresholds".\n See ${URL_DOCS}`,
+  // check config.entities option
+  checkEntities(config.entities);
+
+  // warn about outdated config options
+  if (config.line_color_above || config.line_color_below) {
+    log(
+      '"line_color_above/line_color_below" was removed, please use "color_thresholds"',
     );
+  }
 
   // migrate legacy options, currently belonging to y_axis object
   const migratedConfig = migrateYaxisConfig(config);
 
   const conf = {
     animate: false,
-    font_size: DEFAULT_FONT_SIZE,
     font_size_header: DEFAULT_FONT_SIZE_HEADER,
     hours_to_show: DEFAULT_HOURS_TO_SHOW,
     points_per_hour: DEFAULT_POINTS_PER_HOUR,
@@ -153,7 +157,7 @@ export default (config) => {
     color_thresholds_transition: 'smooth',
     line_width: DEFAULT_MARGIN,
     bar_spacing: DEFAULT_BAR_SPACING,
-    compress: true,
+    compress: false,
     smoothing: true,
     state_map: [],
     cache: true,
@@ -165,7 +169,7 @@ export default (config) => {
   };
 
   // check numeric options for validity
-  conf.font_size = checkNumericOption(conf, 'font_size', 100, { minBound: 0.1, allowString: true });
+  conf.font_size = checkNumericOption(migratedConfig, 'font_size', 100, { minBound: 0.1, allowString: true });
   conf.font_size_header = checkNumericOption(conf, 'font_size_header', DEFAULT_FONT_SIZE_HEADER, { minBound: 0.1, allowString: true });
 
   conf.bar_spacing = checkNumericOption(conf, 'bar_spacing', DEFAULT_BAR_SPACING, { minBound: -1, allowString: true });
@@ -180,10 +184,13 @@ export default (config) => {
   conf.update_interval = checkNumericOption(conf, 'update_interval', undefined, { minBound: 0, allowString: true });
 
   // axis options
+  const boundsParsed = [{}, {}];
   if (conf.y_axis && conf.y_axis.primary) {
     const primaryBounds = checkBounds(conf.y_axis.primary, 'primary');
     conf.y_axis.primary.lower_bound = primaryBounds.lowerBound;
     conf.y_axis.primary.upper_bound = primaryBounds.upperBound;
+    boundsParsed[0].lowerBound = primaryBounds.lowerBoundParsed;
+    boundsParsed[0].upperBound = primaryBounds.upperBoundParsed;
 
     conf.y_axis.primary.min_bound_range = checkNumericOption(
       conf.y_axis.primary,
@@ -203,6 +210,8 @@ export default (config) => {
     const secondaryBounds = checkBounds(conf.y_axis.secondary, 'secondary');
     conf.y_axis.secondary.lower_bound = secondaryBounds.lowerBound;
     conf.y_axis.secondary.upper_bound = secondaryBounds.upperBound;
+    boundsParsed[1].lowerBound = secondaryBounds.lowerBoundParsed;
+    boundsParsed[1].upperBound = secondaryBounds.upperBoundParsed;
 
     conf.y_axis.secondary.min_bound_range = checkNumericOption(
       conf.y_axis.secondary,
@@ -232,7 +241,7 @@ export default (config) => {
     conf.static_value_label_offset = DEFAULT_STATIC_VALUE_LABEL_OFFSET;
   }
 
-  conf.fill_baseline = checkNumericOption(conf, 'fill_baseline', undefined, { allowString: true });
+  conf.baseline = checkNumericOption(conf, 'baseline', undefined, { allowString: true });
 
   // process per-entity configs
   /* eslint-disable no-param-reassign */
@@ -253,11 +262,11 @@ export default (config) => {
         conf.decimals,
         { minBound: 0, allowString: true, logOptionName: `entities[${i}].decimals` },
       );
-      entity.fill_baseline = checkNumericOption(
+      entity.baseline = checkNumericOption(
         entity,
-        'fill_baseline',
+        'baseline',
         undefined,
-        { allowString: true, logOptionName: `entities[${i}].fill_baseline` },
+        { allowString: true, logOptionName: `entities[${i}].baseline` },
       );
 
       if (entity.color_thresholds) {
@@ -290,7 +299,7 @@ export default (config) => {
   if (typeof config.line_color === 'string')
     conf.line_color = [config.line_color, ...DEFAULT_COLORS];
 
-  conf.font_size = (config.font_size / 100) * DEFAULT_FONT_SIZE || DEFAULT_FONT_SIZE;
+  conf.font_size = (conf.font_size / 100) * DEFAULT_FONT_SIZE;
 
   // check color_thresholds
   checkColorThresholds(conf, 'config');
@@ -322,16 +331,9 @@ export default (config) => {
       break;
   }
 
-  if (conf.show.graph === 'bar') {
-    const entities = conf.entities.length;
-    if (conf.hours_to_show * conf.points_per_hour * entities > MAX_BARS) {
-      conf.points_per_hour = MAX_BARS / (conf.hours_to_show * entities);
-      log(`Not enough space, adjusting points_per_hour to ${conf.points_per_hour}`);
-    }
-  }
-
   return {
     config: conf,
+    boundsParsed,
     entityFactors,
     axisFactors,
   };

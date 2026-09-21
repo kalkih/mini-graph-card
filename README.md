@@ -81,9 +81,9 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | Name | Type | Default | Since | Description |
 |------|:----:|:-------:|:-----:|-------------|
 | type ***(required)*** | string |  | v0.0.1 | `custom:mini-graph-card`.
-| entities ***(required)*** | list |  | v0.2.0 | One or more sensor entities (along with [static values](#static-lines)) in a list, see [entities object](#entities-object) for additional entity/static value options.
+| entities ***(required)*** | list |  | v0.2.0 | One or more sensor entities (along with [static values](#static-values)) in a list, see [entities object](#entities-object) for additional entity/static value options.
 | icon | string |  | v0.0.1 | Set a custom icon from any of the available mdi icons.
-| icon_color | string |  | v0.14.0 | Set a custom icon color. Takes precedence over `icon_adaptive_color`.
+| icon_color | string |  | v0.14.0 | Set a custom icon color. Takes precedence over `icon_adaptive_color`. See [Supported color formats](#supported-color-formats).
 | icon_image | string |  | v0.12.0 | Override icon with an image url.
 | name | string |  | v0.0.1 | Set a custom name which is displayed beside the icon.
 | unit | string |  | v0.0.1 | Set a custom unit of measurement (`''` value for an empty unit).
@@ -103,7 +103,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | bar_spacing_group | number |   | 0.14.0 | Set an additional spacing between bar groups (multiple entities) in bar graph. Fallback to `bar_spacing` if undefined; if `bar_spacing: -1` - then a default `4` value is used. See [examples](#bar-spacing-examples).
 | line_width | number | `5` | v0.0.1 | Set the thickness of the line.
 | line_style | string |  | v0.14.0 | Set the style of the line (see [Line styles](#line-styles)).
-| line_color | string/list | `var(--accent-color)` | v0.0.1 | Set a custom color for the graph line, provide a list of colors for multiple graph entries.
+| line_color | string/list | `var(--accent-color)` | v0.0.1 | Set a custom color for the graph line, provide a list of colors for multiple graph entries. See [Supported color formats](#supported-color-formats).
 | color_thresholds | list |  | v0.2.3 | Set thresholds for dynamic graph colors, see [Line color object](#line-color-object).
 | color_thresholds_transition | string | `smooth` | v0.4.3 | Color threshold transition, `smooth` or `hard`.
 | decimals | integer |  | v0.0.9 | Specify the exact number of decimals to show for number values, see [Number format](#number-format).
@@ -117,7 +117,9 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | smoothing | boolean | `true` | v0.8.0 | Whether to make graph line smooth.
 | state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert (order matters as position becomes a value on the graph).
 | logarithmic | boolean | `false` | v0.10.0 | Use a logarithmic scale for the graph (see [Logarithmic options](#logarithmic-options)).
-| fill_baseline | number |  | v0.14.0 | Set a custom baseline for the graph (see [Baseline](#baseline)).
+| baseline | number |  | v0.14.0 | Set a custom baseline for the graph (see [Baseline](#baseline)).
+| static_value_label_offset | number |  `20` | v0.14.0 | Set a custom horizontal offset for the [static value line label](#static-values), as percentage of the graph area's width.
+
 
 These options are legacy and moved into [Y-axis config object](#y-axis-object):
 
@@ -143,12 +145,13 @@ properties of the Entity object detailed in the following table (as per `sensor.
 |------|:----:|:-------:|-------------|
 | entity ***(required)*** | string |         | Entity id of the sensor. Either `entity` or `static_value` must be defined.
 | attribute | string |         | Retrieves an attribute or [sub-attribute (attr1.attr2...)](#accessing-attributes-in-complex-structures) instead of the state
-| static_value | number |         | Set a value for a [static line](#static-lines). Either `entity` or `static_value` must be defined.
-| name | string |         | Set a custom display name, defaults to entity's friendly_name or a `Static` label for a [static value](#static-lines).
+| static_value | number |         | Set a value for a [static line or bar](#static-values). Either `entity` or `static_value` must be defined.
+| name | string |         | Set a custom display name, defaults to entity's friendly_name or a `Static` label for a [static value](#static-values).
 | animate    | boolean |        | Override for a reveal animation to the graph.
+| graph | string |         | Override for a graph type, `line` or `bar` (see [Graph types](#graph-types)).
 | line_width | number |         | Override for a thickness of the line.
 | line_style | string |   | Override the style of the line (see [Line styles](#line-styles)).
-| color | string |         | Set a custom color, overrides all other color options including thresholds.
+| color | string |         | Set a custom color, overrides all other color options including thresholds. See [Supported color formats](#supported-color-formats).
 | color_thresholds | list |  | v0.14.0 | Override the thresholds for dynamic graph colors.
 | color_thresholds_transition | string |  | v0.14.0 | Override the color threshold transition.
 | unit | string |         | Set a custom unit of measurement, overrides `unit` set in base config (`''` value for an empty unit).
@@ -162,13 +165,14 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | show_fill | boolean |         | Set to false to hide the fill.
 | show_points | boolean |         | Set to false to hide the points (see a note below).
 | show_legend | boolean |         | Set to false to turn hide from the legend.
-| show_static_inactive | boolean |         | Set to true to disable hiding the line when a point of a line of another entity selected; meaningful for a [static line](#static-lines) only.
-| state_adaptive_color | boolean |         | Make the color of the state adapt to the entity/static value color.
+| show_static_value_label | boolean | v0.14.0 | Set to false to hide the [static value line label](#static-values).
+| show_static_inactive | boolean |         | Set to true to disable hiding the line when a point of a line of another entity selected; meaningful for a [static value](#static-values) only.
+| state_adaptive_color | boolean |         | Make the color of the state & the [static value line label](#static-values) adapt to the entity/static value color.
 | y_axis | string |         | If 'secondary', displays using the secondary Y-axis on the right.
 | fixed_value | boolean |         | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 | smoothing | boolean |         | Override for a flag indicating whether to make graph line smooth.
 | logarithmic | boolean |         | Override logarithmic scaling for this entity only (see [Logarithmic options](#logarithmic-options)).
-| fill_baseline | number |   | Set a custom baseline for the graph or override a global `fill_baseline` option (see [Baseline](#baseline)).
+| baseline | number |   | Set a custom baseline for the graph or override a global `baseline` option (see [Baseline](#baseline)).
 
 Note: the "points" term is only applicable to a "line" graph, not to a "bar" graph.
 
@@ -189,7 +193,7 @@ All properties are optional.
 | name | `true` | `true` / `false` | Display name.
 | icon | `true` | `true` / `false` | Display icon.
 | state | `true` | `true` / `false` / `last` | Display current state. `last` will show the last graph point's or bar's value (fallback to `true` if points are not shown for a line graph).
-| graph | `line` | `line` / `bar` / `false` | Display option for the graph. If set to `bar` a maximum of `96` bars will be displayed.
+| graph | `line` | `line` / `bar` / `false` | Display option for the graph. If set to `bar` a maximum of `96` bars will be displayed. See [Graph types](#graph-types).
 | fill | `true` | `true` / `false` / `fade` | Display the line graph fill.
 | points | `hover` | `true` / `false` / `hover` | Display graph data points (for a line graph only).
 | legend | `true` | `true` / `false` / `below` | Display the graph legend (only shown when graph contains multiple entities); `below` - place below a graph.
@@ -198,10 +202,21 @@ All properties are optional.
 | info_hide_unit | `false` | `true` / `false` | Do not show a unit for the average & max/min information.
 | labels | `hover` | `true` / `false` / `hover` | Display Y-axis labels.
 | labels_secondary | `hover` | `true` / `false` / `hover` | Display secondary Y-axis labels.
+| static_value_labels | `false` | `left` / `right` / `false` | Display [static value lines labels](#static-values) either on the left or right side, or do not display.
 | name_adaptive_color | `false` | `true` / `false` | Make the name color adapt with the primary entity/static value color.
 | icon_adaptive_color | `false` | `true` / `false` | Make the icon color adapt with the primary entity/static value color.
 | loading_indicator | `true` | `true` / `false` | Show loading indicator while attempting to retrieve a history.
 | graphs_order | `direct` | `direct` / `reversed` | Define an order of displaying graphs (see [Graphs order](#graphs-order)).
+
+#### Graph types
+
+Two graph types are supported - linear & bars.
+By default, all graphs have a `line` type.
+To set a common type for all graphs - use a `show.graph` option (see [Available show options](#available-show-options)).
+To set an individual type for a particular graph, use a per-entity `graph` option (see [Entities object](#entities-object)).
+
+See examples [below](#different-graph-types).
+
 
 #### Y-axis object
 
@@ -209,10 +224,11 @@ The object has a tree-like structure with optional `primary` & `secondary` keys.
 
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
-| decimals | integer |  | Specify the exact number of decimals to show for primary Y-axis labels, see [Number format](#number-format).
+| invert | boolean |  | Make the Y-axis inverted, see [Inverted graphs](#inverted-graphs).
+| decimals | integer |  | Specify the exact number of decimals to show for the Y-axis labels, see [Number format](#number-format).
 | value_factor | number or object |   | Scale a value, see [Value factor](#value-factor).
-| lower_bound | number *or* string |   | Set a fixed lower bound for the graph Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
-| upper_bound | number *or* string |   | Set a fixed upper bound for the graph Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
+| lower_bound | number *or* string |   | Set a fixed lower bound for the Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
+| upper_bound | number *or* string |   | Set a fixed upper bound for the Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
 | min_bound_range | number |   | Applied after everything, makes sure there's a minimum range that the Y-axis will have. Useful for not making small changes look large because of scale.
 
 ```yaml
@@ -238,7 +254,7 @@ See [dynamic line color](#dynamic-line-color) for example usage.
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
 | value ***(required [except in interpolation (see below)](#line-color-interpolation-of-stop-values))*** | number |  | The threshold for the color stop.
-| color ***(required)*** | string |  | Color in 6 digit hex format (e.g. `#008080`).
+| color ***(required)*** | string |  | Color. See [Supported color formats](#supported-color-formats).
 
 ##### Line color interpolation of stop values
 As long as the first and last threshold stops have `value` properties, intermediate stops can exclude `value`; they will be interpolated linearly. For example, given stops like:
@@ -287,9 +303,9 @@ As a shorthand, you can just use a color string for the stops that you want inte
 
 All card's area - except a graph part - supports processing of actions.
 By default, tapping on an element opens a `more-info` dialog:
-1. For "state" elements - the dialog is opened for a corresponding graph entity (not processed for a [static value](#static-lines)).
+1. For "state" elements - the dialog is opened for a corresponding graph entity (not processed for a [static value](#static-values)).
 2. For "legend" elements - same as above.
-3. For other card's areas (except a graph part) - the dialog is opened for the 1st graph entity (not processed for a [static value](#static-lines)).
+3. For other card's areas (except a graph part) - the dialog is opened for the 1st graph entity (not processed for a [static value](#static-values)).
 
 | Name | Type | Default | Options | Description |
 |------|:----:|:-------:|:-----------:|-------------|
@@ -360,21 +376,22 @@ Depending on the configuration, the "name" & "icon" elements are aligned as foll
 
 
 
-### Static lines
+### Static values
 
 A static horizontal line is drawn for a user-defined static value.
 Can be used in various applications like drawing a threshold line or a zeroth X-axis.
 
 Notes:
-1. Like a dynamic graph for an entity (defined by an `entity` option), a static line (defined by a `static_value` option) can use other applicable options: `name`, `line_width`, `line_style`, `color`, `unit`, `decimals`, `show_...`, `state_adaptive_color`, `y_axis`.
-2. When `graph: bar`, a `static_value` entry is rendered as a set of constant bars.
+1. Like a dynamic graph for an entity (defined by an `entity` option), a static value (defined by a `static_value` option) can use other applicable options: `name`, `line_width`, `line_style`, `color`, `unit`, `decimals`, `show_...`, `state_adaptive_color`, `y_axis`.
+2. When a `static_value` entry has a `bar` type (either individually set or inherited from a global `show.graph` option), a `static_value` entry is rendered as a set of constant bars.
 3. Displaying extrema/average values is not supported for `static_value` entries.
+4. It is possible to display a static value's badge on a corresponding static line: the `show.static_value_labels` option (see [Available show options](#available-show-options)) allows to display the badge either on the left or on the right side of the card; the per-entity `show_static_value_label` option (see [Entities object](#entities-object)) can be used to hide a label for a particular static line; the `static_value_label_offset` global option can be used to define a custom horizontal offset for the static value line label. Also, if a `static_value` entry has a `bar` type (either individually set or inherited from a global `show.graph` option) then a static label cannot not displayed.
 
-See examples [below](#displaying-static-lines).
+See examples [below](#displaying-static-values).
 
 ### Number format
 
-Options `decimals` defined "card-wide" and/or for some entity/[static value](#static-lines) are used to set an exact number of decimals according to the following rules:
+Options `decimals` defined "card-wide" and/or for some entity/[static value](#static-values) are used to set an exact number of decimals according to the following rules:
 1. For state & attribute values, static values:
 - if none `decimals` option is defined - a default presentation (see a note below) is used;
 - if `decimals` for some entity is defined - this value is used for this entity;
@@ -395,7 +412,7 @@ Options `decimals` defined "card-wide" and/or for some entity/[static value](#st
 A "default presentation" refers to a default look in HA:
 1. For a state value (also for extrema & average): if accuracy settings are defined for an entity - these settings are used, otherwise some default HA settings (depend on many factors incl. a `device_class`; for template sensors - a user-defined accuracy set in jinja templates is used).
 2. For an attribute value (also for extrema & average): default HA settings are used (for template sensors - a user-defined accuracy set in jinja templates is used).
-3. For Y-axis labels, [static values](#static-lines): "maximum 2 decimals" accuracy is used.
+3. For Y-axis labels, [static values](#static-values): "maximum 2 decimals" accuracy is used.
 And for all values, HA number format settings (like `xxxx.xx` or `x xxx.x` or `x,xxx.x`) are used.
 
 
@@ -430,22 +447,33 @@ Warning: the `line_style` option is not accounted if `animation: true` option is
 
 ### Baseline
 
-The `fill_baseline` option is only meaningful for linear graphs with a fill.
+The `baseline` option is only meaningful for linear graphs with a fill and bar graphs.
 
-By default, a fill is applied to an area between a curve and a bottom edge.
-With the `fill_baseline` option set, areas between a curve & a baseline are filled.
-This can be useful to show a deviation of a value near some basis (like for entities which can be both positive & nagitive).
+For a linear graph: by default, a fill is applied to an area between a curve and a bottom edge.
+With the `baseline` option set, areas between a curve & a baseline are filled.
+This can be useful to show a deviation of a value near some basis (like for entities which can be both positive & negative).
 
-Additionally, the `fill_baseline` option can be set individually for entities.
+For a bar graph: with the `baseline` option set, a bar graph has bars growing upward or downward from the defined baseline. Typically, this can be used with `baseline: 0` to show deviations from zero (positive & negative), although any non-zero value can be defined.
+
+Additionally, the `baseline` option can be set individually for entities; may not be meaningful for bar graphs.
 
 See examples [below](#custom-baseline).
 
+### Inverted graphs
+
+An inverted graph has a vertically flipped Y-scale: lower values are shown at the top, higher values are shown at the bottom.
+
+This type of graph is mainly used when smaller values need to be shown at the top of the scale.
+
+Examples: a ping value (smaller ping is better), a water level in a well (0 level means "well is full", higher values mean "well is empty").
+
+See examples [below](#inverted-y-axis).
 
 ### Graphs order
 
-Note: this section only applies to line graphs & stacked bars graphs (with `bar_spacing: -1`).
+Note: this section only applies to line graphs & overlapping bars graphs (with `bar_spacing: -1`).
 
-For each entity/[static value](#static-lines), a `line` graph consists of 3 basic parts: a "line" part (curve), a "fill" part (if displaying a fill is configured), a "points" part (if displaying points is configured).
+For each entity/[static value](#static-values), a `line` graph consists of 3 basic parts: a "line" part (curve), a "fill" part (if displaying a fill is configured), a "points" part (if displaying points is configured).
 
 By default, graphs are shown in the following order:
 1. All "fill" parts are shown (if configured).
@@ -460,11 +488,22 @@ I.e. the last entity's/static value's graph will be shown as topmost.
 
 This can be altered by setting a `graph_order` option: `direct` (default) stands for the described default order, `reversed` stands for "1st entity's/static value's graph is topmost".
 
-Similarly for stacked bars graphs (when `bar_spacing: -1`): by default (or with `graph_order: direct`), bars for each point are processed in the following order:
+Similarly for overlapping bars graphs (when `bar_spacing: -1`): by default (or with `graph_order: direct`), bars for each point are processed in the following order:
 1. First, a bar for the 1st entity/static value in the `entities` list is processed.
 2. Last, a bar for the last entity/static value in the `entities` list is processed.
 
 With `graph_order: reversed`, bars for the 1st entity/static value become topmost.
+
+### Supported color formats
+Color can be defined as:
+- `red` (available web colors)
+- `#ff0000` (HEX format, values must be provided in quotes)
+- `#ff000055` (HEX format with opacity, values must be provided in quotes)
+- `rgb(255, 0, 0)` (RGB format)
+- `rgba(255, 0, 0, 0.2)` (RGB format with opacity)
+- `var(--primary-text-color)`, `var(--red-color)` (or any other theme variable supported by HA Frontend)
+
+
 
 ### Theme variables
 The following theme variables can be set in your HA theme to customize the appearance of the card.
@@ -477,7 +516,12 @@ The following theme variables can be set in your HA theme to customize the appea
 | mcg-label-static-opacity | 0.75 | Opacity of the static values' labels.
 | mcg-label-axis-border-radius | 1em | Border radius of the Y-axis labels.
 | mcg-label-static-border-radius | 1em | Border radius of the static values' labels.
+| mcg-bar-seam-opacity | 0.3 | Bar stroke opacity (see a note below).
+| mcg-bar-seam-width | 0.5px | Bar stroke width (see a note below).
 
+Note: Bar stroke is added to a bar for a better presentation if `bar_spacing: 0`.
+The opacity is applied for a color defined as `stroke-color: var(--card-background-color, white)`.
+Customizing these 2 variables may be desirable for some client devices.
 
 
 ### Example usage
@@ -521,7 +565,11 @@ entities:
   - sensor.server_received
 ```
 
-#### Bar chart card
+#### Different graph types
+
+See above for simple "Only linear graphs" examples.
+
+Bar graph:
 
 ![Bar chart card](https://user-images.githubusercontent.com/457678/52970286-985e7300-33b3-11e9-89bc-1278c4e2ecf2.png)
 
@@ -533,6 +581,34 @@ name: ENERGY CONSUMPTION
 show:
   graph: bar
 ```
+
+Linear & bar graphs:
+
+<img width="479" height="305" alt="image" src="https://github.com/user-attachments/assets/0e0874f5-8e5d-4854-be58-8a65e14b4fbb" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.system_monitor_memory_use
+  - entity: sensor.system_monitor_processor_use
+    show_state: true
+    y_axis: secondary
+    graph: bar
+height: 200
+y_axis:
+  secondary:
+    lower_bound: 0
+points_per_hour: 2
+bar_spacing: 1
+show:
+  labels: true
+  labels_secondary: true
+  name: false
+  icon: false
+```
+
+
+
 
 #### Bar spacing
 
@@ -714,9 +790,9 @@ entities:
     line_style: 6,6
 ```
 
-#### Displaying static lines
+#### Displaying static values
 
-Example with a threshold line:
+Threshold line:
 
 <img width="485" height="257" alt="image" src="https://github.com/user-attachments/assets/7d668913-1811-48e8-9a24-d6bed93f7ee9" />
 
@@ -741,7 +817,7 @@ show:
   labels: true
 ```
 
-Example with a zeroth X-axis:
+Zeroth X-axis:
 
 <img width="480" height="219" alt="image" src="https://github.com/user-attachments/assets/2fe260f2-439c-4652-b817-feec461cbee8" />
 
@@ -760,7 +836,7 @@ show:
   labels: true
 ```
 
-Example with a static line which is not hidden when a point of a line of another entity selected:
+Static line which is not hidden when a point of a line of another entity selected:
 
 <img width="481" height="353" alt="изображение" src="https://github.com/user-attachments/assets/bc11d3c1-c557-46e0-afe9-b7d2e17b35be" />
 
@@ -790,53 +866,171 @@ show:
   fill: false
 ```
 
+Static line with labels:
+
+<img width="481" height="306" alt="image" src="https://github.com/user-attachments/assets/405e3e3a-ef84-46b0-a48b-67fbf40c79ce" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.system_monitor_processor_use
+    color: red
+  - static_value: 10
+    unit: "%"
+    show_fill: false
+    show_points: false
+    show_legend: false
+    color: red
+    line_width: 1
+    line_style: 4,7
+    state_adaptive_color: true
+  - entity: sensor.system_monitor_memory_use
+    color: green
+    show_state: true
+    y_axis: secondary
+  - static_value: 1700
+    unit: MiB
+    show_fill: false
+    show_points: false
+    show_legend: false
+    color: green
+    line_width: 1
+    line_style: 4,7
+    state_adaptive_color: true
+    y_axis: secondary
+hours_to_show: 3
+points_per_hour: 120
+height: 200
+static_value_label_offset: 7
+show:
+  name: false
+  icon: false
+  legend: true
+  fill: false
+  static_value_labels: right
+  labels: true
+  labels_secondary: true
+```
+
+
 #### Custom baseline
 
 Baseline is set to 0:
 
-<img width="497" height="217" alt="изображение" src="https://github.com/user-attachments/assets/c755d398-bbe8-435a-8571-ee4947483b56" />
+<img width="480" height="402" alt="image" src="https://github.com/user-attachments/assets/3b38e7dd-d5e6-4b9c-b75c-b6b53c07f04c" />
 
 ```yaml
 type: custom:mini-graph-card
 entities:
   - entity: sensor.xxx
-fill_baseline: 0
+baseline: 0
+height: 400
 show:
   labels: true
+  name: false
+  icon: false
+  state: false
+  fill: fade
 ```
 
 Individual baselines for entities (along with displaying static lines):
 
-<img width="498" height="264" alt="изображение" src="https://github.com/user-attachments/assets/43a39c0b-4ca2-40ad-8443-2e8821aa987b" />
+<img width="488" height="309" alt="image" src="https://github.com/user-attachments/assets/a93ddf8f-eaf3-4d63-8e15-720e69fe3470" />
 
 ```yaml
 type: custom:mini-graph-card
 entities:
   - entity: sensor.xiaomi_cg_1_co2
-    fill_baseline: 660
+    baseline: 800
     color: orange
     name: Room 1
-  - static_value: 660
-    show_fill: false
+  - static_value: 800
     line_width: 1
     color: orange
+    show_fill: false
     show_legend: false
+    show_static_inactive: true
   - entity: sensor.xiaomi_cg_2_co2
-    fill_baseline: 740
+    show_state: true
+    baseline: 1000
     color: green
     name: Room 2
-  - static_value: 740
-    show_fill: false
+  - static_value: 1000
     line_width: 1
     color: green
+    show_fill: false
     show_legend: false
+    show_static_inactive: true
 height: 200
 show:
   static_value_labels: left
   name: false
   icon: false
-  state: false
+  labels: true
 ```
+
+Bar graph with a baseline set to 0:
+
+<img width="474" height="265" alt="image" src="https://github.com/user-attachments/assets/1bd4029b-d086-4748-add0-f7408551f147" />
+
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.xxx
+baseline: 0
+height: 200
+show:
+  graph: bar
+  name: false
+  icon: false
+  labels: true
+```
+
+#### Inverted Y-axis
+
+Water level in a well: a 0 value means "well is full", a higher value - "well is depleted/empty":
+
+<img width="477" height="272" alt="image" src="https://github.com/user-attachments/assets/446013ca-eca8-4344-85e4-d20d18c189f3" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.water_level
+    baseline: 100
+height: 200
+y_axis:
+  primary:
+    invert: true
+show:
+  name: false
+  icon: false
+  state: true
+  labels: true
+```
+
+Example for a bar graph:
+
+<img width="480" height="274" alt="image" src="https://github.com/user-attachments/assets/25c95530-a71d-4b3f-81c0-f4ca594ae9cf" />
+
+```yaml
+
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.water_level
+height: 200
+y_axis:
+  primary:
+    invert: true
+show:
+  name: false
+  icon: false
+  state: true
+  labels: true
+  graph: bar
+```
+
+
 
 #### Grouping by date
 

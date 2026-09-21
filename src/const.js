@@ -1,4 +1,3 @@
-const URL_DOCS = 'https://github.com/kalkih/mini-graph-card/blob/master/README.md';
 const MAX_BARS = 96;
 const DEFAULT_FONT_SIZE = 14;
 const DEFAULT_FONT_SIZE_HEADER = 14;
@@ -38,7 +37,6 @@ const DEFAULT_COLORS = [
   '#2980b9',
   '#8e44ad',
 ];
-const UPDATE_PROPS = ['entity', 'line', 'length', 'fill', 'points', 'tooltip', 'abs', 'config'];
 const DEFAULT_SHOW = {
   name: true,
   icon: true,
@@ -58,7 +56,6 @@ const V = 2;
 const ONE_HOUR = 1000 * 3600;
 
 export {
-  URL_DOCS,
   MAX_BARS,
   DEFAULT_FONT_SIZE,
   DEFAULT_FONT_SIZE_HEADER,
@@ -72,7 +69,6 @@ export {
   ICONS,
   DEFAULT_COLORS,
   DEFAULT_SHOW,
-  UPDATE_PROPS,
   X,
   Y,
   V,
