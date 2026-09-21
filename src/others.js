@@ -198,7 +198,7 @@ const getIntervalEndDate = (groupBy) => {
       break;
   }
   return date;
-}
+};
 
 export {
   isNumeric,
