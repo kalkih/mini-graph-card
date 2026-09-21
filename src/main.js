@@ -991,6 +991,7 @@ class MiniGraphCard extends LitElement {
         stroke-dasharray=${strokeDashArray} stroke-dashoffset=${strokeDashOffset}
         stroke=${'white'}
         stroke-width=${lineWidth}
+        vector-effect="non-scaling-stroke"
         d=${this.line[index]}
       />`;
     return svg`
@@ -1012,16 +1013,24 @@ class MiniGraphCard extends LitElement {
       ? this.computeColor(point[V], index)
       : 'inherit';
     return svg`
-      <circle
+      <g
         class='line--point'
         ?inactive=${this.tooltip.bucketIndex !== point[3]}
-        style=${`--mcg-hover: ${color};`}
-        stroke=${color}
-        fill=${color}
-        cx=${point[X]} cy=${point[Y]} r=${radius}
         @mouseover=${() => this.setTooltip(index, point[3], point[V])}
         @mouseout=${() => (this.tooltip = {})}
-      />
+      >
+        <line
+          class='line--point--border'
+          x1=${point[X]} y1=${point[Y]} x2=${point[X]} y2=${point[Y]}
+          stroke-width=${radius * 2}
+          stroke=${color}
+        />
+        <line
+          class='line--point--fill'
+          x1=${point[X]} y1=${point[Y]} x2=${point[X]} y2=${point[Y]}
+          stroke-width=${radius}
+        />
+      </g>
     `;
   }
 
@@ -1043,11 +1052,16 @@ class MiniGraphCard extends LitElement {
       && this.tooltip.entityIndex !== index
       && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.bucketIndex !== -1)
       && !this._isShowStaticInactive[index];
+    const isAnimated = isEntryAnimated(this.config, index);
+
+    // coefficent 1.25 is used to achieve
+    // same geometry which was used before v.0.14
+    // with "circle" SVG command
     const radius = getFirstDefinedItem(
       this.config.entities[index].line_width,
       this.config.line_width,
-    );
-    const isAnimated = isEntryAnimated(this.config, index);
+    ) * 1.25;
+
     return svg`
       <g class='line--points'
         ?tooltip=${this.tooltip.entityIndex === index}
@@ -1055,9 +1069,8 @@ class MiniGraphCard extends LitElement {
         ?init=${this.length[index]}
         anim=${isAnimated && this.config.show.points !== 'hover'}
         style="animation-delay: ${isAnimated ? `${index * 0.5 + 0.5}s` : '0s'}"
-        fill=${color}
         stroke=${color}
-        stroke-width=${radius / 2}>
+      >
         ${points.map(point => this.renderSvgPoint(point, index, radius))}
       </g>`;
   }
@@ -1318,12 +1331,19 @@ class MiniGraphCard extends LitElement {
         || !this.bound || this.primaryYaxisSeries.length === 0) {
       return html``;
     }
-    // index is not passed into computeState() for a primary axis
+    const inactive = this.tooltip.entityIndex !== undefined
+      && this.config.entities[this.tooltip.entityIndex].y_axis === 'secondary'
+      && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.bucketIndex !== -1);
     const invert = this.config.y_axis
       && this.config.y_axis.primary
       && this.config.y_axis.primary.invert;
+    // index is not passed into computeState() for a primary axis
     return html`
-      <div class="graph__labels --primary flex" ?invert=${invert}>
+      <div
+        class="graph__labels --primary flex"
+        ?invert=${invert}
+        ?inactive=${inactive}
+      >
         <span class="label--max">${this.computeState(this.bound[1])}</span>
         <span class="label--min">${this.computeState(this.bound[0])}</span>
       </div>
@@ -1339,12 +1359,19 @@ class MiniGraphCard extends LitElement {
         || !this.boundSecondary || this.secondaryYaxisSeries.length === 0) {
       return html``;
     }
-    // index "-1" is passed into computeState() for a secondary axis
+    const inactive = this.tooltip.entityIndex !== undefined
+      && this.config.entities[this.tooltip.entityIndex].y_axis !== 'secondary'
+      && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.bucketIndex !== -1);
     const invert = this.config.y_axis
       && this.config.y_axis.secondary
       && this.config.y_axis.secondary.invert;
+    // index "-1" is passed into computeState() for a secondary axis
     return html`
-      <div class="graph__labels --secondary flex" ?invert=${invert}>
+      <div
+        class="graph__labels --secondary flex"
+        ?invert=${invert}
+        ?inactive=${inactive}
+      >
         <span class="label--max">${this.computeState(this.boundSecondary[1], -1)}</span>
         <span class="label--min">${this.computeState(this.boundSecondary[0], -1)}</span>
       </div>
@@ -1963,7 +1990,9 @@ class MiniGraphCard extends LitElement {
    */
   getBoundary(type, series, configVal, isSoft, fallback) {
     if (!(type in Math)) {
-      throw new Error(`The type "${type}" is not present on the Math object`);
+      const error = `The type "${type}" is not present on the Math object`;
+      log(error);
+      throw new Error(error);
     }
 
     if (configVal === undefined) {

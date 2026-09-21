@@ -32,7 +32,13 @@ const style = css`
   ha-card[points]:hover .line--points,
   ha-card:hover .graph__labels.--primary,
   ha-card:hover .graph__labels.--secondary {
-      opacity: 1;
+    opacity: 1;
+  }
+  .graph__labels.--primary[inactive],
+  .graph__labels.--secondary[inactive] {
+    opacity: 0 !important; /* override 'ha-card:hover .graph__labels' styles */
+    transition: opacity .25s;
+    animation: none;
   }
   ha-card[fill] path {
     stroke-linecap: initial;
@@ -301,11 +307,17 @@ const style = css`
   }
   .line--point {
     cursor: pointer;
-    fill: var(--primary-background-color, white);
-    stroke-width: inherit;
   }
-  .line--point:hover {
-    fill: var(--mcg-hover, inherit) !important;
+  .line--point--fill {
+    stroke: var(--primary-background-color, white);
+  }
+  .line--point:hover .line--point--fill {
+    visibility: hidden;
+  }
+  .line--point--border,
+  .line--point--fill {
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
   }
   .bars {
     animation: pop .25s cubic-bezier(0.215, 0.61, 0.355, 1);
