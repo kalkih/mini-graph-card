@@ -37,6 +37,38 @@ const VARIANTS: any[] = [
   },
   ///////////////////////////////////////////////////////////////////
   {
+    description: 'group_by=15min, points_per_hour=0.5',
+    config: { points_per_hour: 0.5, group_by: '15min' },
+    expected: 4,
+  },
+  {
+    description: 'group_by=15min, points_per_hour=1',
+    config: { points_per_hour: 1, group_by: '15min' },
+    expected: 4,
+  },
+  {
+    description: 'group_by=15min, points_per_hour=2',
+    config: { points_per_hour: 2, group_by: '15min' },
+    expected: 4,
+  },
+  ///////////////////////////////////////////////////////////////////
+  {
+    description: 'group_by=30min, points_per_hour=0.5',
+    config: { points_per_hour: 0.5, group_by: '30min' },
+    expected: 2,
+  },
+  {
+    description: 'group_by=30min, points_per_hour=1',
+    config: { points_per_hour: 1, group_by: '30min' },
+    expected: 2,
+  },
+  {
+    description: 'group_by=30min, points_per_hour=2',
+    config: { points_per_hour: 2, group_by: '30min' },
+    expected: 2,
+  },
+  ///////////////////////////////////////////////////////////////////
+  {
     description: 'group_by=hour, points_per_hour=0.5',
     config: { points_per_hour: 0.5, group_by: 'hour' },
     expected: 1,
