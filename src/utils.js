@@ -25,6 +25,9 @@ const log = (message) => {
 };
 
 export {
-  getMin, getAvg, getMax, getMilli, compress, decompress, log,
+  getMin, getAvg, getMax,
+  getMilli,
+  compress, decompress,
+  log,
   getFirstDefinedItem,
 };
