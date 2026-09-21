@@ -287,7 +287,7 @@ const checkLineStyle = (config) => {
  * @param {object} config Config object
  * @returns {string} Cleared group_by value
  */
-export const checkGroupBy = (config) => {
+const checkGroupBy = (config) => {
   const { group_by: groupBy, hours_to_show: hoursToShow } = config;
 
   if (groupBy === null || groupBy === 'undefined') {
