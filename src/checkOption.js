@@ -318,6 +318,16 @@ const checkGroupBy = (config) => {
       logReset('1 (1 hour)');
       return 'interval';
     }
+  } else if (groupBy === '30min') {
+    if (hoursToShow < 0.5 || hoursToShow % 0.5 !== 0) {
+      logReset('0.5 (30 minutes)');
+      return 'interval';
+    }
+  } else if (groupBy === '15min') {
+    if (hoursToShow < 0.25 || hoursToShow % 0.25 !== 0) {
+      logReset('0.25 (15 minutes)');
+      return 'interval';
+    }
   }
 
   return groupBy;
@@ -344,6 +354,14 @@ const checkPointsPerHour = (config) => {
       break;
     case 'hour':
       newPointsPerHour = 1;
+      pointsPerHourAdjusted = true;
+      break;
+    case '30min':
+      newPointsPerHour = 2;
+      pointsPerHourAdjusted = true;
+      break;
+    case '15min':
+      newPointsPerHour = 4;
       pointsPerHourAdjusted = true;
       break;
     default:
