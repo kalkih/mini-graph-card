@@ -31,6 +31,17 @@ const VARIANTS: any[] = [
   },
   ///////////////////////////////////////////////////////////////////
   {
+    description: 'group_by=interval, hours_to_show: 0.5',
+    config: { hours_to_show: 0.5, group_by: 'interval' },
+    expected: 'interval',
+  },
+  {
+    description: 'group_by=interval, hours_to_show: 24',
+    config: { hours_to_show: 24, group_by: 'interval' },
+    expected: 'interval',
+  },
+  ///////////////////////////////////////////////////////////////////
+  {
     description: 'group_by=hour, hours_to_show: 0.5',
     config: { hours_to_show: 0.5, group_by: 'hour' },
     expected: 'interval',
