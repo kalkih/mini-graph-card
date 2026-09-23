@@ -29,6 +29,7 @@ import {
   isNumeric,
   isEntryAnimated,
   getIntervalEndDate,
+  getBoundsForCustomZeroPosition,
 } from './others';
 import {
   getMin, getAvg, getMax,
@@ -2093,6 +2094,7 @@ class MiniGraphCard extends LitElement {
     const primaryAxis = config.y_axis && config.y_axis.primary;
     const {
       min_bound_range: primaryMinBoundRange,
+      invert: primaryInverted,
     } = primaryAxis || {};
     this.bound = this.getBoundaries(
       this.primaryYaxisSeries,
@@ -2106,6 +2108,7 @@ class MiniGraphCard extends LitElement {
     const secondaryAxis = config.y_axis && config.y_axis.secondary;
     const {
       min_bound_range: secondaryMinBoundRange,
+      invert: secondaryInverted,
     } = secondaryAxis || {};
     this.boundSecondary = this.getBoundaries(
       this.secondaryYaxisSeries,
@@ -2114,6 +2117,21 @@ class MiniGraphCard extends LitElement {
       this.boundSecondary,
       secondaryMinBoundRange,
     );
+
+    // refactor ig zero_position is defined
+    const zeroPosition = config.y_axis && config.y_axis.zero_position;
+    if (zeroPosition !== undefined && zeroPosition !== null) {
+      this.bound = getBoundsForCustomZeroPosition(
+        this.bound,
+        zeroPosition,
+        primaryInverted,
+      );
+      this.boundSecondary = getBoundsForCustomZeroPosition(
+        this.boundSecondary,
+        zeroPosition,
+        secondaryInverted,
+      );
+    }
   }
 
   async getCache(key, compressed) {
