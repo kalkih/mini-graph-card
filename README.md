@@ -479,9 +479,14 @@ See examples [below](#inverted-y-axis).
 
 ### Force a zero vertical position
 
-xxxxxxxxxxxxxxxxxxxx
+The `zero_position option` defines a vertical offset of a "Y=0" baseline from a top edge of a graph area.
+Although any number `[0..1]` (incl. `0` & `1`) can be set, only values like `0.5` (symmetric split), `0.25` (more attention to a bottom part) or `0.75` (more attention to a top part) should be set.
 
-See examples [below](#opposing-dual-axis-graphs).
+After fixing a zero vertical position, all upper/lower bounds (including ones defined by a user with `lower_bound` & `upper_bound` options) are automatically re-calculated to fit in new proportions.
+
+Could be useful for these scenarios:
+1. Fix a vertical position of a 0-baseline for a rapidly changing graph (although positive & negative peaks will be re-scaled automatically). So it is up to a user whether to see a 0-baseline moving up/down or peaks re-scaled.
+2. More interesting case - use for 2 graphs, one graph is inverted, see examples [below](#opposing-dual-axis-graphs).
 
 ### Graphs order
 
