@@ -220,7 +220,15 @@ See examples [below](#different-graph-types).
 
 #### Y-axis object
 
-The object has a tree-like structure with optional `primary` & `secondary` keys. Each key may contain optional properties listed below:
+The object has a tree-like structure with optional `zero_position`, `primary` & `secondary` keys:
+
+| Name | Type | Default | Description |
+|------|:----:|:-------:|-------------|
+| zero_position | number |  | Set a vertical position of a zero baseline (0..1, measured from a top edge of a graph area), see [Force a zero vertical position](#force-a-zero-vertical-position).
+| primary | object |  | Specify options for a `primary` axis, see below.
+| secondary | object |  | Specify options for a `secondary` axis, see below.
+
+The `primary` & `secondary` keys may contain optional properties listed below:
 
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
@@ -468,6 +476,12 @@ This type of graph is mainly used when smaller values need to be shown at the to
 Examples: a ping value (smaller ping is better), a water level in a well (0 level means "well is full", higher values mean "well is empty").
 
 See examples [below](#inverted-y-axis).
+
+### Force a zero vertical position
+
+xxxxxxxxxxxxxxxxxxxx
+
+See examples [below](#opposing-dual-axis-graphs).
 
 ### Graphs order
 
@@ -1030,7 +1044,77 @@ show:
   graph: bar
 ```
 
+#### Opposing dual-axis graphs
 
+Linear graphs (a static line stands for a 0-baseline):
+
+<img width="477" height="308" alt="image" src="https://github.com/user-attachments/assets/b3b04fbe-7be5-44d3-9b88-4d99d5a6a8b7" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.ac68u_download
+    state_adaptive_color: true
+  - entity: sensor.ac68u_upload
+    y_axis: secondary
+    show_state: true
+    state_adaptive_color: true
+  - static_value: 0
+    line_width: 1
+    line_style: 2,4
+    show_state: false
+    show_fill: false
+    show_legend: false
+    color: red
+    graph: line
+height: 200
+static_value_label_offset: 10
+show:
+  static_value_labels: left
+  name: false
+  icon: false
+baseline: 0
+y_axis:
+  zero_position: 0.75
+  secondary:
+    invert: true
+```
+
+A similar presentation with bar graphs:
+
+<img width="480" height="310" alt="image" src="https://github.com/user-attachments/assets/43f292ea-a645-4f44-98c8-0fd91c50328a" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.ac68u_download
+    state_adaptive_color: true
+  - entity: sensor.ac68u_upload
+    y_axis: secondary
+    show_state: true
+    state_adaptive_color: true
+  - static_value: 0
+    line_width: 1
+    line_style: 2,4
+    show_state: false
+    show_fill: false
+    show_legend: false
+    color: red
+    graph: line
+height: 200
+bar_spacing: -1
+static_value_label_offset: 10
+show:
+  graph: bar
+  static_value_labels: left
+  name: false
+  icon: false
+baseline: 0
+y_axis:
+  zero_position: 0.75
+  secondary:
+    invert: true
+```
 
 #### Grouping by date
 
