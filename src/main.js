@@ -2118,7 +2118,7 @@ class MiniGraphCard extends LitElement {
       secondaryMinBoundRange,
     );
 
-    // refactor ig zero_position is defined
+    // refactor if zero_position is defined
     const zeroPosition = config.y_axis && config.y_axis.zero_position;
     if (zeroPosition !== undefined && zeroPosition !== null) {
       this.bound = getBoundsForCustomZeroPosition(
