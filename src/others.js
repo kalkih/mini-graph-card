@@ -162,7 +162,6 @@ const getBound = (bound) => {
  * @returns {Array<number>} New boundaries
  */
 const getBoundsForCustomZeroPosition = (boundary, zeroPos, invert) => {
-
   if (zeroPos === undefined || zeroPos === null) {
     return boundary;
   }
@@ -194,17 +193,17 @@ const getBoundsForCustomZeroPosition = (boundary, zeroPos, invert) => {
 
   if (prioritizedUpper) {
     u2 = u1;
-    l2 = - u2 * bottomWeight / topWeight;
+    l2 = -u2 * bottomWeight / topWeight;
     if (l1 < 0 && Math.abs(l2) < Math.abs(l1)) {
       l2 = l1;
-      u2 = - l2 * topWeight / bottomWeight;
+      u2 = -l2 * topWeight / bottomWeight;
     }
   } else {
     l2 = l1;
-    u2 = - l2 * topWeight / bottomWeight;
+    u2 = -l2 * topWeight / bottomWeight;
     if (u1 > 0 && Math.abs(u2) < Math.abs(u1)) {
       u2 = u1;
-      l2 = - u2 * bottomWeight / topWeight;
+      l2 = -u2 * bottomWeight / topWeight;
     }
   }
 
