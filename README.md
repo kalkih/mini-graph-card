@@ -214,7 +214,6 @@ Two graph types are supported - linear & bars.
 By default, all graphs have a `line` type.
 To set a common type for all graphs - use a `show.graph` option (see [Available show options](#available-show-options)).
 To set an individual type for a particular graph, use a per-entity `graph` option (see [Entities object](#entities-object)).
-
 See examples [below](#different-graph-types).
 
 
