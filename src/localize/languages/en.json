@@ -1,0 +1,131 @@
+{
+  "edit_entity": "Edit entity",
+  "hour24": "Display time in 24-hour format",
+  "points_per_hour": "Data points per hour",
+  "group_by": "Data grouping",
+  "aggregate_func": "Aggregate function",
+  "align_header": "Header alignment",
+  "align_icon": "Icon alignment",
+  "align_state": "State alignment",
+  "graph": "Graph",
+  "fill": "Fill",
+  "points": "Points",
+  "legend": "Legend",
+  "average": "Average",
+  "extrema": "Extrema",
+  "labels": "Labels",
+  "labels_secondary": "Secondary labels",
+  "name_adaptive_color": "Name adaptive color",
+  "icon_adaptive_color": "Icon adaptive color",
+  "animate": "Animate",
+  "bar_spacing": "Bar spacing",
+  "line_width": "Line width",
+  "color_thresholds_transition": "Color thresholds transition",
+  "logarithmic": "Logarithmic",
+  "lower_bound": "Lower bound",
+  "upper_bound": "Upper bound",
+  "min_bound_range": "Min bound range",
+  "lower_bound_secondary": "Secondary lower bound",
+  "upper_bound_secondary": "Secondary upper bound",
+  "min_bound_range_secondary": "Min secondary bound range",
+  "value_factor": "Value factor",
+  "color_thresholds": "Color thresholds",
+  "state_map": "State map",
+  "color": "Color",
+  "value": "Value",
+  "label": "Label",
+  "use_color_thresholds": "Use color thresholds",
+  "state_adaptive_color": "State adaptive color",
+  "show_state": "Show state",
+  "show_indicator": "Show indicator",
+  "show_graph": "Show graph",
+  "show_line": "Show line",
+  "show_fill": "Show fill",
+  "show_points": "Show points",
+  "show_legend": "Show legends",
+  "show_adaptive_color": "Show adaptive color",
+  "smoothing": "Smoothing",
+  "y_axis": "Axis",
+  "appearance": "Appearance",
+  "bounds": "Bounds",
+  "alignment": "Alignment",
+  "show": "Display",
+  "values": {
+    "aggregate_func": {
+      "options": {
+        "avg": "Average",
+        "median": "Median",
+        "min": "Minimum",
+        "max": "Maximum",
+        "first": "First",
+        "last": "Last",
+        "sum": "Sum",
+        "delta": "Delta",
+        "diff": "Diff"
+      }
+    },
+    "group_by": {
+      "options": {
+        "interval": "Interval",
+        "date": "Date",
+        "hour": "Hour"
+      }
+    },
+    "transition": {
+      "options": {
+        "smooth": "Smooth",
+        "hard": "Hard"
+      }
+    },
+    "alignment": {
+      "options": {
+        "default": "Default",
+        "left": "Left",
+        "right": "Right",
+        "center": "Center",
+        "state": "State"
+      }
+    },
+    "state": {
+      "options": {
+        "show": "Show",
+        "hide": "Hide",
+        "last": "Last"
+      }
+    },
+    "graph": {
+      "options": {
+        "line": "Line",
+        "bar": "Bar",
+        "hide": "Hide"
+      }
+    },
+    "fill": {
+      "options": {
+        "show": "Show",
+        "hide": "Hide",
+        "fade": "Fade"
+      }
+    },
+    "points": {
+      "options": {
+        "show": "Show",
+        "hide": "Hide",
+        "hover": "Hover"
+      }
+    },
+    "labels": {
+      "options": {
+        "show": "Show",
+        "hide": "Hide",
+        "hover": "Hover"
+      }
+    },
+    "y_axis": {
+      "options":{
+        "primary": "Primary",
+        "secondary": "Secondary"
+      }
+    }
+  }
+}
