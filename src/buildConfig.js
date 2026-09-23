@@ -236,7 +236,12 @@ export default (config) => {
       conf.y_axis,
       'zero_position',
       undefined,
-      { minBound: 0, maxBound: 1, allowString: true, logOptionName: 'y_axis.zero_position' },
+      {
+        minBound: 0,
+        maxBound: 1,
+        allowString: true,
+        logOptionName: 'y_axis.zero_position',
+      },
     );
   }
 
