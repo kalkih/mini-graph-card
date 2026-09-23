@@ -48,7 +48,8 @@ export default class Graph {
     this._points_per_hour = points_per_hour;
     this._hours_to_show = hours_to_show;
     this._aggregateFuncName = aggregateFuncName;
-    this._calcPoint = aggregateFuncMap[aggregateFuncName] || this._average;
+    this._calcPoint = aggregateFuncMap[aggregateFuncName]
+     || this._average; // fallback in case a wrong func is passed
     this._smoothing = smoothing;
     this._logarithmic = logarithmic;
     this._bar_spacing = bar_spacing;
