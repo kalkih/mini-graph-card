@@ -231,6 +231,19 @@ export default (config) => {
       { minBound: 0, allowString: true, logOptionName: 'secondary.decimals' },
     );
   }
+  if (conf.y_axis) {
+    conf.y_axis.zero_position = checkNumericOption(
+      conf.y_axis,
+      'zero_position',
+      undefined,
+      {
+        minBound: 0,
+        maxBound: 1,
+        allowString: true,
+        logOptionName: 'y_axis.zero_position',
+      },
+    );
+  }
 
   conf.decimals = checkIntegerOption(conf, 'decimals', undefined, { minBound: 0, allowString: true });
 

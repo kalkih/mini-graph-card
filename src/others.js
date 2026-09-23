@@ -155,6 +155,62 @@ const getBound = (bound) => {
 };
 
 /**
+ * Applies zero_position constraint to boundaries [lower, upper]
+ * @param {Array<number>} boundary Current [lower, upper] boundaries
+ * @param {number} zeroPos zero_position config value (0..1)
+ * @param {boolean} invert True if the Y-axis is inverted, false otherwise
+ * @returns {Array<number>} New boundaries
+ */
+const getBoundsForCustomZeroPosition = (boundary, zeroPos, invert) => {
+  if (zeroPos === undefined || zeroPos === null) {
+    return boundary;
+  }
+
+  let l1 = boundary[0];
+  const u1 = boundary[1];
+
+  // prevent division by 0
+  const safeZeroPos = Math.max(0.0001, Math.min(0.9999, zeroPos));
+
+  const topWeight = invert
+    ? (1 - safeZeroPos)
+    : safeZeroPos;
+  const bottomWeight = invert
+    ? safeZeroPos
+    : (1 - safeZeroPos);
+
+  if (u1 === l1) {
+    l1 = u1 - Number.EPSILON;
+  }
+
+  let l2;
+  let u2;
+
+  const prioritizedUpper = (u1 >= 0 && l1 >= 0)
+    || ((u1 > 0 && l1 < 0)
+      && (Math.abs(u1) >= Math.abs(l1))
+    );
+
+  if (prioritizedUpper) {
+    u2 = u1;
+    l2 = -u2 * bottomWeight / topWeight;
+    if (l1 < 0 && Math.abs(l2) < Math.abs(l1)) {
+      l2 = l1;
+      u2 = -l2 * topWeight / bottomWeight;
+    }
+  } else {
+    l2 = l1;
+    u2 = -l2 * topWeight / bottomWeight;
+    if (u1 > 0 && Math.abs(u2) < Math.abs(u1)) {
+      u2 = u1;
+      l2 = -u2 * bottomWeight / topWeight;
+    }
+  }
+
+  return [l2, u2];
+};
+
+/**
  * Checks if animation is enabled for a specific entry in config.entities.
  * @param {object} config Config object
  * @param {number} index Index of an entry in config.entities
@@ -217,6 +273,7 @@ export {
   logStringWarning,
   getFactor,
   getBound,
+  getBoundsForCustomZeroPosition,
   isEntryAnimated,
   getIntervalEndDate,
 };
