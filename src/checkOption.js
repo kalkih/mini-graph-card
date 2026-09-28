@@ -165,7 +165,7 @@ const checkBoundOption = (config, option, logOptionName) => {
 /**
  * Check both upper/lower bounds for valid values.
  * @param {object} config Config object
- * @param {string} yAxis Y axis type (primary/secondary)
+ * @param {string} yAxis Y-axis type (primary/secondary)
  * @returns {{
  *   lowerBound: string|number|undefined,
  *   upperBound: string|number|undefined,
