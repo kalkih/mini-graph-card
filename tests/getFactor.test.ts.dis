@@ -6,8 +6,8 @@
  */
 
 import { assert, describe, it } from 'vitest';
-import { getFactor } from '../others';
-import { migrateYaxisConfig } from '../migrate';
+import { getFactor } from '../src/others';
+import { migrateYaxisConfig } from '../src/migrate';
 
 interface ValueFactorType {
   type?: string | any,

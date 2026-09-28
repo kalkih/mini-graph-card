@@ -5,6 +5,7 @@ import {
   DEFAULT_BAR_SPACING,
 } from './const';
 import { log } from './utils';
+import { getIntervalEndDate } from './others';
 
 export default class Graph {
   constructor({
@@ -47,7 +48,8 @@ export default class Graph {
     this._points_per_hour = points_per_hour;
     this._hours_to_show = hours_to_show;
     this._aggregateFuncName = aggregateFuncName;
-    this._calcPoint = aggregateFuncMap[aggregateFuncName] || this._average;
+    this._calcPoint = aggregateFuncMap[aggregateFuncName]
+     || this._average; // fallback in case a wrong func is passed
     this._smoothing = smoothing;
     this._logarithmic = logarithmic;
     this._bar_spacing = bar_spacing;
@@ -128,7 +130,9 @@ export default class Graph {
       this._history = history;
     }
     if (!this._history) return;
-    this._updateEndTime();
+
+    // update interval end date
+    this._endTime = getIntervalEndDate(this._groupBy);
 
     // group history into time buckets
     const histGroups = this._history.reduce((res, item) => this._reducer(res, item), []);
@@ -174,10 +178,7 @@ export default class Graph {
       res[key].push(item);
     } else {
       // points from "before a timespan" moments are placed into the 1st bucket
-      if (!res[0]) {
-        res[0] = [];
-      }
-      res[0].push(item);
+      res[0] = [item];
     }
     return res;
   }
@@ -428,24 +429,33 @@ export default class Graph {
     return [Zx, Zy];
   }
 
+  _getValidNumbers(items) {
+    return items.map(item => parseFloat(item.state));
+  }
+
   _average(items) {
-    return items.reduce((sum, entry) => (sum + parseFloat(entry.state)), 0) / items.length;
+    const validNumbers = this._getValidNumbers(items);
+    if (!validNumbers.length) return NaN;
+    return validNumbers.reduce((sum, val) => sum + val, 0) / validNumbers.length;
   }
 
   _median(items) {
-    const itemsDup = [...items].sort((a, b) => parseFloat(a) - parseFloat(b));
-    const mid = Math.floor((itemsDup.length - 1) / 2);
+    const validNumbers = this._getValidNumbers(items);
+    const itemsDup = [...validNumbers].sort((a, b) => a - b);
+    const mid = Math.floor(itemsDup.length / 2);
     if (itemsDup.length % 2 === 1)
-      return parseFloat(itemsDup[mid].state);
-    return (parseFloat(itemsDup[mid].state) + parseFloat(itemsDup[mid + 1].state)) / 2;
+      return itemsDup[mid];
+    return (itemsDup[mid - 1] + itemsDup[mid]) / 2;
   }
 
   _maximum(items) {
-    return Math.max(...items.map(item => item.state));
+    const validNumbers = this._getValidNumbers(items);
+    return Math.max(...validNumbers);
   }
 
   _minimum(items) {
-    return Math.min(...items.map(item => item.state));
+    const validNumbers = this._getValidNumbers(items);
+    return Math.min(...validNumbers);
   }
 
   _first(items) {
@@ -457,7 +467,8 @@ export default class Graph {
   }
 
   _sum(items) {
-    return items.reduce((sum, entry) => sum + parseFloat(entry.state), 0);
+    const validNumbers = this._getValidNumbers(items);
+    return validNumbers.reduce((sum, val) => sum + val, 0);
   }
 
   _delta(items) {
@@ -473,27 +484,6 @@ export default class Graph {
       return 0;
     } else {
       return parseFloat(items[items.length - 1].state) || 0;
-    }
-  }
-
-  _updateEndTime() {
-    this._endTime = new Date();
-    switch (this._groupBy) {
-      case 'month':
-        this._endTime.setMonth(this._endTime.getMonth() + 1);
-        this._endTime.setDate(1);
-        this._endTime.setHours(0, 0, 0, 0);
-        break;
-      case 'date':
-        this._endTime.setDate(this._endTime.getDate() + 1);
-        this._endTime.setHours(0, 0, 0, 0);
-        break;
-      case 'hour':
-        this._endTime.setHours(this._endTime.getHours() + 1);
-        this._endTime.setMinutes(0, 0, 0);
-        break;
-      default:
-        break;
     }
   }
 }

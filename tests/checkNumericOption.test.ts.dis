@@ -6,8 +6,8 @@
  */
 
 import { assert, describe, it } from 'vitest';
-import { checkNumericOption, checkIntegerOption } from '../checkOption';
-import { isNumeric } from '../others';
+import { checkNumericOption, checkIntegerOption } from '../src/checkOption';
+import { isNumeric } from '../src/others';
 
 interface ConfigType {
   some_option?: number | string | any;

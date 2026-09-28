@@ -14,7 +14,9 @@ const getMilli = hours => hours * 60 ** 2 * 10 ** 3;
 
 const compress = data => lzStringCompress(JSON.stringify(data));
 
-const decompress = data => (typeof data === 'string' ? JSON.parse(lzStringDecompress(data)) : data);
+const decompress = data => (typeof data === 'string'
+  ? JSON.parse(lzStringDecompress(data))
+  : data);
 
 const getFirstDefinedItem = (...collection) => collection
   .find(item => item !== undefined && item !== null);
@@ -58,14 +60,22 @@ const entityNamesChanged = (oldHass, newHass) => {
   return NAME_SOURCES.some(key => oldHass[key] !== newHass[key]);
 };
 
+const getStringifiedValue = value => (typeof value === 'object'
+  ? JSON.stringify(value)
+  : value);
+
 const log = (message) => {
   // eslint-disable-next-line no-console
   console.warn('mini-graph-card: ', message);
 };
 
 export {
-  getMin, getAvg, getMax, getMilli, compress, decompress, log,
+  getMin, getAvg, getMax,
+  getMilli,
+  compress, decompress,
+  log,
   getFirstDefinedItem,
   computeEntityName,
   entityNamesChanged,
+  getStringifiedValue,
 };

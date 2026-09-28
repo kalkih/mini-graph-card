@@ -92,7 +92,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | hours_to_show | integer | `24` | v0.0.2 | Specify how many hours of history the graph should present.
 | points_per_hour | number | `0.5` | v0.2.0 | Specify amount of data points the graph should display for each hour, *(basically the detail/accuracy/smoothing of the graph)*.
 | aggregate_func | string | `avg` | v0.8.0 | Specify [aggregate function](#aggregate-functions) used to calculate point/bar in the graph.
-| group_by | string | `interval` | v0.8.0 | Specify type of grouping of data, dynamic `interval`, `date` or `hour`.
+| group_by | string | `interval` | v0.8.0 | Specify type of grouping of data, dynamic `interval`, `week`, `date`, `hour`, `30min` or `15min`.
 | update_interval | number |  | v0.4.0 | Specify a custom update interval of the history data (in seconds), instead of on every state change.
 | cache | boolean | `true` | v0.9.0 | Enable/disable local caching of history data.
 | show | [show object](#available-show-options) |  | v0.2.0 | UI elements display/hide options.
@@ -206,7 +206,7 @@ All properties are optional.
 | name_adaptive_color | `false` | `true` / `false` | Make the name color adapt with the primary entity/static value color.
 | icon_adaptive_color | `false` | `true` / `false` | Make the icon color adapt with the primary entity/static value color.
 | loading_indicator | `true` | `true` / `false` | Show loading indicator while attempting to retrieve a history.
-| graphs_order | `direct` | `direct` / `reversed` | Define an order of displaying graphs (see [Graphs order](#graphs-order)).
+| graph_order | `direct` | `direct` / `reversed` | Define an order of displaying graphs (see [Graphs order](#graphs-order)).
 
 #### Graph types
 
@@ -214,13 +214,20 @@ Two graph types are supported - linear & bars.
 By default, all graphs have a `line` type.
 To set a common type for all graphs - use a `show.graph` option (see [Available show options](#available-show-options)).
 To set an individual type for a particular graph, use a per-entity `graph` option (see [Entities object](#entities-object)).
-
 See examples [below](#different-graph-types).
 
 
 #### Y-axis object
 
-The object has a tree-like structure with optional `primary` & `secondary` keys. Each key may contain optional properties listed below:
+The object has a tree-like structure with optional `zero_position`, `primary` & `secondary` keys:
+
+| Name | Type | Default | Description |
+|------|:----:|:-------:|-------------|
+| zero_position | number |  | Set a vertical position of a zero baseline (0..1, measured from a top edge of a graph area), see [Force a zero vertical position](#force-a-zero-vertical-position).
+| primary | object |  | Specify options for a `primary` axis, see below.
+| secondary | object |  | Specify options for a `secondary` axis, see below.
+
+The `primary` & `secondary` keys may contain optional properties listed below:
 
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
@@ -230,6 +237,7 @@ The object has a tree-like structure with optional `primary` & `secondary` keys.
 | lower_bound | number *or* string |   | Set a fixed lower bound for the Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
 | upper_bound | number *or* string |   | Set a fixed upper bound for the Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
 | min_bound_range | number |   | Applied after everything, makes sure there's a minimum range that the Y-axis will have. Useful for not making small changes look large because of scale.
+| labels | list | `['min', 'max']`  | Set types of Y-axis labels to display. Possible values are `max`, `min`, `zero`, `all` (includes all of them); `max` & `min` stand for a max & min Y-axis labels correspondingly, `zero` - for a 0 label. The 0 label is only shown if max & min labels have different signs.
 
 ```yaml
 y_axis:
@@ -239,12 +247,14 @@ y_axis:
     lower_bound: ...
     upper_bound: ...
     min_bound_range: ...
+    labels: ...
   secondary:
     decimals: ...
     value_factor: ...
     lower_bound: ...
     upper_bound: ...
     min_bound_range: ...
+    labels: ...
 ```
 
 
@@ -494,6 +504,17 @@ This type of graph is mainly used when smaller values need to be shown at the to
 Examples: a ping value (smaller ping is better), a water level in a well (0 level means "well is full", higher values mean "well is empty").
 
 See examples [below](#inverted-y-axis).
+
+### Force a zero vertical position
+
+The `zero_position` option defines a vertical offset of a "Y=0" baseline from a top edge of a graph area.
+Although any number `[0..1]` (incl. `0` & `1`) can be set, only values like `0.5` (symmetric split), `0.25` (more attention to a bottom part) or `0.75` (more attention to a top part) should be set.
+
+After fixing a zero vertical position, all upper/lower bounds (including ones defined by a user with `lower_bound` & `upper_bound` options) are automatically re-calculated to fit in new proportions.
+
+Could be useful for these scenarios:
+1. Fix a vertical position of a 0-baseline for a rapidly changing graph (although positive & negative peaks will be re-scaled automatically). So it is up to a user whether to see a 0-baseline moving up/down or peaks re-scaled.
+2. More interesting case - use for 2 graphs, one graph is inverted, see examples [below](#opposing-dual-axis-graphs).
 
 ### Graphs order
 
@@ -1056,7 +1077,80 @@ show:
   graph: bar
 ```
 
+#### Opposing dual-axis graphs
 
+Linear graphs (a static line stands for a 0-baseline, only `max` & `zero` labels are shown):
+
+<img width="480" height="307" alt="image" src="https://github.com/user-attachments/assets/9e951595-f9bd-4aff-9047-bbc464039a9a" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.ac68u_download
+    state_adaptive_color: true
+  - entity: sensor.ac68u_upload
+    y_axis: secondary
+    show_state: true
+    state_adaptive_color: true
+  - static_value: 0
+    line_width: 1
+    line_style: 2,4
+    show_state: false
+    show_fill: false
+    show_legend: false
+    color: red
+    graph: line
+height: 200
+show:
+  name: false
+  icon: false
+  labels: true
+  labels_secondary: true
+baseline: 0
+y_axis:
+  zero_position: 0.75
+  primary:
+    labels: ['max','zero']
+  secondary:
+    invert: true
+    labels: ['max','zero']
+```
+
+A similar presentation with bar graphs (a "zero" label is added as a static line label):
+
+<img width="480" height="310" alt="image" src="https://github.com/user-attachments/assets/43f292ea-a645-4f44-98c8-0fd91c50328a" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.ac68u_download
+    state_adaptive_color: true
+  - entity: sensor.ac68u_upload
+    y_axis: secondary
+    show_state: true
+    state_adaptive_color: true
+  - static_value: 0
+    line_width: 1
+    line_style: 2,4
+    show_state: false
+    show_fill: false
+    show_legend: false
+    color: red
+    graph: line
+height: 200
+bar_spacing: -1
+static_value_label_offset: 10
+show:
+  graph: bar
+  static_value_labels: left
+  name: false
+  icon: false
+baseline: 0
+y_axis:
+  zero_position: 0.75
+  secondary:
+    invert: true
+```
 
 #### Grouping by date
 

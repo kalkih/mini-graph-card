@@ -6,7 +6,7 @@
  */
 
 import { assert, describe, it } from 'vitest';
-import { checkBounds } from '../checkOption';
+import { checkBounds } from '../src/checkOption';
 
 interface ConfigType {
   lower_bound?: number | string | any;

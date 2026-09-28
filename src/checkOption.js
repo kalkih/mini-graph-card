@@ -1,10 +1,42 @@
-import { log } from './utils';
+import {
+  log,
+  getStringifiedValue,
+} from './utils';
 import {
   isNumeric,
   logStringWarning,
   getBound,
   isEntryAnimated,
 } from './others';
+
+/**
+ * Check if entities are properly defined.
+ * @param {object} configEntities Config 'entities' object
+ * @returns {void}
+ */
+const checkEntities = (configEntities) => {
+  if (!Array.isArray(configEntities)) {
+    const error = 'Please provide the "entities" option as a list';
+    log(error);
+    throw new Error(error);
+  }
+
+  configEntities.forEach((entityConfig, index) => {
+    const isShorthandString = typeof entityConfig === 'string'
+      && entityConfig.trim() !== '';
+    const hasEntity = entityConfig
+      && typeof entityConfig.entity === 'string'
+      && entityConfig.entity.trim() !== '';
+    const hasStaticValue = entityConfig
+      && entityConfig.static_value !== undefined
+      && isNumeric(entityConfig.static_value);
+    if (!isShorthandString && !hasEntity && !hasStaticValue) {
+      const error = `Invalid configuration at index ${index}: Either "entity" or "static_value" must be specified`;
+      log(error);
+      throw new Error(error);
+    }
+  });
+};
 
 /**
  * Check if an option is numeric (if not undefined);
@@ -53,9 +85,7 @@ const checkNumericOption = (
   }
 
   const clearedValue = defaultValue;
-  const invalidValue = typeof value === 'object'
-    ? JSON.stringify(value)
-    : value;
+  const invalidValue = getStringifiedValue(value);
   let errorDescr = 'not a numeric value';
   if (isNumeric(value, allowString)) {
     const valueNumeric = Number(value);
@@ -127,7 +157,7 @@ const checkBoundOption = (config, option, logOptionName) => {
   }
 
   // invalid type or value of the option
-  const invalidValue = typeof value === 'object' ? JSON.stringify(value) : value;
+  const invalidValue = getStringifiedValue(value);
   log(`Invalid option "${logOptionName}": [${invalidValue}] (not a numeric value); adjusting value to undefined`);
   return undefined;
 };
@@ -135,7 +165,7 @@ const checkBoundOption = (config, option, logOptionName) => {
 /**
  * Check both upper/lower bounds for valid values.
  * @param {object} config Config object
- * @param {string} yAxis Y axis type (primary/secondary)
+ * @param {string} yAxis Y-axis type (primary/secondary)
  * @returns {{
  *   lowerBound: string|number|undefined,
  *   upperBound: string|number|undefined,
@@ -175,6 +205,28 @@ const checkBounds = (config, yAxis) => {
     upperBoundParsed,
   };
 };
+
+/* eslint-disable no-param-reassign */
+/**
+ * Check Y-axis labels option for a valid content.
+ * @param {object} axisConfig Config object for Y-axis
+ * @returns {void}
+ */
+const checkYAxisLabels = (axisConfig) => {
+  if (axisConfig) {
+    const rawLabels = axisConfig.labels;
+    if (Array.isArray(rawLabels)) {
+      axisConfig.labels = rawLabels.filter(
+        l => ['max', 'min', 'zero', 'all'].includes(l),
+      );
+    } else {
+      const invalidValue = getStringifiedValue(rawLabels);
+      log(`Invalid option "labels": [${invalidValue}]; adjusting to "['max', 'min']"`);
+      axisConfig.labels = ['max', 'min'];
+    }
+  }
+};
+/* eslint-enable no-param-reassign */
 
 /* eslint-disable no-param-reassign */
 /**
@@ -253,11 +305,108 @@ const checkLineStyle = (config) => {
   });
 };
 
+/**
+ * Check group_by option for a compatibility with hours_to_show
+ * @param {object} config Config object
+ * @returns {string} Cleared group_by value
+ */
+const checkGroupBy = (config) => {
+  const { group_by: groupBy, hours_to_show: hoursToShow } = config;
+
+  if (groupBy === null || groupBy === 'undefined') {
+    log(`group_by is ${groupBy}, resetting group_by to "interval"`);
+    return 'interval';
+  }
+  if (groupBy === undefined) {
+    return 'interval';
+  }
+
+  const logReset = (requiredUnit) => {
+    log(`group_by "${groupBy}" requires hours_to_show to be a multiple of ${requiredUnit} `
+      + `(current: ${hoursToShow}); resetting group_by to "interval"`);
+  };
+
+  if (groupBy === 'week') {
+    if (hoursToShow < 168 || hoursToShow % 168 !== 0) {
+      logReset('168 (1 week)');
+      return 'interval';
+    }
+  } else if (groupBy === 'date') {
+    if (hoursToShow < 24 || hoursToShow % 24 !== 0) {
+      logReset('24 (1 day)');
+      return 'interval';
+    }
+  } else if (groupBy === 'hour') {
+    if (hoursToShow < 1 || hoursToShow % 1 !== 0) {
+      logReset('1 (1 hour)');
+      return 'interval';
+    }
+  } else if (groupBy === '30min') {
+    if (hoursToShow < 0.5 || hoursToShow % 0.5 !== 0) {
+      logReset('0.5 (30 minutes)');
+      return 'interval';
+    }
+  } else if (groupBy === '15min') {
+    if (hoursToShow < 0.25 || hoursToShow % 0.25 !== 0) {
+      logReset('0.25 (15 minutes)');
+      return 'interval';
+    }
+  }
+
+  return groupBy;
+};
+
+/**
+ * Adjust points_per_hour value based on the group_by parameter
+ * @param {object} config Config object
+ * @returns {number} Possibly adjusted value of points_per_hour
+ */
+const checkPointsPerHour = (config) => {
+  const prevPointsPerHour = config.points_per_hour;
+  let newPointsPerHour = prevPointsPerHour;
+  let pointsPerHourAdjusted = false;
+
+  switch (config.group_by) {
+    case 'week':
+      newPointsPerHour = 1 / 24 / 7;
+      pointsPerHourAdjusted = true;
+      break;
+    case 'date':
+      newPointsPerHour = 1 / 24;
+      pointsPerHourAdjusted = true;
+      break;
+    case 'hour':
+      newPointsPerHour = 1;
+      pointsPerHourAdjusted = true;
+      break;
+    case '30min':
+      newPointsPerHour = 2;
+      pointsPerHourAdjusted = true;
+      break;
+    case '15min':
+      newPointsPerHour = 4;
+      pointsPerHourAdjusted = true;
+      break;
+    default:
+      break;
+  }
+  if (pointsPerHourAdjusted
+    && Math.abs(newPointsPerHour - prevPointsPerHour) > Number.EPSILON) {
+    log(`group_by "${config.group_by}": points_per_hour ${prevPointsPerHour}; adjusting value to ${newPointsPerHour}`);
+  }
+
+  return newPointsPerHour;
+};
+
 export {
+  checkEntities,
   checkNumericOption,
   checkIntegerOption,
   checkBoundOption,
   checkBounds,
+  checkYAxisLabels,
   checkColorThresholds,
   checkLineStyle,
+  checkGroupBy,
+  checkPointsPerHour,
 };

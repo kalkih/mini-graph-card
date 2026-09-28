@@ -18,7 +18,6 @@ import './initialize';
 import { version } from '../package.json';
 import {
   ICONS,
-  UPDATE_PROPS,
   X, Y, V,
   ONE_HOUR,
   MAX_BARS,
@@ -29,6 +28,8 @@ import {
 import {
   isNumeric,
   isEntryAnimated,
+  getIntervalEndDate,
+  getBoundsForCustomZeroPosition,
 } from './others';
 import {
   getMin, getAvg, getMax,
@@ -66,20 +67,23 @@ class MiniGraphCard extends LitElement {
     this.initial = true;
     this._md5Config = undefined;
 
+    // array of erroneous entity_ids
+    this._loggedEntityErrors = [];
+
     // array of flags: true if an entity config contains a valid `static_value` option,
-    // false - otherwise
+    // false otherwise
     this._isStaticValue = [];
     // set once to "true" when a history is set for a particular entry[index] with static_value
     this._staticValueUpdated = [];
 
     // array of flags: true if an entry represents a static_value with `show_static_inactive: true`,
-    // false - otherwise
+    // false otherwise
     this._isShowStaticInactive = [];
 
-    // array of flags: true if an entity graph is "bars", false - otherwise
+    // array of flags: true if an entity graph is "bars", false otherwise
     this._isBarGraph = [];
 
-    // array of flags: true if a graph for the entry must be vertically inverted, false - otherwise
+    // array of flags: true if a graph for the entry must be vertically inverted, false otherwise
     this._isInverted = [];
 
     // array of "smoothing" values for each graph
@@ -115,6 +119,28 @@ class MiniGraphCard extends LitElement {
     this.config.entities.forEach((entityConfig, index) => {
       this.config.entities[index].index = index; // Required for filtered views
       const stateObj = hass && entityConfig.entity && hass.states[entityConfig.entity] || undefined;
+
+      // log invalid entity_ids (once per error to prevent spam)
+      if (hass && entityConfig.entity) {
+        const errorIndex = this._loggedEntityErrors.indexOf(entityConfig.entity);
+        if (!stateObj) {
+          // invalid entity
+          // check if the error was already handled
+          if (errorIndex === -1) {
+            // not handled yet - save the error & log it
+            this._loggedEntityErrors.push(entityConfig.entity);
+            log(`Server returned 'undefined' for entity '${entityConfig.entity}'. Check entity_id`);
+          }
+        } else {
+          // if this valid entity was erroneous earlier - remove it from _loggedEntityErrors
+          // eslint-disable-next-line no-lonely-if
+          if (errorIndex !== -1) {
+            // remove earlier saved entity_id
+            this._loggedEntityErrors.splice(errorIndex, 1);
+          }
+        }
+      }
+
       // initiate an update if stateObj changed
       if (stateObj && this.entity[index] !== stateObj) {
         this.entity[index] = stateObj;
@@ -128,11 +154,16 @@ class MiniGraphCard extends LitElement {
         updated = true;
       }
     });
+
     if (updated) {
       this.stateChanged = true;
+
+      // initiate an immediate refresh of a "state" label, do not wait for readiness of a graph
       this.entity = [...this.entity];
+
       if (!this.config.update_interval && !this.updating) {
         setTimeout(() => {
+          // gather asyncronously collected updates
           this.updateQueue = [...queue, ...this.updateQueue];
           this.updateData();
         }, this.initial ? 0 : 1000);
@@ -144,19 +175,12 @@ class MiniGraphCard extends LitElement {
 
   static get properties() {
     return {
-      id: String, // do not remove (unless a "this.id" property is renamed)
-      _hass: {},
-      config: {},
+      id: String, // in case "id" is changed somehow from outside
+      _hass: {}, // update when a hass object (incl. a locale) is changed
       entity: [],
-      Graph: [],
       line: [],
-      shadow: [],
-      length: Number,
-      bound: [],
-      boundSecondary: [],
-      abs: [],
-      tooltip: {},
-      updateQueue: [],
+      length: Number, // process animation
+      tooltip: {}, // update on selecting a point/bar/legend entry
       color: String,
     };
   }
@@ -309,7 +333,7 @@ class MiniGraphCard extends LitElement {
   /**
    * Check if smoothing can be defaulted to `true` for an entity
    * @param {number} index Index of an entry in config.entities
-   * @returns {boolean} True if smoothing is applicable for an entity, false - otherwise
+   * @returns {boolean} True if smoothing is applicable for an entity, false otherwise
    */
   getDefaultSmoothing(index) {
     const { entity } = this.config.entities[index];
@@ -359,9 +383,16 @@ class MiniGraphCard extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     if (this.config.update_interval) {
+      // call updateOnInterval() right at the 1st rendering, and then periodically
       window.requestAnimationFrame(() => {
         this.updateOnInterval();
       });
+      // remove the timer if it was created before
+      if (this.interval) {
+        clearInterval(this.interval);
+      }
+      // set the timer - call updateOnInterval() periodically
+      // dependently on the "update_interval" value
       this.interval = setInterval(
         () => this.updateOnInterval(),
         this.config.update_interval * 1000,
@@ -377,18 +408,48 @@ class MiniGraphCard extends LitElement {
   }
 
   shouldUpdate(changedProps) {
-    if (UPDATE_PROPS.some(prop => changedProps.has(prop))) {
+    if (changedProps.has('tooltip')
+      || changedProps.has('line')
+      || changedProps.has('entity')) {
       this.color = this.computeColor(
         this.tooltip.value !== undefined
           ? this.tooltip.value : this.getEntityState(0),
         this.tooltip.entityIndex || 0,
       );
-      return true;
     }
-    if (changedProps.has('_hass')) {
-      return entityNamesChanged(changedProps.get('_hass'), this._hass);
+
+    // check for changes in _hass
+    if (changedProps.size === 1 && changedProps.has('_hass')) {
+      const oldHass = changedProps.get('_hass');
+      const newHass = this._hass;
+
+      // 1st run
+      if (!oldHass) return true;
+
+      const oldLocale = oldHass.locale;
+      const newLocale = newHass.locale;
+
+      if (!oldLocale || !newLocale) return true;
+
+      // check for changes in "config.time_zone"
+      const oldServerTz = oldHass.config && oldHass.config.time_zone;
+      const newServerTz = newHass.config && newHass.config.time_zone;
+
+      // also check for changes in locale
+      const configChanged = oldLocale.language !== newLocale.language
+        || oldLocale.number_format !== newLocale.number_format
+        || oldLocale.time_format !== newLocale.time_format
+        || oldLocale.date_format !== newLocale.date_format
+        || oldLocale.time_zone !== newLocale.time_zone
+        || oldServerTz !== newServerTz;
+
+      // check for changes in names
+      const namesChanged = entityNamesChanged(changedProps.get('_hass'), this._hass);
+
+      return configChanged || namesChanged;
     }
-    return false;
+
+    return true;
   }
 
   firstUpdated() {
@@ -419,12 +480,9 @@ class MiniGraphCard extends LitElement {
     if (!config || !this.entity || !this._hass) {
       return html``;
     }
-    if (this.config.entities.some(
-      (_, index) => this.entity[index] === undefined && !this._isStaticValue[index],
-    )) {
-      return this.renderWarnings();
-    }
+
     this.updateFormatFromLocale();
+
     return html`
       <ha-card
         class="flex"
@@ -440,19 +498,6 @@ class MiniGraphCard extends LitElement {
         ${this.renderHeader()} ${this.renderStates()} ${this.renderGraph()} ${this.renderInfo()}
       </ha-card>
     `;
-  }
-
-  renderWarnings() {
-    /* eslint-disable indent */
-    return html`
-      <hui-warning>
-        <div>mini-graph-card</div>
-        ${this.config.entities.map((entityConfig, index) => (!this.entity[index] && !this._isStaticValue[index]
-          ? html`<div>Entity not available: ${entityConfig.entity}</div>`
-          : html``))}
-      </hui-warning>
-    `;
-    /* eslint-enable indent */
   }
 
   /**
@@ -554,6 +599,7 @@ class MiniGraphCard extends LitElement {
         <span
           class="ellipsis"
           style=${color}
+          title=${name}
         >${name}</span>
       </div>
     `;
@@ -596,7 +642,7 @@ class MiniGraphCard extends LitElement {
 
   /**
   * Check if an attribute path represents a nested object path (contains a dot separator)
-  * @returns {boolean} True if a path contains a dot separator, false - otherwise
+  * @returns {boolean} True if a path contains a dot separator, false otherwise
   * @param {string} path Attribute defined as either a singular attribute or a tree-like path
   */
   isObjectAttr(path) {
@@ -818,6 +864,22 @@ class MiniGraphCard extends LitElement {
   }
 
   /**
+  * Get Y coordinate (in %) for a point with "value"
+  * @param {number} valueY Value
+  * @param {object} graphObj Graph object
+  * @param {number} graphHeight Graph's height
+  * @returns {number|undefined} Y coordinate
+  */
+  getCoordY(valueY, graphObj, graphHeight) {
+    const [coord] = graphObj.calcY([[0, 0, valueY]]);
+    const [, topSVG] = coord; // top in SVG coords
+    const topPercent = (topSVG / graphHeight) * 100; // top in %
+    return !isNumeric(topPercent)
+      ? undefined
+      : topPercent;
+  }
+
+  /**
   * Renders labels for static lines
   * @returns {TemplateResult} Lit template result
   */
@@ -843,13 +905,14 @@ class MiniGraphCard extends LitElement {
             || this._isBarGraph[index]) {
             return html``;
           }
-          const staticValue = this.config.entities[index].static_value;
-          // get Y coord in SVG space
-          const [staticLineCoord] = this.Graph[index].calcY([[0, 0, staticValue]]);
-          const [, topSVG] = staticLineCoord; // top in SVG coords
 
-          const topPercent = (topSVG / graphHeight) * 100; // top in %
-          if (!isNumeric(topPercent)) {
+          const staticValue = this.config.entities[index].static_value;
+          const topPercent = this.getCoordY(
+            staticValue,
+            this.Graph[index],
+            graphHeight,
+          );
+          if (topPercent === undefined) {
             return html``;
           }
 
@@ -954,6 +1017,7 @@ class MiniGraphCard extends LitElement {
         stroke-dasharray=${strokeDashArray} stroke-dashoffset=${strokeDashOffset}
         stroke=${'white'}
         stroke-width=${lineWidth}
+        vector-effect="non-scaling-stroke"
         d=${this.line[index]}
       />`;
     return svg`
@@ -975,16 +1039,24 @@ class MiniGraphCard extends LitElement {
       ? this.computeColor(point[V], index)
       : 'inherit';
     return svg`
-      <circle
+      <g
         class='line--point'
         ?inactive=${this.tooltip.bucketIndex !== point[3]}
-        style=${`--mcg-hover: ${color};`}
-        stroke=${color}
-        fill=${color}
-        cx=${point[X]} cy=${point[Y]} r=${radius}
         @mouseover=${() => this.setTooltip(index, point[3], point[V])}
         @mouseout=${() => (this.tooltip = {})}
-      />
+      >
+        <line
+          class='line--point--border'
+          x1=${point[X]} y1=${point[Y]} x2=${point[X]} y2=${point[Y]}
+          stroke-width=${radius * 2}
+          stroke=${color}
+        />
+        <line
+          class='line--point--fill'
+          x1=${point[X]} y1=${point[Y]} x2=${point[X]} y2=${point[Y]}
+          stroke-width=${radius}
+        />
+      </g>
     `;
   }
 
@@ -1006,11 +1078,16 @@ class MiniGraphCard extends LitElement {
       && this.tooltip.entityIndex !== index
       && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.bucketIndex !== -1)
       && !this._isShowStaticInactive[index];
+    const isAnimated = isEntryAnimated(this.config, index);
+
+    // coefficent 1.25 is used to achieve
+    // same geometry which was used before v.0.14
+    // with "circle" SVG command
     const radius = getFirstDefinedItem(
       this.config.entities[index].line_width,
       this.config.line_width,
-    );
-    const isAnimated = isEntryAnimated(this.config, index);
+    ) * 1.25;
+
     return svg`
       <g class='line--points'
         ?tooltip=${this.tooltip.entityIndex === index}
@@ -1018,9 +1095,8 @@ class MiniGraphCard extends LitElement {
         ?init=${this.length[index]}
         anim=${isAnimated && this.config.show.points !== 'hover'}
         style="animation-delay: ${isAnimated ? `${index * 0.5 + 0.5}s` : '0s'}"
-        fill=${color}
         stroke=${color}
-        stroke-width=${radius / 2}>
+      >
         ${points.map(point => this.renderSvgPoint(point, index, radius))}
       </g>`;
   }
@@ -1233,7 +1309,8 @@ class MiniGraphCard extends LitElement {
       // offset end by a minute, if grouped by, e.g., date or hour
       const oneMinute = group_by !== 'interval' ? 60000 : 0;
 
-      const now = this.getEndDate();
+      const now = getIntervalEndDate(this.config.group_by);
+      const nowPersistent = new Date(now.getTime());
 
       now.setMilliseconds(now.getMilliseconds() - oneMinute - interval * count);
       end = formatDateTime(
@@ -1243,6 +1320,7 @@ class MiniGraphCard extends LitElement {
         this._datetimeFormatDateOptions,
         this._datetimeFormatTimeOptions,
         this._hass,
+        nowPersistent,
       );
 
       const smoothingType = this._graphSmoothing[entityIndex];
@@ -1258,6 +1336,7 @@ class MiniGraphCard extends LitElement {
           this._datetimeFormatDateOptions,
           this._datetimeFormatTimeOptions,
           this._hass,
+          nowPersistent,
         );
       }
     }
@@ -1272,6 +1351,21 @@ class MiniGraphCard extends LitElement {
     };
   }
 
+  /** Check if an Y-axis label permitted for display
+  * @param {string} axis 'primary' or 'secondary'
+  * @param {string} label 'min', 'max' or 'zero'
+  * @returns {boolean} True if the label is permitted, false otherwise
+  */
+  getAxisLabelPermitted(axis, label) {
+    const isSecondary = axis === 'secondary';
+    const axisConfig = this.config.y_axis && isSecondary
+      ? this.config.y_axis.secondary
+      : (this.config.y_axis ? this.config.y_axis.primary : undefined);
+    const allowedLabels = (axisConfig && axisConfig.labels) || ['max', 'min'];
+    const labelPermitted = allowedLabels.includes(label) || allowedLabels.includes('all');
+    return labelPermitted;
+  }
+
   /**
   * Renders primary Y-axis labels
   * @returns {TemplateResult} Lit template result
@@ -1281,14 +1375,31 @@ class MiniGraphCard extends LitElement {
         || !this.bound || this.primaryYaxisSeries.length === 0) {
       return html``;
     }
-    // index is not passed into computeState() for a primary axis
+    // check allowed Y-axis labels
+    const maxLabelPermitted = this.getAxisLabelPermitted('primary', 'max');
+    const minLabelPermitted = this.getAxisLabelPermitted('primary', 'min');
+    const inactive = this.tooltip.entityIndex !== undefined
+      && this.config.entities[this.tooltip.entityIndex].y_axis === 'secondary'
+      && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.bucketIndex !== -1);
     const invert = this.config.y_axis
       && this.config.y_axis.primary
       && this.config.y_axis.primary.invert;
+    // index is not passed into computeState() for a primary axis
     return html`
-      <div class="graph__labels --primary flex" ?invert=${invert}>
-        <span class="label--max">${this.computeState(this.bound[1])}</span>
-        <span class="label--min">${this.computeState(this.bound[0])}</span>
+      <div
+        class="graph__labels --primary flex"
+        ?invert=${invert}
+        ?inactive=${inactive}
+      >
+        <span
+          class="label--max"
+          style="${maxLabelPermitted ? '' : 'visibility: hidden;'}"
+        >${this.computeState(this.bound[1])}</span>
+        <span
+          class="label--min"
+          style="${minLabelPermitted ? '' : 'visibility: hidden;'}"
+        >${this.computeState(this.bound[0])}</span>
+        ${this.renderLabelZero('primary')}
       </div>
     `;
   }
@@ -1302,16 +1413,91 @@ class MiniGraphCard extends LitElement {
         || !this.boundSecondary || this.secondaryYaxisSeries.length === 0) {
       return html``;
     }
-    // index "-1" is passed into computeState() for a secondary axis
+    // check allowed Y-axis labels
+    const maxLabelPermitted = this.getAxisLabelPermitted('secondary', 'max');
+    const minLabelPermitted = this.getAxisLabelPermitted('secondary', 'min');
+    const inactive = this.tooltip.entityIndex !== undefined
+      && this.config.entities[this.tooltip.entityIndex].y_axis !== 'secondary'
+      && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.bucketIndex !== -1);
     const invert = this.config.y_axis
       && this.config.y_axis.secondary
       && this.config.y_axis.secondary.invert;
+    // index "-1" is passed into computeState() for a secondary axis
     return html`
-      <div class="graph__labels --secondary flex" ?invert=${invert}>
-        <span class="label--max">${this.computeState(this.boundSecondary[1], -1)}</span>
-        <span class="label--min">${this.computeState(this.boundSecondary[0], -1)}</span>
+      <div
+        class="graph__labels --secondary flex"
+        ?invert=${invert}
+        ?inactive=${inactive}
+      >
+        <span
+          class="label--max"
+          style="${maxLabelPermitted ? '' : 'visibility: hidden;'}"
+        >${this.computeState(this.boundSecondary[1], -1)}</span>
+        <span
+          class="label--min"
+          style="${minLabelPermitted ? '' : 'visibility: hidden;'}"
+        >${this.computeState(this.boundSecondary[0], -1)}</span>
+        ${this.renderLabelZero('secondary')}
       </div>
     `;
+  }
+
+  /**
+  * Renders zero Y-axis label
+  * @param {string} axis 'primary' or 'secondary'
+  * @returns {TemplateResult} Lit template result
+  */
+  renderLabelZero(axis) {
+    // check allowed Y-axis labels
+    if (!this.getAxisLabelPermitted(axis, 'zero')) {
+      // zero label is not permitted
+      return html``;
+    }
+
+    // find 1st index of an entity associated with the processed Y-axis
+    const index = this.config.entities.findIndex((entityConfig) => {
+      if ((this.config.show.graph === false)
+        || entityConfig.show_graph === false) return false;
+      const entityAxis = entityConfig.y_axis === 'secondary'
+        ? 'secondary'
+        : 'primary';
+      return entityAxis === axis;
+    });
+
+    if (!this.Graph || !this.Graph[index]) {
+      // Graph object not created
+      return html``;
+    }
+
+    const bounds = axis === 'secondary'
+      ? this.boundSecondary
+      : this.bound;
+    if (!bounds || bounds[0] > 0 || bounds[1] < 0) {
+      // do not show a zero label if max & min have same sign
+      return html``;
+    }
+
+    const graphHeight = this.config.height;
+    if (!isNumeric(graphHeight) || graphHeight <= 0) {
+      // graph container not ready
+      return html``;
+    }
+    const zeroValue = 0;
+    // get Y coord in SVG space
+    const topPercent = this.getCoordY(
+      zeroValue,
+      this.Graph[index],
+      graphHeight,
+    );
+    if (topPercent === undefined) {
+      return html``;
+    }
+
+    return html`
+      <span
+        class="label--custom"
+        style="top: ${topPercent}%;"
+      >0</span>`;
   }
 
   /**
@@ -1829,13 +2015,25 @@ class MiniGraphCard extends LitElement {
     }
   }
 
+  /**
+   * Update line/points/bars/gradient data for a further card's rendering:
+   * - initiate fetching a history for every updated entity;
+   * - prepare Graph objects;
+   * - calculate max/min bounds (accounting bounds from Graph objects);
+   * - pass updated max/min bounds back to Graph objects;
+   * - compute line/points/bars/gradient data;
+   * - initiate a next card's rendering;
+   * - schedule a next update (if update_interval is not defined)
+   * @returns {void}
+   */
   async updateData({ config } = this) {
     this.updating = true;
 
-    const end = this.getEndDate();
+    const end = getIntervalEndDate(this.config.group_by);
     const start = new Date(end);
     start.setMilliseconds(start.getMilliseconds() - getMilli(config.hours_to_show));
 
+    // fetch histories for all changed entities
     try {
       const promise = this.entity.map((stateObj, i) => this.updateEntity(stateObj, i, start, end));
       await Promise.all(promise);
@@ -1843,17 +2041,22 @@ class MiniGraphCard extends LitElement {
       log(err);
     }
 
-
     if (config.show.graph) {
       this.entity.forEach((stateObj, i) => {
         if (stateObj
           || (!stateObj && this._isStaticValue[i])
         ) {
+          // prepare Graph objects:
+          // - reduce history arrays;
+          // - calc coords[] data;
+          // - calc max/min values
           this.Graph[i].update();
         }
       });
     }
 
+    // update bounds - analyze max/min values from Graph objects,
+    // account user-defined lower/upper_bound values
     this.updateBounds();
 
     if (config.show.graph) {
@@ -1861,10 +2064,16 @@ class MiniGraphCard extends LitElement {
       let graphPos = 0;
       this.entity.forEach((stateObj, i) => {
         if ((!stateObj && !this._isStaticValue[i])
-          || this.Graph[i].coords.length === 0)
+          || this.Graph[i].coords.length === 0) {
           return;
-        const bound = config.entities[i].y_axis === 'secondary' ? this.boundSecondary : this.bound;
+        }
+
+        // renew max/min values in Graph[i] object
+        const bound = config.entities[i].y_axis === 'secondary'
+          ? this.boundSecondary
+          : this.bound;
         [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
+
         if (this._isBarGraph[i]) {
           // bar graph
           this.bar[i] = this.Graph[i].getBars(graphPos);
@@ -1889,6 +2098,8 @@ class MiniGraphCard extends LitElement {
       this.line = [...this.line]; // force the card's re-rendering
     }
     this.updating = false;
+
+    // schedule a next update (if update_interval is not defined)
     this.setNextUpdate();
   }
 
@@ -1903,13 +2114,16 @@ class MiniGraphCard extends LitElement {
    */
   getBoundary(type, series, configVal, isSoft, fallback) {
     if (!(type in Math)) {
-      throw new Error(`The type "${type}" is not present on the Math object`);
+      const error = `The type "${type}" is not present on the Math object`;
+      log(error);
+      throw new Error(error);
     }
 
     if (configVal === undefined) {
       // dynamic boundary depending on values
       // take a max/min value out of ["max/min value of each Graph object"]
-      return Math[type](...series.map(ele => ele[type])) || fallback;
+      const computed = Math[type](...series.map(ele => ele[type]));
+      return isNumeric(computed) ? computed : fallback;
     }
     if (!isSoft) {
       // fixed boundary
@@ -1981,7 +2195,8 @@ class MiniGraphCard extends LitElement {
   }
 
   /**
-   * Update boundaries for all Y-axes
+   * Update boundaries for all Y-axes: analyze max/min values from Graph objects,
+   * account user-defined lower/upper_bound values
    * @param {object} config Config object
    * @returns {void}
    */
@@ -2001,6 +2216,7 @@ class MiniGraphCard extends LitElement {
     const primaryAxis = config.y_axis && config.y_axis.primary;
     const {
       min_bound_range: primaryMinBoundRange,
+      invert: primaryInverted,
     } = primaryAxis || {};
     this.bound = this.getBoundaries(
       this.primaryYaxisSeries,
@@ -2014,6 +2230,7 @@ class MiniGraphCard extends LitElement {
     const secondaryAxis = config.y_axis && config.y_axis.secondary;
     const {
       min_bound_range: secondaryMinBoundRange,
+      invert: secondaryInverted,
     } = secondaryAxis || {};
     this.boundSecondary = this.getBoundaries(
       this.secondaryYaxisSeries,
@@ -2022,6 +2239,21 @@ class MiniGraphCard extends LitElement {
       this.boundSecondary,
       secondaryMinBoundRange,
     );
+
+    // refactor if zero_position is defined
+    const zeroPosition = config.y_axis && config.y_axis.zero_position;
+    if (zeroPosition !== undefined && zeroPosition !== null) {
+      this.bound = getBoundsForCustomZeroPosition(
+        this.bound,
+        zeroPosition,
+        primaryInverted,
+      );
+      this.boundSecondary = getBoundsForCustomZeroPosition(
+        this.boundSecondary,
+        zeroPosition,
+        secondaryInverted,
+      );
+    }
   }
 
   async getCache(key, compressed) {
@@ -2035,77 +2267,130 @@ class MiniGraphCard extends LitElement {
       : localForage.setItem(`${key}_${this._md5Config}_raw`, data);
   }
 
-  async updateEntity(stateObj, index, initStart, end) {
+  /**
+   * Retrieve history data for an entity/static value
+   * @param {object} stateObj stateObj for an entity
+   * @param {number} index Index of an entry in config.entities
+   * @param {Date} start Start of time interval
+   * @param {Date} end End of time interval
+   * @returns {void}
+   */
+  async updateEntity(stateObj, index, start, end) {
+    const entityConfig = this.config.entities[index];
+
     if ((!stateObj && !this._isStaticValue[index])
+      // skip static values which are not queued
       || (!stateObj && this._isStaticValue[index] && !this.updateQueue.includes(`static_value-${index}`))
+      // skip entities which are not queued
       || (stateObj && !this.updateQueue.includes(`${stateObj.entity_id}-${index}`))
-      || this.config.entities[index].show_graph === false
+      // do not process a history if no graph is displayed
+      || entityConfig.show_graph === false
     ) return;
 
     if (this._isStaticValue[index]) {
-      // process a fake static_value history
-      const staticValue = this.config.entities[index].static_value;
+      // process a static value
+      const staticValue = entityConfig.static_value;
+      // create a fake history
       this.Graph[index].history = [{ state: staticValue }, { state: staticValue }];
+      // remove a corresponding entry from a queue for a processed static value
       this.updateQueue = this.updateQueue.filter(entry => entry !== `static_value-${index}`);
       return;
     }
 
+    // process an entity
+    // remove a corresponding entry from a queue for a processed entity
     this.updateQueue = this.updateQueue.filter(entry => entry !== `${stateObj.entity_id}-${index}`);
 
     let stateHistory = [];
-    let start = initStart;
+    let fetchStart = start;
     let skipInitialState = false;
 
     const history = this.config.cache
-      ? await this.getCache(`${stateObj.entity_id}_${index}`, this.config.useCompress)
+      ? await this.getCache(`${stateObj.entity_id}_${index}`, this.config.compress)
       : undefined;
     if (history && history.hours_to_show === this.config.hours_to_show) {
+      // process a cached history
       stateHistory = history.data;
 
-      let currDataIndex = stateHistory.findIndex(item => new Date(item.last_changed) > initStart);
+      let currDataIndex = stateHistory.findIndex(item => new Date(item.last_changed) > start);
       if (currDataIndex !== -1) {
         if (currDataIndex > 0) {
           // include previous item
           currDataIndex -= 1;
           // but change it's last changed time
-          stateHistory[currDataIndex].last_changed = initStart;
+          stateHistory[currDataIndex].last_changed = start;
         }
 
-        stateHistory = stateHistory.slice(currDataIndex, stateHistory.length);
+        stateHistory = stateHistory.slice(currDataIndex);
         // skip initial state when fetching recent/not-cached data
         skipInitialState = true;
+
+        const lastFetched = new Date(history.last_fetched);
+        if (lastFetched > fetchStart) {
+          fetchStart = new Date(lastFetched - 1);
+        }
       } else {
         // there were no states which could be used in current graph so clearing
         stateHistory = [];
       }
-
-      const lastFetched = new Date(history.last_fetched);
-      if (lastFetched > start) {
-        start = new Date(lastFetched - 1);
-      }
     }
 
-    let newStateHistory = await this.fetchRecent(
+    // fetch recent history
+    let fetchedHistory = await this.fetchRecent(
       stateObj.entity_id,
-      start,
+      fetchStart,
       end,
-      this.config.entities[index].attribute ? false : skipInitialState,
-      !!this.config.entities[index].attribute,
+      entityConfig.attribute ? false : skipInitialState,
+      !!entityConfig.attribute,
     );
-    if (newStateHistory[0] && newStateHistory[0].length > 0) {
+
+    // just in case
+    if (!fetchedHistory || fetchedHistory.length === 0 || fetchedHistory[0].length === 0) {
+      fetchedHistory = [[]];
+    }
+
+    // check if the latest point corresponds to the current state
+    const lastHistoryItem = fetchedHistory[0].length > 0
+      ? fetchedHistory[0][fetchedHistory[0].length - 1]
+      : (stateHistory.length > 0 ? stateHistory[stateHistory.length - 1] : null);
+    // current value of state/attribute
+    const currentValue = entityConfig.attribute
+      ? this.getObjectAttr(stateObj.attributes, entityConfig.attribute)
+      : stateObj.state;
+    // last value of state/attribute from history
+    const lastHistoryValue = lastHistoryItem
+      ? entityConfig.attribute && lastHistoryItem.attributes
+        ? this.getObjectAttr(lastHistoryItem.attributes, entityConfig.attribute)
+        : lastHistoryItem.state
+      : null;
+    // if the latest record from the history does not correspond to the current state/attribute
+    // - add the current state/attribute to the history
+    // (may happen since data in recorder may be not ready yet)
+    if (lastHistoryValue !== currentValue) {
+      fetchedHistory[0].push({
+        entity_id: stateObj.entity_id,
+        state: stateObj.state,
+        last_changed: stateObj.last_changed,
+        last_updated: stateObj.last_updated,
+        attributes: stateObj.attributes,
+      });
+    }
+
+    if (fetchedHistory[0] && fetchedHistory[0].length > 0) {
       /**
       * hack because HA doesn't return anything if skipInitialState is false
       * when retrieving for attributes so we retrieve it and we remove it.*
       */
-      if (this.config.entities[index].attribute && skipInitialState) {
-        newStateHistory[0].shift();
+      if (entityConfig.attribute && skipInitialState) {
+        fetchedHistory[0].shift();
       }
+
       // check if we should convert states to numeric values
-      if (this.config.state_map.length > 0 || this.config.entities[index].attribute) {
-        newStateHistory[0].forEach((item) => {
-          if (this.config.entities[index].attribute) {
+      if (this.config.state_map.length > 0 || entityConfig.attribute) {
+        fetchedHistory[0].forEach((item) => {
+          if (entityConfig.attribute) {
             // eslint-disable-next-line no-param-reassign
-            item.state = this.getObjectAttr(item.attributes, this.config.entities[index].attribute);
+            item.state = this.getObjectAttr(item.attributes, entityConfig.attribute);
             // eslint-disable-next-line no-param-reassign
             delete item.attributes;
           }
@@ -2114,12 +2399,12 @@ class MiniGraphCard extends LitElement {
         });
       }
 
-      newStateHistory = newStateHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
-      newStateHistory = newStateHistory.map(item => ({
-        last_changed: this.config.entities[index].attribute ? item.last_updated : item.last_changed,
+      fetchedHistory = fetchedHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
+      fetchedHistory = fetchedHistory.map(item => ({
+        last_changed: entityConfig.attribute ? item.last_updated : item.last_changed,
         state: item.state,
       }));
-      stateHistory = [...stateHistory, ...newStateHistory];
+      stateHistory = [...stateHistory, ...fetchedHistory];
 
       if (this.config.cache) {
         this
@@ -2128,7 +2413,7 @@ class MiniGraphCard extends LitElement {
             last_fetched: new Date(),
             data: stateHistory,
             version,
-          }, this.config.useCompress)
+          }, this.config.compress)
           .catch((err) => {
             log(err);
             localForage.clear();
@@ -2142,7 +2427,7 @@ class MiniGraphCard extends LitElement {
       this.updateExtrema(stateHistory);
     }
 
-    if (this.config.entities[index].fixed_value === true) {
+    if (entityConfig.fixed_value === true) {
       const last = stateHistory[stateHistory.length - 1];
       this.Graph[index].history = [last, last];
     } else {
@@ -2188,30 +2473,20 @@ class MiniGraphCard extends LitElement {
     res.state = resultIndex;
   }
 
-  getEndDate() {
-    const date = new Date();
-    switch (this.config.group_by) {
-      case 'date':
-        date.setDate(date.getDate() + 1);
-        date.setHours(0, 0, 0);
-        break;
-      case 'hour':
-        date.setHours(date.getHours() + 1);
-        date.setMinutes(0, 0);
-        break;
-      default:
-        break;
-    }
-    return date;
-  }
-
+  /**
+  * Schedule an update in "ONE_HOUR/points_per_hour" milliseconds
+  * @returns {void}
+  */
   setNextUpdate() {
+    // if update_interval is not defined - then update dependently on "points_per_hour"
     if (!this.config.update_interval) {
-      const interval = 1 / this.config.points_per_hour;
+      const interval = ONE_HOUR / this.config.points_per_hour;
+      // clear the timer if was set earlier
       clearInterval(this.interval);
+      // set new periodic action
       this.interval = setInterval(() => {
         if (!this.updating) this.updateData();
-      }, interval * ONE_HOUR);
+      }, interval);
     }
   }
 

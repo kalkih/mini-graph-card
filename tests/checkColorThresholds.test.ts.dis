@@ -6,7 +6,7 @@
  */
 
 import { expect, describe, it } from 'vitest';
-import { checkColorThresholds } from '../checkOption';
+import { checkColorThresholds } from '../src/checkOption';
 
 // prevent logging
 global.log = () => { };

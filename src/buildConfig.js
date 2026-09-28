@@ -1,5 +1,4 @@
 import {
-  URL_DOCS,
   DEFAULT_FONT_SIZE,
   DEFAULT_FONT_SIZE_HEADER,
   DEFAULT_BAR_SPACING,
@@ -12,14 +11,19 @@ import {
   DEFAULT_SHOW,
 } from './const';
 import {
+  checkEntities,
   checkNumericOption,
   checkIntegerOption,
   checkBounds,
+  checkYAxisLabels,
   checkColorThresholds,
   checkLineStyle,
+  checkGroupBy,
+  checkPointsPerHour,
 } from './checkOption';
 import { getFactor } from './others';
 import { migrateYaxisConfig } from './migrate';
+import { log } from './utils';
 
 /**
  * Starting from the given index, increment the index until an array element with a
@@ -35,10 +39,11 @@ const findFirstValuedIndex = (stops, startIndex) => {
       return i;
     }
   }
-  throw new Error(
-    'Error in threshold interpolation: could not find right-nearest valued stop. '
-    + 'Do the first and last thresholds have a set "value"?',
-  );
+
+  const error = 'Error in threshold interpolation: could not find right-nearest valued stop. '
+    + 'Do the first and last thresholds have a set "value"?';
+  log(error);
+  throw new Error(error);
 };
 
 /**
@@ -65,7 +70,9 @@ const interpolateStops = (stops) => {
     return stops;
   }
   if (stops[0].value == null || stops[stops.length - 1].value == null) {
-    throw new Error(`The first and last thresholds must have a set "value".\n See ${URL_DOCS}`);
+    const error = 'The first and last thresholds must have a set "value"';
+    log(error);
+    throw new Error(error);
   }
 
   let leftValuedIndex = 0;
@@ -129,12 +136,15 @@ const computeThresholds = (stops, type) => {
 };
 
 export default (config) => {
-  if (!Array.isArray(config.entities))
-    throw new Error(`Please provide the "entities" option as a list.\n See ${URL_DOCS}`);
-  if (config.line_color_above || config.line_color_below)
-    throw new Error(
-      `"line_color_above/line_color_below" was removed, please use "color_thresholds".\n See ${URL_DOCS}`,
+  // check config.entities option
+  checkEntities(config.entities);
+
+  // warn about outdated config options
+  if (config.line_color_above || config.line_color_below) {
+    log(
+      '"line_color_above/line_color_below" was removed, please use "color_thresholds"',
     );
+  }
 
   // migrate legacy options, currently belonging to y_axis object
   const migratedConfig = migrateYaxisConfig(config);
@@ -152,7 +162,7 @@ export default (config) => {
     color_thresholds_transition: 'smooth',
     line_width: DEFAULT_MARGIN,
     bar_spacing: DEFAULT_BAR_SPACING,
-    compress: true,
+    compress: false,
     smoothing: true,
     state_map: [],
     cache: true,
@@ -178,7 +188,7 @@ export default (config) => {
   conf.points_per_hour = checkNumericOption(conf, 'points_per_hour', DEFAULT_POINTS_PER_HOUR, { minBound: 0.001, allowString: true });
   conf.update_interval = checkNumericOption(conf, 'update_interval', undefined, { minBound: 0, allowString: true });
 
-  // axis options
+  // axis options - check them & prepare parsed bounds data
   const boundsParsed = [{}, {}];
   if (conf.y_axis && conf.y_axis.primary) {
     const primaryBounds = checkBounds(conf.y_axis.primary, 'primary');
@@ -200,6 +210,8 @@ export default (config) => {
       undefined,
       { minBound: 0, allowString: true, logOptionName: 'primary.decimals' },
     );
+
+    checkYAxisLabels(conf.y_axis.primary);
   }
   if (conf.y_axis && conf.y_axis.secondary) {
     const secondaryBounds = checkBounds(conf.y_axis.secondary, 'secondary');
@@ -220,6 +232,21 @@ export default (config) => {
       'decimals',
       undefined,
       { minBound: 0, allowString: true, logOptionName: 'secondary.decimals' },
+    );
+
+    checkYAxisLabels(conf.y_axis.secondary);
+  }
+  if (conf.y_axis) {
+    conf.y_axis.zero_position = checkNumericOption(
+      conf.y_axis,
+      'zero_position',
+      undefined,
+      {
+        minBound: 0,
+        maxBound: 1,
+        allowString: true,
+        logOptionName: 'y_axis.zero_position',
+      },
     );
   }
 
@@ -314,17 +341,11 @@ export default (config) => {
   // warn if line_style is defined along with animate=true
   checkLineStyle(conf);
 
-  // override points per hour to mach group_by function
-  switch (conf.group_by) {
-    case 'date':
-      conf.points_per_hour = 1 / 24;
-      break;
-    case 'hour':
-      conf.points_per_hour = 1;
-      break;
-    default:
-      break;
-  }
+  // check if group_by & hours_to_show fit together
+  conf.group_by = checkGroupBy(conf);
+
+  // override points_per_hour to match group_by option
+  conf.points_per_hour = checkPointsPerHour(conf);
 
   return {
     config: conf,
