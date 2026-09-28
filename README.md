@@ -1053,9 +1053,9 @@ show:
 
 #### Opposing dual-axis graphs
 
-Linear graphs (a static line stands for a 0-baseline):
+Linear graphs (a static line stands for a 0-baseline, only `max` & `zero` labels are shown):
 
-<img width="477" height="308" alt="image" src="https://github.com/user-attachments/assets/b3b04fbe-7be5-44d3-9b88-4d99d5a6a8b7" />
+<img width="478" height="308" alt="image" src="https://github.com/user-attachments/assets/45a28b40-f3ee-458b-a7bd-3e86714ffe26" />
 
 ```yaml
 type: custom:mini-graph-card
@@ -1090,7 +1090,7 @@ y_axis:
     labels: ['max','zero']
 ```
 
-A similar presentation with bar graphs:
+A similar presentation with bar graphs (a "zero" label is added as a static line label):
 
 <img width="480" height="310" alt="image" src="https://github.com/user-attachments/assets/43f292ea-a645-4f44-98c8-0fd91c50328a" />
 
