@@ -208,6 +208,28 @@ const checkBounds = (config, yAxis) => {
 
 /* eslint-disable no-param-reassign */
 /**
+ * Check Y-axis labels option for a valid content.
+ * @param {object} axisConfig Config object for Y-axis
+ * @returns {void}
+ */
+const checkYAxisLabels = (axisConfig) => {
+  if (axisConfig) {
+    const rawLabels = axisConfig.labels;
+    if (Array.isArray(rawLabels)) {
+      axisConfig.labels = rawLabels.filter(l =>
+        ['max', 'min', 'zero', 'all'].includes(l)
+      );
+    } else {
+      const invalidValue = getStringifiedValue(rawLabels);
+      log(`Invalid option "labels": [${invalidValue}]; adjusting to "['max', 'min']"`);
+      axisConfig.labels = ['max', 'min'];
+    }
+  }
+};
+/* eslint-enable no-param-reassign */
+
+/* eslint-disable no-param-reassign */
+/**
  * Check color_thresholds array.
  * @param {object} config Config object containing color_thresholds
  * @param {string} configName Name of a config object
@@ -382,6 +404,7 @@ export {
   checkIntegerOption,
   checkBoundOption,
   checkBounds,
+  checkYAxisLabels,
   checkColorThresholds,
   checkLineStyle,
   checkGroupBy,
