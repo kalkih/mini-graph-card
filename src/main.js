@@ -1303,6 +1303,7 @@ class MiniGraphCard extends LitElement {
       const oneMinute = group_by !== 'interval' ? 60000 : 0;
 
       const now = getIntervalEndDate(this.config.group_by);
+      const nowPersistent = new Date(now.getTime());
 
       now.setMilliseconds(now.getMilliseconds() - oneMinute - interval * count);
       end = formatDateTime(
@@ -1312,6 +1313,7 @@ class MiniGraphCard extends LitElement {
         this._datetimeFormatDateOptions,
         this._datetimeFormatTimeOptions,
         this._hass,
+        nowPersistent,
       );
 
       const smoothingType = this._graphSmoothing[entityIndex];
@@ -1327,6 +1329,7 @@ class MiniGraphCard extends LitElement {
           this._datetimeFormatDateOptions,
           this._datetimeFormatTimeOptions,
           this._hass,
+          nowPersistent,
         );
       }
     }
