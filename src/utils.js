@@ -14,14 +14,16 @@ const getMilli = hours => hours * 60 ** 2 * 10 ** 3;
 
 const compress = data => lzStringCompress(JSON.stringify(data));
 
-const decompress = data => (typeof data === 'string' ? JSON.parse(lzStringDecompress(data)) : data);
+const decompress = data => (typeof data === 'string'
+  ? JSON.parse(lzStringDecompress(data))
+  : data);
 
 const getFirstDefinedItem = (...collection) => collection
   .find(item => item !== undefined && item !== null);
 
 const getStringifiedValue = value => (typeof value === 'object'
-    ? JSON.stringify(value)
-    : value);
+  ? JSON.stringify(value)
+  : value);
 
 const log = (message) => {
   // eslint-disable-next-line no-console
