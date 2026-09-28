@@ -36,10 +36,12 @@ import {
   getMilli,
   compress, decompress,
   getFirstDefinedItem,
-  computeEntityName,
-  entityNamesChanged,
   log,
 } from './utils';
+import {
+  computeEntityName,
+  entityNamesChanged,
+} from './entityName';
 
 const isUnavailableState = value => ['unavailable', 'unknown'].includes(value);
 
