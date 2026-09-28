@@ -69,19 +69,19 @@ class MiniGraphCard extends LitElement {
     this._loggedEntityErrors = [];
 
     // array of flags: true if an entity config contains a valid `static_value` option,
-    // false - otherwise
+    // false otherwise
     this._isStaticValue = [];
     // set once to "true" when a history is set for a particular entry[index] with static_value
     this._staticValueUpdated = [];
 
     // array of flags: true if an entry represents a static_value with `show_static_inactive: true`,
-    // false - otherwise
+    // false otherwise
     this._isShowStaticInactive = [];
 
-    // array of flags: true if an entity graph is "bars", false - otherwise
+    // array of flags: true if an entity graph is "bars", false otherwise
     this._isBarGraph = [];
 
-    // array of flags: true if a graph for the entry must be vertically inverted, false - otherwise
+    // array of flags: true if a graph for the entry must be vertically inverted, false otherwise
     this._isInverted = [];
 
     // array of "smoothing" values for each graph
@@ -331,7 +331,7 @@ class MiniGraphCard extends LitElement {
   /**
    * Check if smoothing can be defaulted to `true` for an entity
    * @param {number} index Index of an entry in config.entities
-   * @returns {boolean} True if smoothing is applicable for an entity, false - otherwise
+   * @returns {boolean} True if smoothing is applicable for an entity, false otherwise
    */
   getDefaultSmoothing(index) {
     const { entity } = this.config.entities[index];
@@ -635,7 +635,7 @@ class MiniGraphCard extends LitElement {
 
   /**
   * Check if an attribute path represents a nested object path (contains a dot separator)
-  * @returns {boolean} True if a path contains a dot separator, false - otherwise
+  * @returns {boolean} True if a path contains a dot separator, false otherwise
   * @param {string} path Attribute defined as either a singular attribute or a tree-like path
   */
   isObjectAttr(path) {
