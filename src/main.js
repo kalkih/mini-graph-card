@@ -36,6 +36,8 @@ import {
   getMilli,
   compress, decompress,
   getFirstDefinedItem,
+  computeEntityName,
+  entityNamesChanged,
   log,
 } from './utils';
 
@@ -429,9 +431,11 @@ class MiniGraphCard extends LitElement {
 
       if (!oldLocale || !newLocale) return true;
 
+      // check for changes in "config.time_zone"
       const oldServerTz = oldHass.config && oldHass.config.time_zone;
       const newServerTz = newHass.config && newHass.config.time_zone;
 
+      // also check for changes in locale
       const configChanged = oldLocale.language !== newLocale.language
         || oldLocale.number_format !== newLocale.number_format
         || oldLocale.time_format !== newLocale.time_format
@@ -439,7 +443,10 @@ class MiniGraphCard extends LitElement {
         || oldLocale.time_zone !== newLocale.time_zone
         || oldServerTz !== newServerTz;
 
-      return configChanged;
+      // check for changes in names
+      const namesChanged = entityNamesChanged(changedProps.get('_hass'), this._hass);
+
+      return configChanged || namesChanged;
     }
 
     return true;
@@ -580,7 +587,7 @@ class MiniGraphCard extends LitElement {
 
     const name = this.tooltip.entityIndex !== undefined
       ? this.computeName(this.tooltip.entityIndex)
-      : this.config.name || this.computeName(0);
+      : this.computeName(0, this.config.name || undefined);
     const color = this.config.show.name_adaptive_color
       ? `opacity: 1; color: ${this.color};`
       : '';
@@ -1646,17 +1653,19 @@ class MiniGraphCard extends LitElement {
   * @returns {string} Name of an entity/static value
   * @param {number} index Index of an entry in config.entities
   */
-  computeName(index) {
-    // use a possibly defined "name" option
+  computeName(index, nameOverride) {
     const entityConfig = this.config.entities[index];
-    if (entityConfig
-      && entityConfig.name !== undefined && entityConfig.name !== null) {
-      return String(entityConfig.name);
-    }
-    // use a possibly present friendly_name for an entity
+    const name = nameOverride !== undefined
+      ? nameOverride
+      : entityConfig && entityConfig.name;
+    // resolve the "name" option against the entity's registry context
     const stateObj = this.entity && this.entity[index];
     if (stateObj) {
-      return stateObj.attributes.friendly_name || stateObj.entity_id;
+      return computeEntityName(this._hass, stateObj, name) || stateObj.entity_id;
+    }
+    // a static value has no entity, so only a plain "name" option applies
+    if (name !== undefined && name !== null && typeof name !== 'object') {
+      return String(name);
     }
     // use a fixed label for a static value
     return this._isStaticValue[index] ? 'Static' : '';
