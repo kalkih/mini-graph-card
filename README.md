@@ -1055,7 +1055,7 @@ show:
 
 Linear graphs (a static line stands for a 0-baseline, only `max` & `zero` labels are shown):
 
-<img width="478" height="308" alt="image" src="https://github.com/user-attachments/assets/45a28b40-f3ee-458b-a7bd-3e86714ffe26" />
+<img width="480" height="307" alt="image" src="https://github.com/user-attachments/assets/9e951595-f9bd-4aff-9047-bbc464039a9a" />
 
 ```yaml
 type: custom:mini-graph-card
