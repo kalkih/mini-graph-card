@@ -905,7 +905,7 @@ class MiniGraphCard extends LitElement {
             this.Graph[index],
             graphHeight,
           );
-          if (topPercent === undefined) {          
+          if (topPercent === undefined) {
             return html``;
           }
 
