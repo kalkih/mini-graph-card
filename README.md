@@ -1075,16 +1075,19 @@ entities:
     color: red
     graph: line
 height: 200
-static_value_label_offset: 10
 show:
-  static_value_labels: left
   name: false
   icon: false
+  labels: true
+  labels_secondary: true
 baseline: 0
 y_axis:
   zero_position: 0.75
+  primary:
+    labels: ['max','zero']
   secondary:
     invert: true
+    labels: ['max','zero']
 ```
 
 A similar presentation with bar graphs:
