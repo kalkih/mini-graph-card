@@ -85,7 +85,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | icon | string |  | v0.0.1 | Set a custom icon from any of the available mdi icons.
 | icon_color | string |  | v0.14.0 | Set a custom icon color. Takes precedence over `icon_adaptive_color`. See [Supported color formats](#supported-color-formats).
 | icon_image | string |  | v0.12.0 | Override icon with an image url.
-| name | string / list |  | v0.0.1 | Set a custom name which is displayed beside the icon. Accepts a [structured name](#structured-names) on Home Assistant 2026.4 and later.
+| name | string |  | v0.0.1 | Set a custom name which is displayed beside the icon.
 | unit | string |  | v0.0.1 | Set a custom unit of measurement (`''` value for an empty unit).
 | tap_action | [action object](#action-object-options) |  | v0.7.0 | Action on click/tap.
 | group | boolean | `false` | v0.2.0 | Disable paddings and box-shadow, useful when nesting the card.
