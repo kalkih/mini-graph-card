@@ -19,6 +19,10 @@ const decompress = data => (typeof data === 'string' ? JSON.parse(lzStringDecomp
 const getFirstDefinedItem = (...collection) => collection
   .find(item => item !== undefined && item !== null);
 
+const getStringifiedValue = (value) => typeof value === 'object'
+    ? JSON.stringify(value)
+    : value;
+
 const log = (message) => {
   // eslint-disable-next-line no-console
   console.warn('mini-graph-card: ', message);
@@ -30,4 +34,5 @@ export {
   compress, decompress,
   log,
   getFirstDefinedItem,
+  getStringifiedValue,
 };
