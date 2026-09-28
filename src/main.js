@@ -857,6 +857,22 @@ class MiniGraphCard extends LitElement {
   }
 
   /**
+  * Get Y coordinate (in %) for a point with "value"
+  * @param {number} valueY Value
+  * @param {object} graphObj Graph object
+  * @param {number} graphHeight Graph's height
+  * @returns {number|undefined} Y coordinate
+  */
+  getCoordY(valueY, graphObj, graphHeight) {
+    const [coord] = graphObj.calcY([[0, 0, valueY]]);
+    const [, topSVG] = coord; // top in SVG coords
+    const topPercent = (topSVG / graphHeight) * 100; // top in %
+    return !isNumeric(topPercent)
+      ? undefined
+      : topPercent;
+  }
+
+  /**
   * Renders labels for static lines
   * @returns {TemplateResult} Lit template result
   */
@@ -882,13 +898,14 @@ class MiniGraphCard extends LitElement {
             || this._isBarGraph[index]) {
             return html``;
           }
-          const staticValue = this.config.entities[index].static_value;
-          // get Y coord in SVG space
-          const [staticLineCoord] = this.Graph[index].calcY([[0, 0, staticValue]]);
-          const [, topSVG] = staticLineCoord; // top in SVG coords
 
-          const topPercent = (topSVG / graphHeight) * 100; // top in %
-          if (!isNumeric(topPercent)) {
+          const staticValue = this.config.entities[index].static_value;
+          const topPercent = this.getCoordY(
+            staticValue,
+            this.Graph[index],
+            graphHeight,
+          );
+          if (topPercent === undefined) {          
             return html``;
           }
 
@@ -1324,6 +1341,21 @@ class MiniGraphCard extends LitElement {
     };
   }
 
+  /** Check if an Y-axis label permitted for display
+  * @param {string} axis 'primary' or 'secondary'
+  * @param {string} label 'min', 'max' or 'zero'
+  * @returns {boolean} True if the label is permitted, false otherwise
+  */
+  getAxisLabelPermitted(axis, label) {
+    const isSecondary = axis === 'secondary';
+    const axisConfig = this.config.y_axis && isSecondary
+      ? this.config.y_axis.secondary
+      : (this.config.y_axis ? this.config.y_axis.primary : undefined);
+    const allowedLabels = (axisConfig && axisConfig.labels) || ['max', 'min'];
+    const labelPermitted = allowedLabels.includes(label) || allowedLabels.includes('all');
+    return labelPermitted;
+  }
+
   /**
   * Renders primary Y-axis labels
   * @returns {TemplateResult} Lit template result
@@ -1333,6 +1365,9 @@ class MiniGraphCard extends LitElement {
         || !this.bound || this.primaryYaxisSeries.length === 0) {
       return html``;
     }
+    // check allowed Y-axis labels
+    const maxLabelPermitted = this.getAxisLabelPermitted('primary', 'max');
+    const minLabelPermitted = this.getAxisLabelPermitted('primary', 'min');
     const inactive = this.tooltip.entityIndex !== undefined
       && this.config.entities[this.tooltip.entityIndex].y_axis === 'secondary'
       && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.bucketIndex !== -1);
@@ -1346,8 +1381,15 @@ class MiniGraphCard extends LitElement {
         ?invert=${invert}
         ?inactive=${inactive}
       >
-        <span class="label--max">${this.computeState(this.bound[1])}</span>
-        <span class="label--min">${this.computeState(this.bound[0])}</span>
+        <span
+          class="label--max"
+          style="${maxLabelPermitted ? '' : 'visibility: hidden;'}"
+        >${this.computeState(this.bound[1])}</span>
+        <span
+          class="label--min"
+          style="${minLabelPermitted ? '' : 'visibility: hidden;'}"
+        >${this.computeState(this.bound[0])}</span>
+        ${this.renderLabelZero('primary')}
       </div>
     `;
   }
@@ -1361,6 +1403,9 @@ class MiniGraphCard extends LitElement {
         || !this.boundSecondary || this.secondaryYaxisSeries.length === 0) {
       return html``;
     }
+    // check allowed Y-axis labels
+    const maxLabelPermitted = this.getAxisLabelPermitted('secondary', 'max');
+    const minLabelPermitted = this.getAxisLabelPermitted('secondary', 'min');
     const inactive = this.tooltip.entityIndex !== undefined
       && this.config.entities[this.tooltip.entityIndex].y_axis !== 'secondary'
       && !(this._isBarGraph[this.tooltip.entityIndex] && this.tooltip.bucketIndex !== -1);
@@ -1374,10 +1419,75 @@ class MiniGraphCard extends LitElement {
         ?invert=${invert}
         ?inactive=${inactive}
       >
-        <span class="label--max">${this.computeState(this.boundSecondary[1], -1)}</span>
-        <span class="label--min">${this.computeState(this.boundSecondary[0], -1)}</span>
+        <span
+          class="label--max"
+          style="${maxLabelPermitted ? '' : 'visibility: hidden;'}"
+        >${this.computeState(this.boundSecondary[1], -1)}</span>
+        <span
+          class="label--min"
+          style="${minLabelPermitted ? '' : 'visibility: hidden;'}"
+        >${this.computeState(this.boundSecondary[0], -1)}</span>
+        ${this.renderLabelZero('secondary')}
       </div>
     `;
+  }
+
+  /**
+  * Renders zero Y-axis label
+  * @param {string} axis 'primary' or 'secondary'
+  * @returns {TemplateResult} Lit template result
+  */
+  renderLabelZero(axis) {
+    // check allowed Y-axis labels
+    if (!this.getAxisLabelPermitted(axis, 'zero')) {
+      // zero label is not permitted
+      return html``;
+    }
+
+    // find 1st index of an entity associated with the processed Y-axis
+    const index = this.config.entities.findIndex((entityConfig) => {
+      if ((this.config.show.graph === false)
+        || entityConfig.show_graph === false) return false;
+      const entityAxis = entityConfig.y_axis === 'secondary'
+        ? 'secondary'
+        : 'primary';
+      return entityAxis === axis;
+    });
+
+    if (!this.Graph || !this.Graph[index]) {
+      // Graph object not created
+      return html``;
+    }
+
+    const bounds = axis === 'secondary'
+      ? this.boundSecondary
+      : this.bound;
+    if (!bounds || bounds[0] > 0 || bounds[1] < 0) {
+      // do not show a zero label if max & min have same sign
+      return html``;
+    }
+
+    const graphHeight = this.getGraphHeight();
+    if (!isNumeric(graphHeight) || graphHeight <= 0) {
+      // graph container not ready
+      return html``;
+    }
+    const zeroValue = 0;
+    // get Y coord in SVG space
+    const topPercent = this.getCoordY(
+      zeroValue,
+      this.Graph[index],
+      graphHeight,
+    );
+    if (topPercent === undefined) {
+      return html``;
+    }
+
+    return html`
+      <span
+        class="label--custom"
+        style="top: ${topPercent}%;"
+      >0</span>`;
   }
 
   /**
