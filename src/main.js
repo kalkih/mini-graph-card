@@ -1467,7 +1467,7 @@ class MiniGraphCard extends LitElement {
       return html``;
     }
 
-    const graphHeight = this.getGraphHeight();
+    const graphHeight = this.config.height;
     if (!isNumeric(graphHeight) || graphHeight <= 0) {
       // graph container not ready
       return html``;

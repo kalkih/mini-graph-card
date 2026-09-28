@@ -237,6 +237,7 @@ The `primary` & `secondary` keys may contain optional properties listed below:
 | lower_bound | number *or* string |   | Set a fixed lower bound for the Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
 | upper_bound | number *or* string |   | Set a fixed upper bound for the Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
 | min_bound_range | number |   | Applied after everything, makes sure there's a minimum range that the Y-axis will have. Useful for not making small changes look large because of scale.
+| labels | list | `['min', 'max']`  | Set types of Y-axis labels to display. Possible values are `max`, `min`, `zero`, `all` (includes all of them); `max` & `min` stand for a max & min Y-axis labels correspondingly, `zero` - for a 0 label. The 0 label is only shown if max & min labels have different signs.
 
 ```yaml
 y_axis:
@@ -246,12 +247,14 @@ y_axis:
     lower_bound: ...
     upper_bound: ...
     min_bound_range: ...
+    labels: ...
   secondary:
     decimals: ...
     value_factor: ...
     lower_bound: ...
     upper_bound: ...
     min_bound_range: ...
+    labels: ...
 ```
 
 
@@ -1050,9 +1053,9 @@ show:
 
 #### Opposing dual-axis graphs
 
-Linear graphs (a static line stands for a 0-baseline):
+Linear graphs (a static line stands for a 0-baseline, only `max` & `zero` labels are shown):
 
-<img width="477" height="308" alt="image" src="https://github.com/user-attachments/assets/b3b04fbe-7be5-44d3-9b88-4d99d5a6a8b7" />
+<img width="480" height="307" alt="image" src="https://github.com/user-attachments/assets/9e951595-f9bd-4aff-9047-bbc464039a9a" />
 
 ```yaml
 type: custom:mini-graph-card
@@ -1072,19 +1075,22 @@ entities:
     color: red
     graph: line
 height: 200
-static_value_label_offset: 10
 show:
-  static_value_labels: left
   name: false
   icon: false
+  labels: true
+  labels_secondary: true
 baseline: 0
 y_axis:
   zero_position: 0.75
+  primary:
+    labels: ['max','zero']
   secondary:
     invert: true
+    labels: ['max','zero']
 ```
 
-A similar presentation with bar graphs:
+A similar presentation with bar graphs (a "zero" label is added as a static line label):
 
 <img width="480" height="310" alt="image" src="https://github.com/user-attachments/assets/43f292ea-a645-4f44-98c8-0fd91c50328a" />
 
