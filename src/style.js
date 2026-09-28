@@ -377,6 +377,10 @@ const style = css`
     cursor: pointer;
     border-radius: var(--mcg-label-axis-border-radius, 1em);
   }
+  .label--custom {
+    position: absolute;
+    transform: translateY(-50%);
+  }
   .graph__static_value_labels {
     font-size: calc(.15em + 8.5px);
     position: absolute;
