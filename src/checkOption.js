@@ -1,4 +1,7 @@
-import { log } from './utils';
+import {
+  log,
+  getStringifiedValue,
+} from './utils';
 import {
   isNumeric,
   logStringWarning,
@@ -82,9 +85,7 @@ const checkNumericOption = (
   }
 
   const clearedValue = defaultValue;
-  const invalidValue = typeof value === 'object'
-    ? JSON.stringify(value)
-    : value;
+  const invalidValue = getStringifiedValue(value);
   let errorDescr = 'not a numeric value';
   if (isNumeric(value, allowString)) {
     const valueNumeric = Number(value);
@@ -156,7 +157,7 @@ const checkBoundOption = (config, option, logOptionName) => {
   }
 
   // invalid type or value of the option
-  const invalidValue = typeof value === 'object' ? JSON.stringify(value) : value;
+  const invalidValue = getStringifiedValue(value);
   log(`Invalid option "${logOptionName}": [${invalidValue}] (not a numeric value); adjusting value to undefined`);
   return undefined;
 };
