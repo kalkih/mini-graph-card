@@ -12,7 +12,7 @@ import { log } from './utils';
   * @param {any} value Value to be checked
   * @param {boolean} [allowString=false] Optional flag
   * to allow string representations of numbers (like "123")
-  * @returns {boolean} True if value is a valid number, false - otherwise
+  * @returns {boolean} True if value is a valid number, false otherwise
   */
 const isNumeric = (value, allowString = false) => {
   if (typeof value === 'number' && Number.isFinite(value)) {
@@ -214,7 +214,7 @@ const getBoundsForCustomZeroPosition = (boundary, zeroPos, invert) => {
  * Checks if animation is enabled for a specific entry in config.entities.
  * @param {object} config Config object
  * @param {number} index Index of an entry in config.entities
- * @returns {boolean} True if animated, false - otherwise
+ * @returns {boolean} True if animated, false otherwise
  */
 const isEntryAnimated = (config, index) => {
   const entryConf = config.entities && config.entities[index];
