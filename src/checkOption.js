@@ -1,4 +1,7 @@
-import { log } from './utils';
+import {
+  log,
+  getStringifiedValue,
+} from './utils';
 import {
   isNumeric,
   logStringWarning,
@@ -82,9 +85,7 @@ const checkNumericOption = (
   }
 
   const clearedValue = defaultValue;
-  const invalidValue = typeof value === 'object'
-    ? JSON.stringify(value)
-    : value;
+  const invalidValue = getStringifiedValue(value);
   let errorDescr = 'not a numeric value';
   if (isNumeric(value, allowString)) {
     const valueNumeric = Number(value);
@@ -156,7 +157,7 @@ const checkBoundOption = (config, option, logOptionName) => {
   }
 
   // invalid type or value of the option
-  const invalidValue = typeof value === 'object' ? JSON.stringify(value) : value;
+  const invalidValue = getStringifiedValue(value);
   log(`Invalid option "${logOptionName}": [${invalidValue}] (not a numeric value); adjusting value to undefined`);
   return undefined;
 };
@@ -164,7 +165,7 @@ const checkBoundOption = (config, option, logOptionName) => {
 /**
  * Check both upper/lower bounds for valid values.
  * @param {object} config Config object
- * @param {string} yAxis Y axis type (primary/secondary)
+ * @param {string} yAxis Y-axis type (primary/secondary)
  * @returns {{
  *   lowerBound: string|number|undefined,
  *   upperBound: string|number|undefined,
@@ -204,6 +205,28 @@ const checkBounds = (config, yAxis) => {
     upperBoundParsed,
   };
 };
+
+/* eslint-disable no-param-reassign */
+/**
+ * Check Y-axis labels option for a valid content.
+ * @param {object} axisConfig Config object for Y-axis
+ * @returns {void}
+ */
+const checkYAxisLabels = (axisConfig) => {
+  if (axisConfig) {
+    const rawLabels = axisConfig.labels;
+    if (Array.isArray(rawLabels)) {
+      axisConfig.labels = rawLabels.filter(
+        l => ['max', 'min', 'zero', 'all'].includes(l),
+      );
+    } else {
+      const invalidValue = getStringifiedValue(rawLabels);
+      log(`Invalid option "labels": [${invalidValue}]; adjusting to "['max', 'min']"`);
+      axisConfig.labels = ['max', 'min'];
+    }
+  }
+};
+/* eslint-enable no-param-reassign */
 
 /* eslint-disable no-param-reassign */
 /**
@@ -381,6 +404,7 @@ export {
   checkIntegerOption,
   checkBoundOption,
   checkBounds,
+  checkYAxisLabels,
   checkColorThresholds,
   checkLineStyle,
   checkGroupBy,
