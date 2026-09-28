@@ -216,8 +216,8 @@ const checkYAxisLabels = (axisConfig) => {
   if (axisConfig) {
     const rawLabels = axisConfig.labels;
     if (Array.isArray(rawLabels)) {
-      axisConfig.labels = rawLabels.filter(l =>
-        ['max', 'min', 'zero', 'all'].includes(l)
+      axisConfig.labels = rawLabels.filter(
+        l => ['max', 'min', 'zero', 'all'].includes(l),
       );
     } else {
       const invalidValue = getStringifiedValue(rawLabels);
