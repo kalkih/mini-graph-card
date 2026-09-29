@@ -228,11 +228,15 @@ const getDaysUntilNextMonday = day => (day === 0 ? 1 : 8 - day);
 
 /**
  * Get a datetime of the interval's end
- * @param {string} groupBy Type of grouping
  * @param {Date} date Current datetime
+ * @param {string} groupBy Type of grouping
+ * @param {string} timeZone Target timezone (e.g. 'Europe/London' or 'UTC')
  * @returns {Date} Datetime of the interval's end
  */
-const getIntervalEndDate = (date, groupBy) => {
+const getIntervalEndDate = (date, groupBy, timeZone) => {
+  const offset = Date.parse(date.toLocaleString('en-US', { timeZone }))
+    - Date.parse(date.toLocaleString('en-US'));
+  date.setTime(date.getTime() + offset);
   switch (groupBy) {
     // case 'month': // Not supported yet officially
     //   date.setMonth(date.getMonth() + 1);
@@ -265,6 +269,7 @@ const getIntervalEndDate = (date, groupBy) => {
     default:
       break;
   }
+  date.setTime(date.getTime() - offset);
   return date;
 };
 

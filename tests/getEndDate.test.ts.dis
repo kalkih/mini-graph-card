@@ -1,0 +1,53 @@
+/**
+ * Tests for graph bucket boundaries in Home Assistant's selected time zone.
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { assert, describe, it } from 'vitest';
+import { getEndDate } from '../src/locale';
+
+describe('getEndDate', () => {
+  it('uses the server day boundary instead of the browser day boundary', () => {
+    const now = new Date('2026-08-22T08:30:00Z');
+    const result = getEndDate(now, 'date', 'Europe/Vienna');
+
+    assert.equal(result.toISOString(), '2026-08-22T22:00:00.000Z');
+  });
+
+  it('uses the next server hour boundary in a non-whole-hour time zone', () => {
+    const now = new Date('2026-08-22T08:30:30Z');
+    const result = getEndDate(now, 'hour', 'Asia/Kathmandu');
+
+    assert.equal(result.toISOString(), '2026-08-22T09:15:00.000Z');
+  });
+
+  it('handles the shorter day when daylight-saving time starts', () => {
+    const now = new Date('2026-03-28T23:30:00Z');
+    const result = getEndDate(now, 'date', 'Europe/Vienna');
+
+    assert.equal(result.toISOString(), '2026-03-29T22:00:00.000Z');
+  });
+
+  it('handles the longer day when daylight-saving time ends', () => {
+    const now = new Date('2026-10-24T22:30:00Z');
+    const result = getEndDate(now, 'date', 'Europe/Vienna');
+
+    assert.equal(result.toISOString(), '2026-10-25T23:00:00.000Z');
+  });
+
+  it('uses the next server month boundary', () => {
+    const now = new Date('2026-08-22T08:30:00Z');
+    const result = getEndDate(now, 'month', 'Europe/Vienna');
+
+    assert.equal(result.toISOString(), '2026-08-31T22:00:00.000Z');
+  });
+
+  it('keeps rolling interval graphs unchanged', () => {
+    const now = new Date('2026-08-22T08:30:30Z');
+    const result = getEndDate(now, 'interval', 'Europe/Vienna');
+
+    assert.equal(result.toISOString(), now.toISOString());
+  });
+});
