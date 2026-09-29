@@ -1655,16 +1655,19 @@ class MiniGraphCard extends LitElement {
   * @returns {string} Name of an entity/static value
   * @param {number} index Index of an entry in config.entities
   */
-  computeName(index, nameOverride) {
+  computeName(index) {
     const entityConfig = this.config.entities[index];
-    const name = nameOverride !== undefined
-      ? nameOverride
-      : entityConfig && entityConfig.name;
+    // use a possibly defined "name" option
+    const name = entityConfig && entityConfig.name;
+
     // resolve the "name" option against the entity's registry context
     const stateObj = this.entity && this.entity[index];
     if (stateObj) {
+      // process entity
       return computeEntityName(this._hass, stateObj, name) || stateObj.entity_id;
     }
+
+    // process static value
     // a static value has no entity, so only a plain "name" option applies
     if (name !== undefined && name !== null && typeof name !== 'object') {
       return String(name);
