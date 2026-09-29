@@ -234,10 +234,9 @@ export default class Graph {
     const min = this._logarithmic ? Math.log10(Math.max(1, this.min)) : this.min;
 
     const delta = Math.abs(max - min);
-    const scaleRef = max !== 0 ? Math.abs(max) : Math.abs(min);
     let yRatio;
-    if (max === min || (delta / scaleRef) < 0.001) {
-      yRatio = 1;
+    if (max === min || delta < Number.EPSILON) {
+      yRatio = 1; // anyway, a whole "((val - min) / yRatio)" part would be 0
     } else {
       yRatio = delta / this._height;
     }
