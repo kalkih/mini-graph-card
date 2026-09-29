@@ -555,6 +555,7 @@ const formatTime = (
  * @param {Intl.DateTimeFormatOptions} datetimeFormatDateOptions Date format options
  * @param {Intl.DateTimeFormatOptions} datetimeFormatTimeOptions Time format options
  * @param {HomeAssistant} hass HomeAssistant object
+ * @param {Date} [nowTime=undefined] Current time to adaptively show a date
  * @returns {string} Formatted string
  */
 const formatDateTime = (
@@ -564,6 +565,7 @@ const formatDateTime = (
   datetimeFormatDateOptions,
   datetimeFormatTimeOptions,
   hass,
+  nowTime = undefined,
 ) => {
   let timeString = formatTime(
     dateObj,
@@ -573,7 +575,17 @@ const formatDateTime = (
     hass,
   );
   const { hours_to_show } = config;
-  if (hours_to_show > 24) {
+  let isYesterday;
+  if (nowTime !== undefined && nowTime !== null
+    && hours_to_show <= 24
+  ) {
+    const yesterday = new Date(nowTime.getTime());
+    yesterday.setDate(yesterday.getDate() - 1);
+    isYesterday = dateObj.getDate() === yesterday.getDate()
+      && dateObj.getMonth() === yesterday.getMonth()
+      && dateObj.getFullYear() === yesterday.getFullYear();
+  }
+  if (hours_to_show > 24 || isYesterday) {
     const dateString = formatDate(
       dateObj,
       config,

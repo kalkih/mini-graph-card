@@ -14,13 +14,16 @@ const getMilli = hours => hours * 60 ** 2 * 10 ** 3;
 
 const compress = data => lzStringCompress(JSON.stringify(data));
 
-const decompress = data => (typeof data === 'string' ? JSON.parse(lzStringDecompress(data)) : data);
+const decompress = data => (typeof data === 'string'
+  ? JSON.parse(lzStringDecompress(data))
+  : data);
 
 const getFirstDefinedItem = (...collection) => collection
   .find(item => item !== undefined && item !== null);
 
-// eslint-disable-next-line max-len
-const compareArray = (a, b) => a.length === b.length && a.every((value, index) => value === b[index]);
+const getStringifiedValue = value => (typeof value === 'object'
+  ? JSON.stringify(value)
+  : value);
 
 const log = (message) => {
   // eslint-disable-next-line no-console
@@ -28,7 +31,10 @@ const log = (message) => {
 };
 
 export {
-  getMin, getAvg, getMax, getMilli, compress, decompress, log,
+  getMin, getAvg, getMax,
+  getMilli,
+  compress, decompress,
+  log,
   getFirstDefinedItem,
-  compareArray,
+  getStringifiedValue,
 };

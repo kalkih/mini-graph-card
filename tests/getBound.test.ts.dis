@@ -6,7 +6,7 @@
  */
 
 import { assert, describe, it } from 'vitest';
-import { getBound } from '../others';
+import { getBound } from '../src/others';
 
 const NUMBERS: number[] = [
   -1234567890,
