@@ -82,7 +82,7 @@ export default class Graph {
 
     if (this._baseline !== undefined) {
       // calculate Y coord
-      const [baselineCoord] = this.[[0, 0, this._baseline]]);
+      const [baselineCoord] = this.calcY([[0, 0, this._baseline]]);
       [, baselineY] = baselineCoord;
 
       // if the baseline is inside a top "margins area"
