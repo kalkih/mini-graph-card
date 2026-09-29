@@ -313,7 +313,6 @@ class MiniGraphCard extends LitElement {
         hours_to_show: this.config.hours_to_show,
         points_per_hour: this.config.points_per_hour,
         aggregateFuncName: entityConfig.aggregate_func || this.config.aggregate_func,
-        groupBy: this.config.group_by,
         smoothing: this._graphSmoothing[index],
         logarithmic: getFirstDefinedItem(
           entityConfig.logarithmic,
