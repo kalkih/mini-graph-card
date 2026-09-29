@@ -229,10 +229,10 @@ const getDaysUntilNextMonday = day => (day === 0 ? 1 : 8 - day);
 /**
  * Get a datetime of the interval's end
  * @param {string} groupBy Type of grouping
+ * @param {Date} date Current datetime
  * @returns {Date} Datetime of the interval's end
  */
-const getIntervalEndDate = (groupBy) => {
-  const date = new Date();
+const getIntervalEndDate = (date, groupBy) => {
   switch (groupBy) {
     // case 'month': // Not supported yet officially
     //   date.setMonth(date.getMonth() + 1);

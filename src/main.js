@@ -313,7 +313,6 @@ class MiniGraphCard extends LitElement {
         hours_to_show: this.config.hours_to_show,
         points_per_hour: this.config.points_per_hour,
         aggregateFuncName: entityConfig.aggregate_func || this.config.aggregate_func,
-        groupBy: this.config.group_by,
         smoothing: this._graphSmoothing[index],
         logarithmic: getFirstDefinedItem(
           entityConfig.logarithmic,
@@ -1311,7 +1310,7 @@ class MiniGraphCard extends LitElement {
       // offset end by a minute, if grouped by, e.g., date or hour
       const oneMinute = group_by !== 'interval' ? 60000 : 0;
 
-      const now = getIntervalEndDate(this.config.group_by);
+      const now = this.getIntervalEndDate();
       const nowPersistent = new Date(now.getTime());
 
       now.setMilliseconds(now.getMilliseconds() - oneMinute - interval * count);
@@ -2034,7 +2033,7 @@ class MiniGraphCard extends LitElement {
   async updateData({ config } = this) {
     this.updating = true;
 
-    const end = getIntervalEndDate(this.config.group_by);
+    const end = this.getIntervalEndDate();
     const start = new Date(end);
     start.setMilliseconds(start.getMilliseconds() - getMilli(config.hours_to_show));
 
@@ -2042,8 +2041,8 @@ class MiniGraphCard extends LitElement {
     try {
       const promise = this.entity.map((stateObj, i) => this.updateEntity(stateObj, i, start, end));
       await Promise.all(promise);
-    } catch (err) {
-      log(err);
+    } catch (error) {
+      log(error);
     }
 
     if (config.show.graph) {
@@ -2055,7 +2054,7 @@ class MiniGraphCard extends LitElement {
           // - reduce history arrays;
           // - calc coords[] data;
           // - calc max/min values
-          this.Graph[i].update();
+          this.Graph[i].update(end);
         }
       });
     }
@@ -2419,8 +2418,8 @@ class MiniGraphCard extends LitElement {
             data: stateHistory,
             version,
           }, this.config.compress)
-          .catch((err) => {
-            log(err);
+          .catch((error) => {
+            log(error);
             localForage.clear();
           });
       }
@@ -2493,6 +2492,14 @@ class MiniGraphCard extends LitElement {
         if (!this.updating) this.updateData();
       }, interval);
     }
+  }
+
+  /**
+  * Get a datetime of the interval's end
+  * @returns {Date} Datetime of the interval's end
+  */
+  getIntervalEndDate() {
+    return getIntervalEndDate(new Date(), this.config.group_by);
   }
 
   getCardSize() {
