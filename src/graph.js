@@ -16,7 +16,6 @@ export default class Graph {
     hours_to_show = 24,
     points_per_hour = 1,
     aggregateFuncName = 'avg',
-    groupBy = 'interval',
     smoothing = true,
     logarithmic = false,
     bar_spacing = DEFAULT_BAR_SPACING, // spacing between bars
@@ -55,7 +54,6 @@ export default class Graph {
     this._bar_spacing = bar_spacing;
     this._bar_spacing_group = bar_spacing_group;
     this._total_bars_in_group = total_bars_in_group;
-    this._groupBy = groupBy;
     this._endTime = 0;
     this._baseline = baseline;
     this._invert = invert;
@@ -122,17 +120,18 @@ export default class Graph {
   /**
    * Update the graph data: group history into time buckets,
    * calculate coordinates, define new value boundaries
+   * @param {Date} endTime Current interval's end time
    * @param {Array} [history] Array of historical data
    * @returns {void}
    */
-  update(history = undefined) {
+  update(endTime, history = undefined) {
     if (history) {
       this._history = history;
     }
     if (!this._history) return;
 
     // update interval end date
-    this._endTime = getIntervalEndDate(this._groupBy);
+    this._endTime = endTime;
 
     // group history into time buckets
     const histGroups = this._history.reduce((res, item) => this._reducer(res, item), []);
