@@ -20,6 +20,7 @@ import {
   checkLineStyle,
   checkGroupBy,
   checkPointsPerHour,
+  checkName,
 } from './checkOption';
 import { getFactor } from './others';
 import { migrateYaxisConfig } from './migrate';
@@ -346,6 +347,9 @@ export default (config) => {
 
   // override points_per_hour to match group_by option
   conf.points_per_hour = checkPointsPerHour(conf);
+
+  // check a global "name" option
+  checkName(conf);
 
   return {
     config: conf,

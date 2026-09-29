@@ -158,7 +158,7 @@ const checkBoundOption = (config, option, logOptionName) => {
 
   // invalid type or value of the option
   const invalidValue = getStringifiedValue(value);
-  log(`Invalid option "${logOptionName}": [${invalidValue}] (not a numeric value); adjusting value to undefined`);
+  log(`Invalid option "${logOptionName}": [${invalidValue}] (not a numeric value); unsetting value to undefined`);
   return undefined;
 };
 
@@ -314,7 +314,7 @@ const checkGroupBy = (config) => {
   const { group_by: groupBy, hours_to_show: hoursToShow } = config;
 
   if (groupBy === null || groupBy === 'undefined') {
-    log(`group_by is ${groupBy}, resetting group_by to "interval"`);
+    log(`group_by is ${groupBy}, unsetting group_by to "interval"`);
     return 'interval';
   }
   if (groupBy === undefined) {
@@ -323,7 +323,7 @@ const checkGroupBy = (config) => {
 
   const logReset = (requiredUnit) => {
     log(`group_by "${groupBy}" requires hours_to_show to be a multiple of ${requiredUnit} `
-      + `(current: ${hoursToShow}); resetting group_by to "interval"`);
+      + `(current: ${hoursToShow}); unsetting group_by to "interval"`);
   };
 
   if (groupBy === 'week') {
@@ -398,6 +398,23 @@ const checkPointsPerHour = (config) => {
   return newPointsPerHour;
 };
 
+/* eslint-disable no-param-reassign */
+/**
+ * Check the global card title config
+ * @param {object} config Config object
+ * @returns {void}
+ */
+const checkName = (config) => {
+  if (config.name !== undefined && config.name !== null && typeof config.name !== 'object') {
+    config.name = String(config.name);
+  } else if (typeof config.name === 'object') {
+    const invalidValue = getStringifiedValue(config.name);
+    log(`Invalid option "name": [${invalidValue}]; unsetting value to undefined`);
+    config.name = undefined;
+  }
+};
+/* eslint-enable no-param-reassign */
+
 export {
   checkEntities,
   checkNumericOption,
@@ -409,4 +426,5 @@ export {
   checkLineStyle,
   checkGroupBy,
   checkPointsPerHour,
+  checkName,
 };

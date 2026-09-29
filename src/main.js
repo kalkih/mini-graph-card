@@ -36,10 +36,12 @@ import {
   getMilli,
   compress, decompress,
   getFirstDefinedItem,
-  computeEntityName,
-  entityNamesChanged,
   log,
 } from './utils';
+import {
+  computeEntityName,
+  entityNamesChanged,
+} from './entityName';
 
 const isUnavailableState = value => ['unavailable', 'unknown'].includes(value);
 
@@ -444,7 +446,7 @@ class MiniGraphCard extends LitElement {
         || oldServerTz !== newServerTz;
 
       // check for changes in names
-      const namesChanged = entityNamesChanged(changedProps.get('_hass'), this._hass);
+      const namesChanged = entityNamesChanged(oldHass, newHass);
 
       return configChanged || namesChanged;
     }
@@ -587,7 +589,7 @@ class MiniGraphCard extends LitElement {
 
     const name = this.tooltip.entityIndex !== undefined
       ? this.computeName(this.tooltip.entityIndex)
-      : this.computeName(0, this.config.name || undefined);
+      : this.config.name || this.computeName(0);
     const color = this.config.show.name_adaptive_color
       ? `opacity: 1; color: ${this.color};`
       : '';
@@ -1653,16 +1655,19 @@ class MiniGraphCard extends LitElement {
   * @returns {string} Name of an entity/static value
   * @param {number} index Index of an entry in config.entities
   */
-  computeName(index, nameOverride) {
+  computeName(index) {
     const entityConfig = this.config.entities[index];
-    const name = nameOverride !== undefined
-      ? nameOverride
-      : entityConfig && entityConfig.name;
+    // use a possibly defined "name" option
+    const name = entityConfig && entityConfig.name;
+
     // resolve the "name" option against the entity's registry context
     const stateObj = this.entity && this.entity[index];
     if (stateObj) {
+      // process entity
       return computeEntityName(this._hass, stateObj, name) || stateObj.entity_id;
     }
+
+    // process static value
     // a static value has no entity, so only a plain "name" option applies
     if (name !== undefined && name !== null && typeof name !== 'object') {
       return String(name);
