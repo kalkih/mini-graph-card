@@ -446,7 +446,7 @@ class MiniGraphCard extends LitElement {
         || oldServerTz !== newServerTz;
 
       // check for changes in names
-      const namesChanged = entityNamesChanged(changedProps.get('_hass'), this._hass);
+      const namesChanged = entityNamesChanged(oldHass, newHass);
 
       return configChanged || namesChanged;
     }
