@@ -2041,8 +2041,8 @@ class MiniGraphCard extends LitElement {
     try {
       const promise = this.entity.map((stateObj, i) => this.updateEntity(stateObj, i, start, end));
       await Promise.all(promise);
-    } catch (err) {
-      log(err);
+    } catch (error) {
+      log(error);
     }
 
     if (config.show.graph) {
@@ -2418,8 +2418,8 @@ class MiniGraphCard extends LitElement {
             data: stateHistory,
             version,
           }, this.config.compress)
-          .catch((err) => {
-            log(err);
+          .catch((error) => {
+            log(error);
             localForage.clear();
           });
       }
