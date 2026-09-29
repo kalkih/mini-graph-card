@@ -236,7 +236,7 @@ export default class Graph {
     const delta = Math.abs(max - min);
     const scaleRef = max !== 0 ? Math.abs(max) : Math.abs(min);
     let yRatio;
-    if (max === min || (delta / scaleRef) < 0.001) {
+    if (max === min || delta < Number.EPSILON) {
       yRatio = 1;
     } else {
       yRatio = delta / this._height;
