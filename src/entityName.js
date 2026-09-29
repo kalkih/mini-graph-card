@@ -47,6 +47,12 @@ const computeEntityName = (hass, stateObj, name) => {
 // leaves rendered names stale until some unrelated state change forces a render.
 const NAME_SOURCES = ['formatEntityName', 'entities', 'devices', 'areas', 'floors'];
 
+/**
+ * Check if names changed.
+ * @param {HomeAssistant} oldHass Old HomeAssistant object
+ * @param {HomeAssistant} newHass New HomeAssistant object
+ * @returns {boolean} True if names changed, false otherwise
+ */
 const entityNamesChanged = (oldHass, newHass) => {
   if (!oldHass || !newHass) return false;
   return NAME_SOURCES.some(key => oldHass[key] !== newHass[key]);
