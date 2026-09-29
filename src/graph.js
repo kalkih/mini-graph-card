@@ -5,7 +5,6 @@ import {
   DEFAULT_BAR_SPACING,
 } from './const';
 import { log } from './utils';
-import { getIntervalEndDate } from './others';
 
 export default class Graph {
   constructor({
