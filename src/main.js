@@ -589,7 +589,7 @@ class MiniGraphCard extends LitElement {
 
     const name = this.tooltip.entityIndex !== undefined
       ? this.computeName(this.tooltip.entityIndex)
-      : this.computeName(0, this.config.name || undefined);
+      : this.config.name || this.computeName(0);
     const color = this.config.show.name_adaptive_color
       ? `opacity: 1; color: ${this.color};`
       : '';
