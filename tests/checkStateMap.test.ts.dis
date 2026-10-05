@@ -1,0 +1,174 @@
+/**
+ * Tests for checkStateMap().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it } from 'vitest';
+import { checkStateMap } from '../src/checkOption';
+
+// prevent logging
+global.log = () => { };
+
+interface ConfigType {
+  state_map?: any;
+};
+
+const STRING_VALUES: string[] = [
+  "abc",
+  "123",
+  "-123",
+  "0",
+];
+
+const NUMERIC_VALUES: string[] = [
+  123,
+  -123,
+  0,
+  123.456,
+  -123.456,
+];
+
+describe("checkStateMap", () => {
+  const configOK = [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}];
+
+  it('checkStateMap: check for undefined или null', () => {
+    const config1: ConfigType = {}; // check for undefined
+    const config2 = { state_map: null }; // check for null
+    checkStateMap(config1, 'config');
+    checkStateMap(config2, 'config');
+    expect(config1.state_map).toEqual([]);
+    expect(config2.state_map).toEqual([]);
+  });
+
+  it('checkStateMap: if not an array (number) -> unsetting to []', () => {
+    const config = { state_map: 123 };
+    checkStateMap(config, 'config');
+    expect(config.state_map).toEqual([]);
+  });
+
+  it('checkStateMap: if not an array (string) -> unsetting to []', () => {
+    const config = { state_map: 'abc' };
+    checkStateMap(config, 'config');
+    expect(config.state_map).toEqual([]);
+  });
+
+  it('checkStateMap: if not an array (dict) -> unsetting to []', () => {
+    const config = { state_map: { abc: 'xxx', def: 123 } };
+    checkStateMap(config, 'config');
+    expect(config.state_map).toEqual([]);
+  });
+
+  STRING_VALUES.forEach((value) => {
+    it(`checkStateMap: shorthand "value-only" [${value}] element`, () => {
+      const config = {
+        state_map: [value],
+      };
+      const expected = [{ value, label: value }];
+      checkStateMap(config, 'config');
+      expect(config.state_map).toEqual(expected);
+    });
+  });
+
+  STRING_VALUES.forEach((value) => {
+    it(`checkStateMap: "value-only" [${value}] dict element`, () => {
+      const config = {
+        state_map: [{ value }],
+      };
+      const expected = [{ value, label: value }];
+      checkStateMap(config, 'config');
+      expect(config.state_map).toEqual(expected);
+    });
+  });
+
+  NUMERIC_VALUES.forEach((value) => {
+    it(`checkStateMap: shorthand "numeric-value-only" [${value}] element`, () => {
+      const config = {
+        state_map: [value],
+      };
+      const expected = [{ value: String(value), label: String(value) }];
+      checkStateMap(config, 'config');
+      expect(config.state_map).toEqual(expected);
+    });
+  });
+
+  NUMERIC_VALUES.forEach((value) => {
+    it(`checkStateMap: "numeric-value-only" [${value}] dict element`, () => {
+      const config = {
+        state_map: [{ value }],
+      };
+      const expected = [{ value: String(value), label: String(value) }];
+      checkStateMap(config, 'config');
+      expect(config.state_map).toEqual(expected);
+    });
+  });
+
+  it(`checkStateMap: value is missing`, () => {
+    const config = {
+      state_map: ['abc', {label: 'xyz'}, {}, 'def'],
+    };
+    const expected = configOK;
+    checkStateMap(config, 'config');
+    expect(config.state_map).toEqual(expected);
+  });
+
+  it(`checkStateMap: value is not a string or a number`, () => {
+    const config = {
+      state_map: [{value: 'abc', label: 'abc'}, {value: []}, {value: {}}, {value: 'def', label: 'def'}],
+    };
+    const expected = configOK;
+    checkStateMap(config, 'config');
+    expect(config.state_map).toEqual(expected);
+  });
+
+  it(`checkStateMap: value is undefined`, () => {
+    const config = {
+      state_map: [{value: 'abc', label: 'abc'}, {value: undefined}, {value: 'def', label: 'def'}],
+    };
+    const expected = configOK;
+    checkStateMap(config, 'config');
+    expect(config.state_map).toEqual(expected);
+  });
+
+  it(`checkStateMap: value is null`, () => {
+    const config = {
+      state_map: [{value: 'abc', label: 'abc'}, {value: null}, {value: 'def', label: 'def'}],
+    };
+    const expected = configOK;
+    checkStateMap(config, 'config');
+    expect(config.state_map).toEqual(expected);
+  });
+
+  it(`checkStateMap: label is not a string or a number`, () => {
+    const config1 = {
+      state_map: [...configOK, {value: 'xyz', label: []}],
+    };
+    const config2 = {
+      state_map: [...configOK, {value: 'xyz', label: {}}],
+    };
+    const expected = [...configOK, {value: 'xyz', label: 'xyz'}];
+    checkStateMap(config1, 'config');
+    checkStateMap(config2, 'config');
+    expect(config1.state_map).toEqual(expected);
+    expect(config2.state_map).toEqual(expected);
+  });
+
+  it(`checkStateMap: label is undefined`, () => {
+    const config = {
+      state_map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: undefined}],
+    };
+    const expected = [...configOK, {value: 'xyz', label: 'xyz'}];
+    checkStateMap(config, 'config');
+    expect(config.state_map).toEqual(expected);
+  });
+
+  it(`checkStateMap: label is null`, () => {
+    const config = {
+      state_map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: null}],
+    };
+    const expected = [...configOK, {value: 'xyz', label: 'xyz'}];
+    checkStateMap(config, 'config');
+    expect(config.state_map).toEqual(expected);
+  });
+});

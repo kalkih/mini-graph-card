@@ -17,6 +17,7 @@ import {
   checkBounds,
   checkYAxisLabels,
   checkColorThresholds,
+  checkStateMap,
   checkLineStyle,
   checkGroupBy,
   checkPointsPerHour,
@@ -312,12 +313,8 @@ export default (config) => {
     secondary: getFactor(conf, -1),
   };
 
-  conf.state_map.forEach((state, i) => {
-    // convert string values to objects
-    if (typeof state === 'string') conf.state_map[i] = { value: state, label: state };
-    // make sure label is set
-    conf.state_map[i].label = conf.state_map[i].label || conf.state_map[i].value;
-  });
+  // check state_map
+  checkStateMap(conf, 'config');
 
   if (typeof config.line_color === 'string')
     conf.line_color = [config.line_color, ...DEFAULT_COLORS];

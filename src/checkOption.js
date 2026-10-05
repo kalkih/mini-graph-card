@@ -3,6 +3,7 @@ import {
   getStringifiedValue,
 } from './utils';
 import {
+  isString, isNumber,
   isNumeric,
   logStringWarning,
   getBound,
@@ -22,11 +23,9 @@ const checkEntities = (configEntities) => {
   }
 
   configEntities.forEach((entityConfig, index) => {
-    const isShorthandString = typeof entityConfig === 'string'
-      && entityConfig.trim() !== '';
+    const isShorthandString = isString(entityConfig);
     const hasEntity = entityConfig
-      && typeof entityConfig.entity === 'string'
-      && entityConfig.entity.trim() !== '';
+      && isString(entityConfig.entity);
     const hasStaticValue = entityConfig
       && entityConfig.static_value !== undefined
       && isNumeric(entityConfig.static_value);
@@ -251,7 +250,7 @@ const checkColorThresholds = (config, configName) => {
   }
 
   config.color_thresholds = thresholds
-    .map((threshold, idx) => {
+    .map((threshold, index) => {
       if (typeof threshold === 'string') {
         return { color: threshold };
       }
@@ -260,21 +259,21 @@ const checkColorThresholds = (config, configName) => {
         let { color, value } = threshold;
 
         if (color === undefined || typeof color !== 'string') {
-          log(`Invalid option "${configName}.color_thresholds[${idx}]": "color" is missing or not a string; adjusting to "var(--primary-text-color)"`);
+          log(`Invalid option "${configName}.color_thresholds[${index}]": "color" is missing or not a string; adjusting to "var(--primary-text-color)"`);
           color = 'var(--primary-text-color)';
         }
 
         if (value !== undefined && value !== null) {
           if (!isNumeric(value, true)) {
-            log(`Invalid option "${configName}.color_thresholds[${idx}]": "value" is not a numeric value; unsetting to undefined`);
+            log(`Invalid option "${configName}.color_thresholds[${index}]": "value" is not a numeric value; unsetting to undefined`);
             value = undefined;
           } else {
             // log a warning in case of a string presentation of a number
-            logStringWarning(value, `${configName}.color_thresholds[${idx}].value`);
+            logStringWarning(value, `${configName}.color_thresholds[${index}].value`);
             value = Number(value);
           }
         } else if (value === null) {
-          log(`Invalid option "${configName}.color_thresholds[${idx}]": "value" is null, unsetting to undefined`);
+          log(`Invalid option "${configName}.color_thresholds[${index}]": "value" is null, unsetting to undefined`);
           value = undefined;
         }
 
@@ -282,9 +281,59 @@ const checkColorThresholds = (config, configName) => {
       }
 
       // other invalid content
-      log(`Invalid option "${configName}.color_thresholds[${idx}]": expected an object or a color string; replacing with a default entry`);
+      log(`Invalid option "${configName}.color_thresholds[${index}]": expected an object or a color string; replacing with a default entry`);
       return { color: 'var(--primary-text-color)' };
     });
+};
+/* eslint-enable no-param-reassign */
+
+/* eslint-disable no-param-reassign */
+/**
+ * Check if state_map is properly defined.
+ * @param {object} config Config object containing state_map
+ * @param {string} configName Name of a config object
+ * @returns {void}
+ */
+const checkStateMap = (config, configName) => {
+  const stateMap = config.state_map;
+  if (!Array.isArray(stateMap)) {
+    const error = `Please provide the "${configName}.state_map" option as a list`;
+    log(error);
+    config.state_map = [];
+    return;
+  }
+
+  const validEntries = [];
+  stateMap.forEach((entry, index) => {
+    const isShorthandString = isString(entry) || isNumber(entry);
+    const hasValue = entry
+      && (isString(entry.value) || isNumber(entry.value));
+    if (!isShorthandString && !hasValue) {
+      const error = `Invalid option "${configName}.state_map[${index}]": "value" must be specified`;
+      log(error);
+      return; // filter out wrong entries
+    }
+    // convert string values to objects
+    if (isShorthandString) {
+      validEntries.push({ value: String(entry), label: String(entry) });
+    } else {
+      // make sure a "value" is a string
+      const value = String(entry.value);
+      // make sure a "label" is set & a string
+      let label;
+      if (!entry.label) {
+        label = value;
+      } else if (!isString(entry.label) && !isNumber(entry.label)) {
+        const error = `Invalid option "${configName}.state_map[${index}]": "label" must be a string`;
+        log(error);
+        label = value;
+      } else {
+        label = String(entry.label);
+      }
+      validEntries.push({ value, label });
+    }
+  });
+  config.state_map = validEntries;
 };
 /* eslint-enable no-param-reassign */
 
@@ -423,6 +472,7 @@ export {
   checkBounds,
   checkYAxisLabels,
   checkColorThresholds,
+  checkStateMap,
   checkLineStyle,
   checkGroupBy,
   checkPointsPerHour,
