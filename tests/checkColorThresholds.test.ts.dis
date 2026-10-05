@@ -13,14 +13,15 @@ global.log = () => { };
 
 interface ConfigType {
   color_thresholds?: any;
-};const COLORS: string[] = [
+};
 
+const COLORS: string[] = [
   "red",
   "#ff00ff",
   "var(--red-color)",
 ];
 
-describe("isNumeric", () => {
+describe("checkColorThresholds", () => {
 
   it('checkColorThresholds: check for undefined или null', () => {
     const config1: ConfigType = {}; // check for undefined
