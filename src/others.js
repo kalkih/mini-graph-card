@@ -7,6 +7,10 @@
 
 import { log } from './utils';
 
+const isString = (value) => typeof value === 'string' && value.trim() !== '';
+
+const isNumber = (value) => typeof value === 'number' && Number.isFinite(value);
+
 /**
   * Check if a value is a valid number
   * @param {any} value Value to be checked
@@ -15,7 +19,7 @@ import { log } from './utils';
   * @returns {boolean} True if value is a valid number, false otherwise
   */
 const isNumeric = (value, allowString = false) => {
-  if (typeof value === 'number' && Number.isFinite(value)) {
+  if (isNumber(value)) {
     return true;
   }
   if (allowString && typeof value === 'string') {
@@ -269,6 +273,8 @@ const getIntervalEndDate = (date, groupBy) => {
 };
 
 export {
+  isString,
+  isNumber,
   isNumeric,
   logStringWarning,
   getFactor,
