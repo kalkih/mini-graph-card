@@ -7,9 +7,9 @@
 
 import { log } from './utils';
 
-const isString = (value) => typeof value === 'string' && value.trim() !== '';
+const isString = value => typeof value === 'string' && value.trim() !== '';
 
-const isNumber = (value) => typeof value === 'number' && Number.isFinite(value);
+const isNumber = value => typeof value === 'number' && Number.isFinite(value);
 
 /**
   * Check if a value is a valid number
