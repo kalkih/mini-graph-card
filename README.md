@@ -331,7 +331,7 @@ By default, tapping on an element opens a `more-info` dialog:
 
 State map object allows to map values from an entity's history to specific graph coordinates and labels. It operates in two modes:
 * **strict mode** (default): maps text states (e.g., `on`, `off`) to sequential numbers (0, 1) to render them on a line graph. Any unmapped values are treated as invalid;
-* **relaxed mode** (when `keep_values: true`): retains original numeric history values while replacing custom text labels for specific numbers. Supports an optional `tolerance` parameter to match values within a defined range.
+* **relaxed mode** (when `keep_values: true`): retains original numeric history values while replacing custom text labels for specific numbers. Supports an optional `tolerance` parameter to match numeric values within a defined range.
 
 The `state_map` option has an object structure with mandatory `map` & optional `keep_values` keys:
 
