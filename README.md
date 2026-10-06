@@ -159,8 +159,8 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | aggregate_func | string |         | Override for aggregate function used to calculate point on the graph, `avg`, `median`, `min`, `max`, `first`, `last`, `sum`.
 | decimals | integer |    | Override the exact number of decimals to show for number values, see [Number format](#number-format).
 | show_state | boolean |         | Display the current state.
-| show_legend_state | boolean |  false  | Display the current state as part of the legend.
-| show_indicator | boolean |         | Display a color indicator next to the state.
+| show_legend_state | boolean |  `false`  | Display the current state as part of the legend.
+| show_indicator | boolean |   `false`      | Display a color indicator next to the state.
 | show_graph | boolean |         | Set to false to completely hide the graph.
 | show_line | boolean |         | Set to false to hide the line.
 | show_fill | boolean |         | Set to false to hide the fill.
