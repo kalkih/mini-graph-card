@@ -1226,7 +1226,7 @@ group_by: date
 
 ![mini_binary_sensor](https://user-images.githubusercontent.com/8268674/66825779-e1ff5d80-ef42-11e9-89eb-673d2ada8d34.png)
 
-You can render non-numeric states by providing state_map config. For example this way you can show data coming from binary sensors.
+You can render non-numeric states by providing `state_map` config. For example this way you can show data coming from binary sensors.
 
 ```yaml
 type: custom:mini-graph-card
