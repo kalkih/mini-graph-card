@@ -110,7 +110,7 @@ const checkNumericOption = (
  * @param {number} [params.maxBound] Optional maximum allowed value
  * @param {boolean} [params.allowString=false] Optional flag
  * to allow string representations of numbers
- * @param {string} [params.] Optional custom option name for detailed log output
+ * @param {string} [params.logOptionName] Optional custom option name for detailed log output
  * @returns {number|undefined} Cleared value, or undefined
  */
 const checkIntegerOption = (
@@ -367,7 +367,7 @@ const checkLineStyle = (config) => {
 const checkGroupBy = (config) => {
   const { group_by: groupBy, hours_to_show: hoursToShow } = config;
 
-  if (groupBy === null || groupBy === 'undefined') {
+  if (groupBy === null || groupBy === undefined) {
     log(`group_by is ${groupBy}, unsetting group_by to "interval"`);
     return 'interval';
   }
@@ -445,7 +445,7 @@ const checkPointsPerHour = (config) => {
       break;
   }
   if (pointsPerHourAdjusted
-    && Math.abs(newPointsPerHour - prevPointsPerHour) > Number.EPSILON) {
+    && Math.abs(newPointsPerHour - prevPointsPerHour) > 1e-7) {
     log(`group_by "${config.group_by}": points_per_hour ${prevPointsPerHour}; adjusting value to ${newPointsPerHour}`);
   }
 
