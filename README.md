@@ -361,7 +361,7 @@ As a shorthand, you can just use a string as a value to convert:
       label: Blue
 ```
 
-Legacy configuration: the State map object is itself an array of records `{value, label}` (see above).
+Legacy configuration: the State map object is itself an array of records `{value, label}` (see above), or a described "value-only" shorthand.
 In the legacy format, only the default strict mode is supported; the `tolerance` option is ignored.
 Legacy configuration is still supported, yet it is recommended to upgrade.
 
