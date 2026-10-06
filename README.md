@@ -349,6 +349,7 @@ Each entry may contain properties listed below:
 | value ***(required)*** | string |  | Value to convert.
 | label | string | same as value | String to show as a label.
 | tolerance | number | 0 | Absolute numeric deviation allowed when matching values on the graph, e.g. a value `3.14` in a history & a `value` option's value `3.142` are matched with a `tolerance: 0.005`. Only accounted when `keep_values: true`.
+| hide_unit | boolean | `false` | Hide a unit for a converted value, might be useful for special cases like "'1000 W' value should be shown as 'Danger'".
 
 As a shorthand, you can just use a string as a value to convert:
 
@@ -361,8 +362,8 @@ As a shorthand, you can just use a string as a value to convert:
       label: Blue
 ```
 
-Legacy configuration: the State map object is itself an array of records `{value, label}` (see above), or a described "value-only" shorthand.
-In the legacy format, only the default strict mode is supported; the `tolerance` option is ignored.
+Legacy configuration: the State map object is itself an array of records `{value, label, hide_unit}` (see above), or a described "value-only" shorthand.
+In the legacy format, only the default strict mode is supported, the `tolerance` option is ignored.
 Legacy configuration is still supported, yet it is recommended to upgrade.
 
 See an example [below](#non-numeric-sensor-states).
