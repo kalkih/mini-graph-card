@@ -338,7 +338,7 @@ The `state_map` option has an object structure with mandatory `map` & optional `
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
 | map | list |  | Array of mappings between a historical value and a graph coordinate or display label.
-| keep_values | boolean |  `false` | Set to `true` to preserve raw numeric values in the history instead of converting them to indexes.
+| keep_values | boolean |  `false` | Set to `true` to preserve raw numeric values in the history instead of replacing them with indexes.
 
 The `map` key contains a list of entries.
 When `keep_values` is not `true` - the **order of entries matters** as the entry's index determines its position (Y-value) on the graph.
@@ -361,6 +361,7 @@ As a shorthand, you can just use a string as a value to convert:
     - value: blue
       label: Blue
 ```
+Note: if an order of entries is changed in a "strict" `state_map` and a `cache` option is not set to `false`, it is recommended to purge a browser's cache - otherwise old cached history data (generated for the old order) might become wrong for the new config.
 
 Legacy configuration: the State map object is itself an array of records `{value, label, hide_unit}` (see above), or a described "value-only" shorthand.
 In the legacy format, only the default strict mode is supported, the `tolerance` option is ignored.
