@@ -350,6 +350,17 @@ Each entry may contain properties listed below:
 | label | string | same as value | String to show as a label.
 | tolerance | number | 0 | Absolute numeric deviation allowed when matching values on the graph, e.g. a value `3.14` in a history & a `value` option's value `3.142` are matched with a `tolerance: 0.005`. Only accounted when `keep_values: true`.
 
+As a shorthand, you can just use a string as a value to convert:
+
+```yaml
+  map:
+    - value: red
+      label: Red
+    - green
+    - value: blue
+      label: Blue
+```
+
 Legacy configuration: the State map object is itself an array of records `{value, label}` (see above).
 In the legacy format, only the default strict mode is supported; the `tolerance` option is ignored.
 Legacy configuration is still supported, yet it is recommended to upgrade.
