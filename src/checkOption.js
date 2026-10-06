@@ -209,19 +209,24 @@ const checkBounds = (config, yAxis) => {
 /**
  * Check Y-axis labels option for a valid content.
  * @param {object} axisConfig Config object for Y-axis
+ * @param {string} yAxis Y-axis type (primary/secondary)
  * @returns {void}
  */
-const checkYAxisLabels = (axisConfig) => {
+const checkYAxisLabels = (axisConfig, yAxis) => {
   if (axisConfig) {
     const rawLabels = axisConfig.labels;
     if (Array.isArray(rawLabels)) {
+      const oldLabels = [...axisConfig.labels];
       axisConfig.labels = rawLabels.filter(
         l => ['max', 'min', 'zero', 'all'].includes(l),
       );
-    } else {
+      if (axisConfig.labels.length !== oldLabels.length) {
+        log(`Option "y_axis.${yAxis}.labels": [${oldLabels}] reduced to [${axisConfig.labels}]`);
+      }
+    } else if (rawLabels !== undefined) {
       const invalidValue = getStringifiedValue(rawLabels);
-      log(`Invalid option "labels": [${invalidValue}]; adjusting to "['max', 'min']"`);
-      axisConfig.labels = ['max', 'min'];
+      log(`Invalid option "y_axis.${yAxis}.labels": [${invalidValue}]; unsetting to undefined`);
+      axisConfig.labels = undefined;
     }
   }
 };
