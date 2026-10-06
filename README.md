@@ -299,7 +299,7 @@ The example above will result in the following colors of the graph: if value is
 * between `2.666667` (including this value) and `4`, the color is `#00ff00`,
 * equal to or more than `4`, the color is `#0000ff`.
 
-As a shorthand, you can just use a color string for the stops that you want interpolated:
+orthand, you can just use a color string for the stops that you want interpolated:
 
 ```yaml
   - value: 0
@@ -365,6 +365,7 @@ Legacy configuration: the State map object is itself an array of records `{value
 In the legacy format, only the default strict mode is supported; the `tolerance` option is ignored.
 Legacy configuration is still supported, yet it is recommended to upgrade.
 
+See an example [below](#non-numeric-sensor-states).
 
 #### Value factor
 
