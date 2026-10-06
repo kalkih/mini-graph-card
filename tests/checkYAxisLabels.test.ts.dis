@@ -1,0 +1,70 @@
+/**
+ * Tests for checkYAxisLabels().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it } from 'vitest';
+import { checkYAxisLabels } from '../src/checkOption';
+
+const AXES: string[] = [
+  'primary',
+  'secondary',
+];
+
+const VARIANTS: any[] = [
+  {
+    description: 'undefined labels',
+    config: {},
+    expected: {},
+  },
+  {
+    description: 'labels = number',
+    config: {labels: 123},
+    expected: {},
+  },
+  {
+    description: 'labels = string',
+    config: {labels: 'abc'},
+    expected: {},
+  },
+  {
+    description: 'labels = dict',
+    config: {labels: {abc: 123}},
+    expected: {},
+  },
+  {
+    description: 'labels = empty array',
+    config: {labels: []},
+    expected: {labels: []},
+  },
+  {
+    description: 'labels = wrong array',
+    config: {labels: ['abc']},
+    expected: {labels: []},
+  },
+  {
+    description: 'labels = some entries in array are wrong',
+    config: {labels: ['abc', 'max']},
+    expected: {labels: ['max']},
+  },
+  {
+    description: 'labels = all possible entries in array',
+    config: {labels: ['min', 'max', 'zero', 'all']},
+    expected: {labels: ['min', 'max', 'zero', 'all']},
+  },
+];
+
+describe("checkYAxisLabels", () => {
+  AXES.forEach((axis) => {
+    VARIANTS.forEach((variant) => {
+      it(`checkYAxisLabels: check [${JSON.stringify(variant)}], ${variant.description}`, () => {
+        checkYAxisLabels(variant.config, axis);
+        const result = variant.config
+        const expectedValue = variant.expected;
+        expect(result).toEqual(expectedValue);
+      });
+    });
+  });
+});
