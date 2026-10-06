@@ -299,7 +299,7 @@ The example above will result in the following colors of the graph: if value is
 * between `2.666667` (including this value) and `4`, the color is `#00ff00`,
 * equal to or more than `4`, the color is `#0000ff`.
 
-orthand, you can just use a color string for the stops that you want interpolated:
+As a shorthand, you can just use a color string for the stops that you want interpolated:
 
 ```yaml
   - value: 0
