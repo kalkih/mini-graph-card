@@ -8,11 +8,6 @@
 import { expect, describe, it } from 'vitest';
 import { checkGroupBy } from '../src/checkOption';
 
-interface ConfigType {
-  group_by?: string | undefined | null;
-  hours_to_show: number;
-};
-
 const VARIANTS: any[] = [
   {
     description: 'undefined group_by',
