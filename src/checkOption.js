@@ -369,7 +369,7 @@ const checkLineStyle = (config) => {
 const checkGroupBy = (config) => {
   const { group_by: groupBy, hours_to_show: hoursToShow } = config;
 
-  if (groupBy === null || groupBy === undefined) {
+  if (groupBy === null) {
     log(`group_by is ${groupBy}, unsetting group_by to "interval"`);
     return 'interval';
   }
@@ -418,7 +418,7 @@ const checkGroupBy = (config) => {
  * @returns {number} Possibly adjusted value of points_per_hour
  */
 const checkPointsPerHour = (config) => {
-  const prevPointsPerHour = config.points_per_hour;
+  const prevPointsPerHour = config.points_per_hour;  // cannot be undefined
   let newPointsPerHour = prevPointsPerHour;
   let pointsPerHourAdjusted = false;
 
