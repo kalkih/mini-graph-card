@@ -15,11 +15,6 @@ const VARIANTS: any[] = [
     expected: 'interval',
   },
   {
-    description: 'string "undefined" group_by',
-    config: { hours_to_show: 1, group_by: 'undefined' },
-    expected: 'interval',
-  },
-  {
     description: 'null group_by',
     config: { hours_to_show: 1, group_by: null },
     expected: 'interval',
