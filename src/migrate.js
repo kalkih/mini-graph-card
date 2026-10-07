@@ -30,35 +30,36 @@ const migrateYaxisConfig = (config) => {
     const oldValue = conf[oldKey];
 
     // check if the legacy option is present in config
-    if (oldValue !== undefined && oldValue !== null) {
-      // check if the option is already defined in the new y_axis object
-      const hasNewValue = conf.y_axis
-        && conf.y_axis[axis]
-        && conf.y_axis[axis][newKey] !== undefined
-        && conf.y_axis[axis][newKey] !== null;
+    if (oldValue !== undefined) {
+      if (oldValue !== null) {
+        // check if the option is already defined in the new y_axis object
+        const hasNewValue = conf.y_axis
+          && conf.y_axis[axis]
+          && conf.y_axis[axis][newKey] !== undefined
+          && conf.y_axis[axis][newKey] !== null;
 
-      if (!hasNewValue) {
-        // new option is missing
+        if (!hasNewValue) {
+          // new option is missing
 
-        // create empty object if it was not created yet
-        if (!conf.y_axis) {
-          conf.y_axis = {};
+          // create empty object if it was not created yet
+          if (!conf.y_axis) {
+            conf.y_axis = {};
+          }
+          if (!conf.y_axis[axis]) {
+            conf.y_axis[axis] = {};
+          }
+          // copy a value
+          conf.y_axis[axis][newKey] = oldValue;
+
+          log(`option "${oldKey}" is deprecated and has been automatically migrated. `
+            + `Please update your YAML configuration to "y_axis.${axis}.${newKey}"`); // ?? { isError: false }
+        } else {
+          // new option is also present
+          // legacy option is ignored in favor of the new option
+          log(`option "${oldKey}" is ignored `
+            + `because you have already configured "y_axis.${axis}.${newKey}". Please remove "${oldKey}" from your YAML`); // ?? { isError: false }
         }
-        if (!conf.y_axis[axis]) {
-          conf.y_axis[axis] = {};
-        }
-        // copy a value
-        conf.y_axis[axis][newKey] = oldValue;
-
-        log(`option "${oldKey}" is deprecated and has been automatically migrated. `
-          + `Please update your YAML configuration to "y_axis.${axis}.${newKey}"`);
-      } else {
-        // new option is also present
-        // legacy option is ignored in favor of the new option
-        log(`option "${oldKey}" is ignored `
-          + `because you have already configured "y_axis.${axis}.${newKey}". Please remove "${oldKey}" from your YAML`);
       }
-
       // remove old option
       delete conf[oldKey];
     }
@@ -66,7 +67,6 @@ const migrateYaxisConfig = (config) => {
 
   return conf;
 };
-
 
 export {
   migrateYaxisConfig,
