@@ -7,13 +7,20 @@
 
 import { expect, describe, it } from 'vitest';
 import { checkYAxisLabels } from '../src/checkOption';
+import { OTHER_OPTIONS } from './otherOptions';
 
 const AXES: string[] = [
   'primary',
   'secondary',
 ];
 
+
 const VARIANTS: any[] = [
+  {
+    description: 'untouched other options',
+    config: {...OTHER_OPTIONS},
+    expected: {...OTHER_OPTIONS},
+  },
   {
     description: 'undefined labels',
     config: {},
@@ -54,14 +61,20 @@ const VARIANTS: any[] = [
     config: {labels: ['min', 'max', 'zero', 'all']},
     expected: {labels: ['min', 'max', 'zero', 'all']},
   },
+  {
+    description: 'labels = some entries in array are repeated',
+    config: {labels: ['min', 'max', 'zero', 'zero', 'min']},
+    expected: {labels: ['min', 'max', 'zero', 'zero', 'min']}, // not a problem
+  },
 ];
 
 describe("checkYAxisLabels", () => {
   AXES.forEach((axis) => {
     VARIANTS.forEach((variant) => {
       it(`checkYAxisLabels: check [${JSON.stringify(variant)}], ${variant.description}`, () => {
-        checkYAxisLabels(variant.config, axis);
-        const result = variant.config
+        const config = {...variant.config};
+        checkYAxisLabels(config, axis);
+        const result = config;
         const expectedValue = variant.expected;
         expect(result).toEqual(expectedValue);
       });
