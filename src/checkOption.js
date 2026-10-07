@@ -198,8 +198,10 @@ const checkBounds = (config, yAxis) => {
   }
 
   return {
+    // lowerBound & upperBound are only used to update the config
     lowerBound: lowerBoundParsed && formatBound(lowerBoundParsed),
     upperBound: upperBoundParsed && formatBound(upperBoundParsed),
+    // parsed objects are used to calcalate bounds
     lowerBoundParsed,
     upperBoundParsed,
   };
