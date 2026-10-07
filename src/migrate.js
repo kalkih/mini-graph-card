@@ -57,7 +57,7 @@ const migrateYaxisConfig = (config) => {
           // new option is also present
           // legacy option is ignored in favor of the new option
           log(`option "${oldKey}" is ignored `
-            + `because you have already configured "y_axis.${axis}.${newKey}". Please remove "${oldKey}" from your YAML`); // ?? { isError: false }
+            + `because you have already configured "y_axis.${axis}.${newKey}". Please remove "${oldKey}" from your YAML`);
         }
       }
       // remove old option
