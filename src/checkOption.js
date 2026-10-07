@@ -246,6 +246,8 @@ const checkColorThresholds = (config, configName) => {
 
   if (thresholds === undefined || thresholds === null) {
     // color_thresholds not defined
+    // normal situation for per-entity color_thresholds
+    // global color_thresholds are at least []
     return;
   }
 
@@ -262,7 +264,10 @@ const checkColorThresholds = (config, configName) => {
         return { color: threshold };
       }
 
-      if (threshold && typeof threshold === 'object') {
+      if (threshold
+        && typeof threshold === 'object'
+        && !Array.isArray(threshold)
+      ) {
         let { color, value } = threshold;
 
         if (color === undefined || typeof color !== 'string') {
@@ -283,14 +288,18 @@ const checkColorThresholds = (config, configName) => {
           log(`Invalid option "${configName}.color_thresholds[${index}]": "value" is null, unsetting to undefined`);
           value = undefined;
         }
-
-        return { color, value };
+        const result = { color };
+        if (value !== undefined) {
+          result.value = value;
+        }
+        return result;
       }
 
       // other invalid content
-      log(`Invalid option "${configName}.color_thresholds[${index}]": expected an object or a color string; replacing with a default entry`);
-      return { color: 'var(--primary-text-color)' };
-    });
+      log(`Invalid option "${configName}.color_thresholds[${index}]": expected an object or a color string`);
+      return null;
+    })
+    .filter(threshold => threshold !== null);
 };
 /* eslint-enable no-param-reassign */
 
