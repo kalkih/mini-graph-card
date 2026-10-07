@@ -7,13 +7,15 @@
 
 import { expect, describe, it } from 'vitest';
 import { checkPointsPerHour } from '../src/checkOption';
-
-interface ConfigType {
-  group_by?: string | undefined | null;
-  hours_to_show: number;
-};
+import { OTHER_OPTIONS } from './otherOptions';
 
 const VARIANTS: any[] = [
+  {
+    description: 'untouched other options',
+    config: { points_per_hour: 1, ...OTHER_OPTIONS },
+    expected: 1,
+  },
+  ///////////////////////////////////////////////////////////////////
   {
     description: 'undefined group_by',
     config: { points_per_hour: 1 },
@@ -115,7 +117,6 @@ const VARIANTS: any[] = [
     config: { points_per_hour: 1/24/8, group_by: 'week' },
     expected: 1/24/7,
   },
-
 ];
 
 describe("checkPointsPerHour", () => {
@@ -126,5 +127,4 @@ describe("checkPointsPerHour", () => {
       expect(result).toEqual(expectedValue);
     });
   });
-
 });
