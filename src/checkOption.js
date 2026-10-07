@@ -288,7 +288,7 @@ const checkColorThresholds = (config, configName) => {
           log(`Invalid option "${configName}.color_thresholds[${index}]": "value" is null, unsetting to undefined`);
           value = undefined;
         }
-        const result = {color};
+        const result = { color };
         if (value !== undefined) {
           result.value = value;
         }
@@ -299,7 +299,7 @@ const checkColorThresholds = (config, configName) => {
       log(`Invalid option "${configName}.color_thresholds[${index}]": expected an object or a color string`);
       return null;
     })
-    .filter((threshold) => threshold !== null);
+    .filter(threshold => threshold !== null);
 };
 /* eslint-enable no-param-reassign */
 
