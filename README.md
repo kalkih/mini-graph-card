@@ -115,7 +115,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | align_icon | string | `right` | v0.2.0 | Set the alignment of the icon, `left`, `right` or `state`. See more details [here](#alignment-for-name--icon-elements).
 | align_state | string | `left` | v0.2.0 | Set the alignment of the current state, `left`, `right` or `center`.
 | smoothing | boolean | `true` | v0.8.0 | Whether to make graph line smooth.
-| state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert (order matters as position becomes a value on the graph).
+| state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert.
 | logarithmic | boolean | `false` | v0.10.0 | Use a logarithmic scale for the graph (see [Logarithmic options](#logarithmic-options)).
 | baseline | number |  | v0.14.0 | Set a custom baseline for the graph (see [Baseline](#baseline)).
 | static_value_label_offset | number |  `20` | v0.14.0 | Set a custom horizontal offset for the [static value line label](#static-values), as percentage of the graph area's width.
@@ -136,6 +136,7 @@ These options are legacy and moved into [Y-axis config object](#y-axis-object):
 | value_factor | number or object |   | v0.9.4<br>v0.14.0-dev.1 | Scale a value, see [Value factor](#value-factor).
 | value_factor_secondary | number or object |   | v0.14.0-dev.1  | Scale a value, see [Value factor](#value-factor).
 
+Card config can still keep legacy options, yet it is recommended to upgrade.
 
 #### Entities object
 Entities may be listed directly (as per `sensor.temperature` in the example below), or defined using
@@ -158,8 +159,8 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | aggregate_func | string |         | Override for aggregate function used to calculate point on the graph, `avg`, `median`, `min`, `max`, `first`, `last`, `sum`.
 | decimals | integer |    | Override the exact number of decimals to show for number values, see [Number format](#number-format).
 | show_state | boolean |         | Display the current state.
-| show_legend_state | boolean |  false  | Display the current state as part of the legend.
-| show_indicator | boolean |         | Display a color indicator next to the state.
+| show_legend_state | boolean |  `false`  | Display the current state as part of the legend.
+| show_indicator | boolean |   `false`      | Display a color indicator next to the state.
 | show_graph | boolean |         | Set to false to completely hide the graph.
 | show_line | boolean |         | Set to false to hide the line.
 | show_fill | boolean |         | Set to false to hide the fill.
@@ -219,7 +220,7 @@ See examples [below](#different-graph-types).
 
 #### Y-axis object
 
-The object has a tree-like structure with optional `zero_position`, `primary` & `secondary` keys:
+The `y_axis` option has an object structure with optional `zero_position`, `primary` & `secondary` keys:
 
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
@@ -231,7 +232,7 @@ The `primary` & `secondary` keys may contain optional properties listed below:
 
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
-| invert | boolean |  | Make the Y-axis inverted, see [Inverted graphs](#inverted-graphs).
+| invert | boolean |  `false` | Make the Y-axis inverted, see [Inverted graphs](#inverted-graphs).
 | decimals | integer |  | Specify the exact number of decimals to show for the Y-axis labels, see [Number format](#number-format).
 | value_factor | number or object |   | Scale a value, see [Value factor](#value-factor).
 | lower_bound | number *or* string |   | Set a fixed lower bound for the Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
@@ -327,10 +328,46 @@ By default, tapping on an element opens a `more-info` dialog:
 | url | string |  | Any URL | URL to open when `action` is defined as `url`.
 
 #### State map object
+
+State map object allows to map values from an entity's history to specific graph coordinates and labels. It operates in two modes:
+* **strict mode** (default): maps text states (e.g., `on`, `off`) to sequential numbers (0, 1) to render them on a line graph. Any unmapped values are treated as invalid;
+* **relaxed mode** (when `keep_values: true`): retains original numeric history values while replacing custom text labels for specific numbers. Supports an optional `tolerance` parameter to match numeric values within a defined range.
+
+The `state_map` option has an object structure with mandatory `map` & optional `keep_values` keys:
+
+| Name | Type | Default | Description |
+|------|:----:|:-------:|-------------|
+| map | list |  | Array of mappings between a historical value and a graph coordinate or display label.
+| keep_values | boolean |  `false` | Set to `true` to preserve raw numeric values in the history instead of replacing them with indexes.
+
+The `map` key contains a list of entries.
+When `keep_values` is not `true` - the **order of entries matters** as the entry's index determines its position (Y-value) on the graph.
+Each entry may contain properties listed below:
+
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
 | value ***(required)*** | string |  | Value to convert.
-| label | string | same as value | String to show as label (if the value is not precise).
+| label | string | same as value | String to show as a label.
+| tolerance | number | 0 | Absolute numeric deviation allowed when matching values on the graph, e.g. a value `3.14` in a history & a `value` option's value `3.142` are matched with a `tolerance: 0.005`. Only accounted when `keep_values: true`.
+| hide_unit | boolean | `false` | Hide a unit for a converted value, might be useful for special cases like "'1000 W' value should be shown as 'Danger'".
+
+As a shorthand, you can just use a string as a value to convert:
+
+```yaml
+  map:
+    - value: red
+      label: Red
+    - green
+    - value: blue
+      label: Blue
+```
+Note: if an order of entries is changed in a "strict" `state_map` and a `cache` option is not set to `false`, it is recommended to purge a browser's cache - otherwise old cached history data (generated for the old order) might become wrong for the new config.
+
+Legacy configuration: the State map object is itself an array of records `{value, label, hide_unit}` (see above), or a described "value-only" shorthand.
+In the legacy format, only the default strict mode is supported, the `tolerance` option is ignored.
+Legacy configuration is still supported, yet it is recommended to upgrade.
+
+See an example [below](#non-numeric-sensor-states).
 
 #### Value factor
 
@@ -1191,7 +1228,7 @@ group_by: date
 
 ![mini_binary_sensor](https://user-images.githubusercontent.com/8268674/66825779-e1ff5d80-ef42-11e9-89eb-673d2ada8d34.png)
 
-You can render non-numeric states by providing state_map config. For example this way you can show data coming from binary sensors.
+You can render non-numeric states by providing `state_map` config. For example, this way you can show data coming from binary sensors.
 
 ```yaml
 type: custom:mini-graph-card
