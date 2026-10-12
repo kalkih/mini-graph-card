@@ -137,9 +137,8 @@ Else, if you prefer the graphical editor, use the menu to add the resource:
 We recommend looking at the [Example usage section](#example-usage) to understand the basics to configure this card.
 (also) pay attention to the **required** options mentioned below.
 
-### Options
 
-#### Card options
+### Card options
 | Name | Type | Default | Since | Description |
 |------|:----:|:-------:|:-----:|-------------|
 | type ***(required)*** | string |  | v0.0.1 | `custom:mini-graph-card`.
@@ -199,7 +198,7 @@ These options are legacy and moved into [Y-axis config object](#y-axis-object):
 | value_factor_secondary | number or object |   | v0.14.0-dev.1  | Scale a value, see [Value factor](#value-factor).
 
 
-#### Entities object
+### Entities object
 Entities may be listed directly (as per `sensor.temperature` in the example below), or defined using
 properties of the Entity object detailed in the following table (as per `sensor.pressure` in the example below).
 
@@ -247,7 +246,7 @@ entities:
   - sensor.humidity
 ```
 
-#### Available show options
+### Available show options
 All properties are optional.
 
 | Name | Default | Options | Description |
@@ -279,7 +278,7 @@ To set an individual type for a particular graph, use a per-entity `graph` optio
 See examples [below](#different-graph-types).
 
 
-#### Y-axis object
+### Y-axis object
 
 The object has a tree-like structure with optional `zero_position`, `primary` & `secondary` keys:
 
@@ -320,7 +319,7 @@ y_axis:
 ```
 
 
-#### Line color object
+### Line color object
 See [dynamic line color](#dynamic-line-color) for example usage.
 
 | Name | Type | Default | Description |
@@ -371,7 +370,7 @@ As a shorthand, you can just use a color string for the stops that you want inte
     color: "#0000ff"
 ```
 
-#### Action object options
+### Action object options
 
 All card's area - except a graph part - supports processing of actions.
 By default, tapping on an element opens a `more-info` dialog:
@@ -388,13 +387,13 @@ By default, tapping on an element opens a `more-info` dialog:
 | navigation_path | string |  | Any path | Path to navigate to (e.g. `/lovelace/0/`) when `action` is defined as `navigate`.
 | url | string |  | Any URL | URL to open when `action` is defined as `url`.
 
-#### State map object
+### State map object
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
 | value ***(required)*** | string |  | Value to convert.
 | label | string | same as value | String to show as label (if the value is not precise).
 
-#### Value factor
+### Value factor
 
 Defines a coefficient (factor) applied to displayed values (including Y-axis labels).
 There are two available options per each Y-axis - `y_axis.primary.value_factor` & `y_axis.secondary.value_factor`:
