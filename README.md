@@ -636,7 +636,7 @@ entities:
  - sensor.illumination
 ```
 
-#### Alternative style
+Alternative style:
 
 ![Alternative style](https://user-images.githubusercontent.com/457678/52009161-8daa6f80-24d2-11e9-8678-47658a181615.png)
 
