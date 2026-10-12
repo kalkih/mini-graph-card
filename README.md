@@ -40,7 +40,6 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
    * [Theme variables](#theme-variables)
    * [Example usage](#example-usage)
       + [Single entity card](#single-entity-card)
-      + [Alternative style](#alternative-style)
       + [Multiple entities card](#multiple-entities-card)
       + [Different graph types](#different-graph-types)
       + [Bar spacing](#bar-spacing)
