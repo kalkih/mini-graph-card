@@ -46,7 +46,7 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
       + [Show data from the past week](#show-data-from-the-past-week)
       + [Graph only card](#graph-only-card)
       + [Horizontally stacked cards](#horizontally-stacked-cards)
-      + [ine color](#dynamic-line-color)
+      + [Dynamic line color](#dynamic-line-color)
       + [Alternate Y-axis](#alternate-y-axis)
       + [Custom styles for line graphs](#custom-styles-for-line-graphs)
       + [Displaying static values](#displaying-static-values)
