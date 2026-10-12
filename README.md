@@ -6,64 +6,6 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
 ![Preview](https://user-images.githubusercontent.com/457678/52977264-edf34980-33cc-11e9-903b-cee43b307ed8.png)
 
 ## Table of Contents:
-- [Install](#install)
-   * [HACS (recommended)](#hacs-recommended)
-   * [Manual install](#manual-install)
-   * [CLI install](#cli-install)
-   * [Add resource reference](#add-resource-reference)
-- [Updating](#updating)
-- [Using the card](#using-the-card)
-   * [Options](#options)
-      + [Card options](#card-options)
-      + [Entities object](#entities-object)
-      + [Available show options](#available-show-options)
-      + [Graph types](#graph-types)
-      + [Y-axis object](#y-axis-object)
-      + [Line color object](#line-color-object)
-         - [Line color interpolation of stop values](#line-color-interpolation-of-stop-values)
-      + [Action object options](#action-object-options)
-      + [State map object](#state-map-object)
-      + [Value factor](#value-factor)
-   * [Aggregate functions](#aggregate-functions)
-   * [Alignment for "name" & "icon" elements](#alignment-for-name-icon-elements)
-   * [Structured names](#structured-names)
-   * [Static values](#static-values)
-   * [Number format](#number-format)
-   * [Custom format for datetime values](#custom-format-for-datetime-values)
-   * [Logarithmic options](#logarithmic-options)
-   * [Line styles](#line-styles)
-   * [Baseline](#baseline)
-   * [Inverted graphs](#inverted-graphs)
-   * [Force a zero vertical position](#force-a-zero-vertical-position)
-   * [Graphs order](#graphs-order)
-   * [Supported color formats](#supported-color-formats)
-   * [Theme variables](#theme-variables)
-   * [Example usage](#example-usage)
-      + [Single entity card](#single-entity-card)
-      + [Multiple entities card](#multiple-entities-card)
-      + [Different graph types](#different-graph-types)
-      + [Bar spacing](#bar-spacing)
-      + [Show data from the past week](#show-data-from-the-past-week)
-      + [Graph only card](#graph-only-card)
-      + [Horizontally stacked cards](#horizontally-stacked-cards)
-      + [Dynamic line color](#dynamic-line-color)
-      + [Alternate Y-axis](#alternate-y-axis)
-      + [Custom styles for line graphs](#custom-styles-for-line-graphs)
-      + [Displaying static values](#displaying-static-values)
-      + [Custom baseline](#custom-baseline)
-      + [Inverted Y-axis](#inverted-y-axis)
-      + [Opposing dual-axis graphs](#opposing-dual-axis-graphs)
-      + [Grouping by date](#grouping-by-date)
-      + [Data aggregation functions](#data-aggregation-functions)
-      + [Non-numeric sensor states](#non-numeric-sensor-states)
-      + [Showing additional info on the card](#showing-additional-info-on-the-card)
-      + [Accessing attributes in complex structures](#accessing-attributes-in-complex-structures)
-         - [Accessing dictionary attributes](#accessing-dictionary-attributes)
-         - [Accessing list attributes](#accessing-list-attributes)
-- [Development](#development)
-   * [Instructions](#instructions)
-- [Getting errors?](#getting-errors)
-- [License](#license)
 
 ---
 
@@ -269,7 +211,7 @@ All properties are optional.
 | loading_indicator | `true` | `true` / `false` | Show loading indicator while attempting to retrieve a history.
 | graph_order | `direct` | `direct` / `reversed` | Define an order of displaying graphs (see [Graphs order](#graphs-order)).
 
-#### Graph types
+### Graph types
 
 Two graph types are supported - linear & bars.
 By default, all graphs have a `line` type.
@@ -327,7 +269,7 @@ See [dynamic line color](#dynamic-line-color) for example usage.
 | value ***(required [except in interpolation (see below)](#line-color-interpolation-of-stop-values))*** | number |  | The threshold for the color stop.
 | color ***(required)*** | string |  | Color. See [Supported color formats](#supported-color-formats).
 
-##### Line color interpolation of stop values
+Line color interpolation of stop values:
 As long as the first and last threshold stops have `value` properties, intermediate stops can exclude `value`; they will be interpolated linearly. For example, given stops like:
 
 ```yaml
