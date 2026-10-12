@@ -5,6 +5,67 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
 
 ![Preview](https://user-images.githubusercontent.com/457678/52977264-edf34980-33cc-11e9-903b-cee43b307ed8.png)
 
+## Table of Contents:
+
+   * [Install](#install)
+      + [HACS (recommended)](#hacs-recommended)
+      + [Manual install](#manual-install)
+      + [CLI install](#cli-install)
+      + [Add resource reference](#add-resource-reference)
+   * [Updating](#updating)
+   * [Using the card](#using-the-card)
+      + [Card options](#card-options)
+      + [Entities object](#entities-object)
+      + [Available show options](#available-show-options)
+      + [Graph types](#graph-types)
+      + [Y-axis object](#y-axis-object)
+      + [Line color object](#line-color-object)
+      + [Action object options](#action-object-options)
+      + [State map object](#state-map-object)
+      + [Value factor](#value-factor)
+      + [Aggregate functions](#aggregate-functions)
+      + [Alignment for "name" & "icon" elements](#alignment-for-name--icon-elements)
+      + [Structured names](#structured-names)
+      + [Static values](#static-values)
+      + [Number format](#number-format)
+      + [Custom format for datetime values](#custom-format-for-datetime-values)
+      + [Logarithmic options](#logarithmic-options)
+      + [Line styles](#line-styles)
+      + [Baseline](#baseline)
+      + [Inverted graphs](#inverted-graphs)
+      + [Force a zero vertical position](#force-a-zero-vertical-position)
+      + [Graphs order](#graphs-order)
+      + [Supported color formats](#supported-color-formats)
+      + [Theme variables](#theme-variables)
+      + [Example usage](#example-usage)
+         - [Single entity card](#single-entity-card)
+         - [Multiple entities card](#multiple-entities-card)
+         - [Different graph types](#different-graph-types)
+         - [Bar spacing](#bar-spacing)
+         - [Show data from the past week](#show-data-from-the-past-week)
+         - [Graph only card](#graph-only-card)
+         - [Horizontally stacked cards](#horizontally-stacked-cards)
+         - [Dynamic line color](#dynamic-line-color)
+         - [Alternate Y-axis](#alternate-y-axis)
+         - [Custom styles for line graphs](#custom-styles-for-line-graphs)
+         - [Displaying static values](#displaying-static-values)
+         - [Custom baseline](#custom-baseline)
+         - [Inverted Y-axis](#inverted-y-axis)
+         - [Opposing dual-axis graphs](#opposing-dual-axis-graphs)
+         - [Grouping by date](#grouping-by-date)
+         - [Data aggregation functions](#data-aggregation-functions)
+         - [Non-numeric sensor states](#non-numeric-sensor-states)
+         - [Showing additional info on the card](#showing-additional-info-on-the-card)
+         - [Accessing attributes in complex structures](#accessing-attributes-in-complex-structures)
+            * [Accessing dictionary attributes](#accessing-dictionary-attributes)
+            * [Accessing list attributes](#accessing-list-attributes)
+   * [Development](#development)
+      + [Instructions](#instructions)
+   * [Getting errors?](#getting-errors)
+   * [License](#license)
+
+---
+
 ## Install
 
 ### HACS (recommended)
@@ -75,9 +136,8 @@ Else, if you prefer the graphical editor, use the menu to add the resource:
 We recommend looking at the [Example usage section](#example-usage) to understand the basics to configure this card.
 (also) pay attention to the **required** options mentioned below.
 
-### Options
 
-#### Card options
+### Card options
 | Name | Type | Default | Since | Description |
 |------|:----:|:-------:|:-----:|-------------|
 | type ***(required)*** | string |  | v0.0.1 | `custom:mini-graph-card`.
@@ -137,7 +197,7 @@ These options are legacy and moved into [Y-axis config object](#y-axis-object):
 | value_factor_secondary | number or object |   | v0.14.0-dev.1  | Scale a value, see [Value factor](#value-factor).
 
 
-#### Entities object
+### Entities object
 Entities may be listed directly (as per `sensor.temperature` in the example below), or defined using
 properties of the Entity object detailed in the following table (as per `sensor.pressure` in the example below).
 
@@ -185,7 +245,7 @@ entities:
   - sensor.humidity
 ```
 
-#### Available show options
+### Available show options
 All properties are optional.
 
 | Name | Default | Options | Description |
@@ -208,7 +268,7 @@ All properties are optional.
 | loading_indicator | `true` | `true` / `false` | Show loading indicator while attempting to retrieve a history.
 | graph_order | `direct` | `direct` / `reversed` | Define an order of displaying graphs (see [Graphs order](#graphs-order)).
 
-#### Graph types
+### Graph types
 
 Two graph types are supported - linear & bars.
 By default, all graphs have a `line` type.
@@ -217,7 +277,7 @@ To set an individual type for a particular graph, use a per-entity `graph` optio
 See examples [below](#different-graph-types).
 
 
-#### Y-axis object
+### Y-axis object
 
 The object has a tree-like structure with optional `zero_position`, `primary` & `secondary` keys:
 
@@ -258,7 +318,7 @@ y_axis:
 ```
 
 
-#### Line color object
+### Line color object
 See [dynamic line color](#dynamic-line-color) for example usage.
 
 | Name | Type | Default | Description |
@@ -266,7 +326,7 @@ See [dynamic line color](#dynamic-line-color) for example usage.
 | value ***(required [except in interpolation (see below)](#line-color-interpolation-of-stop-values))*** | number |  | The threshold for the color stop.
 | color ***(required)*** | string |  | Color. See [Supported color formats](#supported-color-formats).
 
-##### Line color interpolation of stop values
+Line color interpolation of stop values:
 As long as the first and last threshold stops have `value` properties, intermediate stops can exclude `value`; they will be interpolated linearly. For example, given stops like:
 
 ```yaml
@@ -309,7 +369,7 @@ As a shorthand, you can just use a color string for the stops that you want inte
     color: "#0000ff"
 ```
 
-#### Action object options
+### Action object options
 
 All card's area - except a graph part - supports processing of actions.
 By default, tapping on an element opens a `more-info` dialog:
@@ -326,13 +386,13 @@ By default, tapping on an element opens a `more-info` dialog:
 | navigation_path | string |  | Any path | Path to navigate to (e.g. `/lovelace/0/`) when `action` is defined as `navigate`.
 | url | string |  | Any URL | URL to open when `action` is defined as `url`.
 
-#### State map object
+### State map object
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
 | value ***(required)*** | string |  | Value to convert.
 | label | string | same as value | String to show as label (if the value is not precise).
 
-#### Value factor
+### Value factor
 
 Defines a coefficient (factor) applied to displayed values (including Y-axis labels).
 There are two available options per each Y-axis - `y_axis.primary.value_factor` & `y_axis.secondary.value_factor`:
@@ -776,6 +836,32 @@ color_thresholds:
     color: "#d35400"
   - value: 21.5
     color: "#c0392b"
+```
+
+With `color_thresholds_transition: hard`:
+
+<img width="479" height="220" alt="image" src="https://github.com/user-attachments/assets/1e976185-3c0d-4ce8-89cc-d0be99bcdb8a" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.xiaomi_cg_1_co2
+color_thresholds:
+ - value: 400
+   color: green
+ - value: 780
+   color: orange
+ - value: 850
+   color: red
+color_thresholds_transition: hard   
+hours_to_show: 1
+points_per_hour: 60
+height: 200
+show:
+  name: false
+  icon: false
+  labels: true
+  state: false
 ```
 
 #### Alternate Y-axis
