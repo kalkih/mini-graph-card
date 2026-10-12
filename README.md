@@ -7,7 +7,6 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
 
 ## Table of Contents:
 
-   * [Table of Contents:](#table-of-contents)
    * [Install](#install)
       + [HACS (recommended)](#hacs-recommended)
       + [Manual install](#manual-install)
