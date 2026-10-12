@@ -65,6 +65,7 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
 - [Getting errors?](#getting-errors)
 - [License](#license)
 
+---
 
 ## Install
 
