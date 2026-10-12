@@ -46,7 +46,7 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
       + [Show data from the past week](#show-data-from-the-past-week)
       + [Graph only card](#graph-only-card)
       + [Horizontally stacked cards](#horizontally-stacked-cards)
-      + [Dynamic line color](#dynamic-line-color)
+      + [ine color](#dynamic-line-color)
       + [Alternate Y-axis](#alternate-y-axis)
       + [Custom styles for line graphs](#custom-styles-for-line-graphs)
       + [Displaying static values](#displaying-static-values)
@@ -837,6 +837,32 @@ color_thresholds:
     color: "#d35400"
   - value: 21.5
     color: "#c0392b"
+```
+
+With `color_thresholds_transition: hard`:
+
+<img width="479" height="220" alt="image" src="https://github.com/user-attachments/assets/1e976185-3c0d-4ce8-89cc-d0be99bcdb8a" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.xiaomi_cg_1_co2
+color_thresholds:
+ - value: 400
+   color: green
+ - value: 780
+   color: orange
+ - value: 850
+   color: red
+color_thresholds_transition: hard   
+hours_to_show: 1
+points_per_hour: 60
+height: 200
+show:
+  name: false
+  icon: false
+  labels: true
+  state: false
 ```
 
 #### Alternate Y-axis
