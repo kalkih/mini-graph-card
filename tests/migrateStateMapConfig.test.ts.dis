@@ -1,0 +1,201 @@
+/**
+ * Tests for migrateStateMapConfig().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it, beforeEach } from 'vitest';
+import { migrateStateMapConfig } from '../src/migrate';
+import { OTHER_OPTIONS } from './otherOptions';
+
+const VARIANTS_OLD: any[] = [
+  {
+    descr: 'other options are untouched',
+    conf: {state_map: [123, 456], ...OTHER_OPTIONS},
+    expected: {state_map: {map: [123, 456]}, ...OTHER_OPTIONS},
+  },
+  ////////////////////////////
+  {
+    descr: 'state_map is undefined',
+    conf: {},
+    expected: {state_map: {map: []}},
+  },
+  {
+    descr: 'state_map is null',
+    conf: {state_map: null},
+    expected: {state_map: {map: []}},
+  },
+  ////////////////////////////
+  {
+    descr: 'state_map is a string',
+    conf: {state_map: 'abc'},
+    expected: {state_map: {map: []}},
+  },
+  {
+    descr: 'state_map is a number',
+    conf: {state_map: 123},
+    expected: {state_map: {map: []}},
+  },
+  {
+    descr: 'state_map is a dict',
+    conf: {state_map: {abc: 123}},
+    expected: {state_map: {map: []}},
+  },
+  {
+    descr: 'state_map is an empty dict',
+    conf: {state_map: {}},
+    expected: {state_map: {map: []}},
+  },
+  ////////////////////////////
+  {
+    descr: 'state_map is an empty array',
+    conf: {state_map: []},
+    expected: {state_map: {map: []}},
+  },
+  {
+    descr: 'state_map is an array of numbers',
+    conf: {state_map: [123, 456]},
+    expected: {state_map: {map: [123, 456]}},
+  },
+  {
+    descr: 'state_map is an array of strings',
+    conf: {state_map: ['abc', 'def']},
+    expected: {state_map: {map: ['abc', 'def']}},
+  },
+  {
+    descr: 'state_map is an array of empty dicts',
+    conf: {state_map: [{}, {}]},
+    expected: {state_map: {map: [{}, {}]}},
+  },
+  {
+    descr: 'state_map is an array of dicts',
+    conf: {state_map: [{abc: 123}, {def: 456}]},
+    expected: {state_map: {map: [{abc: 123}, {def: 456}]}},
+  },
+];
+
+const VARIANTS_NEW: any[] = [
+  {
+    descr: 'other options are untouched',
+    conf: {state_map: {map: [123, 456]}, ...OTHER_OPTIONS},
+    expected: {state_map: {map: [123, 456]}, ...OTHER_OPTIONS},
+  },
+  ////////////////////////////
+  {
+    descr: 'map is undefined',
+    conf: {state_map: {}},
+    expected: {state_map: {map: []}},
+  },
+  ////////////////////////////
+  {
+    descr: 'map is undefined, +unknown keys',
+    conf: {state_map: {abc: 123}},
+    expected: {state_map: {map: []}},
+  },
+  ////////////////////////////
+  {
+    descr: 'map is undefined, keep_values=undefined, +unknown keys',
+    conf: {state_map: {abc: 123, keep_values: undefined}},
+    expected: {state_map: {map: []}},
+  },
+  {
+    descr: 'map is undefined, keep_values=null, +unknown keys',
+    conf: {state_map: {abc: 123, keep_values: null}},
+    expected: {state_map: {map: [], keep_values: null}},
+  },
+  {
+    descr: 'map is undefined, keep_values=false, +unknown keys',
+    conf: {state_map: {abc: 123, keep_values: false}},
+    expected: {state_map: {map: [], keep_values: false}},
+  },
+  {
+    descr: 'map is undefined, keep_values=true, +unknown keys',
+    conf: {state_map: {abc: 123, keep_values: true}},
+    expected: {state_map: {map: [], keep_values: true}},
+  },
+  {
+    descr: 'map is undefined, keep_values=123, +unknown keys',
+    conf: {state_map: {abc: 123, keep_values: 123}},
+    expected: {state_map: {map: [], keep_values: 123}},
+  },
+  {
+    descr: 'map is undefined, keep_values=abc, +unknown keys',
+    conf: {state_map: {abc: 123, keep_values: 'abc'}},
+    expected: {state_map: {map: [], keep_values: 'abc'}},
+  },
+  ////////////////////////////
+  {
+    descr: 'map is null',
+    conf: {state_map: {map: null}},
+    expected: {state_map: {map: []}},
+  },
+  {
+    descr: 'map is a string',
+    conf: {state_map: {map: 'abc'}},
+    expected: {state_map: {map: 'abc'}},
+  },
+  {
+    descr: 'map is a number',
+    conf: {state_map: {map: 123}},
+    expected: {state_map: {map: 123}},
+  },
+  {
+    descr: 'map is a dict',
+    conf: {state_map: {map: {abc: 123}}},
+    expected: {state_map: {map: {abc: 123}}},
+  },
+  {
+    descr: 'map is an empty dict',
+    conf: {state_map: {map: {}}},
+    expected: {state_map: {map: {}}},
+  },
+  ////////////////////////////
+  {
+    descr: 'map is an empty array',
+    conf: {state_map: {map: []}},
+    expected: {state_map: {map: []}},
+  },
+  {
+    descr: 'map is an array of numbers',
+    conf: {state_map: {map: [123, 456]}},
+    expected: {state_map: {map: [123, 456]}},
+  },
+  {
+    descr: 'map is an array of strings',
+    conf: {state_map: {map: ['abc', 'def']}},
+    expected: {state_map: {map: ['abc', 'def']}},
+  },
+  {
+    descr: 'map is an array of empty dicts',
+    conf: {state_map: {map: [{}, {}]}},
+    expected: {state_map: {map: [{}, {}]}},
+  },
+  {
+    descr: 'map is an array of dicts',
+    conf: {state_map: {map: [{abc: 123}, {def: 456}]}},
+    expected: {state_map: {map: [{abc: 123}, {def: 456}]}},
+  },
+];
+
+describe("migrateStateMapConfig()", () => {
+  describe("old structure()", () => {
+    VARIANTS_OLD.forEach((variant) => {
+      it(variant.descr, () => {
+        // we can safely address the variant.conf, it is not mutated in migrateStateMapConfig()
+        const res = migrateStateMapConfig(variant.conf);
+        expect(res).toEqual(variant.expected);
+      });
+    });
+  });
+
+  describe("new structure()", () => {
+    VARIANTS_NEW.forEach((variant) => {
+      it(variant.descr, () => {
+        // we can safely address the variant.conf, it is not mutated in migrateStateMapConfig()
+        const res = migrateStateMapConfig(variant.conf);
+        expect(res).toEqual(variant.expected);
+      });
+    });
+  });
+});
