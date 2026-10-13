@@ -42,8 +42,10 @@ const renderSimpleTemplate = (template, vars) => {
     || !vars || typeof vars !== 'object') {
     return String(template);
   }
-  return template.replace(/\$\{\s*(\w+)\s*\}/g, (match, key) => (vars[key] !== undefined ? vars[key] : match);
-  });
+  return template.replace(
+    /\$\{\s*(\w+)\s*\}/g,
+    (match, key) => (vars[key] !== undefined ? vars[key] : match),
+  );
 };
 
 export {
