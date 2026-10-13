@@ -2461,7 +2461,7 @@ export default class MiniGraphCard extends LitElement {
       : (stateHistory.length > 0 ? stateHistory[stateHistory.length - 1] : null);
 
     // current value of state/attribute
-    const currentValue = entityConfig.attribute
+    let currentValue = entityConfig.attribute
       ? this.getObjectAttr(stateObj.attributes, entityConfig.attribute)
       : stateObj.state;
 
