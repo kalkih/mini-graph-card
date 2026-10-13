@@ -356,19 +356,22 @@ const checkStateMap = (config, configName) => {
           && min !== null && max !== null;
 
         if (!hasValue && !keepValues) {
-          log(`Invalid option "${configName}.state_map.map[${index}]": `
-            + `"value" must be specified; removing the entry`);
+          const error = `Invalid option "${configName}.state_map.map[${index}]": `
+            + `"value" must be specified; removing the entry`;
+          log(error);
           return null;
         }
         if (!hasValue && !hasMinMax && keepValues) {
-          log(`Invalid option "${configName}.state_map.map[${index}]": `
-            + `"value" or both "min" and "max" must be specified; removing the entry`);
+          const error = `Invalid option "${configName}.state_map.map[${index}]": `
+            + `"value" or both "min" and "max" must be specified; removing the entry`;
+          log(error);
           return null;
         }
         if (hasValue) {
           if (typeof value !== 'string' && typeof value !== 'number') {
-            log(`Invalid option "${configName}.state_map.map[${index}]": `
-              + `"value" is missing or not a string/number; removing the entry`);
+            const error = `Invalid option "${configName}.state_map.map[${index}]": `
+              + `"value" is missing or not a string/number; removing the entry`;
+            log(error);
             return null;
           }
           value = String(value);
@@ -385,8 +388,9 @@ const checkStateMap = (config, configName) => {
           min = Number(min);
           max = Number(max);
           if (max <= min) {
-            log(`Invalid option "${configName}.state_map.map[${index}]": `
-              + `"max" (${max}) must be greater than "min" (${min}); removing the entry`);
+            const error = `Invalid option "${configName}.state_map.map[${index}]": `
+              + `"max" (${max}) must be greater than "min" (${min}); removing the entry`;
+            log(error);
             return null;
           }
         }
