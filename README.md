@@ -35,6 +35,9 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
       + [Inverted graphs](#inverted-graphs)
       + [Force a zero vertical position](#force-a-zero-vertical-position)
       + [Graphs order](#graphs-order)
+      + [Configuration validation](#configuration-validation)
+         - [Error severity levels](#error-severity-levels)
+         - [Validation rules](#validation-rules)
       + [Supported color formats](#supported-color-formats)
       + [Theme variables](#theme-variables)
       + [Example usage](#example-usage)
@@ -593,9 +596,7 @@ Similarly for overlapping bars graphs (when `bar_spacing: -1`): by default (or w
 
 With `graph_order: reversed`, bars for the 1st entity/static value become topmost.
 
-### Input data validation
-
-## Configuration validation
+### Configuration validation
 
 Before the 1st rendering, the card performs a validation of some settings provided in the YAML configuration.
 If a misconfigured option is detected, the card reacts dynamically based on the severity of the error.
@@ -607,7 +608,7 @@ Occurs when the basic configuration is broken (e.g., passing a plain string inst
 2. **Non-critical warnings:**
 If a parameter contains an incorrect data type or an invalid value (e.g., a negative `decimals`), the card outputs a detailed warning to the browser console, assigns that specific option to its safe default value, and then continues to render the card.
 
-### Configuration rules
+### Validation rules
 
 The list below is not comprehensive:
 
