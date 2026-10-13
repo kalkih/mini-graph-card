@@ -614,8 +614,10 @@ The list below is not comprehensive:
 
 * **Numeric values**: all numeric options (like `baseline`) are validated against numeric types (`number`).
 * **Integers:** all integer numeric options (like `decimals`) are additionally validated to ensure they are integers rather than floating-point values.
-* **Quoted numbers:** The card allows numeric values wrapped in quotes (e.g., `hours_to_show: "24"`). The internal parser will safely convert them to numbers, but it will emit a warning in the browser console prompting you to fix the type in your YAML file.
-* **Complex config objects:** Complex objects (like `color_thresholds` or `state_map`) undergo a deeper structural audit: the card verifies not only the overall container structure but also the presence, validity, and precise data types of all important inner options .
+* **Quoted numbers**: the card allows numeric values wrapped in quotes (like `hours_to_show: "24"`). The internal parser will safely convert them to numbers, but it will emit a warning in the browser console prompting you to fix the type in your YAML file.
+* **Complex config objects**: Complex objects (like `color_thresholds` or `state_map`) undergo a deeper structural audit: the card verifies not only the overall container structure but also the presence, validity, and precise data types of all important inner options .
+* **Feature-specific**: check values using more specific criteria (like "`hours_to_show`, `points_per_hour` & `group_by` should match with each other").
+  
 
 > **Troubleshooting tip:** If your card is shown blank or behaves unexpectedly, press `F12` to open your browser's Developer Tools, navigate to the **Console** tab and check the logged warnings emitted by `mini-graph-card`.
 
