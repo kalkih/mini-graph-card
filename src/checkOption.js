@@ -357,20 +357,20 @@ const checkStateMap = (config, configName) => {
 
         if (!hasValue && !keepValues) {
           const error = `Invalid option "${configName}.state_map.map[${index}]": `
-            + `"value" must be specified; removing the entry`;
+            + '"value" must be specified; removing the entry';
           log(error);
           return null;
         }
         if (!hasValue && !hasMinMax && keepValues) {
           const error = `Invalid option "${configName}.state_map.map[${index}]": `
-            + `"value" or both "min" and "max" must be specified; removing the entry`;
+            + '"value" or both "min" and "max" must be specified; removing the entry';
           log(error);
           return null;
         }
         if (hasValue) {
           if (typeof value !== 'string' && typeof value !== 'number') {
             const error = `Invalid option "${configName}.state_map.map[${index}]": `
-              + `"value" is missing or not a string/number; removing the entry`;
+              + '"value" is missing or not a string/number; removing the entry';
             log(error);
             return null;
           }
@@ -379,7 +379,7 @@ const checkStateMap = (config, configName) => {
         if (!hasValue && hasMinMax && keepValues) {
           if (!isNumeric(min, true) || !isNumeric(max, true)) {
             const error = `Invalid option "${configName}.state_map.map[${index}]": `
-              + `"min" and "max" must be numeric values; removing the entry`;
+              + '"min" and "max" must be numeric values; removing the entry';
             log(error);
             return null;
           }
