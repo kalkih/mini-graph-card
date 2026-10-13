@@ -35,6 +35,9 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
       + [Inverted graphs](#inverted-graphs)
       + [Force a zero vertical position](#force-a-zero-vertical-position)
       + [Graphs order](#graphs-order)
+      + [Configuration validation](#configuration-validation)
+         - [Error severity levels](#error-severity-levels)
+         - [Validation rules](#validation-rules)
       + [Supported color formats](#supported-color-formats)
       + [Theme variables](#theme-variables)
       + [Example usage](#example-usage)
@@ -592,6 +595,32 @@ Similarly for overlapping bars graphs (when `bar_spacing: -1`): by default (or w
 2. Last, a bar for the last entity/static value in the `entities` list is processed.
 
 With `graph_order: reversed`, bars for the 1st entity/static value become topmost.
+
+### Configuration validation
+
+Before the 1st rendering, the card performs a validation of some settings provided in the YAML configuration.
+If a misconfigured option is detected, the card reacts dynamically based on the severity of the error.
+
+#### Error severity levels
+
+1. **Critical errors:**
+Occurs when the basic configuration is broken (e.g., passing a plain string instead of an array to `entities`). In this case, the card completely blocks its rendering process.
+2. **Non-critical warnings:**
+If a parameter contains an incorrect data type or an invalid value (e.g., a negative `decimals`), the card outputs a detailed warning to the browser console, assigns that specific option to its safe default value, and then continues to render the card.
+
+#### Validation rules
+
+The list below is not comprehensive:
+
+* **Numeric values**: all numeric options (like `baseline`) are validated against numeric types (`number`).
+* **Integers:** all integer numeric options (like `decimals`) are additionally validated to ensure they are integers rather than floating-point values.
+* **Quoted numbers**: the card allows numeric values wrapped in quotes (like `hours_to_show: "24"`). The internal parser will safely convert them to numbers, but it will emit a warning in the browser console prompting you to fix the type in your YAML file.
+* **Complex config objects**: Complex objects (like `color_thresholds` or `state_map`) undergo a deeper structural audit: the card verifies not only the overall container structure but also the presence, validity, and precise data types of all important inner options .
+* **Feature-specific**: check values using more specific criteria (like "`hours_to_show`, `points_per_hour` & `group_by` should match with each other").
+  
+
+> **Troubleshooting tip:** If your card is shown blank or behaves unexpectedly, press `F12` to open your browser's Developer Tools, navigate to the **Console** tab and check the logged warnings emitted by `mini-graph-card`.
+
 
 ### Supported color formats
 Color can be defined as:
