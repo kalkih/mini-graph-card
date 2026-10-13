@@ -1321,6 +1321,8 @@ export default class MiniGraphCard extends LitElement {
       const oneMinute = group_by !== 'interval' ? 60000 : 0;
 
       const now = this.getIntervalEndDate();
+      // current time (not mutated)
+      // needed to show a time with a yesterday's date if hours_to_show>=24
       const nowPersistent = new Date(now.getTime());
 
       now.setMilliseconds(now.getMilliseconds() - oneMinute - interval * count);
