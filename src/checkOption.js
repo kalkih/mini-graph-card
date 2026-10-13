@@ -212,7 +212,7 @@ const checkBounds = (config, yAxis) => {
  * @param {object} axisConfig Config object for Y-axis
  * @returns {void}
  */
-const checkYAxisLabels = (axisConfig) => {
+const checkYaxisLabels = (axisConfig) => {
   if (axisConfig) {
     const rawLabels = axisConfig.labels;
     if (Array.isArray(rawLabels)) {
@@ -606,7 +606,7 @@ export {
   checkIntegerOption,
   checkBoundOption,
   checkBounds,
-  checkYAxisLabels,
+  checkYaxisLabels,
   checkColorThresholds,
   checkStateMap,
   checkLineStyle,
