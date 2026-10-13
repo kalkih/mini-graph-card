@@ -262,6 +262,7 @@ const checkColorThresholds = (config, configName) => {
   config.color_thresholds = thresholds
     .map((threshold, index) => {
       if (typeof threshold === 'string') {
+        // shorthand
         return { color: threshold };
       }
 
