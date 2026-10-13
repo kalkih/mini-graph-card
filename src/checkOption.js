@@ -4,7 +4,7 @@ import {
   renderSimpleTemplate,
 } from './utils';
 import {
-  isString, isNumber,
+  isString,
   isNumeric,
   logStringWarning,
   getBound,
