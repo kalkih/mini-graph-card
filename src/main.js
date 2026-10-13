@@ -1789,7 +1789,7 @@ export default class MiniGraphCard extends LitElement {
   * @param {object} stateMapConfig state_map napping array
   * @param {number|string} inState Value of a state/attribute ("unformatted") or a static_value
   */
-  _mapState(stateMapConfig, inState ) {
+  _mapState(stateMapConfig, inState) {
     const stateMapArray = stateMapConfig.map;
     const keepValues = stateMapConfig.keep_values;
     let hideUnit;
@@ -1819,7 +1819,7 @@ export default class MiniGraphCard extends LitElement {
         // relaxed mode - state_map presumably contains particular values to be "re-labeled"
         const isCurrentNumeric = isNumeric(inState, true);
         const currentValue = isCurrentNumeric ? Number(inState) : NaN;
-        stateMap = stateMapArray.find(state => {
+        stateMap = stateMapArray.find((state) => {
           if (isCurrentNumeric) {
             // use min/max
             if (state.min !== undefined && state.max !== undefined) {
@@ -1873,7 +1873,7 @@ export default class MiniGraphCard extends LitElement {
       ? this.config.entities[index]
       : null;
     const stateMapConfig = (entityConfig && entityConfig.state_map) || this.config.state_map;
-    const { result, hideUnit} = this._mapState(stateMapConfig, inState);
+    const { result, hideUnit } = this._mapState(stateMapConfig, inState);
     if (hideUnit !== undefined && index >= 0) {
       this._mappedHideUnit[index] = hideUnit;
     }
@@ -2083,7 +2083,7 @@ export default class MiniGraphCard extends LitElement {
 
     // get a unit
     // account a possible state_map.map.hide_unit option
-    const unit = hideUnit  || this._mappedHideUnit[index]
+    const unit = hideUnit || this._mappedHideUnit[index]
       ? ''
       : this.computeUom(index, inState);
 
@@ -2526,7 +2526,8 @@ export default class MiniGraphCard extends LitElement {
         });
       }
 
-      const processedPoints = fetchedHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
+      const processedPoints = fetchedHistory[0]
+        .filter(item => !Number.isNaN(parseFloat(item.state)));
       const formattedPoints = processedPoints.map(item => ({
         last_changed: entityConfig.attribute ? item.last_updated : item.last_changed,
         state: item.state,
