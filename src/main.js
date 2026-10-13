@@ -37,15 +37,16 @@ import {
   compress, decompress,
   getFirstDefinedItem,
   log,
+  getStringifiedValue,
 } from './utils';
 import {
   computeEntityName,
   entityNamesChanged,
 } from './entityName';
 
-const isUnavailableState = value => ['unavailable', 'unknown'].includes(value);
+const isUnavailableState = value => ['unavailable'].includes(value);
 
-class MiniGraphCard extends LitElement {
+export default class MiniGraphCard extends LitElement {
   constructor() {
     super();
     this.id = Math.random()
@@ -102,6 +103,9 @@ class MiniGraphCard extends LitElement {
 
     // margins for a graph container
     this._graphMargin = [DEFAULT_MARGIN, DEFAULT_MARGIN];
+
+    // array of hide_unit flags for mapped values (processing state_map)
+    this._mappedHideUnit = [];
 
     // data prepared by buildConfig()
     this._axisBoundsParsed = undefined; // parsed Y-axis bounds
@@ -453,6 +457,12 @@ class MiniGraphCard extends LitElement {
     return true;
   }
 
+  willUpdate(changedProperties) {
+    super.willUpdate(changedProperties);
+    // restore hide_unit flags for mapped values
+    this._mappedHideUnit = [];
+  }
+
   firstUpdated() {
     this.initial = false;
     this.updateFormatFromLocale(true);
@@ -737,7 +747,7 @@ class MiniGraphCard extends LitElement {
             ${this.computeState(value, entityIndex)}
           </span>
           <span class="state__uom ellipsis">
-            ${this.computeUom(entityIndex, value)}
+            ${!this._mappedHideUnit[entityIndex] ? this.computeUom(entityIndex, value) : ''}
           </span>
           ${isPrimary && this.renderStateTime() || ''}
         </div>
@@ -1772,6 +1782,73 @@ class MiniGraphCard extends LitElement {
   }
 
   /**
+  * Returns a mapped string/number value for a state/attribute or a static_value
+  * @returns {{hideUnit: (boolean|undefined), result: (string|undefined)}} Object containing mapping results
+  * @param {object} stateMapConfig state_map napping array
+  * @param {number|string} inState Value of a state/attribute ("unformatted") or a static_value
+  */
+  _mapState(stateMapConfig, inState ) {
+    const stateMapArray = stateMapConfig.map;
+    const keepValues = stateMapConfig.keep_values;
+    let hideUnit;
+    let result;
+
+    if (stateMapArray.length > 0) {
+      let stateMap;
+      if (!keepValues) {
+        // strict mode - state_map presumably contains all possible values
+        if (isNumeric(inState, true)) {
+          let roundedValue = Math.round(Number(inState));
+          roundedValue = Math.max(0, roundedValue);
+          stateMap = stateMapArray[roundedValue]; // can be undefined for a moment
+        } else {
+          stateMap = stateMapArray.find(state => state.value === inState);
+        }
+        if (stateMap) {
+          if (stateMap.hide_unit !== undefined) {
+            hideUnit = !!stateMap.hide_unit;
+          }
+          result = stateMap.label;
+        } else if (!isUnavailableState(inState)) { // no usual need to map the "unavailable" word
+          log(`value [${inState}] not found in state_map: `
+            + `[${getStringifiedValue(stateMapArray)}]`); // ?? { isError: false }
+        }
+      } else {
+        // relaxed mode - state_map presumably contains particular values to be "re-labeled"
+        const isCurrentNumeric = isNumeric(inState, true);
+        const currentValue = isCurrentNumeric ? Number(inState) : NaN;
+        stateMap = stateMapArray.find(state => {
+          if (isCurrentNumeric) {
+            // use min/max
+            if (state.min !== undefined && state.max !== undefined) {
+              // min - included, max - excluded
+              return currentValue >= state.min && currentValue < state.max;
+            }
+            // use value & tolerance
+            if (isNumeric(state.value, true)) {
+              const targetValue = Number(state.value);
+              const tolerance = state.tolerance || 0;
+              // both limits are included
+              const delta = Math.abs(currentValue - targetValue);
+              const roundedDelta = Math.round(delta * 1e12) / 1e12;
+              return roundedDelta <= tolerance;
+            }
+          }
+          return state.value === String(inState);
+        });
+        if (stateMap) {
+          if (stateMap.hide_unit !== undefined) {
+            hideUnit = !!stateMap.hide_unit;
+          }
+          result = stateMap.label;
+        }
+      }
+    }
+
+    return { hideUnit, result };
+  }
+
+  /**
   * Returns a string value for a state/attribute or a static_value:
   * localized, following locale settings,
   * (for entities:) accounting possible individual accuracy settings & possible "decimals" options
@@ -1780,18 +1857,29 @@ class MiniGraphCard extends LitElement {
   * @param {number} index Index of an entry in config.entities
   */
   computeState(inState, index) {
-    if (this.config.state_map.length > 0) {
-      const stateMap = Number.isInteger(inState)
-        ? this.config.state_map[inState]
-        : this.config.state_map.find(state => state.value === inState);
-
-      if (stateMap) {
-        return stateMap.label;
-      } else {
-        log(`value [${inState}] not found in state_map`);
-      }
+    // unset just in case
+    if (index >= 0) {
+      this._mappedHideUnit[index] = undefined;
     }
 
+    if (typeof inState === 'object' && inState !== null) {
+      // safely bypass complex data
+      inState = undefined;
+    }
+
+    const entityConfig = index >= 0
+      ? this.config.entities[index]
+      : null;
+    const stateMapConfig = (entityConfig && entityConfig.state_map) || this.config.state_map;
+    const { result, hideUnit} = this._mapState(stateMapConfig, inState);
+    if (hideUnit !== undefined && index >= 0) {
+      this._mappedHideUnit[index] = hideUnit;
+    }
+    if (result !== undefined) {
+      return result;
+    }
+
+    // cases like "complex data", "data not ready"
     if (inState === undefined || inState === null || inState === '') {
       return formatNumber(NaN, this._hass.locale);
     }
@@ -1807,6 +1895,12 @@ class MiniGraphCard extends LitElement {
       // as is presented as a number
       state = Number(inState);
     }
+
+    // handle possible NaN values from a history & after failed mapping
+    if (Number.isNaN(state)) {
+      return formatNumber(NaN, this._hass.locale);
+    }
+
     const factor = index === undefined
       ? this._axisFactors.primary
       : index === -1
@@ -1986,7 +2080,10 @@ class MiniGraphCard extends LitElement {
     const state = this.computeState(inState, index);
 
     // get a unit
-    const unit = hideUnit ? '' : this.computeUom(index, inState);
+    // account a possible state_map.map.hide_unit option
+    const unit = hideUnit  || this._mappedHideUnit[index]
+      ? ''
+      : this.computeUom(index, inState);
 
     // get native order & delimiter
     const { directOrder, delimiter: nativeDelimiter } = this.computeStateOrder(index, inState);
@@ -2309,12 +2406,16 @@ class MiniGraphCard extends LitElement {
     let fetchStart = start;
     let skipInitialState = false;
 
+    // cache is converted with state_map
+    let isCacheConverted = false;
+
     const history = this.config.cache
       ? await this.getCache(`${stateObj.entity_id}_${index}`, this.config.compress)
       : undefined;
     if (history && history.hours_to_show === this.config.hours_to_show) {
       // process a cached history
       stateHistory = history.data;
+      isCacheConverted = history.state_map_converted === true;
 
       let currDataIndex = stateHistory.findIndex(item => new Date(item.last_changed) > start);
       if (currDataIndex !== -1) {
@@ -2325,14 +2426,13 @@ class MiniGraphCard extends LitElement {
           stateHistory[currDataIndex].last_changed = start;
         }
 
+        // delete everything before the found point
         stateHistory = stateHistory.slice(currDataIndex);
         // skip initial state when fetching recent/not-cached data
         skipInitialState = true;
 
         const lastFetched = new Date(history.last_fetched);
-        if (lastFetched > fetchStart) {
-          fetchStart = new Date(lastFetched - 1);
-        }
+        fetchStart = new Date(lastFetched - 1);
       } else {
         // there were no states which could be used in current graph so clearing
         stateHistory = [];
@@ -2357,16 +2457,30 @@ class MiniGraphCard extends LitElement {
     const lastHistoryItem = fetchedHistory[0].length > 0
       ? fetchedHistory[0][fetchedHistory[0].length - 1]
       : (stateHistory.length > 0 ? stateHistory[stateHistory.length - 1] : null);
+
     // current value of state/attribute
     const currentValue = entityConfig.attribute
       ? this.getObjectAttr(stateObj.attributes, entityConfig.attribute)
       : stateObj.state;
+
+    // process state_map
+    const stateMapConfig = entityConfig.state_map || this.config.state_map;
+    const hasStateMap = stateMapConfig.map.length > 0;
+    const isStateMapStrictMode = hasStateMap && stateMapConfig.keep_values !== true;
+    if (isCacheConverted && isStateMapStrictMode) {
+      const mock = { state: currentValue };
+      this._convertState(mock, stateMapConfig);
+      // get a converted currentValue (index)
+      currentValue = mock.state;
+    }
+
     // last value of state/attribute from history
     const lastHistoryValue = lastHistoryItem
       ? entityConfig.attribute && lastHistoryItem.attributes
         ? this.getObjectAttr(lastHistoryItem.attributes, entityConfig.attribute)
         : lastHistoryItem.state
       : null;
+
     // if the latest record from the history does not correspond to the current state/attribute
     // - add the current state/attribute to the history
     // (may happen since data in recorder may be not ready yet)
@@ -2382,15 +2496,21 @@ class MiniGraphCard extends LitElement {
 
     if (fetchedHistory[0] && fetchedHistory[0].length > 0) {
       /**
-      * hack because HA doesn't return anything if skipInitialState is false
-      * when retrieving for attributes so we retrieve it and we remove it.*
-      */
+       * Seems that some old HA versions could not handle properly
+       * a combination of "retrieve a history for attributes" & "skipInitialState=true".
+       * As a workaround, it was implemented a hack: pass "skipInitialState=false" when
+       * requesting a history for attributes, and then delete the 1st point ("initial state")
+       * if skipInitialState=true.
+       * In newer versions of HA (at least in 2026.8), the workaround is not required,
+       * the mentioned combination is handled properly.
+       * Yet the workaround stays for a compatibility with old HA versions.
+       */
       if (entityConfig.attribute && skipInitialState) {
         fetchedHistory[0].shift();
       }
 
       // check if we should convert states to numeric values
-      if (this.config.state_map.length > 0 || entityConfig.attribute) {
+      if (hasStateMap || entityConfig.attribute) {
         fetchedHistory[0].forEach((item) => {
           if (entityConfig.attribute) {
             // eslint-disable-next-line no-param-reassign
@@ -2398,26 +2518,35 @@ class MiniGraphCard extends LitElement {
             // eslint-disable-next-line no-param-reassign
             delete item.attributes;
           }
-          if (this.config.state_map.length > 0)
-            this._convertState(item);
+          if (hasStateMap) {
+            this._convertState(item, stateMapConfig);
+          }
         });
       }
 
-      fetchedHistory = fetchedHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
-      fetchedHistory = fetchedHistory.map(item => ({
+      const processedPoints = fetchedHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
+      const formattedPoints = processedPoints.map(item => ({
         last_changed: entityConfig.attribute ? item.last_updated : item.last_changed,
         state: item.state,
       }));
-      stateHistory = [...stateHistory, ...fetchedHistory];
+      stateHistory = [...stateHistory, ...formattedPoints];
 
       if (this.config.cache) {
+        const data = {
+          hours_to_show: this.config.hours_to_show,
+          last_fetched: new Date(),
+          data: stateHistory,
+          version,
+        };
+        if (isStateMapStrictMode) {
+          data.state_map_converted = true;
+        }
         this
-          .setCache(`${stateObj.entity_id}_${index}`, {
-            hours_to_show: this.config.hours_to_show,
-            last_fetched: new Date(),
-            data: stateHistory,
-            version,
-          }, this.config.compress)
+          .setCache(
+            `${stateObj.entity_id}_${index}`,
+            data,
+            this.config.compress,
+          )
           .catch((error) => {
             log(error);
             localForage.clear();
@@ -2425,7 +2554,7 @@ class MiniGraphCard extends LitElement {
       }
     }
 
-    if (stateHistory.length === 0) return;
+    if (stateHistory.length === 0) return; // no history - nothing to pass to Graph
 
     if (this.entity[0] && stateObj.entity_id === this.entity[0].entity_id) {
       this.updateExtrema(stateHistory);
@@ -2468,13 +2597,27 @@ class MiniGraphCard extends LitElement {
     ];
   }
 
-  _convertState(res) {
-    const resultIndex = this.config.state_map.findIndex(s => s.value === res.state);
-    if (resultIndex === -1) {
+  /**
+  * Convert a raw historic value using a state_map option
+  * @param {object} res Record from a history
+  * @param {object} stateMapConfig state_map config object
+  * @returns {void}
+  */
+  _convertState(res, stateMapConfig) {
+    const stateMapArray = stateMapConfig.map;
+    const keepValues = stateMapConfig.keep_values;
+    if (stateMapArray.length === 0 || keepValues === true) {
+      // the "stateMapArray.length === 0" check is only needed for tests
+      // comment when not debugging
       return;
     }
-
-    res.state = resultIndex;
+    const stringState = String(res.state);
+    const resultIndex = stateMapArray.findIndex(s => s.value === stringState);
+    if (resultIndex !== -1) {
+      res.state = resultIndex;
+    } else {
+      res.state = NaN;
+    }
   }
 
   /**
