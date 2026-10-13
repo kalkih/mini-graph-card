@@ -533,6 +533,32 @@ Similarly for overlapping bars graphs (when `bar_spacing: -1`): by default (or w
 
 With `graph_order: reversed`, bars for the 1st entity/static value become topmost.
 
+### Input data validation
+
+## Configuration validation
+
+Before the 1st rendering, the card performs a validation of some settings provided in the YAML configuration.
+If a misconfigured option is detected, the card reacts dynamically based on the severity of the error.
+
+### Error severity levels
+
+1. **Critical errors:**
+Occurs when the basic configuration is broken (e.g., passing a plain string instead of an array to `entities`). In this case, the card completely blocks its rendering process.
+2. **Non-critical warnings:**
+If a parameter contains an incorrect data type or an invalid value (e.g., a negative `decimals`), the card outputs a detailed warning to the browser console, assigns that specific option to its safe default value, and then continues to render the card.
+
+### Configuration rules
+
+The list below is not comprehensive:
+
+* **Numeric values**: all numeric options (like `baseline`) are validated against numeric types (`number`).
+* **Integers:** all integer numeric options (like `decimals`) are additionally validated to ensure they are integers rather than floating-point values.
+* **Quoted numbers:** The card allows numeric values wrapped in quotes (e.g., `hours_to_show: "24"`). The internal parser will safely convert them to numbers, but it will emit a warning in the browser console prompting you to fix the type in your YAML file.
+* **Complex config objects:** Complex objects (like `color_thresholds` or `state_map`) undergo a deeper structural audit: the card verifies not only the overall container structure but also the presence, validity, and precise data types of all important inner options .
+
+> **Troubleshooting Tip:** If your card appears blank or behaves unexpectedly, press `F12` (or `Ctrl+Shift+I`) to open your browser's Developer Tools, navigate to the **Console** tab and check the logged outputs for warnings emitted by `mini-graph-card`.
+
+
 ### Supported color formats
 Color can be defined as:
 - `red` (available web colors)
