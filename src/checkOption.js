@@ -375,8 +375,9 @@ const checkStateMap = (config, configName) => {
         }
         if (!hasValue && hasMinMax && keepValues) {
           if (!isNumeric(min, true) || !isNumeric(max, true)) {
-            log(`Invalid option "${configName}.state_map.map[${index}]": `
-              + `"min" and "max" must be numeric values; removing the entry`);
+            const error = `Invalid option "${configName}.state_map.map[${index}]": `
+              + `"min" and "max" must be numeric values; removing the entry`;
+            log(error);
             return null;
           }
           logStringWarning(min, `${configName}.map[${index}].min`);
@@ -475,7 +476,7 @@ const checkStateMap = (config, configName) => {
     // Sort, "low" by ascendance
     intervals.sort((a, b) => a.low - b.low);
 
-    for (let i = 0; i < intervals.length - 1; i++) {
+    for (let i = 0; i < intervals.length - 1; i += 1) {
       const current = intervals[i];
       const next = intervals[i + 1];
       const hasOverlap = (current.isClosed || next.isClosed)
