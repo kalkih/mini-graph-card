@@ -596,7 +596,7 @@ Similarly for overlapping bars graphs (when `bar_spacing: -1`): by default (or w
 
 With `graph_order: reversed`, bars for the 1st entity/static value become topmost.
 
-### Configuration validation
+#### Configuration validation
 
 Before the 1st rendering, the card performs a validation of some settings provided in the YAML configuration.
 If a misconfigured option is detected, the card reacts dynamically based on the severity of the error.
@@ -608,7 +608,7 @@ Occurs when the basic configuration is broken (e.g., passing a plain string inst
 2. **Non-critical warnings:**
 If a parameter contains an incorrect data type or an invalid value (e.g., a negative `decimals`), the card outputs a detailed warning to the browser console, assigns that specific option to its safe default value, and then continues to render the card.
 
-### Validation rules
+#### Validation rules
 
 The list below is not comprehensive:
 
