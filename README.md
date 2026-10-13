@@ -596,12 +596,12 @@ Similarly for overlapping bars graphs (when `bar_spacing: -1`): by default (or w
 
 With `graph_order: reversed`, bars for the 1st entity/static value become topmost.
 
-#### Configuration validation
+### Configuration validation
 
 Before the 1st rendering, the card performs a validation of some settings provided in the YAML configuration.
 If a misconfigured option is detected, the card reacts dynamically based on the severity of the error.
 
-### Error severity levels
+#### Error severity levels
 
 1. **Critical errors:**
 Occurs when the basic configuration is broken (e.g., passing a plain string instead of an array to `entities`). In this case, the card completely blocks its rendering process.
