@@ -213,7 +213,7 @@ export default (config) => {
       { minBound: 0, allowString: true, logOptionName: 'primary.decimals' },
     );
 
-    checkYaxisLabels(conf.y_axis.primary);
+    checkYaxisLabels(conf.y_axis.primary, 'primary');
   }
   if (conf.y_axis && conf.y_axis.secondary) {
     const secondaryBounds = checkBounds(conf.y_axis.secondary, 'secondary');
@@ -236,7 +236,7 @@ export default (config) => {
       { minBound: 0, allowString: true, logOptionName: 'secondary.decimals' },
     );
 
-    checkYaxisLabels(conf.y_axis.secondary);
+    checkYaxisLabels(conf.y_axis.secondary, 'secondary');
   }
   if (conf.y_axis) {
     conf.y_axis.zero_position = checkNumericOption(

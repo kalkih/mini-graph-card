@@ -8,20 +8,10 @@
 import { expect, describe, it } from 'vitest';
 import { checkGroupBy } from '../src/checkOption';
 
-interface ConfigType {
-  group_by?: string | undefined | null;
-  hours_to_show: number;
-};
-
 const VARIANTS: any[] = [
   {
     description: 'undefined group_by',
     config: { hours_to_show: 1 },
-    expected: 'interval',
-  },
-  {
-    description: 'string "undefined" group_by',
-    config: { hours_to_show: 1, group_by: 'undefined' },
     expected: 'interval',
   },
   {

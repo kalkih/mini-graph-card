@@ -111,7 +111,7 @@ const checkNumericOption = (
  * @param {number} [params.maxBound] Optional maximum allowed value
  * @param {boolean} [params.allowString=false] Optional flag
  * to allow string representations of numbers
- * @param {string} [params.] Optional custom option name for detailed log output
+ * @param {string} [params.logOptionName] Optional custom option name for detailed log output
  * @returns {number|undefined} Cleared value, or undefined
  */
 const checkIntegerOption = (
@@ -199,8 +199,10 @@ const checkBounds = (config, yAxis) => {
   }
 
   return {
+    // lowerBound & upperBound are only used to update the config
     lowerBound: lowerBoundParsed && formatBound(lowerBoundParsed),
     upperBound: upperBoundParsed && formatBound(upperBoundParsed),
+    // parsed objects are used to calcalate bounds
     lowerBoundParsed,
     upperBoundParsed,
   };
@@ -210,19 +212,24 @@ const checkBounds = (config, yAxis) => {
 /**
  * Check Y-axis labels option for a valid content.
  * @param {object} axisConfig Config object for Y-axis
+ * @param {string} yAxis Y-axis type (primary/secondary)
  * @returns {void}
  */
-const checkYaxisLabels = (axisConfig) => {
+const checkYaxisLabels = (axisConfig, yAxis) => {
   if (axisConfig) {
     const rawLabels = axisConfig.labels;
     if (Array.isArray(rawLabels)) {
+      const oldLabels = [...axisConfig.labels];
       axisConfig.labels = rawLabels.filter(
         l => ['max', 'min', 'zero', 'all'].includes(l),
       );
-    } else {
+      if (axisConfig.labels.length !== oldLabels.length) {
+        log(`Option "y_axis.${yAxis}.labels": [${oldLabels}] reduced to [${axisConfig.labels}]`);
+      }
+    } else if (rawLabels !== undefined) {
       const invalidValue = getStringifiedValue(rawLabels);
-      log(`Invalid option "labels": [${invalidValue}]; adjusting to "['max', 'min']"`);
-      axisConfig.labels = ['max', 'min'];
+      log(`Invalid option "y_axis.${yAxis}.labels": [${invalidValue}]; unsetting to undefined`);
+      axisConfig.labels = undefined;
     }
   }
 };
@@ -240,6 +247,8 @@ const checkColorThresholds = (config, configName) => {
 
   if (thresholds === undefined || thresholds === null) {
     // color_thresholds not defined
+    // normal situation for per-entity color_thresholds
+    // global color_thresholds are at least []
     return;
   }
 
@@ -256,7 +265,10 @@ const checkColorThresholds = (config, configName) => {
         return { color: threshold };
       }
 
-      if (threshold && typeof threshold === 'object') {
+      if (threshold
+        && typeof threshold === 'object'
+        && !Array.isArray(threshold)
+      ) {
         let { color, value } = threshold;
 
         if (color === undefined || typeof color !== 'string') {
@@ -277,14 +289,18 @@ const checkColorThresholds = (config, configName) => {
           log(`Invalid option "${configName}.color_thresholds[${index}]": "value" is null, unsetting to undefined`);
           value = undefined;
         }
-
-        return { color, value };
+        const result = { color };
+        if (value !== undefined) {
+          result.value = value;
+        }
+        return result;
       }
 
       // other invalid content
-      log(`Invalid option "${configName}.color_thresholds[${index}]": expected an object or a color string; replacing with a default entry`);
-      return { color: 'var(--primary-text-color)' };
-    });
+      log(`Invalid option "${configName}.color_thresholds[${index}]": expected an object or a color string`);
+      return null;
+    })
+    .filter(threshold => threshold !== null);
 };
 /* eslint-enable no-param-reassign */
 
@@ -498,7 +514,7 @@ const checkLineStyle = (config) => {
 const checkGroupBy = (config) => {
   const { group_by: groupBy, hours_to_show: hoursToShow } = config;
 
-  if (groupBy === null || groupBy === 'undefined') {
+  if (groupBy === null) {
     log(`group_by is ${groupBy}, unsetting group_by to "interval"`);
     return 'interval';
   }
@@ -547,7 +563,7 @@ const checkGroupBy = (config) => {
  * @returns {number} Possibly adjusted value of points_per_hour
  */
 const checkPointsPerHour = (config) => {
-  const prevPointsPerHour = config.points_per_hour;
+  const prevPointsPerHour = config.points_per_hour; // cannot be undefined
   let newPointsPerHour = prevPointsPerHour;
   let pointsPerHourAdjusted = false;
 
@@ -576,7 +592,7 @@ const checkPointsPerHour = (config) => {
       break;
   }
   if (pointsPerHourAdjusted
-    && Math.abs(newPointsPerHour - prevPointsPerHour) > Number.EPSILON) {
+    && Math.abs(newPointsPerHour - prevPointsPerHour) > 1e-7) {
     log(`group_by "${config.group_by}": points_per_hour ${prevPointsPerHour}; adjusting value to ${newPointsPerHour}`);
   }
 

@@ -1,0 +1,243 @@
+/**
+ * Tests for migrateYaxisConfig().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+// @vitest-environment jsdom
+import { expect, describe, it, beforeEach } from 'vitest';
+import { migrateYaxisConfig } from '../src/migrate';
+import { OTHER_OPTIONS } from './otherOptions';
+
+const OPTIONS_PRIMARY = {
+  old: {
+    upper_bound: 345,
+    min_bound_range: 10,
+    decimals_primary_labels: 2,
+    value_factor: 1,
+  },
+  new: {
+    upper_bound: 345,
+    min_bound_range: 10,
+    decimals: 2,
+    value_factor: 1,
+  },
+};
+
+const OPTIONS_SECONDARY = {
+  old: {
+    lower_bound_secondary: '~123',
+    min_bound_range_secondary: 20,
+    decimals_secondary_labels: 1,
+    value_factor_secondary: {type: 'scale', factor: 2},
+  },
+  new: {
+    lower_bound: '~123',
+    min_bound_range: 20,
+    decimals: 1,
+    value_factor: {type: 'scale', factor: 2},
+  },
+};
+
+const VARIANTS: any[] = [
+  {
+    descr: 'other options are untouched',
+    conf: {lower_bound_secondary: '~123', ...OTHER_OPTIONS},
+    expected: {y_axis: {secondary: {lower_bound: '~123'}}, ...OTHER_OPTIONS},
+  },
+  {
+    descr: 'other options are untouched, no y-axis related options',
+    conf: {...OTHER_OPTIONS},
+    expected: {...OTHER_OPTIONS},
+  },
+  ////////////////////////////
+  {
+    descr: 'options for primary Y-axis',
+    conf: {...OPTIONS_PRIMARY.old},
+    expected: {
+      y_axis: {
+        primary: {...OPTIONS_PRIMARY.new},
+      },
+    },
+  },
+  {
+    descr: 'options for secondary Y-axis',
+    conf: {...OPTIONS_SECONDARY.old},
+    expected: {
+      y_axis: {
+        secondary: {...OPTIONS_SECONDARY.new},
+      },
+    },
+  },
+  {
+    descr: 'options for both Y-axes',
+    conf: {
+      ...OPTIONS_PRIMARY.old,
+      ...OPTIONS_SECONDARY.old,
+    },
+    expected: {
+      y_axis: {
+        primary: {...OPTIONS_PRIMARY.new},
+        secondary: {...OPTIONS_SECONDARY.new},
+      },
+    },
+  },
+  ////////////////////////////
+  {
+    descr: 'options are already migrated for primary Y-axis',
+    conf: {
+      y_axis: {
+        primary: {...OPTIONS_PRIMARY.new},
+      },
+    },
+    expected: {
+      y_axis: {
+        primary: {...OPTIONS_PRIMARY.new},
+      },
+    },
+  },
+  {
+    descr: 'options are already migrated for secondary Y-axis',
+    conf: {
+      y_axis: {
+        secondary: {...OPTIONS_SECONDARY.new},
+      },
+    },
+    expected: {
+      y_axis: {
+        secondary: {...OPTIONS_SECONDARY.new},
+      },
+    },
+  },
+  {
+    descr: 'options are already migrated for both Y-axes',
+    conf: {
+      y_axis: {
+        primary: {...OPTIONS_PRIMARY.new},
+        secondary: {...OPTIONS_SECONDARY.new},
+      },
+    },
+    expected: {
+      y_axis: {
+        primary: {...OPTIONS_PRIMARY.new},
+        secondary: {...OPTIONS_SECONDARY.new},
+      },
+    },
+  },
+  ////////////////////////////
+  {
+    descr: 'mixed options for primary Y-axis',
+    conf: {
+      ...OPTIONS_PRIMARY.old,
+      y_axis: {
+        primary: {...OPTIONS_PRIMARY.new},
+      },
+    },
+    expected: {
+      y_axis: {
+        primary: {...OPTIONS_PRIMARY.new},
+      },
+    },
+  },
+  {
+    descr: 'one old option for primary Y-axis',
+    conf: {
+      lower_bound: '~456',
+      y_axis: {
+        primary: {...OPTIONS_PRIMARY.new},
+      },
+    },
+    expected: {
+      y_axis: {
+        primary: {
+          lower_bound: '~456',
+          ...OPTIONS_PRIMARY.new,
+        },
+      },
+    },
+  },
+  {
+    descr: 'one old option for secondary Y-axis',
+    conf: {
+      upper_bound_secondary: 1000,
+      y_axis: {
+        secondary: {...OPTIONS_SECONDARY.new},
+      },
+    },
+    expected: {
+      y_axis: {
+        secondary: {
+          upper_bound: 1000,
+          ...OPTIONS_SECONDARY.new
+        },
+      },
+    },
+  },
+  {
+    descr: 'mixed options for secondary Y-axis',
+    conf: {
+      ...OPTIONS_SECONDARY.old,
+      y_axis: {
+        secondary: {...OPTIONS_SECONDARY.new},
+      },
+    },
+    expected: {
+      y_axis: {
+        secondary: {...OPTIONS_SECONDARY.new},
+      },
+    },
+  },
+  {
+    descr: 'mixed options for both Y-axes',
+    conf: {
+      ...OPTIONS_PRIMARY.old,
+      ...OPTIONS_SECONDARY.old,
+      y_axis: {
+        primary: {...OPTIONS_PRIMARY.new},
+        secondary: {...OPTIONS_SECONDARY.new},
+      },
+    },
+    expected: {
+      y_axis: {
+        primary: {...OPTIONS_PRIMARY.new},
+        secondary: {...OPTIONS_SECONDARY.new},
+      },
+    },
+  },
+  ////////////////////////////
+  {
+    descr: 'options for primary Y-axis, null option for secondary Y-axis',
+    conf: {
+      ...OPTIONS_PRIMARY.old,
+      upper_bound_secondary: null,
+    },
+    expected: {
+      y_axis: {
+        primary: {...OPTIONS_PRIMARY.new},
+      },
+    },
+  },
+  {
+    descr: 'options for secondary Y-axis, null option for primary Y-axis',
+    conf: {
+      ...OPTIONS_SECONDARY.old,
+      lower_bound: null,
+    },
+    expected: {
+      y_axis: {
+        secondary: {...OPTIONS_SECONDARY.new},
+      },
+    },
+  },
+];
+
+describe("migrateYaxisConfig()", () => {
+  VARIANTS.forEach((variant) => {
+    it(variant.descr, () => {
+      const config = {...variant.conf};
+      const res = migrateYaxisConfig(config);
+      expect(res).toEqual(variant.expected);
+    });
+  });
+});
