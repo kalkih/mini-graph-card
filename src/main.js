@@ -1,6 +1,5 @@
 import { LitElement, html, svg } from 'lit-element';
 import localForage from 'localforage/src/localforage';
-import { stateIcon } from 'custom-card-helpers';
 import SparkMD5 from 'spark-md5';
 import { interpolateRGB } from './color';
 import Graph from './graph';
@@ -564,6 +563,11 @@ class MiniGraphCard extends LitElement {
 
     const { icon_color } = this.config;
     const iconColor = icon_color || (icon_adaptive_color ? this.color : undefined);
+    const stateObj = this.entity[0];
+    // an entity icon is resolved by HA (incl. icon translations, e.g. for device classes)
+    const iconElement = stateObj && !this.config.icon
+      ? html`<ha-state-icon .hass=${this._hass} .stateObj=${stateObj}></ha-state-icon>`
+      : html`<ha-icon .icon=${this.computeIcon()}></ha-icon>`;
 
     return html`
       <div
@@ -571,7 +575,7 @@ class MiniGraphCard extends LitElement {
         loc=${iconLoc}
         style=${iconColor !== undefined ? `color: ${iconColor};` : ''}
       >
-        <ha-icon .icon=${this.computeIcon(this.entity[0])}></ha-icon>
+        ${iconElement}
       </div>
     `;
   }
@@ -1676,19 +1680,13 @@ class MiniGraphCard extends LitElement {
   }
 
   /**
-  * Returns an icon for an entity
-  * accounting an `icon` option, entity's native `icon` attribute,
-  * fallback to a standard MDI "temperature" icon
+  * Returns an icon accounting an `icon` option,
+  * fallback to a standard MDI "temperature" icon;
+  * used if an icon is not resolved by "ha-state-icon" (static value or `icon` option)
   * @returns {string} mdi:icon
-  * @param {object} stateObj stateObj for an entity
   */
-  computeIcon(stateObj) {
-    return (
-      this.config.icon
-      || stateObj && stateObj.attributes.icon
-      || typeof stateIcon === 'function' && stateObj && stateIcon(stateObj)
-      || ICONS.temperature
-    );
+  computeIcon() {
+    return this.config.icon || ICONS.temperature;
   }
 
   /**
