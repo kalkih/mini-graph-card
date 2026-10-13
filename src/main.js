@@ -1785,7 +1785,8 @@ export default class MiniGraphCard extends LitElement {
 
   /**
   * Returns a mapped string/number value for a state/attribute or a static_value
-  * @returns {{hideUnit: (boolean|undefined), result: (string|undefined)}} Object containing mapping results
+  * @returns {{hideUnit: (boolean|undefined), result: (string|undefined)}
+  * } Object containing mapping results
   * @param {object} stateMapConfig state_map napping array
   * @param {number|string} inState Value of a state/attribute ("unformatted") or a static_value
   */
@@ -1859,21 +1860,23 @@ export default class MiniGraphCard extends LitElement {
   * @param {number} index Index of an entry in config.entities
   */
   computeState(inState, index) {
+    let state = inState;
+
     // unset just in case
     if (index >= 0) {
       this._mappedHideUnit[index] = undefined;
     }
 
-    if (typeof inState === 'object' && inState !== null) {
+    if (typeof state === 'object' && state !== null) {
       // safely bypass complex data
-      inState = undefined;
+      state = undefined;
     }
 
     const entityConfig = index >= 0
       ? this.config.entities[index]
       : null;
     const stateMapConfig = (entityConfig && entityConfig.state_map) || this.config.state_map;
-    const { result, hideUnit } = this._mapState(stateMapConfig, inState);
+    const { result, hideUnit } = this._mapState(stateMapConfig, state);
     if (hideUnit !== undefined && index >= 0) {
       this._mappedHideUnit[index] = hideUnit;
     }
@@ -1882,20 +1885,18 @@ export default class MiniGraphCard extends LitElement {
     }
 
     // cases like "complex data", "data not ready"
-    if (inState === undefined || inState === null || inState === '') {
+    if (state === undefined || state === null || state === '') {
       return formatNumber(NaN, this._hass.locale);
     }
 
-    let state;
-    if (isUnavailableState(inState)) {
+    if (isUnavailableState(state)) {
       // as is
-      state = inState;
-    } else if (typeof inState === 'string') {
+    } else if (typeof state === 'string') {
       // attempt to fix an unexpected number format
-      state = parseFloat(inState.replace(/,/g, '.'));
+      state = parseFloat(state.replace(/,/g, '.'));
     } else {
       // as is presented as a number
-      state = Number(inState);
+      state = Number(state);
     }
 
     // handle possible NaN values from a history & after failed mapping
