@@ -126,6 +126,42 @@ const VARIANTS_NEW: any[] = [
   },
   ////////////////////////////
   {
+    descr: 'map is an empty array, global hide_unit is undefined',
+    conf: {state_map: {map: [], hide_unit: undefined}},
+    expected: {state_map: {map: []}},
+  },
+  {
+    descr: 'map is an empty array, global hide_unit is null',
+    conf: {state_map: {map: [], hide_unit: null}},
+    expected: {state_map: {map: [], hide_unit: null}},
+  },
+  {
+    descr: 'map is an empty array, global hide_unit=false',
+    conf: {state_map: {map: [], hide_unit: false}},
+    expected: {state_map: {map: [], hide_unit: false}},
+  },
+  {
+    descr: 'map is an empty array, global hide_unit=true',
+    conf: {state_map: {map: [], hide_unit: true}},
+    expected: {state_map: {map: [], hide_unit: true}},
+  },
+  {
+    descr: 'map is an empty array, global label is defined',
+    conf: {state_map: {map: [], label: 'xxx'}},
+    expected: {state_map: {map: [], label: 'xxx'}},
+  },
+  {
+    descr: 'map is an empty array, global label is undefined',
+    conf: {state_map: {map: [], label: undefined}},
+    expected: {state_map: {map: []}},
+  },
+  {
+    descr: 'map is an empty array, global label is null',
+    conf: {state_map: {map: [], label: null}},
+    expected: {state_map: {map: [], label: null}},
+  },
+  ////////////////////////////
+  {
     descr: 'map is null',
     conf: {state_map: {map: null}},
     expected: {state_map: {map: []}},
