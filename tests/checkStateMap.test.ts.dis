@@ -8,23 +8,7 @@
 import { expect, describe, it, afterEach, beforeEach, vi } from 'vitest';
 import { checkStateMap } from '../src/checkOption';
 import { migrateStateMapConfig } from '../src/migrate';
-
-interface StateMapEntryType {
-  value?: string|number;
-  label?: string;
-  max?: string|number;
-  min?: string|number;
-  tolerance?: string|number;
-};
-
-interface StateMapType {
-  map?: StateMapEntryType[];
-  keep_values?: boolean;
-};
-
-interface ConfigType {
-  state_map?: StateMapType | StateMapEntryType[];
-};
+import type { StateMapType, ConfigWithStateMapType } from './stateMapTypes';
 
 const DIFF_VALUES: any[] = [
   "abc",
@@ -77,7 +61,7 @@ const VARIANTS: any[] = [
   {
     descr: 'value is missing',
     map: ['abc', {label: 'xyz'}, {}, 'def'],
-    expected: {map: mapOK},
+    expected: {map: [{value: 'abc'}, {value: 'def'}]},
   },
   {
     descr: 'value is not a string or a number',
@@ -99,23 +83,23 @@ const VARIANTS: any[] = [
   {
     descr: 'label is not a string or a number (array)',
     map: [...mapOK, {value: 'xyz', label: []}],
-    expected: {map: [...mapOK, {value: 'xyz', label: 'xyz'}]},
+    expected: {map: [...mapOK, {value: 'xyz'}]},
   },
   {
     descr: 'label is not a string or a number (dict)',
     map: [...mapOK, {value: 'xyz', label: {}}],
-    expected: {map: [...mapOK, {value: 'xyz', label: 'xyz'}]},
+    expected: {map: [...mapOK, {value: 'xyz'}]},
   },
   ///////////////////////////////////////////////////////////////////
   {
     descr: 'label is undefined',
-    map: [...mapOK, {value: 'xyz', label: undefined}],
-    expected: {map: [...mapOK, {value: 'xyz', label: 'xyz'}]},
+    map: [...mapOK, {value: 'xyz'}],
+    expected: {map: [...mapOK, {value: 'xyz'}]},
   },
   {
     descr: 'label is null',
     map: [...mapOK, {value: 'xyz', label: null}],
-    expected: {map: [...mapOK, {value: 'xyz', label: 'xyz'}]},
+    expected: {map: [...mapOK, {value: 'xyz'}]},
   },
 ];
 
@@ -123,180 +107,180 @@ const VARIANTS_ONLY_NEW: any[] = [
   {
     descr: 'keep_values = undefined',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}]},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}]},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}]},
   },
   {
     descr: 'keep_values = false',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}], keep_values: false},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}], keep_values: false},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}], keep_values: false},
   },
   {
     descr: 'keep_values = something',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}], keep_values: 123},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}], keep_values: true},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}], keep_values: true},
   },
   {
     descr: 'keep_values = true',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}], keep_values: true},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}], keep_values: true},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}], keep_values: true},
   },
   /////////////////////////////////////////////////////////////////
   {
     descr: 'min is a string & not a number (value is defined)',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', min: 'www', max: 1000}, {value: 'xyz'}]},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}]},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}]},
   },
   {
     descr: 'min is a string & not a number (keep_values=false) (value is defined)',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', min: 'www', max: 1000}, {value: 'xyz'}], keep_values: false},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}], keep_values: false},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}], keep_values: false},
   },
   {
     descr: 'min is a string & not a number (keep_values=true) (value is defined)',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', min: 'www', max: 1000}, {value: 'xyz'}], keep_values: true},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}], keep_values: true},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}], keep_values: true},
   },
   {
     descr: 'min & max are OK (keep_values=true) (value is defined)',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', min: 10, max: 1000}, {value: 'xyz'}], keep_values: true},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}], keep_values: true},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}], keep_values: true},
   },
   /////////////////////////////////////////////////////////////////
   {
     descr: 'min is a string & not a number (value is undefined)',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {label: 'def', min: 'www', max: 1000}, {value: 'xyz'}]},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'xyz', label: 'xyz'}]},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'xyz'}]},
   },
   {
     descr: 'min is a string & not a number (keep_values=false) (value is undefined)',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {label: 'def', min: 'www', max: 1000}, {value: 'xyz'}], keep_values: false},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'xyz', label: 'xyz'}], keep_values: false},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'xyz'}], keep_values: false},
   },
   {
     descr: 'min is a string & not a number (keep_values=true) (value is undefined)',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {label: 'def', min: 'www', max: 1000}, {value: 'xyz'}], keep_values: true},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'xyz', label: 'xyz'}], keep_values: true},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'xyz'}], keep_values: true},
   },
   {
     descr: 'min & max are OK (keep_values=true) (value is undefined)',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {label: 'def', min: 10, max: 1000}, {value: 'xyz'}], keep_values: true},
-    expected: {map: [{value: 'abc', label: 'abc'}, {label: 'def', min: 10, max: 1000}, {value: 'xyz', label: 'xyz'}], keep_values: true},
+    expected: {map: [{value: 'abc', label: 'abc'}, {label: 'def', min: 10, max: 1000}, {value: 'xyz'}], keep_values: true},
   },
   {
     descr: 'min & max are OK (keep_values=true) (value is undefined, label is undefined)',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {min: 10, max: 1000}, {value: 'xyz'}], keep_values: true},
-    expected: {map: [{value: 'abc', label: 'abc'}, {label: '10..1000', min: 10, max: 1000}, {value: 'xyz', label: 'xyz'}], keep_values: true},
+    expected: {map: [{value: 'abc', label: 'abc'}, {min: 10, max: 1000}, {value: 'xyz'}], keep_values: true},
   },
   {
     descr: 'min >= max (keep_values=true)',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {min: 1000, max: 1000}, {value: 'xyz'}], keep_values: true},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'xyz', label: 'xyz'}], keep_values: true},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'xyz'}], keep_values: true},
   },
   /////////////////////////////////////////////////////////////////
   {
     descr: 'tolerance is a string & not a number',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: 'www'}, {value: 'xyz'}]},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}]},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}]},
   },
   {
     descr: 'tolerance is a string & not a number (keep_values=false)',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: 'www'}, {value: 'xyz'}], keep_values: false},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}], keep_values: false},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}], keep_values: false},
   },
   {
     descr: 'tolerance is a string & not a number (keep_values=true)',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: 'www'}, {value: 'xyz'}], keep_values: true},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}], keep_values: true},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}], keep_values: true},
   },
   {
     descr: 'tolerance is a string & <0',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: '-1'}, {value: 'xyz'}]},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}]},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}]},
   },
   {
     descr: 'tolerance is a string & <0 (keep_values=false)',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: '-1'}, {value: 'xyz'}], keep_values: false},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}], keep_values: false},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}], keep_values: false},
   },
   {
     descr: 'tolerance is a string & <0 (keep_values=true)',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: '-1'}, {value: 'xyz'}], keep_values: true},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}], keep_values: true},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}], keep_values: true},
   },
   {
     descr: 'tolerance is a number & <0',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: -1}, {value: 'xyz'}]},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}]},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}]},
   },
   {
     descr: 'tolerance is a number & <0 (keep_values=false)',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: -1}, {value: 'xyz'}], keep_values: false},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}], keep_values: false},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}], keep_values: false},
   },
   {
     descr: 'tolerance is a number & <0 (keep_values=true)',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: -1}, {value: 'xyz'}], keep_values: true},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}], keep_values: true},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}], keep_values: true},
   },
   {
     descr: 'tolerance is a string & =0',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: '0'}, {value: 'xyz'}]},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}]},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}]},
   },
   {
     descr: 'tolerance is a string & =0 (keep_values=false)',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: '0'}, {value: 'xyz'}], keep_values: false},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}], keep_values: false},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}], keep_values: false},
   },
   {
     descr: 'tolerance is a string & =0 (keep_values=true)',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: '0'}, {value: 'xyz'}], keep_values: true},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: 0}, {value: 'xyz', label: 'xyz'}], keep_values: true},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: 0}, {value: 'xyz'}], keep_values: true},
   },
   {
     descr: 'tolerance is a number & =0',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: 0}, {value: 'xyz'}]},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}]},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}]},
   },
   {
     descr: 'tolerance is a number & =0 (keep_values=false)',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: 0}, {value: 'xyz'}], keep_values: false},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}], keep_values: false},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}], keep_values: false},
   },
   {
     descr: 'tolerance is a number & =0 (keep_values=true)',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: 0}, {value: 'xyz'}], keep_values: true},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: 0}, {value: 'xyz', label: 'xyz'}], keep_values: true},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: 0}, {value: 'xyz'}], keep_values: true},
   },
   {
     descr: 'tolerance is a string & >0',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: '1'}, {value: 'xyz'}]},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}]},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}]},
   },
   {
     descr: 'tolerance is a string & >0 (keep_values=false)',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: '1'}, {value: 'xyz'}], keep_values: false},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}], keep_values: false},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}], keep_values: false},
   },
   {
     descr: 'tolerance is a string & >0 (keep_values=true)',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: '1'}, {value: 'xyz'}], keep_values: true},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: 1}, {value: 'xyz', label: 'xyz'}], keep_values: true},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: 1}, {value: 'xyz'}], keep_values: true},
   },
   {
     descr: 'tolerance is a number & >0',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: 1}, {value: 'xyz'}]},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}]},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}]},
   },
   {
     descr: 'tolerance is a number & >0 (keep_values=false)',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: 1}, {value: 'xyz'}], keep_values: false},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz', label: 'xyz'}], keep_values: false},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def'}, {value: 'xyz'}], keep_values: false},
   },
   {
     descr: 'tolerance is a number & >0 (keep_values=true)',
     stateMap: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: 1}, {value: 'xyz'}], keep_values: true},
-    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: 1}, {value: 'xyz', label: 'xyz'}], keep_values: true},
+    expected: {map: [{value: 'abc', label: 'abc'}, {value: 'def', label: 'def', tolerance: 1}, {value: 'xyz'}], keep_values: true},
   },
 ];
 
@@ -304,8 +288,8 @@ const VARIANTS_ONLY_NEW: any[] = [
 VARIANTS.forEach((variant) => {
   describe(variant.descr, () => {
     let map = variant.map;
-    let config: ConfigType;
-    let config_new: ConfigType;
+    let config: ConfigWithStateMapType;
+    let config_new: ConfigWithStateMapType;
     let expected = variant.expected;
 
     beforeEach(() => {
@@ -319,7 +303,7 @@ VARIANTS.forEach((variant) => {
           ? config
           : config_new;
         if (index !== 1) {
-          cfg = migrateStateMapConfig(cfg) as ConfigType;
+          cfg = migrateStateMapConfig(cfg) as ConfigWithStateMapType;
         }
         checkStateMap(cfg, 'config');
         expect(cfg.state_map).toEqual(expected);
@@ -333,19 +317,19 @@ DIFF_VALUES.forEach((value) => {
     {
       descr: `shorthand "value-only" [${value}] element`,
       map: [value],
-      expected: {map: [{ value: String(value), label: String(value) }]},
+      expected: {map: [{ value: String(value) }]},
     },
     {
       descr: `"value-only" [${value}] dict element`,
       map: [{ value }],
-      expected: {map: [{ value: String(value), label: String(value) }]},
+      expected: {map: [{ value: String(value) }]},
     },
   ];
   VALUES.forEach((variant) => {
     describe(variant.descr, () => {
       let map = [ ...variant.map ];
-      let config: ConfigType;
-      let config_new: ConfigType;
+      let config: ConfigWithStateMapType;
+      let config_new: ConfigWithStateMapType;
 
       beforeEach(() => {
         config = { state_map: map };
@@ -358,7 +342,7 @@ DIFF_VALUES.forEach((value) => {
             ? config
             : config_new;
           if (index !== 1) {
-            cfg = migrateStateMapConfig(cfg) as ConfigType;
+            cfg = migrateStateMapConfig(cfg) as ConfigWithStateMapType;
           }
           checkStateMap(cfg, 'config');
           expect(cfg.state_map).toEqual(variant.expected);
@@ -370,7 +354,7 @@ DIFF_VALUES.forEach((value) => {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 VARIANTS_ONLY_NEW.forEach((variant) => {
   describe(variant.descr, () => {
-    let config_new: ConfigType;
+    let config_new: ConfigWithStateMapType;
     let expected = variant.expected;
 
     beforeEach(() => {
@@ -384,7 +368,7 @@ VARIANTS_ONLY_NEW.forEach((variant) => {
       }
       it(test, () => {
         if (index !== 1) {
-          config_new = migrateStateMapConfig(config_new) as ConfigType;
+          config_new = migrateStateMapConfig(config_new) as ConfigWithStateMapType;
         }
         checkStateMap(config_new, 'config');
         expect(config_new.state_map).toEqual(expected);
@@ -549,7 +533,7 @@ describe("Zones overlapping", () => {
 // testing templates in "label"
 describe("Templated label", () => {
   it("Auto-generated labels (strict)", () => {
-    const config: ConfigType = {
+    const config: ConfigWithStateMapType = {
       state_map: {
         map: [
           { value: '200' },
@@ -558,12 +542,12 @@ describe("Templated label", () => {
       }
     };
     checkStateMap(config, "config");
-    expect((config.state_map as StateMapType)!.map![0].label).toBe("200");
-    expect((config.state_map as StateMapType)!.map![1].label).toBe("100");
+    expect((config.state_map as StateMapType)!.map![0].label).toBeUndefined();
+    expect((config.state_map as StateMapType)!.map![1].label).toBeUndefined();
   });
 
   it("Auto-generated labels (relaxed)", () => {
-    const config: ConfigType = {
+    const config: ConfigWithStateMapType = {
       state_map: {
         keep_values: true,
         map: [
@@ -573,12 +557,12 @@ describe("Templated label", () => {
       }
     };
     checkStateMap(config, "config");
-    expect((config.state_map as StateMapType)!.map![0].label).toBe("15..25");
-    expect((config.state_map as StateMapType)!.map![1].label).toBe("100");
+    expect((config.state_map as StateMapType)!.map![0].label).toBeUndefined();
+    expect((config.state_map as StateMapType)!.map![1].label).toBeUndefined();
   });
 
   it("Templated labels (relaxed)", () => {
-    const config: ConfigType = {
+    const config: ConfigWithStateMapType = {
       state_map: {
         keep_values: true,
         map: [
@@ -587,11 +571,11 @@ describe("Templated label", () => {
       }
     };
     checkStateMap(config, "config");
-    expect((config.state_map as StateMapType)!.map![0].label).toBe("xxx [15%..25%]");
+    expect((config.state_map as StateMapType)!.map![0].label).toBe("xxx [${min}%..${max}%]");
   });
 
   it("Templated labels (relaxed), value is defined along with min/max", () => {
-    const config: ConfigType = {
+    const config: ConfigWithStateMapType = {
       state_map: {
         keep_values: true,
         map: [
@@ -601,7 +585,7 @@ describe("Templated label", () => {
     };
     checkStateMap(config, "config");
     // label is generated, but min/max are unset to undefined
-    expect((config.state_map as StateMapType)!.map![0].label).toBe("xxx 100, [15%..25%]");
+    expect((config.state_map as StateMapType)!.map![0].label).toBe("xxx ${value}, [${min}%..${max}%]");
     expect((config.state_map as StateMapType)!.map![0].min).toBeUndefined();
     expect((config.state_map as StateMapType)!.map![0].max).toBeUndefined();
     expect((config.state_map as StateMapType)!.map![0].value).toBe("100");
