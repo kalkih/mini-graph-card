@@ -331,11 +331,22 @@ const checkStateMap = (config, configName) => {
     config.state_map.keep_values = keepValues;
   }
 
+  const globalLabel = config.state_map.label;
+  if (globalLabel !== undefined && globalLabel !== null) {
+    config.state_map.label = String(globalLabel);
+    console.log('config.state_map.label', config.state_map.label);
+  }
+
+  const globalHideUnit = config.state_map.hide_unit;
+  if (globalHideUnit !== undefined && globalHideUnit !== null) {
+    config.state_map.hide_unit = !!globalHideUnit;
+  }
+
   config.state_map.map = stateMap
     .map((entry, index) => {
       if (typeof entry === 'string' || typeof entry === 'number') {
         // shorthand
-        return { value: String(entry), label: String(entry) };
+        return { value: String(entry) };
       }
 
       if (entry
@@ -356,31 +367,27 @@ const checkStateMap = (config, configName) => {
           && min !== null && max !== null;
 
         if (!hasValue && !keepValues) {
-          const error = `Invalid option "${configName}.state_map.map[${index}]": `
-            + '"value" must be specified; removing the entry';
-          log(error);
+          log(`Invalid option "${configName}.state_map.map[${index}]": `
+            + `"value" must be specified; removing the entry`);
           return null;
         }
         if (!hasValue && !hasMinMax && keepValues) {
-          const error = `Invalid option "${configName}.state_map.map[${index}]": `
-            + '"value" or both "min" and "max" must be specified; removing the entry';
-          log(error);
+          log(`Invalid option "${configName}.state_map.map[${index}]": `
+            + `"value" or both "min" and "max" must be specified; removing the entry`);
           return null;
         }
         if (hasValue) {
           if (typeof value !== 'string' && typeof value !== 'number') {
-            const error = `Invalid option "${configName}.state_map.map[${index}]": `
-              + '"value" is missing or not a string/number; removing the entry';
-            log(error);
+            log(`Invalid option "${configName}.state_map.map[${index}]": `
+              + `"value" is missing or not a string/number; removing the entry`);
             return null;
           }
           value = String(value);
         }
         if (!hasValue && hasMinMax && keepValues) {
           if (!isNumeric(min, true) || !isNumeric(max, true)) {
-            const error = `Invalid option "${configName}.state_map.map[${index}]": `
-              + '"min" and "max" must be numeric values; removing the entry';
-            log(error);
+            log(`Invalid option "${configName}.state_map.map[${index}]": `
+              + `"min" and "max" must be numeric values; removing the entry`);
             return null;
           }
           logStringWarning(min, `${configName}.map[${index}].min`);
@@ -388,25 +395,18 @@ const checkStateMap = (config, configName) => {
           min = Number(min);
           max = Number(max);
           if (max <= min) {
-            const error = `Invalid option "${configName}.state_map.map[${index}]": `
-              + `"max" (${max}) must be greater than "min" (${min}); removing the entry`;
-            log(error);
+            log(`Invalid option "${configName}.state_map.map[${index}]": `
+              + `"max" (${max}) must be greater than "min" (${min}); removing the entry`);
             return null;
           }
         }
 
-        if (label === undefined || label === null
-          || (typeof label !== 'string' && typeof label !== 'number')) {
-          label = hasValue
-            ? String(value)
-            : `${min}..${max}`;
+        if (label !== undefined && label !== null
+          && (typeof label === 'string' || typeof label === 'number')
+          && String(label).trim() !== '') {
+          label = String(label);
         } else {
-          label = renderSimpleTemplate(String(label), {
-            min: min !== undefined ? min : '',
-            max: max !== undefined ? max : '',
-            value: value !== undefined ? value : '',
-            tolerance: tolerance !== undefined ? tolerance : '0',
-          });
+          label = undefined;
         }
 
         if (!hasValue
@@ -424,11 +424,16 @@ const checkStateMap = (config, configName) => {
           }
         }
 
-        if (hideUnit === undefined || hideUnit === null) {
+        if (hideUnit !== undefined && hideUnit !== null) {
+          hideUnit = !!hideUnit;
+        } else {
           hideUnit = undefined;
         }
 
-        const result = { label };
+        const result = {};
+        if (label !== undefined) {
+          result.label = label;
+        }
         if (hasValue) {
           result.value = value;
         }
@@ -440,7 +445,7 @@ const checkStateMap = (config, configName) => {
           result.tolerance = tolerance;
         }
         if (hideUnit !== undefined) {
-          result.hide_unit = !!hideUnit;
+          result.hide_unit = hideUnit;
         }
         return result;
       }
@@ -480,7 +485,7 @@ const checkStateMap = (config, configName) => {
     // Sort, "low" by ascendance
     intervals.sort((a, b) => a.low - b.low);
 
-    for (let i = 0; i < intervals.length - 1; i += 1) {
+    for (let i = 0; i < intervals.length - 1; i++) {
       const current = intervals[i];
       const next = intervals[i + 1];
       const hasOverlap = (current.isClosed || next.isClosed)
