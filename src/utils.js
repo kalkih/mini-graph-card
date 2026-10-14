@@ -38,8 +38,10 @@ const log = (message) => {
  * @returns {string} Rendered string
  */
 const renderSimpleTemplate = (template, vars) => {
-  if (typeof template !== 'string' || !template.includes('${')
-    || !vars || typeof vars !== 'object') {
+  if (typeof template !== 'string'
+    || !template.includes('${')
+    || !vars
+    || typeof vars !== 'object') {
     return String(template);
   }
   return template.replace(
