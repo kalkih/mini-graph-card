@@ -89,7 +89,7 @@ const migrateStateMapConfig = (config) => {
         hide_unit,
       } = config.state_map;
       // map is copied as is
-      newConfig.state_map = { map: map || []};
+      newConfig.state_map = { map: map || [] };
       if (keep_values !== undefined) {
         // keep_values is copied as is
         newConfig.state_map.keep_values = keep_values;
