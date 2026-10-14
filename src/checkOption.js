@@ -333,7 +333,6 @@ const checkStateMap = (config, configName) => {
   const globalLabel = config.state_map.label;
   if (globalLabel !== undefined && globalLabel !== null) {
     config.state_map.label = String(globalLabel);
-    console.log('config.state_map.label', config.state_map.label);
   }
 
   const globalHideUnit = config.state_map.hide_unit;
@@ -399,7 +398,7 @@ const checkStateMap = (config, configName) => {
           max = Number(max);
           if (max <= min) {
             const error = `Invalid option "${configName}.state_map.map[${index}]": `
-              + '"max" (${max}) must be greater than "min" (${min}); removing the entry';
+              + `"max" (${max}) must be greater than "min" (${min}); removing the entry`;
             log(error);
             return null;
           }
@@ -489,7 +488,7 @@ const checkStateMap = (config, configName) => {
     // Sort, "low" by ascendance
     intervals.sort((a, b) => a.low - b.low);
 
-    for (let i = 0; i < intervals.length - 1; i++) {
+    for (let i = 0; i < intervals.length - 1; i += 1) {
       const current = intervals[i];
       const next = intervals[i + 1];
       const hasOverlap = (current.isClosed || next.isClosed)
