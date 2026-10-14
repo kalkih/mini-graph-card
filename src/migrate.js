@@ -74,7 +74,7 @@ const migrateYaxisConfig = (config) => {
  * @returns {object} Updated config object
  */
 const migrateStateMapConfig = (config) => {
-  let newConfig = { ...config };
+  const newConfig = { ...config };
 
   if (config.state_map !== undefined && config.state_map !== null) {
     // "state_map" is defined
@@ -82,7 +82,12 @@ const migrateStateMapConfig = (config) => {
       // state_map -> state_map.map
       newConfig.state_map = { map: config.state_map };
     } else if (typeof config.state_map === 'object') {
-      const { map, keep_values, label, hide_unit } = config.state_map;
+      const {
+        map,
+        keep_values,
+        label,
+        hide_unit,
+      } = config.state_map;
       // map is copied as is
       newConfig.state_map = { map: map || []};
       if (keep_values !== undefined) {
