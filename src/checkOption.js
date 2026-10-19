@@ -306,6 +306,7 @@ const checkColorThresholds = (config, configName) => {
 
 /**
  * Helper function to check numeric min/max bounds.
+ * Used for check bounds in state_map object.
  * @param {any} min Lower bound
  * @param {any} max Upper bound
  * @param {string} configName Name of a config object
@@ -316,7 +317,7 @@ const checkMinMaxBounds = (min, max, configName) => {
     const error = `Invalid option "${configName}": `
       + '"min" and "max" must be numeric values; removing the entry';
     log(error);
-    return null;
+    return null; // whole map entry is dropped
   }
   logStringWarning(min, `${configName}.min`);
   logStringWarning(max, `${configName}.max`);
@@ -326,13 +327,14 @@ const checkMinMaxBounds = (min, max, configName) => {
     const error = `Invalid option "${configName}": `
       + `"max" (${numMax}) must be greater than "min" (${numMin}); removing the entry`;
     log(error);
-    return null;
+    return null; // whole map entry is dropped
   }
   return { min: numMin, max: numMax };
 };
 
 /**
  * Helper function to check a tolerance.
+ * Used for check tolerance in state_map object.
  * @param {any} tolerance Tolerance
  * @param {string} configName Name of a config object
  * @returns {number|undefined} Tolerance
@@ -349,6 +351,7 @@ const checkTolerance = (tolerance, configName) => {
 
 /**
  * Check if ranges are crossing, then remove overlapping duplicate elements.
+ * Used for check ranges in state_map object.
  * @param {object} configArray Array object containing ranges
  * @param {string} configName Name of an array object
  * @returns {Array} Updated array with duplicates removed
@@ -364,7 +367,7 @@ const checkRangesCrossing = (configArray, configName) => {
         return {
           low: entry.min,
           high: entry.max,
-          isClosed: false,
+          isClosed: false, // right bound is not included
           index,
         };
       }
@@ -374,7 +377,7 @@ const checkRangesCrossing = (configArray, configName) => {
         return {
           low: value - tolerance,
           high: value + tolerance,
-          isClosed: true,
+          isClosed: true, // both bounds are included
           index,
         };
       }
@@ -403,12 +406,13 @@ const checkRangesCrossing = (configArray, configName) => {
         + `zones overlap between elements [${current.index}] and [${next.index}]! `
         + `Removing the overlapping element [${next.index}] from config`;
       log(error);
-      indexesToRemove.add(next.index);
+      indexesToRemove.add(next.index); // drop a duplicate entry which overlaps with the prev one
     } else {
       lastValidInterval = next;
     }
   }
 
+  // remove entries with overlapping ranges (duplicates only)
   const clearedArray = indexesToRemove.size > 0
     ? configArray.filter((_, index) => !indexesToRemove.has(index))
     : configArray;
