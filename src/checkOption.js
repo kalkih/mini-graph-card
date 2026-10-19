@@ -392,7 +392,7 @@ const checkRangesCrossing = (configArray, configName) => {
   let lastValidInterval = intervals[0];
 
   for (let i = 1; i < intervals.length; i += 1) {
-    const current =  lastValidInterval;
+    const current = lastValidInterval;
     const next = intervals[i];
 
     if (!current) break;
