@@ -34,7 +34,7 @@ const VARIANTS: any[] = [
     result: "Calculated=${a - c[1]}",
   },
   {
-    descr: "whitespaces are not proceesd in ${}",
+    descr: "whitespaces are not processed in ${}",
     template: "${  a  } Hello! [${   b}] array=${c    }",
     vars: VARS,
     result: "123 Hello! [abc] array=0,1,3",
