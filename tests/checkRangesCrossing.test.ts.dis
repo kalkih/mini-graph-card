@@ -1,0 +1,157 @@
+/**
+ * Tests for checkRangesCrossing().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it } from 'vitest';
+import { checkRangesCrossing } from '../src/checkOption';
+import { RangeType } from './types/rangeType';
+
+const VARIANTS: any[] = [
+  {
+    descr: 'check for undefined',
+    map: undefined,
+    expected: undefined,
+  },
+  {
+    descr: 'check for null',
+    map: null,
+    expected: null,
+  },
+  ///////////////////////////////////////////////////////////////
+  {
+    descr: 'if not an array (number) -> return same',
+    map: 123,
+    expected: 123,
+  },
+  {
+    descr: 'if not an array (string) -> return same',
+    map: 'abc',
+    expected: 'abc',
+  },
+  {
+    descr: 'if not an array (dict) -> return same',
+    map: {abc: 'xxx', def: 123},
+    expected: {abc: 'xxx', def: 123},
+  },
+  ///////////////////////////////////////////////////////////////
+  {
+    descr: "array with 1 element",
+    map: [
+      { min: 0, max: 19 }, // [0 .. 19)
+    ],
+    expected: [
+      { min: 0, max: 19 }, // [0 .. 19)
+    ],
+  },
+  ///////////////////////////////////////////////////////////////
+  {
+    descr: "min/max: [0,19) & [20,50): ranges do not overlap",
+    map: [
+      { min: 0, max: 19 }, // [0 .. 19)
+      { min: 20, max: 50 } // [20 .. 50)
+    ],
+    expected: [
+      { min: 0, max: 19 }, // [0 .. 19)
+      { min: 20, max: 50 } // [20 .. 50)
+    ],
+  },
+  {
+    descr: "min/max: [0,20) & [20,50): ranges do not overlap, but touch",
+    map: [
+      { min: 0, max: 20 }, // [0 .. 20)
+      { min: 20, max: 50 } // [20 .. 50)
+    ],
+    expected: [
+      { min: 0, max: 20 }, // [0 .. 20)
+      { min: 20, max: 50 } // [20 .. 50)
+    ],
+  },
+  {
+    descr: "min/max: [0,21) & [20,50): ranges overlap",
+    map: [
+      { min: 0, max: 21 }, // [0 .. 21)
+      { min: 20, max: 50 } // [20 .. 50)
+    ],
+    expected: [
+      { min: 0, max: 21 }, // [0 .. 21)
+    ],
+  },
+  {
+    descr: "tolerance: [0..20] & [20..50]: ranges do not overlap",
+    map: [
+      { value: 9.9, tolerance: 10 }, // [-0.1 .. 19.9]
+      { value: 35, tolerance: 15 } // [20 .. 50]
+    ],
+    expected: [
+      { value: 9.9, tolerance: 10 }, // [-0.1 .. 19.9]
+      { value: 35, tolerance: 15 } // [20 .. 50]
+    ],
+  },
+  {
+    descr: "tolerance: [0..20] & [20..50]: ranges overlap",
+    map: [
+      { value: 10, tolerance: 10 }, // [0 .. 20]
+      { value: 35, tolerance: 15 } // [20 .. 50]
+    ],
+    expected: [
+      { value: 10, tolerance: 10 }, // [0 .. 20]
+    ],
+  },
+  {
+    descr: "value, min/max: 19.9 & [20,50): ranges do not overlap",
+    map: [
+      { value: 19.9 },
+      { min: 20, max: 50 } // [20 .. 50)
+    ],
+    expected: [
+      { value: 19.9 },
+      { min: 20, max: 50 } // [20 .. 50)
+    ],
+  },
+  {
+    descr: "value, min/max: 20 & [20,50): ranges overlap",
+    map: [
+      { value: 20 },
+      { min: 20, max: 50 } // [20 .. 50)
+    ],
+    expected: [
+      { value: 20 },
+    ],
+  },
+  {
+    descr: "tolerance: 19 & [20..50]: ranges do not overlap",
+    map: [
+      { value: 19 },
+      { value: 35, tolerance: 15 } // [20 .. 50]
+    ],
+    expected: [
+      { value: 19 },
+      { value: 35, tolerance: 15 } // [20 .. 50]
+    ],
+  },
+  {
+    descr: "tolerance: 20 & [20..50]: ranges overlap",
+    map: [
+      { value: 20 },
+      { value: 35, tolerance: 15 } // [20 .. 50]
+    ],
+    expected: [
+      { value: 20 },
+    ],
+  },
+];
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+describe('checkRangesCrossing', () => {
+  VARIANTS.forEach((variant) => {
+    let config: RangeType[] = variant.map;
+
+    it(variant.descr, () => {
+      const result = checkRangesCrossing(config, 'config_array');
+      expect(result).toEqual(variant.expected);
+    });
+  });
+});
