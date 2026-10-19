@@ -42,7 +42,7 @@ const renderSimpleTemplate = (template, vars) => {
     || !template.includes('${')
     || !vars
     || typeof vars !== 'object') {
-    return String(template);
+    return String(template); // return as is
   }
   return template.replace(
     /\$\{\s*(\w+)\s*\}/g,
