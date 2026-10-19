@@ -5,10 +5,10 @@
  * remove the "dis" extension to use it locally in your VSCode devcontainer.
  */
 
-import { expect, describe, it, afterEach, beforeEach, vi } from 'vitest';
+import { expect, describe, it, beforeEach } from 'vitest';
 import { checkStateMap } from '../src/checkOption';
 import { migrateStateMapConfig } from '../src/migrate';
-import type { StateMapType, ConfigWithStateMapType } from './stateMapTypes';
+import type { StateMapType, ConfigWithStateMapType } from './types/stateMapTypes';
 
 const DIFF_VALUES: any[] = [
   "abc",
@@ -380,28 +380,19 @@ VARIANTS_ONLY_NEW.forEach((variant) => {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // testing overlapping
 describe("Zones overlapping", () => {
-  let warnSpy: any;
-
-  beforeEach(() => {
-    warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-  });
-
-  afterEach(() => {
-    warnSpy.mockRestore();
-  });
-  ////////////////////////////////////////////////////////////////////////////////
   it("min/max: [0,19) & [20,50): ranges do not overlap", () => {
     const config = {
       state_map: {
         keep_values: true,
         map: [
           { min: 0, max: 19 }, // [0 .. 19)
-          { min: 20, max: 50 } // [20 .. 50)
+          { min: 20, max: 50 }, // [20 .. 50)
         ]
       }
     };
+    const expected = JSON.parse(JSON.stringify(config));
     checkStateMap(config, "config");
-    expect(warnSpy).not.toHaveBeenCalled();
+    expect(config).toEqual(expected);
   });
 
   it("min/max: [0,20) & [20,50): ranges do not overlap, but touch", () => {
@@ -410,12 +401,13 @@ describe("Zones overlapping", () => {
         keep_values: true,
         map: [
           { min: 0, max: 20 }, // [0 .. 20)
-          { min: 20, max: 50 } // [20 .. 50)
+          { min: 20, max: 50 }, // [20 .. 50)
         ]
       }
     };
+    const expected = JSON.parse(JSON.stringify(config));
     checkStateMap(config, "config");
-    expect(warnSpy).not.toHaveBeenCalled();
+    expect(config).toEqual(expected);
   });
 
   it("min/max: [0,21) & [20,50): ranges overlap", () => {
@@ -424,15 +416,20 @@ describe("Zones overlapping", () => {
         keep_values: true,
         map: [
           { min: 0, max: 21 }, // [0 .. 21)
-          { min: 20, max: 50 } // [20 .. 50)
+          { min: 20, max: 50 }, // [20 .. 50)
+        ]
+      }
+    };
+    const expected = {
+      state_map: {
+        keep_values: true,
+        map: [
+          { min: 0, max: 21 }, // [0 .. 21)
         ]
       }
     };
     checkStateMap(config, "config");
-    expect(warnSpy).toHaveBeenCalledWith(
-      'mini-graph-card: ',
-      expect.stringContaining("zones overlap")
-    );
+    expect(config).toEqual(expected);
   });
   ////////////////////////////////////////////////////////////////////////////////
   it("tolerance: [0..20] & [20..50]: ranges do not overlap", () => {
@@ -441,12 +438,21 @@ describe("Zones overlapping", () => {
         keep_values: true,
         map: [
           { value: 9.9, tolerance: 10 }, // [-0.1 .. 19.9]
-          { value: 35, tolerance: 15 } // [20 .. 50]
+          { value: 35, tolerance: 15 }, // [20 .. 50]
+        ]
+      }
+    };
+    const expected = {
+      state_map: {
+        keep_values: true,
+        map: [
+          { value: '9.9', tolerance: 10 }, // [-0.1 .. 19.9]
+          { value: '35', tolerance: 15 }, // [20 .. 50]
         ]
       }
     };
     checkStateMap(config, "config");
-    expect(warnSpy).not.toHaveBeenCalled();
+    expect(config).toEqual(expected);
   });
 
   it("tolerance: [0..20] & [20..50]: ranges overlap", () => {
@@ -455,29 +461,43 @@ describe("Zones overlapping", () => {
         keep_values: true,
         map: [
           { value: 10, tolerance: 10 }, // [0 .. 20]
-          { value: 35, tolerance: 15 } // [20 .. 50]
+          { value: 35, tolerance: 15 }, // [20 .. 50]
+        ]
+      }
+    };
+    const expected = {
+      state_map: {
+        keep_values: true,
+        map: [
+          { value: '10', tolerance: 10 }, // [0 .. 20]
         ]
       }
     };
     checkStateMap(config, "config");
-    expect(warnSpy).toHaveBeenCalledWith(
-      'mini-graph-card: ',
-      expect.stringContaining("zones overlap")
-    );
+    expect(config).toEqual(expected);
   });
-  ////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
   it("value, min/max: 19.9 & [20,50): ranges do not overlap", () => {
     const config = {
       state_map: {
         keep_values: true,
         map: [
           { value: 19.9 },
-          { min: 20, max: 50 } // [20 .. 50)
+          { min: 20, max: 50 }, // [20 .. 50)
+        ]
+      }
+    };
+    const expected = {
+      state_map: {
+        keep_values: true,
+        map: [
+          { value: '19.9' },
+          { min: 20, max: 50 }, // [20 .. 50)
         ]
       }
     };
     checkStateMap(config, "config");
-    expect(warnSpy).not.toHaveBeenCalled();
+    expect(config).toEqual(expected);
   });
 
   it("value, min/max: 20 & [20,50): ranges overlap", () => {
@@ -486,15 +506,20 @@ describe("Zones overlapping", () => {
         keep_values: true,
         map: [
           { value: 20 },
-          { min: 20, max: 50 } // [20 .. 50)
+          { min: 20, max: 50 }, // [20 .. 50)
+        ]
+      }
+    };
+    const expected = {
+      state_map: {
+        keep_values: true,
+        map: [
+          { value: '20' },
         ]
       }
     };
     checkStateMap(config, "config");
-    expect(warnSpy).toHaveBeenCalledWith(
-      'mini-graph-card: ',
-      expect.stringContaining("zones overlap")
-    );
+    expect(config).toEqual(expected);
   });
   ////////////////////////////////////////////////////////////////////////////////
   it("tolerance: 19 & [20..50]: ranges do not overlap", () => {
@@ -503,12 +528,21 @@ describe("Zones overlapping", () => {
         keep_values: true,
         map: [
           { value: 19 },
-          { value: 35, tolerance: 15 } // [20 .. 50]
+          { value: 35, tolerance: 15 }, // [20 .. 50]
+        ]
+      }
+    };
+    const expected = {
+      state_map: {
+        keep_values: true,
+        map: [
+          { value: '19' },
+          { value: '35', tolerance: 15 }, // [20 .. 50]
         ]
       }
     };
     checkStateMap(config, "config");
-    expect(warnSpy).not.toHaveBeenCalled();
+    expect(config).toEqual(expected);
   });
 
   it("tolerance: 20 & [20..50]: ranges overlap", () => {
@@ -517,15 +551,20 @@ describe("Zones overlapping", () => {
         keep_values: true,
         map: [
           { value: 20 },
-          { value: 35, tolerance: 15 } // [20 .. 50]
+          { value: 35, tolerance: 15 }, // [20 .. 50]
+        ]
+      }
+    };
+    const expected = {
+      state_map: {
+        keep_values: true,
+        map: [
+          { value: '20' },
         ]
       }
     };
     checkStateMap(config, "config");
-    expect(warnSpy).toHaveBeenCalledWith(
-      'mini-graph-card: ',
-      expect.stringContaining("zones overlap")
-    );
+    expect(config).toEqual(expected);
   });
 });
 
