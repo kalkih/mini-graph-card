@@ -1,9 +1,7 @@
-export interface StateMapEntryType {
-  value?: string|number;
+import type { RangeType } from './rangeType';
+
+export interface StateMapEntryType extends RangeType {
   label?: string;
-  max?: string|number;
-  min?: string|number;
-  tolerance?: string|number;
   hide_unit?: boolean;
 };
 
