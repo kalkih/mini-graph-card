@@ -401,7 +401,7 @@ The `state_map` option has an object structure with mandatory `map` & optional `
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
 | map | list |  | Array of mappings between a historical value and a graph coordinate or display label.
-| keep_values | boolean |  `false` | Set to `true` to preserve raw numeric values in the history instead of replacing them with indexes.
+| keep_values | boolean |  `false` | Set to `true` to preserve raw values in the history instead of replacing them with indexes.
 
 The `map` key contains a list of entries.
 When `keep_values` is not `true` - the **order of entries matters** as the entry's index determines its position (Y-value) on the graph.
