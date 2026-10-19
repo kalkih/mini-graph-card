@@ -304,6 +304,117 @@ const checkColorThresholds = (config, configName) => {
 };
 /* eslint-enable no-param-reassign */
 
+/**
+ * Helper function to check numeric min/max bounds.
+ * @param {any} min Lower bound
+ * @param {any} max Upper bound
+ * @param {string} configName Name of a config object
+ * @returns {{min: number, max: number}|null} Bounds, or null if invalid
+ */
+const checkMinMaxBounds = (min, max, configName) => {
+  if (!isNumeric(min, true) || !isNumeric(max, true)) {
+    const error = `Invalid option "${configName}": `
+      + '"min" and "max" must be numeric values; removing the entry';
+    log(error);
+    return null;
+  }
+  logStringWarning(min, `${configName}.min`);
+  logStringWarning(max, `${configName}.max`);
+  const numMin = Number(min);
+  const numMax = Number(max);
+  if (numMax <= numMin) {
+    const error = `Invalid option "${configName}": `
+      + `"max" (${numMax}) must be greater than "min" (${numMin}); removing the entry`;
+    log(error);
+    return null;
+  }
+  return { min: numMin, max: numMax };
+};
+
+/**
+ * Helper function to check a tolerance.
+ * @param {any} tolerance Tolerance
+ * @param {string} configName Name of a config object
+ * @returns {number|undefined} Tolerance
+ */
+const checkTolerance = (tolerance, configName) => {
+  logStringWarning(tolerance, `${configName}.tolerance`);
+  let numTolerance = Number(tolerance);
+  if (!Number.isFinite(numTolerance) || numTolerance < 0) {
+    log(`Invalid option "${configName}": "tolerance" must be a positive number`);
+    numTolerance = undefined;
+  }
+  return numTolerance;
+};
+
+/**
+ * Check if ranges are crossing, then remove overlapping duplicate elements.
+ * @param {object} configArray Array object containing ranges
+ * @param {string} configName Name of an array object
+ * @returns {Array} Updated array with duplicates removed
+ */
+const checkRangesCrossing = (configArray, configName) => {
+  if (!Array.isArray(configArray) || configArray.length <= 1) {
+    return configArray;
+  }
+
+  const intervals = configArray
+    .map((entry, index) => {
+      if (entry.min !== undefined && entry.max !== undefined) {
+        return {
+          low: entry.min,
+          high: entry.max,
+          isClosed: false,
+          index,
+        };
+      }
+      if (entry.value !== undefined && isNumeric(entry.value, true)) {
+        const value = Number(entry.value);
+        const tolerance = entry.tolerance || 0;
+        return {
+          low: value - tolerance,
+          high: value + tolerance,
+          isClosed: true,
+          index,
+        };
+      }
+      return null;
+    })
+    .filter(entry => entry !== null);
+
+  // Sort, "low" by ascendance
+  intervals.sort((a, b) => a.low - b.low);
+
+  const indexesToRemove = new Set();
+  let lastValidInterval = intervals[0];
+
+  for (let i = 1; i < intervals.length; i += 1) {
+    const current =  lastValidInterval;
+    const next = intervals[i];
+
+    if (!current) break;
+
+    const hasOverlap = (current.isClosed || next.isClosed)
+      ? current.high >= next.low
+      : current.high > next.low;
+
+    if (hasOverlap) {
+      const error = `Invalid option "${configName}": `
+        + `zones overlap between elements [${current.index}] and [${next.index}]! `
+        + `Removing the overlapping element [${next.index}] from config`;
+      log(error);
+      indexesToRemove.add(next.index);
+    } else {
+      lastValidInterval = next;
+    }
+  }
+
+  const clearedArray = indexesToRemove.size > 0
+    ? configArray.filter((_, index) => !indexesToRemove.has(index))
+    : configArray;
+  return clearedArray;
+};
+
 /* eslint-disable no-param-reassign */
 /**
  * Check if state_map is properly defined.
@@ -333,6 +444,7 @@ const checkStateMap = (config, configName) => {
   const globalLabel = config.state_map.label;
   if (globalLabel !== undefined && globalLabel !== null) {
     config.state_map.label = String(globalLabel);
+    console.log('config.state_map.label', config.state_map.label);
   }
 
   const globalHideUnit = config.state_map.hide_unit;
@@ -386,22 +498,14 @@ const checkStateMap = (config, configName) => {
           value = String(value);
         }
         if (!hasValue && hasMinMax && keepValues) {
-          if (!isNumeric(min, true) || !isNumeric(max, true)) {
-            const error = `Invalid option "${configName}.state_map.map[${index}]": `
-              + '"min" and "max" must be numeric values; removing the entry';
-            log(error);
-            return null;
-          }
-          logStringWarning(min, `${configName}.map[${index}].min`);
-          logStringWarning(max, `${configName}.map[${index}].max`);
-          min = Number(min);
-          max = Number(max);
-          if (max <= min) {
-            const error = `Invalid option "${configName}.state_map.map[${index}]": `
-              + `"max" (${max}) must be greater than "min" (${min}); removing the entry`;
-            log(error);
-            return null;
-          }
+          const bounds = checkMinMaxBounds(
+            min,
+            max,
+            `${configName}.state_map.map[${index}]`,
+          );
+          if (!bounds) return null;
+          min = bounds.min;
+          max = bounds.max;
         }
 
         if (label !== undefined && label !== null
@@ -419,12 +523,7 @@ const checkStateMap = (config, configName) => {
           || !isNumeric(tolerance, true)) {
           tolerance = undefined;
         } else {
-          logStringWarning(tolerance, `${configName}.map[${index}].tolerance`);
-          tolerance = Number(tolerance);
-          if (!Number.isFinite(tolerance) || tolerance < 0) {
-            log(`Invalid option "${configName}.map[${index}]": "tolerance" must be a positive number`);
-            tolerance = undefined;
-          }
+          tolerance = checkTolerance(tolerance, `${configName}.map[${index}]`);
         }
 
         if (hideUnit !== undefined && hideUnit !== null) {
@@ -459,46 +558,9 @@ const checkStateMap = (config, configName) => {
     })
     .filter(entry => entry !== null);
 
-  // check frong crossing of ranges
+  // check wrong crossing of ranges
   if (keepValues === true) {
-    const intervals = config.state_map.map
-      .map((entry, index) => {
-        if (entry.min !== undefined && entry.max !== undefined) {
-          return {
-            low: entry.min,
-            high: entry.max,
-            isClosed: false,
-            index,
-          };
-        }
-        if (entry.value !== undefined && isNumeric(entry.value, true)) {
-          const value = Number(entry.value);
-          const tolerance = entry.tolerance || 0;
-          return {
-            low: value - tolerance,
-            high: value + tolerance,
-            isClosed: true,
-            index,
-          };
-        }
-        return null;
-      })
-      .filter(entry => entry !== null);
-
-    // Sort, "low" by ascendance
-    intervals.sort((a, b) => a.low - b.low);
-
-    for (let i = 0; i < intervals.length - 1; i += 1) {
-      const current = intervals[i];
-      const next = intervals[i + 1];
-      const hasOverlap = (current.isClosed || next.isClosed)
-        ? current.high >= next.low
-        : current.high > next.low;
-      if (hasOverlap) {
-        log(`Warning in "${configName}.state_map.map": `
-          + `zones overlap between elements [${current.index}] and [${next.index}]!`);
-      }
-    }
+    config.state_map.map = checkRangesCrossing(config.state_map.map, 'state_map.map');
   }
 };
 /* eslint-enable no-param-reassign */
@@ -582,6 +644,10 @@ const checkPointsPerHour = (config) => {
   let pointsPerHourAdjusted = false;
 
   switch (config.group_by) {
+    // case 'month':
+    //   newPointsPerHour = 1 / 24 / 30 ? 31?; // какое число? и в разных месяцах разные числа
+    //   pointsPerHourAdjusted = true;
+    //   break;
     case 'week':
       newPointsPerHour = 1 / 24 / 7;
       pointsPerHourAdjusted = true;
@@ -638,6 +704,7 @@ export {
   checkBounds,
   checkYaxisLabels,
   checkColorThresholds,
+  checkRangesCrossing, // testing only
   checkStateMap,
   checkLineStyle,
   checkGroupBy,
