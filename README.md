@@ -40,28 +40,28 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
          - [Validation rules](#validation-rules)
       + [Supported color formats](#supported-color-formats)
       + [Theme variables](#theme-variables)
-      + [Example usage](#example-usage)
-         - [Single entity card](#single-entity-card)
-         - [Multiple entities card](#multiple-entities-card)
-         - [Different graph types](#different-graph-types)
-         - [Bar spacing](#bar-spacing)
-         - [Show data from the past week](#show-data-from-the-past-week)
-         - [Graph only card](#graph-only-card)
-         - [Horizontally stacked cards](#horizontally-stacked-cards)
-         - [Dynamic line color](#dynamic-line-color)
-         - [Alternate Y-axis](#alternate-y-axis)
-         - [Custom styles for line graphs](#custom-styles-for-line-graphs)
-         - [Displaying static values](#displaying-static-values)
-         - [Custom baseline](#custom-baseline)
-         - [Inverted Y-axis](#inverted-y-axis)
-         - [Opposing dual-axis graphs](#opposing-dual-axis-graphs)
-         - [Grouping by date](#grouping-by-date)
-         - [Data aggregation functions](#data-aggregation-functions)
-         - [Non-numeric sensor states](#non-numeric-sensor-states)
-         - [Showing additional info on the card](#showing-additional-info-on-the-card)
-         - [Accessing attributes in complex structures](#accessing-attributes-in-complex-structures)
-            * [Accessing dictionary attributes](#accessing-dictionary-attributes)
-            * [Accessing list attributes](#accessing-list-attributes)
+   * [Example usage](#example-usage)
+      + [Single entity card](#single-entity-card)
+      + [Multiple entities card](#multiple-entities-card)
+      + [Different graph types](#different-graph-types)
+      + [Bar spacing](#bar-spacing)
+      + [Show data from the past week](#show-data-from-the-past-week)
+      + [Graph only card](#graph-only-card)
+      + [Horizontally stacked cards](#horizontally-stacked-cards)
+      + [Dynamic line color](#dynamic-line-color)
+      + [Alternate Y-axis](#alternate-y-axis)
+      + [Custom styles for line graphs](#custom-styles-for-line-graphs)
+      + [Displaying static values](#displaying-static-values)
+      + [Custom baseline](#custom-baseline)
+      + [Inverted Y-axis](#inverted-y-axis)
+      + [Opposing dual-axis graphs](#opposing-dual-axis-graphs)
+      + [Grouping by date](#grouping-by-date)
+      + [Data aggregation functions](#data-aggregation-functions)
+      + [Non-numeric sensor states](#non-numeric-sensor-states)
+      + [Showing additional info on the card](#showing-additional-info-on-the-card)
+      + [Accessing attributes in complex structures](#accessing-attributes-in-complex-structures)
+         - [Accessing dictionary attributes](#accessing-dictionary-attributes)
+         - [Accessing list attributes](#accessing-list-attributes)
    * [Development](#development)
       + [Instructions](#instructions)
    * [Getting errors?](#getting-errors)
@@ -689,9 +689,9 @@ The opacity is applied for a color defined as `stroke-color: var(--card-backgrou
 Customizing these 2 variables may be desirable for some client devices.
 
 
-### Example usage
+## Example usage
 
-#### Single entity card
+### Single entity card
 
 ![Single entity card](https://user-images.githubusercontent.com/457678/52009150-884d2500-24d2-11e9-9f2b-2981210d3897.png)
 
@@ -715,7 +715,7 @@ show:
   fill: false
 ```
 
-#### Multiple entities card
+### Multiple entities card
 
 ![Multiple entities card](https://user-images.githubusercontent.com/457678/52009165-900cc980-24d2-11e9-8cc6-c77de58465b5.png)
 
@@ -730,7 +730,7 @@ entities:
   - sensor.server_received
 ```
 
-#### Different graph types
+### Different graph types
 
 See above for simple "Only linear graphs" examples.
 
@@ -775,7 +775,7 @@ show:
 
 
 
-#### Bar spacing
+### Bar spacing
 
 Custom `bar_spacing` & `bar_spacing_group`:
 
@@ -826,7 +826,7 @@ show:
 ```
 
 
-#### Show data from the past week
+### Show data from the past week
 ![Show data from the past week](https://user-images.githubusercontent.com/457678/52009167-913df680-24d2-11e9-8732-52fc65e3f0d8.png)
 
 Use the `hours_to_show` option to specify how many hours of history the graph should represent.
@@ -841,7 +841,7 @@ hours_to_show: 168
 points_per_hour: 0.25
 ```
 
-#### Graph only card
+### Graph only card
 Use the `show` option to show/hide UI elements.
 
 <img width="482" height="127" alt="image" src="https://github.com/user-attachments/assets/95196d3b-4de9-49a1-ae88-72bf19b3f3d2" />
@@ -856,7 +856,7 @@ show:
   state: false
 ```
 
-#### Horizontally stacked cards
+### Horizontally stacked cards
 You can stack cards horizontally by using one or more `horizontal-stack(s)`.
 
 ![Horizontally stacked cards](https://user-images.githubusercontent.com/457678/52009171-926f2380-24d2-11e9-9dd4-28f010608858.png)
@@ -884,7 +884,7 @@ cards:
     font_size: 75
 ```
 
-#### Dynamic line color
+### Dynamic line color
 Have the graph change line color dynamically.
 
 ![Dynamic line color](https://user-images.githubusercontent.com/457678/52573150-cbd05900-2e19-11e9-9e01-740753169093.png)
@@ -930,7 +930,7 @@ show:
   state: false
 ```
 
-#### Alternate Y-axis
+### Alternate Y-axis
 Have one or more series plot on a separate Y-axis, which appears on the right side of the graph. This example also
 shows turning off the line, points and legend.
 
@@ -957,7 +957,7 @@ show:
   labels_secondary: true
 ```
 
-#### Custom styles for line graphs
+### Custom styles for line graphs
 
 Set a custom line style globally for a whole card or per-entity:
 
@@ -981,7 +981,7 @@ entities:
     line_style: 6,6
 ```
 
-#### Displaying static values
+### Displaying static values
 
 Threshold line:
 
@@ -1104,7 +1104,7 @@ show:
 ```
 
 
-#### Custom baseline
+### Custom baseline
 
 Baseline is set to 0:
 
@@ -1178,7 +1178,7 @@ show:
   labels: true
 ```
 
-#### Inverted Y-axis
+### Inverted Y-axis
 
 Water level in a well: a 0 value means "well is full", a higher value - "well is depleted/empty":
 
@@ -1221,7 +1221,7 @@ show:
   graph: bar
 ```
 
-#### Opposing dual-axis graphs
+### Opposing dual-axis graphs
 
 Linear graphs (a static line stands for a 0-baseline, only `max` & `zero` labels are shown):
 
@@ -1296,7 +1296,7 @@ y_axis:
     invert: true
 ```
 
-#### Grouping by date
+### Grouping by date
 
 ![mini_energy_daily](https://user-images.githubusercontent.com/8268674/66688605-3ffc1e80-ec7f-11e9-872e-935870a542f3.png)
 
@@ -1314,7 +1314,7 @@ show:
   graph: bar
 ```
 
-#### Data aggregation functions
+### Data aggregation functions
 You can decide how values are aggregated for points on graph. Example how to display min, max, avg temperature per day
 from last week.
 
@@ -1339,7 +1339,7 @@ hours_to_show: 168
 group_by: date
 ```
 
-#### Non-numeric sensor states
+### Non-numeric sensor states
 
 ![mini_binary_sensor](https://user-images.githubusercontent.com/8268674/66825779-e1ff5d80-ef42-11e9-89eb-673d2ada8d34.png)
 
@@ -1372,7 +1372,7 @@ state_map:
 ```
 
 
-#### Showing additional info on the card
+### Showing additional info on the card
 
 ![изображение](https://user-images.githubusercontent.com/71872483/170584118-ef826b60-dce3-42ec-a005-0f467616cd37.png)
 
@@ -1403,11 +1403,11 @@ show:
 ```
 This method may be also used to add a calculated value with it's own `aggregate_func` option.
 
-#### Accessing attributes in complex structures
+### Accessing attributes in complex structures
 
 When using the `attribute` option in the [entities object](#entities-object), you can access data in structured attributes, such as dictionaries and lists.
 
-##### Accessing dictionary attributes
+#### Accessing dictionary attributes
 Suppose you have data stored inside a *dictionary* attribute named `dict_attribute`
 ```yaml
 dict_attribute:
@@ -1425,7 +1425,7 @@ entities:
 ```
 ![image](https://github.com/ildar170975/mini-graph-card/assets/71872483/0549afd5-901e-4e86-a144-edc4cd207440)
 
-##### Accessing list attributes
+#### Accessing list attributes
 
 Suppose you have data stored inside a *list* attribute named `list_attribute`:
 ```yaml
