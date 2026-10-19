@@ -24,7 +24,7 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
       + [State map object](#state-map-object)
       + [Value factor](#value-factor)
       + [Aggregate functions](#aggregate-functions)
-      + [Alignment for "name" & "icon" elements](#alignment-for-name-icon-elements)
+      + [Alignment for "name" & "icon" elements](#alignment-for-name--icon-elements)
       + [Structured names](#structured-names)
       + [Static values](#static-values)
       + [Number format](#number-format)
