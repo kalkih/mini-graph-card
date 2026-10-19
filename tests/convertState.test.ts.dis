@@ -8,20 +8,7 @@
 // @vitest-environment jsdom
 import { expect, describe, it, beforeEach } from 'vitest';
 import MiniGraphCard from '../src/main';
-
-interface StateMapEntryType {
-  value: string|number;
-  label?: string;
-};
-
-interface StateMapType {
-  map: StateMapEntryType[];
-  keep_values?: boolean;
-};
-
-interface ConfigType {
-  state_map: StateMapType;
-};
+import type { ConfigWithStateMapType, StateMapType } from './types/stateMapTypes';
 
 describe("MiniGraphCard::_convertState()", () => {
   let card: MiniGraphCard;
@@ -34,12 +21,12 @@ describe("MiniGraphCard::_convertState()", () => {
         keep_values: false,
         map: [],
       }};
+    stateMapConfig = (card.config as ConfigWithStateMapType).state_map as StateMapType;
   });
 
   describe('keep_values=false/undefined', () => {
 
     beforeEach(() => {
-      stateMapConfig = (card.config as ConfigType).state_map;
       stateMapConfig.keep_values = false;
       stateMapConfig.map = [
         { value: 'red', label: 'Red' },
@@ -67,7 +54,10 @@ describe("MiniGraphCard::_convertState()", () => {
     });
 
     it('unavailable, use mapping', () => {
-      (card.config as ConfigType).state_map.map = [...(card.config as ConfigType).state_map.map, {value: 'unavailable'}];
+      stateMapConfig.map = [
+        ...stateMapConfig.map!,
+        {value: 'unavailable'},
+      ];
       const res = { state: 'unavailable' };
       card._convertState(res, stateMapConfig);
       expect(res.state).toEqual(3);
@@ -78,7 +68,6 @@ describe("MiniGraphCard::_convertState()", () => {
 
   describe('keep_values=true', () => {
     beforeEach(() => {
-      stateMapConfig = (card.config as ConfigType).state_map;
       stateMapConfig.keep_values = true;
       stateMapConfig.map = [
         { value: '10', label: 'Red' },
@@ -110,7 +99,6 @@ describe("MiniGraphCard::_convertState()", () => {
 
   describe('others', () => {
     beforeEach(() => {
-      stateMapConfig = (card.config as ConfigType).state_map;
       stateMapConfig.map = [];
     });
 
@@ -121,7 +109,7 @@ describe("MiniGraphCard::_convertState()", () => {
     });
 
     it('state_map.map is empty, keep_values=true', () => {
-      (card.config as ConfigType).state_map.keep_values = true;
+      stateMapConfig.keep_values = true;
       const res = { state: 'xxx' };
       card._convertState(res, stateMapConfig);
       expect(res.state).toEqual('xxx');
