@@ -38,6 +38,7 @@ import {
   getFirstDefinedItem,
   log,
   getStringifiedValue,
+  renderSimpleTemplate,
 } from './utils';
 import {
   computeEntityName,
@@ -46,6 +47,7 @@ import {
 
 const isUnavailableState = value => ['unavailable'].includes(value);
 
+// 'export' is only needed for testing
 export default class MiniGraphCard extends LitElement {
   constructor() {
     super();
@@ -1787,12 +1789,17 @@ export default class MiniGraphCard extends LitElement {
   * Returns a mapped string/number value for a state/attribute or a static_value
   * @returns {{hideUnit: (boolean|undefined), result: (string|undefined)}
   * } Object containing mapping results
-  * @param {object} stateMapConfig state_map napping array
+  * @param {object} stateMapConfig state_map mapping array
   * @param {number|string} inState Value of a state/attribute ("unformatted") or a static_value
+  * @param {number} [index=undefined] Index of an entry in config.entities (only needed to process a `raw` token)
   */
-  _mapState(stateMapConfig, inState) {
+  _mapState(stateMapConfig, inState, index = undefined) {
     const stateMapArray = stateMapConfig.map;
     const keepValues = stateMapConfig.keep_values;
+
+    const globalHideUnit = stateMapConfig.hide_unit;
+    const globalLabel = stateMapConfig.label;
+
     let hideUnit;
     let result;
 
@@ -1801,18 +1808,15 @@ export default class MiniGraphCard extends LitElement {
       if (!keepValues) {
         // strict mode - state_map presumably contains all possible values
         if (isNumeric(inState, true)) {
+          // float value must be converted to a positive integer
           let roundedValue = Math.round(Number(inState));
           roundedValue = Math.max(0, roundedValue);
-          stateMap = stateMapArray[roundedValue]; // can be undefined for a moment
+          stateMap = stateMapArray[roundedValue]; // can be undefined for a moment (why I wrote this?)
         } else {
           stateMap = stateMapArray.find(state => state.value === inState);
         }
-        if (stateMap) {
-          if (stateMap.hide_unit !== undefined) {
-            hideUnit = !!stateMap.hide_unit;
-          }
-          result = stateMap.label;
-        } else if (!isUnavailableState(inState)) { // no usual need to map the "unavailable" word
+
+        if (!stateMap && !isUnavailableState(inState)) { // no usual need to map the "unavailable" word
           log(`value [${inState}] not found in state_map: `
             + `[${getStringifiedValue(stateMapArray)}]`); // ?? { isError: false }
         }
@@ -1822,28 +1826,78 @@ export default class MiniGraphCard extends LitElement {
         const currentValue = isCurrentNumeric ? Number(inState) : NaN;
         stateMap = stateMapArray.find((state) => {
           if (isCurrentNumeric) {
-            // use min/max
+            // try to find using min/max
             if (state.min !== undefined && state.max !== undefined) {
-              // min - included, max - excluded
+              // min - bound included, max - bound excluded
               return currentValue >= state.min && currentValue < state.max;
             }
-            // use value & tolerance
+            // try to find using value & tolerance
             if (isNumeric(state.value, true)) {
-              const targetValue = Number(state.value);
+              const numValue = Number(state.value);
               const tolerance = state.tolerance || 0;
-              // both limits are included
-              const delta = Math.abs(currentValue - targetValue);
-              const roundedDelta = Math.round(delta * 1e12) / 1e12;
+              // both bounds are included
+              const delta = Math.abs(currentValue - numValue);
+              const roundedDelta = Math.round(delta * 1e12) / 1e12; // drop tiny fraction digits
               return roundedDelta <= tolerance;
             }
+            return false; // not found
           }
           return state.value === String(inState);
         });
-        if (stateMap) {
-          if (stateMap.hide_unit !== undefined) {
-            hideUnit = !!stateMap.hide_unit;
-          }
-          result = stateMap.label;
+      }
+
+      if (stateMap) {
+        const useHideUnit = stateMap.hide_unit !== undefined
+          ? stateMap.hide_unit
+          : globalHideUnit;
+        if (useHideUnit !== undefined) {
+          hideUnit = !!useHideUnit;
+        }
+
+        let useLabel = stateMap.label;
+        if (useLabel === undefined) {
+          // generate automatically
+          useLabel = (typeof globalLabel === 'string')
+            ? globalLabel
+            : undefined;
+        }
+        if (useLabel !== undefined) {
+          // could be a template - check if tokens are present
+          const hasRaw = useLabel.includes('${raw}');
+          const hasValue = useLabel.includes('${value}');
+          const hasTolerance = useLabel.includes('${tolerance}');
+          const hasMin = useLabel.includes('${min}');
+          const hasMax = useLabel.includes('${max}');
+          const templateContext = {
+            raw: hasRaw
+              ? this._processState(inState, index)
+              : '',
+            value: hasValue && stateMap.value !== undefined
+              ? stateMap.value
+              : '',
+            tolerance: hasTolerance
+              ? keepValues === false
+                ? '0' // in strict mode (keep_values=false) a strict "==" is used
+                : stateMap.tolerance !== undefined
+                  ? String(stateMap.tolerance)
+                  : stateMap.value !== undefined
+                    ? '0'
+                    : ''
+              : '',
+            min: hasMin && stateMap.min !== undefined
+              ? String(stateMap.min)
+              : '', // always '' for keepValues === false
+            max: hasMax && stateMap.max !== undefined
+              ? String(stateMap.max)
+              : '', // always '' for keepValues === false
+          };
+          result = renderSimpleTemplate(useLabel, templateContext);
+        } else {
+          result = stateMap.value !== undefined
+            ? String(stateMap.value)
+            : keepValues === false
+              ? undefined
+              : `${stateMap.min} .. ${stateMap.max}`; // min/max are defined if value is undefined
         }
       }
     }
@@ -1853,8 +1907,7 @@ export default class MiniGraphCard extends LitElement {
 
   /**
   * Returns a string value for a state/attribute or a static_value:
-  * localized, following locale settings,
-  * (for entities:) accounting possible individual accuracy settings & possible "decimals" options
+  * processed using state_map & other conversions
   * @returns {string} value of a state/attribute
   * @param {number|string} inState Value of a state/attribute ("unformatted") or a static_value
   * @param {number} index Index of an entry in config.entities
@@ -1872,11 +1925,12 @@ export default class MiniGraphCard extends LitElement {
       state = undefined;
     }
 
+    // process possible state_map
     const entityConfig = index >= 0
       ? this.config.entities[index]
       : null;
     const stateMapConfig = (entityConfig && entityConfig.state_map) || this.config.state_map;
-    const { result, hideUnit } = this._mapState(stateMapConfig, state);
+    const { result, hideUnit } = this._mapState(stateMapConfig, state, index);
     if (hideUnit !== undefined && index >= 0) {
       this._mappedHideUnit[index] = hideUnit;
     }
@@ -1884,6 +1938,59 @@ export default class MiniGraphCard extends LitElement {
       return result;
     }
 
+    // proceed with default processing
+    return this._processState(state, index);
+  }
+
+  /**
+  * Returns a 'decimals' settings for an entity/static value
+  * @param {number} index Index of an entry in config.entities
+  */
+  _getDecimals(index) {
+    let dec;
+    const globalDecimals = this.config.decimals;
+    const configYaxis = this.config.y_axis;
+    // console.log('config', this.config);
+    // console.log('globalDecimals',globalDecimals);
+    // console.log('configYaxis',configYaxis);
+    // console.log('index',index);
+    if (index === undefined) {
+      // for a primary Y-axis
+      const primaryDecimals = configYaxis
+        && configYaxis.primary
+        && configYaxis.primary.decimals;
+      dec = primaryDecimals !== undefined
+        ? primaryDecimals
+        : globalDecimals;
+    } else if (index === -1) {
+      // for a secondary Y-axis
+      const secondaryDecimals = configYaxis
+        && configYaxis.secondary
+        && configYaxis.secondary.decimals;
+      dec = secondaryDecimals !== undefined
+        ? secondaryDecimals
+        : globalDecimals;
+    } else {
+      // for a state or attribute value
+      const entityConfig = this.config.entities[index];
+      // console.log('entityConfig',entityConfig);
+      dec = entityConfig && entityConfig.decimals !== undefined
+        ? entityConfig.decimals
+        : globalDecimals;
+    }
+    return dec;
+  }
+
+  /**
+  * Returns a string value for a state/attribute or a static_value:
+  * processed using value_factor convert,
+  * localized, following locale settings,
+  * (for entities:) accounting possible individual accuracy settings & possible "decimals" options
+  * @returns {string} Formatted value of a state/attribute
+  * @param {number|string} state Value of a state/attribute ("unformatted") or a static_value
+  * @param {number} index Index of an entry in config.entities
+  */
+  _processState(state, index) {
     // cases like "complex data", "data not ready"
     if (state === undefined || state === null || state === '') {
       return formatNumber(NaN, this._hass.locale);
@@ -1905,42 +2012,22 @@ export default class MiniGraphCard extends LitElement {
     }
 
     const factor = index === undefined
-      ? this._axisFactors.primary
+      ? this._axisFactors && this._axisFactors.primary
       : index === -1
-        ? this._axisFactors.secondary
-        : this._entityFactors[index];
+        ? this._axisFactors && this._axisFactors.secondary
+        : this._entityFactors && this._entityFactors[index];
     // safely process with a factor
-    state = Number.isNaN(Number(state)) ? state : state * factor;
+    state = Number.isNaN(Number(state)) || factor === undefined
+      ? state
+      : state * factor;
 
-    let dec;
     // attempting to get "decimals" settings
-    if (index === undefined) {
-      // for a primary Y-axis
-      const primaryDecimals = this.config.y_axis
-        && this.config.y_axis.primary
-        && this.config.y_axis.primary.decimals;
-      dec = primaryDecimals !== undefined
-        ? primaryDecimals
-        : this.config.decimals;
-    } else if (index === -1) {
-      // for a secondary Y-axis
-      const secondaryDecimals = this.config.y_axis
-        && this.config.y_axis.secondary
-        && this.config.y_axis.secondary.decimals;
-      dec = secondaryDecimals !== undefined
-        ? secondaryDecimals
-        : this.config.decimals;
-    } else {
-      // for a state or attribute value
-      dec = this.config.entities[index].decimals !== undefined
-        ? this.config.entities[index].decimals
-        : this.config.decimals;
-    }
-
-    let value;
+    const dec = this._getDecimals(index);
 
     if (dec === undefined || Number.isNaN(Number(dec)) || Number.isNaN(Number(state))) {
-      // no valid "decimals" settings defined, use a default accuracy
+      // no valid "decimals" settings defined,
+      // or a state is not numerical (like 'unavailable') ->
+      // use a default accuracy
       if (index >= 0 && !this._isStaticValue[index]) {
         // formatting a state or attribute of an entity
         const entityId = this.config.entities[index].entity;
@@ -1949,6 +2036,7 @@ export default class MiniGraphCard extends LitElement {
 
         // additional check before calling API
         if (!stateObj) {
+          // process unknown
           return formatNumber(
             state,
             this._hass.locale,
@@ -1963,7 +2051,7 @@ export default class MiniGraphCard extends LitElement {
             state,
           );
           const partValue = attrParts.find(part => part.type === 'value');
-          value = partValue && partValue.value;
+          const value = partValue && partValue.value;
           return value;
         } else if (attribute && this.isObjectAttr(attribute)) {
           // formatting object attribute - similar to Y-axis labels
@@ -1978,7 +2066,7 @@ export default class MiniGraphCard extends LitElement {
             state,
           );
           const partValue = stateParts.find(part => part.type === 'value');
-          value = partValue && partValue.value;
+          const value = partValue && partValue.value;
           return value;
         }
       } else {
