@@ -404,7 +404,7 @@ The `state_map` option in a "full syntax" has an object structure with mandatory
 
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
-| map | list |  | Array of mappings between a historical value and a graph coordinate or display label.
+| map | list |  | Array of mappings between a historical value and a graph coordinate or displayed label.
 | keep_values | boolean |  `false` | Set to `true` for the "relaxed" mapping.
 | hide_unit | boolean |  `false` | Set to `true` to hide a native or custom unit for a mapped value (e.g. to show a "Danger" label instead of "Danger %") for ALL mappings (unless it is overridden by setting the `hide_unit` option for a particular mapping).
 | label | string |   | Set to define a common label for all mappings (see more details about labels below).
@@ -433,11 +433,16 @@ As a shorthand, you can just use a string as a value to convert:
       label: Blue
 ```
 
-The `tolerance`, `min` & `max` options can only be used in the "relaxed" mode as meaningful for numeric values only. There are 2 ways of matching - either define a `value` (with a possible `tolerance`) to match values in `[value ± tolerance]` range (both bounds are "included"), or define `min` & `max` to match values in `[min, max)` range (right bound is not included).
+The `tolerance`, `min` & `max` options can only be used in the "relaxed" mode as meaningful for numeric values only. There are 2 ways of matching - either define a `value` (with a possible `tolerance`, otherwise a default "0" tolerance is used) to match values in `[value ± tolerance]` range (both bounds are "included"), or define `min` & `max` to match values in `[min, max)` range (right bound is not included).
 
 The `label` option is processed as follows:
 1. In "strict mode": if `label` is not defined - then a displayed label is same as `value` (unless a common `label` is defined which is used instead); if `label` is defined - it is displayed instead.
-2. In "relaxed mode"
+2. In "relaxed mode": if `label` is defined - then it is used; otherwise it depends:
+-- if a common `label` is defined - it is used;
+-- if a `value` option is defined - then a displayed label is same as `value`;
+-- if `min` & `max` options are defined - then an automatically generated `${min} .. ${max}` label is used.
+
+It is possible to define the `label` option as a template like `${min} .. ${max}`, `${raw}, range [${min} .. ${max}]` - a combination of a user-defined text & tokens. Here the `${...}` part can contain tokens like `value`, `tolerance`, `min`, `max` & `raw`, where the `raw` token stands for a matched value.
 
 Notes:
 1. The `state_map` option can be defined per-entity or globally for all entities. Per-entity approach is preferable when a conversion is supposed to be done for one particular entity only, otherwise it may cause a distortion on a graph & warnings in a browser's console.
