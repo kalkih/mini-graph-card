@@ -8,7 +8,8 @@
 // @vitest-environment jsdom
 import { expect, describe, it, beforeEach } from 'vitest';
 import MiniGraphCard from '../src/main';
-import type { ConfigWithStateMapType, StateMapType } from './types/stateMapTypes';
+import type { StateMapType } from './types/stateMapTypes';
+import type { ConfigType } from './types/configType';
 
 describe("MiniGraphCard::_convertState()", () => {
   let card: MiniGraphCard;
@@ -21,7 +22,7 @@ describe("MiniGraphCard::_convertState()", () => {
         keep_values: false,
         map: [],
       }};
-    stateMapConfig = (card.config as ConfigWithStateMapType).state_map as StateMapType;
+    stateMapConfig = (card.config as ConfigType).state_map as StateMapType;
   });
 
   describe('keep_values=false/undefined', () => {
