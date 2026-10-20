@@ -1791,7 +1791,8 @@ export default class MiniGraphCard extends LitElement {
   * } Object containing mapping results
   * @param {object} stateMapConfig state_map mapping array
   * @param {number|string} inState Value of a state/attribute ("unformatted") or a static_value
-  * @param {number} [index=undefined] Index of an entry in config.entities (only needed to process a `raw` token)
+  * @param {number} [index=undefined] Index of an entry in config.entities
+  * (only needed to process a `raw` token)
   */
   _mapState(stateMapConfig, inState, index = undefined) {
     const stateMapArray = stateMapConfig.map;
@@ -1811,12 +1812,13 @@ export default class MiniGraphCard extends LitElement {
           // float value must be converted to a positive integer
           let roundedValue = Math.round(Number(inState));
           roundedValue = Math.max(0, roundedValue);
-          stateMap = stateMapArray[roundedValue]; // can be undefined for a moment (why I wrote this?)
+          stateMap = stateMapArray[roundedValue];
         } else {
           stateMap = stateMapArray.find(state => state.value === inState);
         }
 
-        if (!stateMap && !isUnavailableState(inState)) { // no usual need to map the "unavailable" word
+        // note: no usual need to map the "unavailable" word
+        if (!stateMap && !isUnavailableState(inState)) {
           log(`value [${inState}] not found in state_map: `
             + `[${getStringifiedValue(stateMapArray)}]`); // ?? { isError: false }
         }
@@ -1863,11 +1865,13 @@ export default class MiniGraphCard extends LitElement {
         }
         if (useLabel !== undefined) {
           // could be a template - check if tokens are present
-          const hasRaw = useLabel.includes('${raw}');
-          const hasValue = useLabel.includes('${value}');
-          const hasTolerance = useLabel.includes('${tolerance}');
-          const hasMin = useLabel.includes('${min}');
-          const hasMax = useLabel.includes('${max}');
+          // /* eslint-disable no-template-curly-in-string */
+          const hasRaw = useLabel.includes('${raw');
+          const hasValue = useLabel.includes('${value');
+          const hasTolerance = useLabel.includes('${tolerance');
+          const hasMin = useLabel.includes('${min');
+          const hasMax = useLabel.includes('${max');
+          // /* eslint-enable no-template-curly-in-string */
           const templateContext = {
             raw: hasRaw
               ? this._processState(inState, index)
