@@ -1991,10 +1991,12 @@ export default class MiniGraphCard extends LitElement {
   * localized, following locale settings,
   * (for entities:) accounting possible individual accuracy settings & possible "decimals" options
   * @returns {string} Formatted value of a state/attribute
-  * @param {number|string} state Value of a state/attribute ("unformatted") or a static_value
+  * @param {number|string} inState Value of a state/attribute ("unformatted") or a static_value
   * @param {number} index Index of an entry in config.entities
   */
-  _processState(state, index) {
+  _processState(inState, index) {
+    let state = inState;
+
     // cases like "complex data", "data not ready"
     if (state === undefined || state === null || state === '') {
       return formatNumber(NaN, this._hass.locale);
