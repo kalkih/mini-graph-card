@@ -393,26 +393,36 @@ By default, tapping on an element opens a `more-info` dialog:
 #### State map object
 
 State map object allows to map values from an entity's history to specific graph coordinates and labels. It operates in two modes:
-* **strict mode** (default, when `keep_values: false` or undefined): converts text states (e.g., `on`, `off`) to sequential numbers (0, 1, ...) to render them on a graph. Unmapped values are left in the history array "as is"; if these unmapped values are numeric - they are shown on a graph & thus may cause a distortion since the properly mapped values are like "0, 1, ..." and can be much smaller than the unmapped values; if the unmapped values are non-numeric - these values are not shown on a graph (since graph is created using _numbers_), and only **current** unmapped values can be displayed in a "state display" area. As a conclusion: only use the **strict mode** for entities with non-numeric values & provide a mapping for all possible values.
+* **strict mode** (default, when `keep_values: false` or undefined): converts text values (e.g., `on`, `off`) to sequential numbers (0, 1, ...) to render them on a graph. Unmapped values are left in the history array "as is"; if these unmapped values are numeric - they are shown on a graph & thus may cause a distortion since the properly mapped values are like "0, 1, ..." and can be much smaller than the unmapped values; if the unmapped values are non-numeric - these values are not shown on a graph (since graph is created using _numbers_), and only **current** unmapped values can be displayed in a "state display" area. As a conclusion: only use the **strict mode** for entities with non-numeric values & provide a mapping for all possible values.
 * **relaxed mode** (when `keep_values: true`): is only meaningful for entities with numeric values, retains original numeric history values while replacing custom text labels for specific numbers (like `Danger` instead of `1000`). Supports an optional `tolerance` parameter to match numeric values within a defined range `[value ± tolerance]`, both bounds are "included". Alternatively, `min` & `max` parameters can be used instead to match numeric values in a defined range `[min, max)`, a right bound in not "included".
 
-The `state_map` option has an object structure with mandatory `map` & optional `keep_values` keys:
+The `state_map` option can be defined on 2 ways:
+* short (or legacy) syntax - the `state_map` option is an array of mappings, this creates a "strict" mapping.
+* full syntax - the `state_map` option is an object, this may be used to define either a "strict" or "relaxed" mapping.
+
+The `state_map` option in a "full syntax" has an object structure with mandatory `map` & other optional keys:
 
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
 | map | list |  | Array of mappings between a historical value and a graph coordinate or display label.
-| keep_values | boolean |  `false` | Set to `true` to preserve raw values in the history instead of replacing them with indexes.
+| keep_values | boolean |  `false` | Set to `true` for the "relaxed" mapping.
+| hide_unit | boolean |  `false` | Set to `true` to hide a native or custom unit for a mapped value (e.g. to show a "Danger" label instead of "Danger %") for ALL mappings (unless it is overridden by setting the `hide_unit` option for a particular mapping).
+| label | string |   | Set to define a common label for all mappings (see more details about labels below).
 
 The `map` key contains a list of entries.
-When `keep_values` is not `true` - the **order of entries matters** as the entry's index determines its position (Y-value) on the graph.
+
+When `keep_values` is not `true` (or in case of the "short/legacy syntax") - the **order of entries matters** as the entry's index determines its position (Y-value) on the graph.
+
 Each entry may contain properties listed below:
 
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
 | value ***(required)*** | string |  | Value to convert.
-| label | string | same as value | String to show as a label.
-| tolerance | number | 0 | Absolute numeric deviation allowed when matching values on the graph, e.g. a value `3.14` in a history & a `value` option's value `3.142` are matched with a `tolerance: 0.005`. Only accounted when `keep_values: true`.
-| hide_unit | boolean | `false` | Hide a unit for a converted value, might be useful for special cases like "'1000 W' value should be shown as 'Danger'".
+| label | string | same as value | String to show as a label, overrides a common `label` if defined.
+| tolerance | number | 0 | Absolute numeric deviation allowed when matching values, e.g. a value `3.14` in a history & a `value` option's value `3.142` are matched with a `tolerance: 0.005`. Only accounted when `keep_values: true`.
+| min | number |  | Left bound of a range of matching values. Only accounted when `keep_values: true`.
+| max | number |  | Right bound of a range of matching values. Only accounted when `keep_values: true`.
+| hide_unit | boolean | `false` | Hide a unit for a mapped value (overrides a common `hide_unit` if defined).
 
 As a shorthand, you can just use a string as a value to convert:
 
@@ -426,11 +436,7 @@ As a shorthand, you can just use a string as a value to convert:
 ```
 Note: if an order of entries is changed in a "strict" `state_map` and a `cache` option is not set to `false`, it is recommended to purge a browser's cache - otherwise old cached history data (generated for the old order) might become wrong for the new config.
 
-Legacy configuration: the State map object is itself an array of records `{value, label, hide_unit}` (see above), or a described "value-only" shorthand.
-In the legacy format, only the default strict mode is supported, the `tolerance` option is ignored.
-Legacy configuration is still supported, yet it is recommended to upgrade.
-
-See an example [below](#non-numeric-sensor-states).
+See examples [below](#using-state-map).
 
 ### Value factor
 
@@ -1339,11 +1345,11 @@ hours_to_show: 168
 group_by: date
 ```
 
-### Non-numeric sensor states
+### Using `state_map`
+
+Show data coming from binary sensors:
 
 ![mini_binary_sensor](https://user-images.githubusercontent.com/8268674/66825779-e1ff5d80-ef42-11e9-89eb-673d2ada8d34.png)
-
-You can render non-numeric states by providing `state_map` config. For example, this way you can show data coming from binary sensors.
 
 ```yaml
 type: custom:mini-graph-card
