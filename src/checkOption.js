@@ -646,10 +646,6 @@ const checkPointsPerHour = (config) => {
   let pointsPerHourAdjusted = false;
 
   switch (config.group_by) {
-    // case 'month':
-    //   newPointsPerHour = 1 / 24 / 30 ? 31?; // какое число? и в разных месяцах разные числа
-    //   pointsPerHourAdjusted = true;
-    //   break;
     case 'week':
       newPointsPerHour = 1 / 24 / 7;
       pointsPerHourAdjusted = true;
