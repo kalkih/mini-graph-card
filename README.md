@@ -438,7 +438,7 @@ The `tolerance`, `min` & `max` options can only be used in the "relaxed" mode as
 The `label` option is processed as follows:
 1. In "strict mode": if `label` is defined - then it is used; otherwise:
 * if a common `label` is defined - it is used;
-* a displayed label is same as `value`.
+* otherwise - a displayed label is same as `value`.
 2. In "relaxed mode": if `label` is defined - then it is used; otherwise:
 * if a common `label` is defined - it is used;
 * if a `value` option is defined - then a displayed label is same as `value`;
