@@ -396,9 +396,9 @@ State map object allows to map values from an entity's history to specific graph
 * **strict mode** (default, when `keep_values: false` or undefined): converts text values (e.g., `on`, `off`) to sequential numbers (0, 1, ...) to render them on a graph. Unmapped values are left in the history array "as is"; if these unmapped values are numeric - they are shown on a graph & thus may cause a distortion since the properly mapped values are like "0, 1, ..." and can be much smaller than the unmapped values; if the unmapped values are non-numeric - these values are not shown on a graph (since graph is created using _numbers_), and only **current** unmapped values can be displayed in a "state display" area. As a conclusion: only use the **strict mode** for entities with non-numeric values & provide a mapping for all possible values.
 * **relaxed mode** (when `keep_values: true`): is only meaningful for entities with numeric values, retains original numeric history values while replacing custom text labels for specific numbers (like `Danger` instead of `1000`). Supports an optional `tolerance` parameter to match numeric values within a defined range `[value ± tolerance]`, both bounds are "included". Alternatively, `min` & `max` parameters can be used instead to match numeric values in a defined range `[min, max)`, a right bound in not "included".
 
-The `state_map` option can be defined on 2 ways:
-* short (or legacy) syntax - the `state_map` option is an array of mappings, this creates a "strict" mapping.
-* full syntax - the `state_map` option is an object, this may be used to define either a "strict" or "relaxed" mapping.
+The `state_map` option can be defined in 2 ways:
+* short (or legacy) syntax - the `state_map` option is an array of mappings, this creates "strict" mappings.
+* full syntax - the `state_map` option is an object, this may be used to define either "strict" or "relaxed" mappings.
 
 The `state_map` option in a "full syntax" has an object structure with mandatory `map` & other optional keys:
 
@@ -410,9 +410,7 @@ The `state_map` option in a "full syntax" has an object structure with mandatory
 | label | string |   | Set to define a common label for all mappings (see more details about labels below).
 
 The `map` key contains a list of entries.
-
 When `keep_values` is not `true` (or in case of the "short/legacy syntax") - the **order of entries matters** as the entry's index determines its position (Y-value) on the graph.
-
 Each entry may contain properties listed below:
 
 | Name | Type | Default | Description |
