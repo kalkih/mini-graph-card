@@ -507,7 +507,7 @@ const checkStateMap = (config, configName) => {
             `${configName}.state_map.map[${index}]`,
           );
           if (!bounds) return null;
-          ({ min, max} = bounds);
+          ({ min, max } = bounds);
         }
 
         if (label !== undefined && label !== null
