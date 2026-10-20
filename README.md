@@ -444,7 +444,7 @@ The `label` option is processed as follows:
 * if a `value` option is defined - then a displayed label is same as `value`;
 * if `min` & `max` options are defined - then an automatically generated `${min} .. ${max}` label is used.
 
-It is possible to define the `label` option as a template like `${min} .. ${max}`, `${raw}, range [${min} .. ${max}]` - a combination of a user-defined text & tokens. Here the `${...}` part can contain tokens like `value`, `tolerance`, `min`, `max` & `raw`, where the `raw` token stands for a matched value.
+In the "relaxed" mode, it is possible to define the `label` option as a template like `${min} .. ${max}`, `${raw}, range [${min} .. ${max}]` - a combination of a user-defined text & tokens. Here the `${...}` part can contain tokens like `value`, `tolerance`, `min`, `max` & `raw`, where the `raw` token stands for a matched value.
 
 Notes:
 1. The `state_map` option can be defined per-entity or globally for all entities. Per-entity approach is preferable when a conversion is supposed to be done for one particular entity only, otherwise it may cause a distortion on a graph & warnings in a browser's console.
