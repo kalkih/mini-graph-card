@@ -11,7 +11,3 @@ export interface StateMapType {
   label?: string;
   hide_unit?: boolean;
 };
-
-export interface ConfigWithStateMapType {
-  state_map?: StateMapType | StateMapEntryType[];
-};
