@@ -8,7 +8,8 @@
 import { expect, describe, it, beforeEach } from 'vitest';
 import { checkStateMap } from '../src/checkOption';
 import { migrateStateMapConfig } from '../src/migrate';
-import type { StateMapType, ConfigWithStateMapType } from './types/stateMapTypes';
+import type { StateMapType } from './types/stateMapTypes';
+import type { ConfigType } from './types/configType';
 
 const DIFF_VALUES: any[] = [
   "abc",
@@ -288,8 +289,8 @@ const VARIANTS_ONLY_NEW: any[] = [
 VARIANTS.forEach((variant) => {
   describe(variant.descr, () => {
     let map = variant.map;
-    let config: ConfigWithStateMapType;
-    let config_new: ConfigWithStateMapType;
+    let config: ConfigType;
+    let config_new: ConfigType;
     let expected = variant.expected;
 
     beforeEach(() => {
@@ -303,7 +304,7 @@ VARIANTS.forEach((variant) => {
           ? config
           : config_new;
         if (index !== 1) {
-          cfg = migrateStateMapConfig(cfg) as ConfigWithStateMapType;
+          cfg = migrateStateMapConfig(cfg) as ConfigType;
         }
         checkStateMap(cfg, 'config');
         expect(cfg.state_map).toEqual(expected);
@@ -328,8 +329,8 @@ DIFF_VALUES.forEach((value) => {
   VALUES.forEach((variant) => {
     describe(variant.descr, () => {
       let map = [ ...variant.map ];
-      let config: ConfigWithStateMapType;
-      let config_new: ConfigWithStateMapType;
+      let config: ConfigType;
+      let config_new: ConfigType;
 
       beforeEach(() => {
         config = { state_map: map };
@@ -342,7 +343,7 @@ DIFF_VALUES.forEach((value) => {
             ? config
             : config_new;
           if (index !== 1) {
-            cfg = migrateStateMapConfig(cfg) as ConfigWithStateMapType;
+            cfg = migrateStateMapConfig(cfg) as ConfigType;
           }
           checkStateMap(cfg, 'config');
           expect(cfg.state_map).toEqual(variant.expected);
@@ -354,7 +355,7 @@ DIFF_VALUES.forEach((value) => {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 VARIANTS_ONLY_NEW.forEach((variant) => {
   describe(variant.descr, () => {
-    let config_new: ConfigWithStateMapType;
+    let config_new: ConfigType;
     let expected = variant.expected;
 
     beforeEach(() => {
@@ -368,7 +369,7 @@ VARIANTS_ONLY_NEW.forEach((variant) => {
       }
       it(test, () => {
         if (index !== 1) {
-          config_new = migrateStateMapConfig(config_new) as ConfigWithStateMapType;
+          config_new = migrateStateMapConfig(config_new) as ConfigType;
         }
         checkStateMap(config_new, 'config');
         expect(config_new.state_map).toEqual(expected);
@@ -572,7 +573,7 @@ describe("Zones overlapping", () => {
 // testing templates in "label"
 describe("Templated label", () => {
   it("Auto-generated labels (strict)", () => {
-    const config: ConfigWithStateMapType = {
+    const config: ConfigType = {
       state_map: {
         map: [
           { value: '200' },
@@ -586,7 +587,7 @@ describe("Templated label", () => {
   });
 
   it("Auto-generated labels (relaxed)", () => {
-    const config: ConfigWithStateMapType = {
+    const config: ConfigType = {
       state_map: {
         keep_values: true,
         map: [
@@ -601,7 +602,7 @@ describe("Templated label", () => {
   });
 
   it("Templated labels (relaxed)", () => {
-    const config: ConfigWithStateMapType = {
+    const config: ConfigType = {
       state_map: {
         keep_values: true,
         map: [
@@ -614,7 +615,7 @@ describe("Templated label", () => {
   });
 
   it("Templated labels (relaxed), value is defined along with min/max", () => {
-    const config: ConfigWithStateMapType = {
+    const config: ConfigType = {
       state_map: {
         keep_values: true,
         map: [
