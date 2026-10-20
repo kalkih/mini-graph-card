@@ -393,8 +393,8 @@ By default, tapping on an element opens a `more-info` dialog:
 #### State map object
 
 State map object allows to map values from an entity's history to specific graph coordinates and labels. It operates in two modes:
-* **strict mode** (default): maps text states (e.g., `on`, `off`) to sequential numbers (0, 1) to render them on a line graph. Any unmapped values are treated as invalid;
-* **relaxed mode** (when `keep_values: true`): retains original numeric history values while replacing custom text labels for specific numbers. Supports an optional `tolerance` parameter to match numeric values within a defined range.
+* **strict mode** (default, when `keep_values: false` or undefined): converts text states (e.g., `on`, `off`) to sequential numbers (0, 1, ...) to render them on a graph. Unmapped values are left in the history array "as is"; if these unmapped values are numeric - they are shown on a graph & thus may cause a distortion since the properly mapped values are like "0, 1, ..." and can be much smaller than the unmapped values; if the unmapped values are non-numeric - these values are not shown on a graph (since graph is created using _numbers_), and only **current** unmapped values can be displayed in a "state display" area. As a conclusion: only use the **strict mode** for entities with non-numeric values & provide a mapping for all possible values.
+* **relaxed mode** (when `keep_values: true`): is only meaningful for entities with numeric values, retains original numeric history values while replacing custom text labels for specific numbers (like `Danger` instead of `1000`). Supports an optional `tolerance` parameter to match numeric values within a defined range `[value ± tolerance]`, both bounds are "included". Alternatively, `min` & `max` parameters can be used instead to match numeric values in a defined range `[min, max)`, a right bound in not "included".
 
 The `state_map` option has an object structure with mandatory `map` & optional `keep_values` keys:
 
