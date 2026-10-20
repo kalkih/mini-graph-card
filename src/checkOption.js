@@ -448,7 +448,6 @@ const checkStateMap = (config, configName) => {
   const globalLabel = config.state_map.label;
   if (globalLabel !== undefined && globalLabel !== null) {
     config.state_map.label = String(globalLabel);
-    console.log('config.state_map.label', config.state_map.label);
   }
 
   const globalHideUnit = config.state_map.hide_unit;
@@ -508,8 +507,7 @@ const checkStateMap = (config, configName) => {
             `${configName}.state_map.map[${index}]`,
           );
           if (!bounds) return null;
-          min = bounds.min;
-          max = bounds.max;
+          ({ min, max} = bounds);
         }
 
         if (label !== undefined && label !== null
