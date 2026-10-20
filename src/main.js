@@ -1865,13 +1865,11 @@ export default class MiniGraphCard extends LitElement {
         }
         if (useLabel !== undefined) {
           // could be a template - check if tokens are present
-          // /* eslint-disable no-template-curly-in-string */
           const hasRaw = useLabel.includes('${raw');
           const hasValue = useLabel.includes('${value');
           const hasTolerance = useLabel.includes('${tolerance');
           const hasMin = useLabel.includes('${min');
           const hasMax = useLabel.includes('${max');
-          // /* eslint-enable no-template-curly-in-string */
           const templateContext = {
             raw: hasRaw
               ? this._processState(inState, index)
