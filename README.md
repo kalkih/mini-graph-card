@@ -436,10 +436,18 @@ As a shorthand, you can just use a string as a value to convert:
 The `tolerance`, `min` & `max` options can only be used in the "relaxed" mode as meaningful for numeric values only. There are 2 ways of matching - either define a `value` (with a possible `tolerance`, otherwise a default "0" tolerance is used) to match values in `[value ± tolerance]` range (both bounds are "included"), or define `min` & `max` to match values in `[min, max)` range (right bound is not included).
 
 The `label` option is processed as follows:
-1. In "strict mode": if `label` is not defined - then a displayed label is same as `value` (unless a common `label` is defined which is used instead); if `label` is defined - it is displayed instead.
-2. In "relaxed mode": if `label` is defined - then it is used; otherwise it depends:
+1. In "strict mode": if `label` is defined - then it is used; otherwise:
+
 -- if a common `label` is defined - it is used;
+
+-- a displayed label is same as `value`.
+
+2. In "relaxed mode": if `label` is defined - then it is used; otherwise:
+
+-- if a common `label` is defined - it is used;
+
 -- if a `value` option is defined - then a displayed label is same as `value`;
+
 -- if `min` & `max` options are defined - then an automatically generated `${min} .. ${max}` label is used.
 
 It is possible to define the `label` option as a template like `${min} .. ${max}`, `${raw}, range [${min} .. ${max}]` - a combination of a user-defined text & tokens. Here the `${...}` part can contain tokens like `value`, `tolerance`, `min`, `max` & `raw`, where the `raw` token stands for a matched value.
