@@ -446,7 +446,7 @@ The `label` option is processed as follows:
 * if `min` & `max` options are defined - then an automatically generated `${min} .. ${max}` label is used.
 
 It is possible to define the `label` option as a template like `${min} .. ${max}`, `${raw}, range [${min} .. ${max}]` - a combination of a user-defined text & tokens.
-Here the `${...}` part can contain tokens like `value`, `tolerance`, `min`, `max` & `raw`, where the `raw` token stands for a matched value, and other tokens stand to corresponding options; note that if some option (e.g. `min`) is not defined for a particular mapping entry - then a corresponding template (`${min}` in this case) is processed as "empty string".
+Here the `${...}` part can contain tokens like `value`, `tolerance`, `min`, `max` & `raw`, where the `raw` token stands for a matched value, and other tokens stand for corresponding options; note that if some option (e.g. `min`) is not defined for a particular mapping entry - then a corresponding template (`${min}` in this case) is processed as "empty string".
 Also, in the "strict mode", only `value` token can be used, other tokens are processed as "empty string".
 
 Notes:
