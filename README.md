@@ -417,7 +417,7 @@ Each entry may contain properties listed below:
 |------|:----:|:-------:|-------------|
 | value ***(required)*** | string |  | Value to convert.
 | label | string | same as value | String to show as a label, overrides a common `label` if defined.
-| tolerance | number | 0 | Absolute numeric deviation allowed when matching values, e.g. a value `3.14` in a history & a `value` option's value `3.142` are matched with a `tolerance: 0.005`. Only accounted when `keep_values: true`.
+| tolerance | number |  | Absolute numeric deviation allowed when matching values, e.g. a value `3.14` in a history & a `value` option's value `3.142` are matched with a `tolerance: 0.005`. Only accounted when `keep_values: true`.
 | min | number |  | Left bound of a range of matching values. Only accounted when `keep_values: true`.
 | max | number |  | Right bound of a range of matching values. Only accounted when `keep_values: true`.
 | hide_unit | boolean | `false` | Hide a unit for a mapped value (overrides a common `hide_unit` if defined).
@@ -433,7 +433,8 @@ As a shorthand, you can just use a string as a value to convert:
       label: Blue
 ```
 
-The `tolerance`, `min` & `max` options can only be used in the "relaxed" mode as meaningful for numeric values only. There are 2 ways of matching - either define a `value` (with a possible `tolerance`, otherwise a default "0" tolerance is used) to match values in `[value ± tolerance]` range (both bounds are "included"), or define `min` & `max` to match values in `[min, max)` range (right bound is not included).
+The `tolerance`, `min` & `max` options can only be used in the "relaxed" mode as meaningful for numeric values only.
+There are 2 ways of matching - either define a `value` (with a possibly defined `tolerance`, otherwise a default "0" tolerance is used) to match values in `[value ± tolerance]` range (both bounds are "included"), or define `min` & `max` to match values in `[min, max)` range (right bound is not included).
 
 The `label` option is processed as follows:
 1. In "strict mode": if `label` is defined - then it is used; otherwise:
@@ -444,7 +445,10 @@ The `label` option is processed as follows:
 * if a `value` option is defined - then a displayed label is same as `value`;
 * if `min` & `max` options are defined - then an automatically generated `${min} .. ${max}` label is used.
 
-In the "relaxed" mode, it is possible to define the `label` option as a template like `${min} .. ${max}`, `${raw}, range [${min} .. ${max}]` - a combination of a user-defined text & tokens. Here the `${...}` part can contain tokens like `value`, `tolerance`, `min`, `max` & `raw`, where the `raw` token stands for a matched value.
+It is possible to define the `label` option as a template like `${min} .. ${max}`, `${raw}, range [${min} .. ${max}]` - a combination of a user-defined text & tokens.
+Here the `${...}` part can contain tokens like `value`, `tolerance`, `min`, `max` & `raw`, where the `raw` token stands for a matched value, and other tokens stand to corresponding options; note that if some option (e.g. `min`) is not defined for a particular mapping entry - then a corresponding template (`${min}` in this case) is processed as `` (empty string).
+
+Also, in the "strict mode", only `value` token can be used, other tokens are processed as `` (empty string).
 
 Notes:
 1. The `state_map` option can be defined per-entity or globally for all entities. Per-entity approach is preferable when a conversion is supposed to be done for one particular entity only, otherwise it may cause a distortion on a graph & warnings in a browser's console.
