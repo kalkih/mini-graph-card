@@ -1871,25 +1871,23 @@ export default class MiniGraphCard extends LitElement {
           const hasMin = useLabel.includes('${min');
           const hasMax = useLabel.includes('${max');
           const templateContext = {
-            raw: hasRaw
+            raw: hasRaw && keepValues === true
               ? this._processState(inState, index)
-              : '',
+              : '', // always '' for keepValues === false
             value: hasValue && stateMap.value !== undefined
               ? stateMap.value
               : '',
-            tolerance: hasTolerance
-              ? keepValues === false
-                ? '0' // in strict mode (keep_values=false) a strict "==" is used
-                : stateMap.tolerance !== undefined
-                  ? String(stateMap.tolerance)
-                  : stateMap.value !== undefined
-                    ? '0'
-                    : ''
-              : '',
-            min: hasMin && stateMap.min !== undefined
+            tolerance: hasTolerance && keepValues === true
+              ? stateMap.tolerance !== undefined
+                ? String(stateMap.tolerance)
+                : stateMap.value !== undefined
+                  ? '0'
+                  : ''
+              : '', // always '' for keepValues === false
+            min: hasMin && stateMap.min !== undefined && keepValues === true
               ? String(stateMap.min)
               : '', // always '' for keepValues === false
-            max: hasMax && stateMap.max !== undefined
+            max: hasMax && stateMap.max !== undefined && keepValues === true
               ? String(stateMap.max)
               : '', // always '' for keepValues === false
           };
