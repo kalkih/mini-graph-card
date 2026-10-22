@@ -120,7 +120,8 @@ const style = css`
   .icon {
     color: var(--state-icon-color, #44739e);
   }
-  .icon > ha-icon {
+  .icon > ha-icon,
+  .icon > ha-state-icon {
     height: 1.7em;
     width: 1.7em;
   }
@@ -163,7 +164,8 @@ const style = css`
     left: 50%;
     transform: translateX(-50%);
   }
-  .states > .icon > ha-icon {
+  .states > .icon > ha-icon,
+  .states > .icon > ha-state-icon {
     height: 2em !important;
     width: 2em !important;
   }
