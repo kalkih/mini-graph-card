@@ -218,6 +218,57 @@ export default class MiniGraphCard extends LitElement {
     });
   }
 
+  /**
+  * Returns per-axis state_map configs for both Y-axes
+  * @returns {object} per-axis state_map configs
+  */
+  _getAxisStateMap() {
+    const axisStateMap = {};
+    for (let axisIndex = 0; axisIndex < 2; axisIndex += 1) {
+      const entityCfgs = axisIndex === 0
+        ? this.primaryYaxisEntities
+        : this.secondaryYaxisEntities;
+      const stateMapCfgs = entityCfgs.filter(
+        (entityConfig) => {
+          const stateMapConfig = entityConfig.state_map;
+          return stateMapConfig
+            && stateMapConfig.map
+            && stateMapConfig.map.length > 0;
+        },
+      ).map(
+        (entityConfig) => entityConfig.state_map,
+      );
+      let stateMapConfig;
+      if (stateMapCfgs.length === 1 && entityCfgs.length === 1
+        && !stateMapCfgs[0].keep_values) {
+        // there is only one entity on the axis
+        // and it has own strict state_map with non-empty map
+        stateMapConfig = stateMapCfgs[0];
+      } else if (stateMapCfgs.length > 1
+        || (stateMapCfgs.length === 1 && entityCfgs.length > 1)) {
+        // more than 1 entity has own state_map with non-empty map
+        // or 1 entity has own state_map with non-empty map + there are other entities
+        stateMapConfig = null;
+      } else  {
+        // none entity has own state_map with non-empty map
+        // or all per-entity state_maps have empty map
+        // try using global state_map
+        const globalStateMap = this.config.state_map;
+        stateMapConfig = globalStateMap
+          && globalStateMap.map
+          && globalStateMap.map.length > 0
+          && !globalStateMap.keep_values
+          ? globalStateMap
+          : null;
+      }
+      const axisKey = axisIndex === 0
+        ? 'primary'
+        : 'secondary';
+      axisStateMap[axisKey] = stateMapConfig;
+    }
+    return axisStateMap;
+  }
+
   setConfig(config) {
     ({
       config: this.config,
@@ -272,6 +323,9 @@ export default class MiniGraphCard extends LitElement {
     this._primaryYaxisEntitiesCache = undefined;
     this._secondaryYaxisEntitiesCache = undefined;
     this._visibleLegendsCache = undefined;
+
+    // predefined per-axis state_map configs
+    this._axisStateMap = this._getAxisStateMap();
 
     // check a possibility to draw bars; adjust points_per_hour if needed
     const barGraphsCount = this.visibleBarEntities.length;
@@ -1925,19 +1979,30 @@ export default class MiniGraphCard extends LitElement {
       state = undefined;
     }
 
-    // process possible state_map
-    const entityConfig = index >= 0
-      ? this.config.entities[index]
-      : null;
-    const stateMapConfig = (entityConfig && entityConfig.state_map) || this.config.state_map;
-    const { result, hideUnit } = this._mapState(stateMapConfig, state, index);
-    if (hideUnit !== undefined && index >= 0) {
-      this._mappedHideUnit[index] = hideUnit;
+    // process a possible state_map
+    let stateMapConfig;
+    if (index >= 0) {
+      // process entity/static value
+      const entityConfig = this.config.entities[index];
+      stateMapConfig = (entityConfig && entityConfig.state_map) || this.config.state_map;
+    } else {
+      // process Y-axes
+      const axis = index === undefined
+        ? 'primary'
+        : 'secondary';
+      stateMapConfig = this._axisStateMap && this._axisStateMap[axis];
     }
-    if (result !== undefined) {
-      return result;
+    if (stateMapConfig) {
+      // either process a mapping for entity/static value
+      // or process an allowed mapping for Y-axis
+      const { result, hideUnit } = this._mapState(stateMapConfig, state, index);
+      if (hideUnit !== undefined && index >= 0) {
+        this._mappedHideUnit[index] = hideUnit;
+      }
+      if (result !== undefined) {
+        return result;
+      }
     }
-
     // proceed with default processing
     return this._processState(state, index);
   }
