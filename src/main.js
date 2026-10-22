@@ -192,20 +192,15 @@ class MiniGraphCard extends LitElement {
   * & for all entities individually
   * @returns {object} min & max "line_width" values
   */
-  getMinMaxLineWidth() {
+  _getMinMaxLineWidth() {
+    const globalLineWidth = this.config.line_width;
     const arr = this.config.entities
-      .filter(entityConfig => entityConfig.show_graph !== false)
-      .map((entityConfig) => {
-        const value = entityConfig.line_width;
-        return isNumeric(value)
-          ? value : this.config.line_width;
-      });
-    if (arr.length === 0) {
-      return ({
-        min: this.config.line_width,
-        max: this.config.line_width,
-      });
-    }
+      .filter(
+        entityConfig => entityConfig.show_graph !== false
+        && entityConfig.line_width !== undefined,
+      )
+      .map((entityConfig) => entityConfig.line_width);
+    arr.push(globalLineWidth);
     return ({
       min: Math.min(...arr),
       max: Math.max(...arr),
@@ -287,7 +282,7 @@ class MiniGraphCard extends LitElement {
     const {
       min: min_line_width,
       max: max_line_width,
-    } = this.getMinMaxLineWidth();
+    } = this._getMinMaxLineWidth();
     this._graphMargin = this.visibleBarEntities.length === this.visibleEntities.length
       ? [DEFAULT_MARGIN, DEFAULT_MARGIN]
       : this.config.show.fill
