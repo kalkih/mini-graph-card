@@ -1399,6 +1399,25 @@ state_map:
     label: Detected
 ```
 
+Show a custom label for numeric values:
+
+<img width="484" height="181" alt="image" src="https://github.com/user-attachments/assets/a9260a39-b4a1-423f-9ef5-649a4bdbcc0c" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.xiaomi_cg_1_co2
+state_map:
+  keep_values: true
+  map:
+    - min: 650
+      max: 750
+      label: Warning - ${raw}
+show:
+  name: false
+  icon: false
+  labels: true
+```
 
 ### Showing additional info on the card
 
