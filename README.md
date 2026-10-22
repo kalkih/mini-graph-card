@@ -57,7 +57,7 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
       + [Opposing dual-axis graphs](#opposing-dual-axis-graphs)
       + [Grouping by date](#grouping-by-date)
       + [Data aggregation functions](#data-aggregation-functions)
-      + [Non-numeric sensor states](#non-numeric-sensor-states)
+      + [Using state_map](#using-state_map)
       + [Showing additional info on the card](#showing-additional-info-on-the-card)
       + [Accessing attributes in complex structures](#accessing-attributes-in-complex-structures)
          - [Accessing dictionary attributes](#accessing-dictionary-attributes)
@@ -178,7 +178,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | align_icon | string | `right` | v0.2.0 | Set the alignment of the icon, `left`, `right` or `state`. See more details [here](#alignment-for-name--icon-elements).
 | align_state | string | `left` | v0.2.0 | Set the alignment of the current state, `left`, `right` or `center`.
 | smoothing | boolean | `true` | v0.8.0 | Whether to make graph line smooth.
-| state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert (order matters as position becomes a value on the graph).
+| state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert.
 | logarithmic | boolean | `false` | v0.10.0 | Use a logarithmic scale for the graph (see [Logarithmic options](#logarithmic-options)).
 | baseline | number |  | v0.14.0 | Set a custom baseline for the graph (see [Baseline](#baseline)).
 | static_value_label_offset | number |  `20` | v0.14.0 | Set a custom horizontal offset for the [static value line label](#static-values), as percentage of the graph area's width.
@@ -199,6 +199,7 @@ These options are legacy and moved into [Y-axis config object](#y-axis-object):
 | value_factor | number or object |   | v0.9.4<br>v0.14.0-dev.1 | Scale a value, see [Value factor](#value-factor).
 | value_factor_secondary | number or object |   | v0.14.0-dev.1  | Scale a value, see [Value factor](#value-factor).
 
+Card config can still keep legacy options, yet it is recommended to upgrade.
 
 ### Entities object
 Entities may be listed directly (as per `sensor.temperature` in the example below), or defined using
@@ -221,8 +222,8 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | aggregate_func | string |         | Override for aggregate function used to calculate point on the graph, `avg`, `median`, `min`, `max`, `first`, `last`, `sum`.
 | decimals | integer |    | Override the exact number of decimals to show for number values, see [Number format](#number-format).
 | show_state | boolean |         | Display the current state.
-| show_legend_state | boolean |  false  | Display the current state as part of the legend.
-| show_indicator | boolean |         | Display a color indicator next to the state.
+| show_legend_state | boolean |  `false`  | Display the current state as part of the legend.
+| show_indicator | boolean |   `false`      | Display a color indicator next to the state.
 | show_graph | boolean |         | Set to false to completely hide the graph.
 | show_line | boolean |         | Set to false to hide the line.
 | show_fill | boolean |         | Set to false to hide the fill.
@@ -282,7 +283,7 @@ See examples [below](#different-graph-types).
 
 ### Y-axis object
 
-The object has a tree-like structure with optional `zero_position`, `primary` & `secondary` keys:
+The `y_axis` option has an object structure with optional `zero_position`, `primary` & `secondary` keys:
 
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
@@ -294,7 +295,7 @@ The `primary` & `secondary` keys may contain optional properties listed below:
 
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
-| invert | boolean |  | Make the Y-axis inverted, see [Inverted graphs](#inverted-graphs).
+| invert | boolean |  `false` | Make the Y-axis inverted, see [Inverted graphs](#inverted-graphs).
 | decimals | integer |  | Specify the exact number of decimals to show for the Y-axis labels, see [Number format](#number-format).
 | value_factor | number or object |   | Scale a value, see [Value factor](#value-factor).
 | lower_bound | number *or* string |   | Set a fixed lower bound for the Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
@@ -389,11 +390,75 @@ By default, tapping on an element opens a `more-info` dialog:
 | navigation_path | string |  | Any path | Path to navigate to (e.g. `/lovelace/0/`) when `action` is defined as `navigate`.
 | url | string |  | Any URL | URL to open when `action` is defined as `url`.
 
-### State map object
+#### State map object
+
+State map object allows to map values from an entity's history to specific graph coordinates and labels. It operates in two modes:
+* **strict mode** (default, when `keep_values: false` or undefined): converts text values (e.g., `on`, `off`) to sequential numbers (0, 1, ...) to render them on a graph. Unmapped values are left in the history array "as is"; if these unmapped values are numeric - they are shown on a graph & thus may cause a distortion since the properly mapped values are like "0, 1, ..." and can be much smaller than the unmapped values; if the unmapped values are non-numeric - these values are not shown on a graph (since graph is created using _numbers_), and only **current** unmapped values can be displayed in a "state display" area. As a conclusion: only use the **strict mode** for entities with non-numeric values & provide a mapping for all possible values.
+* **relaxed mode** (when `keep_values: true`): is only meaningful for entities with numeric values, retains original numeric history values while replacing custom text labels for specific numbers (like `Danger` instead of `1000`). Supports an optional `tolerance` parameter to match numeric values within a defined range `[value ± tolerance]`, both bounds are "included". Alternatively, `min` & `max` parameters can be used instead to match numeric values in a defined range `[min, max)`, a right bound in not "included". For matched values, defined labels are shown instead (like `Danger` or complex dynamically created `Danger: 810 (700..900)`).
+
+The `state_map` option can be defined in 2 ways:
+* short (or legacy) syntax - the `state_map` option is an array of mappings, this creates "strict" mappings.
+* full syntax - the `state_map` option is an object, this may be used to define either "strict" or "relaxed" mappings.
+
+The `state_map` option in a "full syntax" has an object structure with mandatory `map` & other optional keys:
+
+| Name | Type | Default | Description |
+|------|:----:|:-------:|-------------|
+| map | list |  | Array of mappings between a historical value and a graph coordinate or displayed label.
+| keep_values | boolean |  `false` | Set to `true` for the "relaxed" mapping.
+| hide_unit | boolean |  `false` | Set to `true` to hide a native or custom unit for a mapped value (e.g. to show a "Danger" label instead of "Danger %") for ALL mappings (unless it is overridden by setting the `hide_unit` option for a particular mapping).
+| label | string |   | Set to define a common label for all mappings (see more details about labels below).
+
+The `map` key contains a list of entries.
+When `keep_values` is not `true` (or in case of the "short/legacy syntax") - the **order of entries matters** as the entry's index determines its position (Y-value) on the graph.
+Each entry may contain properties listed below:
+
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
 | value ***(required)*** | string |  | Value to convert.
-| label | string | same as value | String to show as label (if the value is not precise).
+| label | string | same as value | String to show as a label, overrides a common `label` if defined.
+| tolerance | number |  | Absolute numeric deviation allowed when matching values, e.g. a value `3.14` in a history & a `value` option's value `3.142` are matched with a `tolerance: 0.005`. Only accounted when `keep_values: true`.
+| min | number |  | Left bound of a range of matching values. Only accounted when `keep_values: true`.
+| max | number |  | Right bound of a range of matching values. Only accounted when `keep_values: true`.
+| hide_unit | boolean | `false` | Hide a unit for a mapped value (overrides a common `hide_unit` if defined).
+
+As a shorthand, you can just use a string as a value to convert:
+
+```yaml
+  map:
+    - value: red
+      label: Red
+    - green
+    - value: blue
+      label: Blue
+```
+
+The `tolerance`, `min` & `max` options can only be used in the "relaxed" mode as meaningful for numeric values only.
+There are 2 ways of matching - either define a `value` (with a possibly defined `tolerance`, otherwise a default "0" tolerance is used) to match values in `[value ± tolerance]` range (both bounds are "included"), or define `min` & `max` to match values in `[min, max)` range (right bound is not included).
+
+The `label` option is processed as follows:
+1. In "strict mode": if `label` is defined - then it is used; otherwise:
+* if a common `label` is defined - it is used;
+* otherwise - a displayed label is same as `value`.
+2. In "relaxed mode": if `label` is defined - then it is used; otherwise:
+* if a common `label` is defined - it is used;
+* if a `value` option is defined - then a displayed label is same as `value`;
+* if `min` & `max` options are defined - then an automatically generated `${min} .. ${max}` label is used.
+
+It is possible to define the `label` option as a template like `${min} .. ${max}`, `${raw}, range [${min} .. ${max}]` - a combination of a user-defined text & tokens.
+Here the `${...}` part can contain tokens like `value`, `tolerance`, `min`, `max` & `raw`, where the `raw` token stands for a matched value, and other tokens stand for corresponding options; note that if some option (e.g. `min`) is not defined for a particular mapping entry - then a corresponding template (`${min}` in this case) is processed as "empty string".
+Also, in the "strict mode", only `value` token can be used, other tokens are processed as "empty string".
+
+Mapped values (like  `Danger [801 .. 1001)`, `Switched off`) are used as Y-axis labels only if (note: logic is a bit simplified below):
+* there is only one entity associated with the axis and it has own per-entity valid strict `state_map`;
+* none entity associated with the axis has own per-entity `state_map`, then a globally defined valid strict `state_map` is applied (if defined).
+Means - the relaxed mapping does not touch Y-axis labels.
+
+Notes:
+1. The `state_map` option can be defined per-entity or globally for all entities. Per-entity approach is preferable when a conversion is supposed to be done for one particular entity only, otherwise it may cause a distortion on a graph & warnings in a browser's console.
+2. If an order of entries is changed in a "strict" `state_map` and a `cache` option is not set to `false`, it is recommended to purge a browser's cache - otherwise old cached history data (generated for the old order) might become wrong for the new config.
+
+See examples [below](#using-state_map).
 
 ### Value factor
 
@@ -1302,11 +1367,11 @@ hours_to_show: 168
 group_by: date
 ```
 
-### Non-numeric sensor states
+### Using `state_map`
+
+Show data coming from binary sensors:
 
 ![mini_binary_sensor](https://user-images.githubusercontent.com/8268674/66825779-e1ff5d80-ef42-11e9-89eb-673d2ada8d34.png)
-
-You can render non-numeric states by providing state_map config. For example this way you can show data coming from binary sensors.
 
 ```yaml
 type: custom:mini-graph-card
@@ -1334,6 +1399,25 @@ state_map:
     label: Detected
 ```
 
+Show a custom label for numeric values:
+
+<img width="484" height="181" alt="image" src="https://github.com/user-attachments/assets/a9260a39-b4a1-423f-9ef5-649a4bdbcc0c" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.xiaomi_cg_1_co2
+state_map:
+  keep_values: true
+  map:
+    - min: 650
+      max: 750
+      label: Warning - ${raw}
+show:
+  name: false
+  icon: false
+  labels: true
+```
 
 ### Showing additional info on the card
 

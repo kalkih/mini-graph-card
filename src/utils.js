@@ -30,6 +30,26 @@ const log = (message) => {
   console.warn('mini-graph-card: ', message);
 };
 
+/**
+ * Render a string template by replacing ${variable} tokens with values.
+ * Math operations are not supported in ${...}.
+ * @param {string} template String containing ${variable} tokens
+ * @param {object} vars Object containing variable key-value pairs
+ * @returns {string} Rendered string
+ */
+const renderSimpleTemplate = (template, vars) => {
+  if (typeof template !== 'string'
+    || !template.includes('${')
+    || !vars
+    || typeof vars !== 'object') {
+    return String(template); // return as is
+  }
+  return template.replace(
+    /\$\{\s*(\w+)\s*\}/g,
+    (match, key) => (vars[key] !== undefined ? vars[key] : match),
+  );
+};
+
 export {
   getMin, getAvg, getMax,
   getMilli,
@@ -37,4 +57,5 @@ export {
   log,
   getFirstDefinedItem,
   getStringifiedValue,
+  renderSimpleTemplate,
 };

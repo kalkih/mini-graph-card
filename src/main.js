@@ -37,15 +37,18 @@ import {
   compress, decompress,
   getFirstDefinedItem,
   log,
+  getStringifiedValue,
+  renderSimpleTemplate,
 } from './utils';
 import {
   computeEntityName,
   entityNamesChanged,
 } from './entityName';
 
-const isUnavailableState = value => ['unavailable', 'unknown'].includes(value);
+const isUnavailableState = value => ['unavailable'].includes(value);
 
-class MiniGraphCard extends LitElement {
+// 'export' is only needed for testing
+export default class MiniGraphCard extends LitElement {
   constructor() {
     super();
     this.id = Math.random()
@@ -102,6 +105,9 @@ class MiniGraphCard extends LitElement {
 
     // margins for a graph container
     this._graphMargin = [DEFAULT_MARGIN, DEFAULT_MARGIN];
+
+    // array of hide_unit flags for mapped values (processing state_map)
+    this._mappedHideUnit = [];
 
     // data prepared by buildConfig()
     this._axisBoundsParsed = undefined; // parsed Y-axis bounds
@@ -212,6 +218,57 @@ class MiniGraphCard extends LitElement {
     });
   }
 
+  /**
+  * Returns per-axis state_map configs for both Y-axes
+  * @returns {object} per-axis state_map configs
+  */
+  _getAxisStateMap() {
+    const axisStateMap = {};
+    for (let axisIndex = 0; axisIndex < 2; axisIndex += 1) {
+      const entityCfgs = axisIndex === 0
+        ? this.primaryYaxisEntities
+        : this.secondaryYaxisEntities;
+      const stateMapCfgs = entityCfgs.filter(
+        (entityConfig) => {
+          const stateMapConfig = entityConfig.state_map;
+          return stateMapConfig
+            && stateMapConfig.map
+            && stateMapConfig.map.length > 0;
+        },
+      ).map(
+        entityConfig => entityConfig.state_map,
+      );
+      let stateMapConfig;
+      if (stateMapCfgs.length === 1 && entityCfgs.length === 1
+        && !stateMapCfgs[0].keep_values) {
+        // there is only one entity on the axis
+        // and it has own strict state_map with non-empty map
+        [stateMapConfig] = stateMapCfgs;
+      } else if (stateMapCfgs.length > 1
+        || (stateMapCfgs.length === 1 && entityCfgs.length > 1)) {
+        // more than 1 entity has own state_map with non-empty map
+        // or 1 entity has own state_map with non-empty map + there are other entities
+        stateMapConfig = null;
+      } else {
+        // none entity has own state_map with non-empty map
+        // or all per-entity state_maps have empty map
+        // try using global state_map
+        const globalStateMap = this.config.state_map;
+        stateMapConfig = globalStateMap
+          && globalStateMap.map
+          && globalStateMap.map.length > 0
+          && !globalStateMap.keep_values
+          ? globalStateMap
+          : null;
+      }
+      const axisKey = axisIndex === 0
+        ? 'primary'
+        : 'secondary';
+      axisStateMap[axisKey] = stateMapConfig;
+    }
+    return axisStateMap;
+  }
+
   setConfig(config) {
     ({
       config: this.config,
@@ -266,6 +323,9 @@ class MiniGraphCard extends LitElement {
     this._primaryYaxisEntitiesCache = undefined;
     this._secondaryYaxisEntitiesCache = undefined;
     this._visibleLegendsCache = undefined;
+
+    // predefined per-axis state_map configs
+    this._axisStateMap = this._getAxisStateMap();
 
     // check a possibility to draw bars; adjust points_per_hour if needed
     const barGraphsCount = this.visibleBarEntities.length;
@@ -451,6 +511,12 @@ class MiniGraphCard extends LitElement {
     }
 
     return true;
+  }
+
+  willUpdate(changedProperties) {
+    super.willUpdate(changedProperties);
+    // restore hide_unit flags for mapped values
+    this._mappedHideUnit = [];
   }
 
   firstUpdated() {
@@ -737,7 +803,7 @@ class MiniGraphCard extends LitElement {
             ${this.computeState(value, entityIndex)}
           </span>
           <span class="state__uom ellipsis">
-            ${this.computeUom(entityIndex, value)}
+            ${!this._mappedHideUnit[entityIndex] ? this.computeUom(entityIndex, value) : ''}
           </span>
           ${isPrimary && this.renderStateTime() || ''}
         </div>
@@ -1311,6 +1377,8 @@ class MiniGraphCard extends LitElement {
       const oneMinute = group_by !== 'interval' ? 60000 : 0;
 
       const now = this.getIntervalEndDate();
+      // current time (not mutated)
+      // needed to show a time with a yesterday's date if hours_to_show>=24
       const nowPersistent = new Date(now.getTime());
 
       now.setMilliseconds(now.getMilliseconds() - oneMinute - interval * count);
@@ -1772,78 +1840,261 @@ class MiniGraphCard extends LitElement {
   }
 
   /**
+  * Returns a mapped string/number value for a state/attribute or a static_value
+  * @returns {{hideUnit: (boolean|undefined), result: (string|undefined)}
+  * } Object containing mapping results
+  * @param {object} stateMapConfig state_map mapping array
+  * @param {number|string} inState Value of a state/attribute ("unformatted") or a static_value
+  * @param {number} [index=undefined] Index of an entry in config.entities
+  * (only needed to process a `raw` token)
+  */
+  _mapState(stateMapConfig, inState, index = undefined) {
+    const stateMapArray = stateMapConfig.map;
+    const keepValues = stateMapConfig.keep_values;
+
+    const globalHideUnit = stateMapConfig.hide_unit;
+    const globalLabel = stateMapConfig.label;
+
+    let hideUnit;
+    let result;
+
+    if (stateMapArray.length > 0) {
+      let stateMap;
+      if (!keepValues) {
+        // strict mode - state_map presumably contains all possible values
+        if (isNumeric(inState, true)) {
+          // float value must be converted to a positive integer
+          let roundedValue = Math.round(Number(inState));
+          roundedValue = Math.max(0, roundedValue);
+          stateMap = stateMapArray[roundedValue];
+        } else {
+          stateMap = stateMapArray.find(state => state.value === inState);
+        }
+
+        // note: no usual need to map the "unavailable" word
+        if (!stateMap && !isUnavailableState(inState)) {
+          log(`value [${inState}] not found in state_map: `
+            + `[${getStringifiedValue(stateMapArray)}]`); // ?? { isError: false }
+        }
+      } else {
+        // relaxed mode - state_map presumably contains particular values to be "re-labeled"
+        const isCurrentNumeric = isNumeric(inState, true);
+        const currentValue = isCurrentNumeric ? Number(inState) : NaN;
+        stateMap = stateMapArray.find((state) => {
+          if (isCurrentNumeric) {
+            // try to find using min/max
+            if (state.min !== undefined && state.max !== undefined) {
+              // min - bound included, max - bound excluded
+              return currentValue >= state.min && currentValue < state.max;
+            }
+            // try to find using value & tolerance
+            if (isNumeric(state.value, true)) {
+              const numValue = Number(state.value);
+              const tolerance = state.tolerance || 0;
+              // both bounds are included
+              const delta = Math.abs(currentValue - numValue);
+              const roundedDelta = Math.round(delta * 1e12) / 1e12; // drop tiny fraction digits
+              return roundedDelta <= tolerance;
+            }
+            return false; // not found
+          }
+          return state.value === String(inState);
+        });
+      }
+
+      if (stateMap) {
+        const useHideUnit = stateMap.hide_unit !== undefined
+          ? stateMap.hide_unit
+          : globalHideUnit;
+        if (useHideUnit !== undefined) {
+          hideUnit = !!useHideUnit;
+        }
+
+        let useLabel = stateMap.label;
+        if (useLabel === undefined) {
+          // generate automatically
+          useLabel = (typeof globalLabel === 'string')
+            ? globalLabel
+            : undefined;
+        }
+        if (useLabel !== undefined) {
+          // could be a template - check if tokens are present
+          const hasRaw = useLabel.includes('${raw');
+          const hasValue = useLabel.includes('${value');
+          const hasTolerance = useLabel.includes('${tolerance');
+          const hasMin = useLabel.includes('${min');
+          const hasMax = useLabel.includes('${max');
+          const templateContext = {
+            raw: hasRaw && keepValues === true
+              ? this._processState(inState, index)
+              : '', // always '' for keepValues === false
+            value: hasValue && stateMap.value !== undefined
+              ? stateMap.value
+              : '',
+            tolerance: hasTolerance && keepValues === true
+              ? stateMap.tolerance !== undefined
+                ? String(stateMap.tolerance)
+                : stateMap.value !== undefined
+                  ? '0'
+                  : ''
+              : '', // always '' for keepValues === false
+            min: hasMin && stateMap.min !== undefined && keepValues === true
+              ? String(stateMap.min)
+              : '', // always '' for keepValues === false
+            max: hasMax && stateMap.max !== undefined && keepValues === true
+              ? String(stateMap.max)
+              : '', // always '' for keepValues === false
+          };
+          result = renderSimpleTemplate(useLabel, templateContext);
+        } else {
+          result = stateMap.value !== undefined
+            ? String(stateMap.value)
+            : keepValues === false
+              ? undefined
+              : `${stateMap.min} .. ${stateMap.max}`; // min/max are defined if value is undefined
+        }
+      }
+    }
+
+    return { hideUnit, result };
+  }
+
+  /**
   * Returns a string value for a state/attribute or a static_value:
-  * localized, following locale settings,
-  * (for entities:) accounting possible individual accuracy settings & possible "decimals" options
+  * processed using state_map & other conversions
   * @returns {string} value of a state/attribute
   * @param {number|string} inState Value of a state/attribute ("unformatted") or a static_value
   * @param {number} index Index of an entry in config.entities
   */
   computeState(inState, index) {
-    if (this.config.state_map.length > 0) {
-      const stateMap = Number.isInteger(inState)
-        ? this.config.state_map[inState]
-        : this.config.state_map.find(state => state.value === inState);
+    let state = inState;
 
-      if (stateMap) {
-        return stateMap.label;
-      } else {
-        log(`value [${inState}] not found in state_map`);
-      }
+    // unset just in case
+    if (index >= 0) {
+      this._mappedHideUnit[index] = undefined;
     }
 
-    if (inState === undefined || inState === null || inState === '') {
+    if (typeof state === 'object' && state !== null) {
+      // safely bypass complex data
+      state = undefined;
+    }
+
+    // process a possible state_map
+    let stateMapConfig;
+    if (index >= 0) {
+      // process entity/static value
+      const entityConfig = this.config.entities[index];
+      stateMapConfig = (entityConfig && entityConfig.state_map) || this.config.state_map;
+    } else {
+      // process Y-axes
+      const axis = index === undefined
+        ? 'primary'
+        : 'secondary';
+      stateMapConfig = this._axisStateMap && this._axisStateMap[axis];
+    }
+    if (stateMapConfig) {
+      // either process a mapping for entity/static value
+      // or process an allowed mapping for Y-axis
+      const { result, hideUnit } = this._mapState(stateMapConfig, state, index);
+      if (hideUnit !== undefined && index >= 0) {
+        this._mappedHideUnit[index] = hideUnit;
+      }
+      if (result !== undefined) {
+        return result;
+      }
+    }
+    // proceed with default processing
+    return this._processState(state, index);
+  }
+
+  /**
+  * Returns a 'decimals' settings for an entity/static value
+  * @param {number} index Index of an entry in config.entities
+  */
+  _getDecimals(index) {
+    let dec;
+    const globalDecimals = this.config.decimals;
+    const configYaxis = this.config.y_axis;
+    // console.log('config', this.config);
+    // console.log('globalDecimals',globalDecimals);
+    // console.log('configYaxis',configYaxis);
+    // console.log('index',index);
+    if (index === undefined) {
+      // for a primary Y-axis
+      const primaryDecimals = configYaxis
+        && configYaxis.primary
+        && configYaxis.primary.decimals;
+      dec = primaryDecimals !== undefined
+        ? primaryDecimals
+        : globalDecimals;
+    } else if (index === -1) {
+      // for a secondary Y-axis
+      const secondaryDecimals = configYaxis
+        && configYaxis.secondary
+        && configYaxis.secondary.decimals;
+      dec = secondaryDecimals !== undefined
+        ? secondaryDecimals
+        : globalDecimals;
+    } else {
+      // for a state or attribute value
+      const entityConfig = this.config.entities[index];
+      // console.log('entityConfig',entityConfig);
+      dec = entityConfig && entityConfig.decimals !== undefined
+        ? entityConfig.decimals
+        : globalDecimals;
+    }
+    return dec;
+  }
+
+  /**
+  * Returns a string value for a state/attribute or a static_value:
+  * processed using value_factor convert,
+  * localized, following locale settings,
+  * (for entities:) accounting possible individual accuracy settings & possible "decimals" options
+  * @returns {string} Formatted value of a state/attribute
+  * @param {number|string} inState Value of a state/attribute ("unformatted") or a static_value
+  * @param {number} index Index of an entry in config.entities
+  */
+  _processState(inState, index) {
+    let state = inState;
+
+    // cases like "complex data", "data not ready"
+    if (state === undefined || state === null || state === '') {
       return formatNumber(NaN, this._hass.locale);
     }
 
-    let state;
-    if (isUnavailableState(inState)) {
+    if (isUnavailableState(state)) {
       // as is
-      state = inState;
-    } else if (typeof inState === 'string') {
+    } else if (typeof state === 'string') {
       // attempt to fix an unexpected number format
-      state = parseFloat(inState.replace(/,/g, '.'));
+      state = parseFloat(state.replace(/,/g, '.'));
     } else {
       // as is presented as a number
-      state = Number(inState);
+      state = Number(state);
     }
+
+    // handle possible NaN values from a history & after failed mapping
+    if (Number.isNaN(state)) {
+      return formatNumber(NaN, this._hass.locale);
+    }
+
     const factor = index === undefined
-      ? this._axisFactors.primary
+      ? this._axisFactors && this._axisFactors.primary
       : index === -1
-        ? this._axisFactors.secondary
-        : this._entityFactors[index];
+        ? this._axisFactors && this._axisFactors.secondary
+        : this._entityFactors && this._entityFactors[index];
     // safely process with a factor
-    state = Number.isNaN(Number(state)) ? state : state * factor;
+    state = Number.isNaN(Number(state)) || factor === undefined
+      ? state
+      : state * factor;
 
-    let dec;
     // attempting to get "decimals" settings
-    if (index === undefined) {
-      // for a primary Y-axis
-      const primaryDecimals = this.config.y_axis
-        && this.config.y_axis.primary
-        && this.config.y_axis.primary.decimals;
-      dec = primaryDecimals !== undefined
-        ? primaryDecimals
-        : this.config.decimals;
-    } else if (index === -1) {
-      // for a secondary Y-axis
-      const secondaryDecimals = this.config.y_axis
-        && this.config.y_axis.secondary
-        && this.config.y_axis.secondary.decimals;
-      dec = secondaryDecimals !== undefined
-        ? secondaryDecimals
-        : this.config.decimals;
-    } else {
-      // for a state or attribute value
-      dec = this.config.entities[index].decimals !== undefined
-        ? this.config.entities[index].decimals
-        : this.config.decimals;
-    }
-
-    let value;
+    const dec = this._getDecimals(index);
 
     if (dec === undefined || Number.isNaN(Number(dec)) || Number.isNaN(Number(state))) {
-      // no valid "decimals" settings defined, use a default accuracy
+      // no valid "decimals" settings defined,
+      // or a state is not numerical (like 'unavailable') ->
+      // use a default accuracy
       if (index >= 0 && !this._isStaticValue[index]) {
         // formatting a state or attribute of an entity
         const entityId = this.config.entities[index].entity;
@@ -1852,6 +2103,7 @@ class MiniGraphCard extends LitElement {
 
         // additional check before calling API
         if (!stateObj) {
+          // process unknown
           return formatNumber(
             state,
             this._hass.locale,
@@ -1866,7 +2118,7 @@ class MiniGraphCard extends LitElement {
             state,
           );
           const partValue = attrParts.find(part => part.type === 'value');
-          value = partValue && partValue.value;
+          const value = partValue && partValue.value;
           return value;
         } else if (attribute && this.isObjectAttr(attribute)) {
           // formatting object attribute - similar to Y-axis labels
@@ -1881,7 +2133,7 @@ class MiniGraphCard extends LitElement {
             state,
           );
           const partValue = stateParts.find(part => part.type === 'value');
-          value = partValue && partValue.value;
+          const value = partValue && partValue.value;
           return value;
         }
       } else {
@@ -1986,7 +2238,10 @@ class MiniGraphCard extends LitElement {
     const state = this.computeState(inState, index);
 
     // get a unit
-    const unit = hideUnit ? '' : this.computeUom(index, inState);
+    // account a possible state_map.map.hide_unit option
+    const unit = hideUnit || this._mappedHideUnit[index]
+      ? ''
+      : this.computeUom(index, inState);
 
     // get native order & delimiter
     const { directOrder, delimiter: nativeDelimiter } = this.computeStateOrder(index, inState);
@@ -2309,12 +2564,16 @@ class MiniGraphCard extends LitElement {
     let fetchStart = start;
     let skipInitialState = false;
 
+    // cache is converted with state_map
+    let isCacheConverted = false;
+
     const history = this.config.cache
       ? await this.getCache(`${stateObj.entity_id}_${index}`, this.config.compress)
       : undefined;
     if (history && history.hours_to_show === this.config.hours_to_show) {
       // process a cached history
       stateHistory = history.data;
+      isCacheConverted = history.state_map_converted === true;
 
       let currDataIndex = stateHistory.findIndex(item => new Date(item.last_changed) > start);
       if (currDataIndex !== -1) {
@@ -2325,14 +2584,13 @@ class MiniGraphCard extends LitElement {
           stateHistory[currDataIndex].last_changed = start;
         }
 
+        // delete everything before the found point
         stateHistory = stateHistory.slice(currDataIndex);
         // skip initial state when fetching recent/not-cached data
         skipInitialState = true;
 
         const lastFetched = new Date(history.last_fetched);
-        if (lastFetched > fetchStart) {
-          fetchStart = new Date(lastFetched - 1);
-        }
+        fetchStart = new Date(lastFetched - 1);
       } else {
         // there were no states which could be used in current graph so clearing
         stateHistory = [];
@@ -2357,16 +2615,30 @@ class MiniGraphCard extends LitElement {
     const lastHistoryItem = fetchedHistory[0].length > 0
       ? fetchedHistory[0][fetchedHistory[0].length - 1]
       : (stateHistory.length > 0 ? stateHistory[stateHistory.length - 1] : null);
+
     // current value of state/attribute
-    const currentValue = entityConfig.attribute
+    let currentValue = entityConfig.attribute
       ? this.getObjectAttr(stateObj.attributes, entityConfig.attribute)
       : stateObj.state;
+
+    // process state_map
+    const stateMapConfig = entityConfig.state_map || this.config.state_map;
+    const hasStateMap = stateMapConfig.map.length > 0;
+    const isStateMapStrictMode = hasStateMap && stateMapConfig.keep_values !== true;
+    if (isCacheConverted && isStateMapStrictMode) {
+      const mock = { state: currentValue };
+      this._convertState(mock, stateMapConfig);
+      // get a converted currentValue (index)
+      currentValue = mock.state;
+    }
+
     // last value of state/attribute from history
     const lastHistoryValue = lastHistoryItem
       ? entityConfig.attribute && lastHistoryItem.attributes
         ? this.getObjectAttr(lastHistoryItem.attributes, entityConfig.attribute)
         : lastHistoryItem.state
       : null;
+
     // if the latest record from the history does not correspond to the current state/attribute
     // - add the current state/attribute to the history
     // (may happen since data in recorder may be not ready yet)
@@ -2382,15 +2654,21 @@ class MiniGraphCard extends LitElement {
 
     if (fetchedHistory[0] && fetchedHistory[0].length > 0) {
       /**
-      * hack because HA doesn't return anything if skipInitialState is false
-      * when retrieving for attributes so we retrieve it and we remove it.*
-      */
+       * Seems that some old HA versions could not handle properly
+       * a combination of "retrieve a history for attributes" & "skipInitialState=true".
+       * As a workaround, it was implemented a hack: pass "skipInitialState=false" when
+       * requesting a history for attributes, and then delete the 1st point ("initial state")
+       * if skipInitialState=true.
+       * In newer versions of HA (at least in 2026.8), the workaround is not required,
+       * the mentioned combination is handled properly.
+       * Yet the workaround stays for a compatibility with old HA versions.
+       */
       if (entityConfig.attribute && skipInitialState) {
         fetchedHistory[0].shift();
       }
 
       // check if we should convert states to numeric values
-      if (this.config.state_map.length > 0 || entityConfig.attribute) {
+      if (hasStateMap || entityConfig.attribute) {
         fetchedHistory[0].forEach((item) => {
           if (entityConfig.attribute) {
             // eslint-disable-next-line no-param-reassign
@@ -2398,26 +2676,36 @@ class MiniGraphCard extends LitElement {
             // eslint-disable-next-line no-param-reassign
             delete item.attributes;
           }
-          if (this.config.state_map.length > 0)
-            this._convertState(item);
+          if (hasStateMap) {
+            this._convertState(item, stateMapConfig);
+          }
         });
       }
 
-      fetchedHistory = fetchedHistory[0].filter(item => !Number.isNaN(parseFloat(item.state)));
-      fetchedHistory = fetchedHistory.map(item => ({
+      const processedPoints = fetchedHistory[0]
+        .filter(item => !Number.isNaN(parseFloat(item.state)));
+      const formattedPoints = processedPoints.map(item => ({
         last_changed: entityConfig.attribute ? item.last_updated : item.last_changed,
         state: item.state,
       }));
-      stateHistory = [...stateHistory, ...fetchedHistory];
+      stateHistory = [...stateHistory, ...formattedPoints];
 
       if (this.config.cache) {
+        const data = {
+          hours_to_show: this.config.hours_to_show,
+          last_fetched: new Date(),
+          data: stateHistory,
+          version,
+        };
+        if (isStateMapStrictMode) {
+          data.state_map_converted = true;
+        }
         this
-          .setCache(`${stateObj.entity_id}_${index}`, {
-            hours_to_show: this.config.hours_to_show,
-            last_fetched: new Date(),
-            data: stateHistory,
-            version,
-          }, this.config.compress)
+          .setCache(
+            `${stateObj.entity_id}_${index}`,
+            data,
+            this.config.compress,
+          )
           .catch((error) => {
             log(error);
             localForage.clear();
@@ -2425,7 +2713,7 @@ class MiniGraphCard extends LitElement {
       }
     }
 
-    if (stateHistory.length === 0) return;
+    if (stateHistory.length === 0) return; // no history - nothing to pass to Graph
 
     if (this.entity[0] && stateObj.entity_id === this.entity[0].entity_id) {
       this.updateExtrema(stateHistory);
@@ -2468,13 +2756,27 @@ class MiniGraphCard extends LitElement {
     ];
   }
 
-  _convertState(res) {
-    const resultIndex = this.config.state_map.findIndex(s => s.value === res.state);
-    if (resultIndex === -1) {
+  /**
+  * Convert a raw historic value using a state_map option
+  * @param {object} res Record from a history
+  * @param {object} stateMapConfig state_map config object
+  * @returns {void}
+  */
+  _convertState(res, stateMapConfig) {
+    const stateMapArray = stateMapConfig.map;
+    const keepValues = stateMapConfig.keep_values;
+    if (stateMapArray.length === 0 || keepValues === true) {
+      // the "stateMapArray.length === 0" check is only needed for tests
+      // comment when not debugging
       return;
     }
-
-    res.state = resultIndex;
+    const stringState = String(res.state);
+    const resultIndex = stateMapArray.findIndex(s => s.value === stringState);
+    if (resultIndex !== -1) {
+      res.state = resultIndex;
+    } else {
+      res.state = NaN;
+    }
   }
 
   /**
