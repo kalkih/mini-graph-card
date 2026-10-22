@@ -455,6 +455,7 @@ Notes:
 3. Mapped values (like  `Danger [801 .. 1001)`, `Switched off`) are used as Y-axis labels only if (note: logic is a bit simplified below):
 * there is only one entity associated with the axis and it has own per-entity valid strict `state_map`;
 * none entity associated with the axis has own per-entity `state_map`, then a globally defined valid strict `state_map` is applied (if defined).
+
 Means - the relaxed mapping does not touch Y-axis labels.
 
 See examples [below](#using-state_map).
