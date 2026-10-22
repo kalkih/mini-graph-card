@@ -192,7 +192,7 @@ class MiniGraphCard extends LitElement {
   * & for all entities individually
   * @returns {object} min & max "line_width" values
   */
-  getMinMaxLineWidth() {
+  _getMinMaxLineWidth() {
     const arr = this.config.entities
       .filter(entityConfig => entityConfig.show_graph !== false)
       .map((entityConfig) => {
@@ -287,7 +287,7 @@ class MiniGraphCard extends LitElement {
     const {
       min: min_line_width,
       max: max_line_width,
-    } = this.getMinMaxLineWidth();
+    } = this._getMinMaxLineWidth();
     this._graphMargin = this.visibleBarEntities.length === this.visibleEntities.length
       ? [DEFAULT_MARGIN, DEFAULT_MARGIN]
       : this.config.show.fill
