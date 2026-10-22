@@ -35,6 +35,15 @@ const ENTITIES: EntityConfigType[] = [
   { line_width: 25 },
 ];
 
+const ENTITIES_FULL: EntityConfigType[] = [
+  { line_width: 1 },
+  { line_width: 15 },
+  { line_width: 35 },
+  { line_width: 5 },
+  { line_width: 45 },
+  { line_width: 25 },
+];
+
 const SHOW_GRAPH_TRUE: {show_graph?: boolean}[] = [
   { },
   { show_graph: true }, // 15
@@ -77,6 +86,7 @@ const VARIANTS: VariantType[] = [
     },
     expected: { min: DEFAULT_MARGIN, max: DEFAULT_MARGIN },
   },
+  ////////////////////////////////////////////////////////////////////
   {
     descr: 'individual line_width (global=0)',
     config: {
@@ -115,6 +125,47 @@ const VARIANTS: VariantType[] = [
     expected: { min: 5, max: 35 },
     expected_false_1: { min: 5, max: 25 },
     expected_false_2: { min: 15, max: 25 },
+  },
+  ////////////////////////////////////////////////////////////////////
+  {
+    descr: '(\"all set\") individual line_width (global=0)',
+    config: {
+      entities: ENTITIES_FULL,
+      line_width: 0,
+    },
+    expected: { min: 1, max: 45 },
+    expected_false_1: { min: 1, max: 25 },
+    expected_false_2: { min: 1, max: 45 },
+  },
+  {
+    descr: '(\"all set\") individual line_width (global=smallest)',
+    config: {
+      entities: ENTITIES_FULL,
+      line_width: 0.5,
+    },
+    expected: { min: 1, max: 45 },
+    expected_false_1: { min: 1, max: 25 },
+    expected_false_2: { min: 1, max: 45 },
+  },
+  {
+    descr: '(\"all set\") individual line_width (global=biggest)',
+    config: {
+      entities: ENTITIES_FULL,
+      line_width: 100,
+    },
+    expected: { min: 1, max: 45 },
+    expected_false_1: { min: 1, max: 25 },
+    expected_false_2: { min: 1, max: 45 },
+  },
+  {
+    descr: '(\"all set\") individual line_width (global=average)',
+    config: {
+      entities: ENTITIES_FULL,
+      line_width: 15,
+    },
+    expected: { min: 1, max: 45 },
+    expected_false_1: { min: 1, max: 25 },
+    expected_false_2: { min: 1, max: 45 },
   },
 ];
 
