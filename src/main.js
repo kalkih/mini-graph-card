@@ -236,20 +236,20 @@ export default class MiniGraphCard extends LitElement {
             && stateMapConfig.map.length > 0;
         },
       ).map(
-        (entityConfig) => entityConfig.state_map,
+        entityConfig => entityConfig.state_map,
       );
       let stateMapConfig;
       if (stateMapCfgs.length === 1 && entityCfgs.length === 1
         && !stateMapCfgs[0].keep_values) {
         // there is only one entity on the axis
         // and it has own strict state_map with non-empty map
-        stateMapConfig = stateMapCfgs[0];
+        [stateMapConfig] = stateMapCfgs;
       } else if (stateMapCfgs.length > 1
         || (stateMapCfgs.length === 1 && entityCfgs.length > 1)) {
         // more than 1 entity has own state_map with non-empty map
         // or 1 entity has own state_map with non-empty map + there are other entities
         stateMapConfig = null;
-      } else  {
+      } else {
         // none entity has own state_map with non-empty map
         // or all per-entity state_maps have empty map
         // try using global state_map
