@@ -57,7 +57,7 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
       + [Opposing dual-axis graphs](#opposing-dual-axis-graphs)
       + [Grouping by date](#grouping-by-date)
       + [Data aggregation functions](#data-aggregation-functions)
-      + [Non-numeric sensor states](#non-numeric-sensor-states)
+      + [Using state_map](#using-state_map)
       + [Showing additional info on the card](#showing-additional-info-on-the-card)
       + [Accessing attributes in complex structures](#accessing-attributes-in-complex-structures)
          - [Accessing dictionary attributes](#accessing-dictionary-attributes)
