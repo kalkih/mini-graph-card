@@ -277,7 +277,7 @@ export default (config) => {
       entity.line_width = checkNumericOption(
         entity,
         'line_width',
-        conf.line_width,
+        undefined,
         { minBound: 0, allowString: true, logOptionName: `entities[${i}].line_width` },
       );
       entity.decimals = checkIntegerOption(
