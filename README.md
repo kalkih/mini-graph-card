@@ -452,6 +452,10 @@ Also, in the "strict mode", only `value` token can be used, other tokens are pro
 Notes:
 1. The `state_map` option can be defined per-entity or globally for all entities. Per-entity approach is preferable when a conversion is supposed to be done for one particular entity only, otherwise it may cause a distortion on a graph & warnings in a browser's console.
 2. If an order of entries is changed in a "strict" `state_map` and a `cache` option is not set to `false`, it is recommended to purge a browser's cache - otherwise old cached history data (generated for the old order) might become wrong for the new config.
+3. Mapped values (like  `Danger [801 .. 1001)`, `Switched off`) are used as Y-axis labels only if (note: logic is a bit simplified below):
+* there is only one entity associated with the axis and it has own per-entity valid strict `state_map`;
+* none entity associated with the axis has own per-entity `state_map`, then a globally defined valid strict `state_map` is applied (if defined).
+Means - the relaxed mapping does not touch Y-axis labels.
 
 See examples [below](#using-state_map).
 
