@@ -31,7 +31,7 @@ const VARIANTS: any[] = [
     expected: false,
   },
   {
-    descr: 'Non-numeric: sun',
+    descr: 'Non-numeric: automation',
     entityId: 'automation.test',
     expected: false,
   },
