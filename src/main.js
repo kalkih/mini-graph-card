@@ -254,7 +254,7 @@ class MiniGraphCard extends LitElement {
       return getFirstDefinedItem(
         entityConfig.smoothing,
         this.config.smoothing,
-        this.getDefaultSmoothing(index),
+        this._getDefaultSmoothing(index),
       );
     });
 
@@ -337,14 +337,13 @@ class MiniGraphCard extends LitElement {
    * @param {number} index Index of an entry in config.entities
    * @returns {boolean} True if smoothing is applicable for an entity, false otherwise
    */
-  getDefaultSmoothing(index) {
+  _getDefaultSmoothing(index) {
     const { entity } = this.config.entities[index];
     if (entity) {
-      // Turn off default smoothing for binary_sensor entities.
-      // Can be also refactored for other non-numerical domains if needed.
+      // Turn off default smoothing for non-numeric entities.
       // Smoothing should be manually turned on in config
       // in case of addressing a numerical attribute.
-      return !entity.startsWith('binary_sensor.');
+      return isNumericEntity(this._hass, entity);
     }
     // processing a possible `static_value` entry
     return false;
