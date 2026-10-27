@@ -2220,7 +2220,7 @@ export default class MiniGraphCard extends LitElement {
       }
     }
 
-    // use an acuracy defined by "dec" variable
+    // use an accuracy defined by "dec" variable
     return formatNumber(
       state,
       this._hass.locale,
