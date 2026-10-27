@@ -229,7 +229,7 @@ export default class MiniGraphCard extends LitElement {
   * @returns {Array<object|null>} Array of state_map configs or nulls
   */
   _getEntityStateMap() {
-    const yaxisConfig =  this.config.y_axis;
+    const yaxisConfig = this.config.y_axis;
     const primaryYaxisStateMap = yaxisConfig
       && yaxisConfig.primary
       && yaxisConfig.primary.state_map;
@@ -276,7 +276,7 @@ export default class MiniGraphCard extends LitElement {
             && stateMapConfig !== null;
         },
       ).map(
-        (entityConfig) => entityConfig.state_map,
+        entityConfig => entityConfig.state_map,
       );
 
       // analyse per-entity configs
@@ -291,7 +291,7 @@ export default class MiniGraphCard extends LitElement {
         // more than 1 entity has own state_map
         // or 1 entity has own state_map + there are other entities
         stateMapConfig = null;
-      } else  {
+      } else {
         // no per-entity configs (stateMapCfgs.length = 0)
         stateMapConfig = null;
       }
@@ -861,7 +861,7 @@ export default class MiniGraphCard extends LitElement {
         >
           ${entityConfig.show_indicator ? this.renderIndicator(value, entityIndex) : ''}
           <span class="state__value ellipsis">
-            ${this.computeState(value, {index: entityIndex})}
+            ${this.computeState(value, { index: entityIndex })}
           </span>
           <span class="state__uom ellipsis">
             ${!this._mappedHideUnit[entityIndex] ? this.computeUom(entityIndex, value) : ''}
@@ -942,7 +942,7 @@ export default class MiniGraphCard extends LitElement {
     const entityConfig = this.config.entities[index];
     const showLegendState = entityConfig && entityConfig.show_legend_state === true;
     if (showLegendState) {
-      legend += ` (${this.computeStateWithUom(state, {index})})`;
+      legend += ` (${this.computeStateWithUom(state, { index })})`;
     }
     return legend;
   }
@@ -1060,7 +1060,7 @@ export default class MiniGraphCard extends LitElement {
               left: ${isLeft ? `${offset}%` : `calc(100% - ${offset}%)`};
             "
           >
-            ${this.computeStateWithUom(staticValue, {index})}
+            ${this.computeStateWithUom(staticValue, { index })}
           </span>`;
         })}
       </div>
@@ -1524,11 +1524,11 @@ export default class MiniGraphCard extends LitElement {
         <span
           class="label--max"
           style="${maxLabelPermitted ? '' : 'visibility: hidden;'}"
-        >${this.computeState(this.bound[1], {origin: 'axis_primary'})}</span>
+        >${this.computeState(this.bound[1], { origin: 'axis_primary' })}</span>
         <span
           class="label--min"
           style="${minLabelPermitted ? '' : 'visibility: hidden;'}"
-        >${this.computeState(this.bound[0], {origin: 'axis_primary'})}</span>
+        >${this.computeState(this.bound[0], { origin: 'axis_primary' })}</span>
         ${this.renderLabelZero('primary')}
       </div>
     `;
@@ -1562,11 +1562,11 @@ export default class MiniGraphCard extends LitElement {
         <span
           class="label--max"
           style="${maxLabelPermitted ? '' : 'visibility: hidden;'}"
-        >${this.computeState(this.boundSecondary[1], {origin: 'axis_secondary'})}</span>
+        >${this.computeState(this.boundSecondary[1], { origin: 'axis_secondary' })}</span>
         <span
           class="label--min"
           style="${minLabelPermitted ? '' : 'visibility: hidden;'}"
-        >${this.computeState(this.boundSecondary[0], {origin: 'axis_secondary'})}</span>
+        >${this.computeState(this.boundSecondary[0], { origin: 'axis_secondary' })}</span>
         ${this.renderLabelZero('secondary')}
       </div>
     `;
@@ -1649,7 +1649,7 @@ export default class MiniGraphCard extends LitElement {
           <div class="info__item">
             <span class="info__item__type">${entry.type}</span>
             <span class="info__item__value">
-              ${this.computeStateWithUom(entry.state, {index: 0, origin: 'info'}, hideUnit)}
+              ${this.computeStateWithUom(entry.state, { index: 0, origin: 'info' }, hideUnit)}
             </span>
             <span class="info__item__time">
               ${entry.type !== 'avg'
