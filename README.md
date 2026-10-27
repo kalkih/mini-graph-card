@@ -398,7 +398,7 @@ State map object is defined by a `state_map` option and allows to map values fro
 * **strict mode** (default, when `keep_values: false` or undefined): converts original text values (e.g., `on`, `off`) from a history to sequential numbers (0, 1, ...) to render them on a graph. Unmapped values are left in the history array "as is"; if these unmapped values are numeric - they are shown on a graph & thus may cause a distortion since the properly mapped values are like "0, 1, ..." and can be much smaller than the unmapped values; if the unmapped values are non-numeric - these values are not shown on a graph (since graph is created using _numbers_), and an unmapped value can only be displayed for a **current** value in a "state display" area (since the current value is not taken from a history but is a "live" state). As a conclusion: only use the **strict mode** for entities with non-numeric values & provide a mapping for all possible values.
 * **relaxed mode** (when `keep_values: true`): is only meaningful for entities with numeric values, retains original numeric history values (i.e. the history data is untouched) while replacing custom text labels for specific numbers (like `Danger` instead of `1000`). Supports an optional `tolerance` parameter to match numeric values within a defined range `[value ± tolerance]`, both bounds are "included". Alternatively, `min` & `max` parameters can be used instead to match numeric values in a defined range `[min, max)`, a right bound in not "included". For matched values, user-defined (or automatically generated) labels are shown instead (like a `Danger` label or a complex dynamically created `Danger: 810 (700..900)` label).
 
-In the description above, a "label" term stands for a text shown on a card:
+In the description above, a "label" term stands for a text displayed on a card:
 * current state displayed in a "state display" area;
 * state for a selected point/bar in a "state display" area;
 * current state displayed in a "legend" area (if `show_legend_state: true`);
@@ -406,7 +406,7 @@ In the description above, a "label" term stands for a text shown on a card:
 
 In case of using a mapping with a `state_map` object, these labels contain a mapped value (e.g. `off` & `on` in case of a strict mapping, `Danger` in case of a relaxed mapping, see examples above).
 Note that Y-axis labels will contain mapped values only for a strict mapping (see more details below) like `off` & `on`, and in case of a relaxed mapping the Y-axis labels still contain original unmapped values.
-Also, both strict & relaxed mappings are not applied to values shown for "extrema/average" values, original values are shown there.
+Also, both strict & relaxed mappings are not applied to "extrema/average" values, original values are shown there.
 
 
 The `state_map` option can be defined in 2 ways:
@@ -417,9 +417,9 @@ The `state_map` option in a "full syntax" has an object structure with mandatory
 
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
-| map | list |  | Array of mappings between a historical value and a graph coordinate or displayed label.
+| map | list |  | Array of mappings between a historical value and a graph coordinate or a displayed label.
 | keep_values | boolean |  `false` | Set to `true` for the "relaxed" mapping.
-| hide_unit | boolean |  `false` | Set to `true` to hide a native or custom unit for a mapped value (e.g. to show a "Danger" label instead of "Danger %") for ALL mappings (unless it is overridden by setting the `hide_unit` option for a particular mapping).
+| hide_unit | boolean |  `false` | Set to `true` to hide a native or a custom unit for a mapped value (e.g. to show a `Danger` label instead of `Danger %`) for ALL mappings (unless it is overridden by setting the `hide_unit` option for a particular mapping).
 | label | string |   | Set to define a common label for all mappings (see more details about labels below).
 
 The `map` key contains a list of entries.
