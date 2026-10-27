@@ -394,9 +394,19 @@ By default, tapping on an element opens a `more-info` dialog:
 
 #### State map object
 
-State map object allows to map values from an entity's history to specific graph coordinates and labels. It operates in two modes:
-* **strict mode** (default, when `keep_values: false` or undefined): converts text values (e.g., `on`, `off`) to sequential numbers (0, 1, ...) to render them on a graph. Unmapped values are left in the history array "as is"; if these unmapped values are numeric - they are shown on a graph & thus may cause a distortion since the properly mapped values are like "0, 1, ..." and can be much smaller than the unmapped values; if the unmapped values are non-numeric - these values are not shown on a graph (since graph is created using _numbers_), and an unmapped value can only be displayed for a **current** value in a "state display" area. As a conclusion: only use the **strict mode** for entities with non-numeric values & provide a mapping for all possible values.
-* **relaxed mode** (when `keep_values: true`): is only meaningful for entities with numeric values, retains original numeric history values while replacing custom text labels for specific numbers (like `Danger` instead of `1000`). Supports an optional `tolerance` parameter to match numeric values within a defined range `[value ± tolerance]`, both bounds are "included". Alternatively, `min` & `max` parameters can be used instead to match numeric values in a defined range `[min, max)`, a right bound in not "included". For matched values, defined labels are shown instead (like `Danger` or complex dynamically created `Danger: 810 (700..900)`).
+State map object is defined by a `state_map` option and allows to map values from an entity's history to specific graph coordinates and labels. It operates in two modes:
+* **strict mode** (default, when `keep_values: false` or undefined): converts original text values (e.g., `on`, `off`) from a history to sequential numbers (0, 1, ...) to render them on a graph. Unmapped values are left in the history array "as is"; if these unmapped values are numeric - they are shown on a graph & thus may cause a distortion since the properly mapped values are like "0, 1, ..." and can be much smaller than the unmapped values; if the unmapped values are non-numeric - these values are not shown on a graph (since graph is created using _numbers_), and an unmapped value can only be displayed for a **current** value in a "state display" area (since the current value is not taken from a history but is a "live" state). As a conclusion: only use the **strict mode** for entities with non-numeric values & provide a mapping for all possible values.
+* **relaxed mode** (when `keep_values: true`): is only meaningful for entities with numeric values, retains original numeric history values (i.e. the history data is untouched) while replacing custom text labels for specific numbers (like `Danger` instead of `1000`). Supports an optional `tolerance` parameter to match numeric values within a defined range `[value ± tolerance]`, both bounds are "included". Alternatively, `min` & `max` parameters can be used instead to match numeric values in a defined range `[min, max)`, a right bound in not "included". For matched values, defined labels are shown instead (like `Danger` or complex dynamically created `Danger: 810 (700..900)`).
+
+In the description above, a "label" term stands for a text shown on a card:
+* current state displayed in a "state display" area;
+* state for a selected point/bar in a "state display" area;
+* current state displayed in a "legend" area (if `show_legend_state: true`);
+* Y-axis "min/max" labels.
+In case of using a mapping with a `state_map` object, these labels contain a mapped value (e.g. `off` & `on` in case of a strict mapping, `Danger` in case of a relaxed mapping, see examples above).
+Note that Y-axis labels will contain mapped values only for a strict mapping (see more details below) like `off` & `on`, and in case of a relaxed mapping the Y-axis labels still contain original unmapped values.
+Also, both strict & relaxed mappings are not applied to values shown for "extrema/average" values, original values are shown there.
+
 
 The `state_map` option can be defined in 2 ways:
 * short (or legacy) syntax - the `state_map` option is an array of mappings, this creates "strict" mappings.
@@ -442,7 +452,7 @@ state_map:
   label: Danger
   hide_unit: true
 ```
-As a shorthand, you can just use a string as a value to convert as a `value` option (then a label is defined automatically or using a possibly defined common `label` option):
+As a shorthand, you can just use a string as a value to convert (then a label is defined automatically or using a possibly defined common `label` option):
 ```yaml
   map:
     - value: red
@@ -467,6 +477,11 @@ The `label` option is processed as follows:
 It is possible to define the `label` option as a template like `${min} .. ${max}`, `${raw}, range [${min} .. ${max}]` - a combination of a user-defined text & tokens.
 Here the `${...}` part can contain tokens like `value`, `tolerance`, `min`, `max` & `raw`, where the `raw` token stands for a matched value, and other tokens stand for corresponding options; note that if some option (e.g. `min`) is not defined for a particular mapping entry - then a corresponding template (`${min}` in this case) is processed as "empty string".
 Also, in the "strict mode", only `value` token can be used, other tokens are processed as "empty string".
+
+The `state_map` option can be defined per-entity, per-axis or globally for all entities.
+Per-entity approach is preferable when a conversion is supposed to be done for one particular entity only, otherwise it may cause a distortion on a graph & warnings in a browser's console.
+
+
 
 Mapped values (like  `Danger [801 .. 1001)`, `Switched off`) are used as Y-axis labels only if (note: logic is a bit simplified below):
 * there is only one entity associated with the axis and it has own per-entity valid strict `state_map`;
