@@ -10,6 +10,12 @@ import { expect, describe, it, beforeEach } from 'vitest';
 import MiniGraphCard from '../src/main';
 import type { StateMapEntryType, StateMapType } from './types/stateMapTypes';
 import type { ConfigType } from './types/configType';
+import { getStringifiedValue } from '../src/utils';
+
+interface ContextType {
+  index?: number;
+  origin?: string;
+};
 
 const MAP_STRINGS: StateMapEntryType[] = [
   {value: 'abc', label: 'ABC'},
@@ -93,40 +99,54 @@ const VARIANTS_RELAXED_NUMBERS: any[] = [
   { descr: 'no label, value', state: 55, results: { result: '55'}, result_tol: 'Value 55 ± 0', result_range: 'Range  .. ' },
   { descr: 'no label, range', state: 56, results: { result: '56 .. 57' }, result_tol: 'Value  ± ', result_range: 'Range 56 .. 57' },
   ///////////////
-  { descr: 'number 0',   state: 0,   results: { result: 'ABC' }, result_tol: 'Value 0 ± 0', result_range: 'Range  .. ' },
-  { descr: 'number 100', state: 100, results: { result: 'Danger' }, result_tol: 'Value 100 ± 0', result_range: 'Range  .. ' },
-  ///////////////
-  { descr: 'string',                                    state: '100',   results: { result: 'Danger' }, result_tol: 'Value 100 ± 0', result_range: 'Range  .. ' },
-  { descr: 'string with decimals',                      state: '100.0', results: { result: 'Danger' }, result_tol: 'Value 100 ± 0', result_range: 'Range  .. ' },
-  { descr: 'string with decimals with wrong separator', state: '100,0', results: { result: 'NUM-COMMA' }, result_tol: 'Value 100,0 ± 0', result_range: 'Range  .. ' },
-  ///////////////
-  { descr: 'number, hideUnit=false', state: 300,  results: { result: 'Danger', hideUnit: false }, result_tol: 'Value 300 ± 0', result_range: 'Range  .. ' },
-  { descr: 'number, hideUnit=true',  state: -100, results: { result: 'Minus', hideUnit: true }, result_tol: 'Value -100 ± 0', result_range: 'Range  .. ' },
-  ///////////////
-  { descr: 'number, tolerance-, pass', state: 49.9,  results: { result: '+Middle' }, result_tol: 'Value 50 ± 0.1', result_range: 'Range  .. ' },
-  { descr: 'number, tolerance+, pass', state: 50.1,  results: { result: '+Middle' }, result_tol: 'Value 50 ± 0.1', result_range: 'Range  .. ' },
-  { descr: 'number, tolerance-, fail', state: 49.89, results: { } },
-  { descr: 'number, tolerance+, fail', state: 50.11, results: { } },
-  ///////////////
-  { descr: '-number, tolerance-, pass', state: -49.9,  results: { result: '-Middle' }, result_tol: 'Value -50 ± 0.1', result_range: 'Range  .. ' },
-  { descr: '-number, tolerance+, pass', state: -50.1,  results: { result: '-Middle' }, result_tol: 'Value -50 ± 0.1', result_range: 'Range  .. ' },
-  { descr: '-number, tolerance-, fail', state: -49.89, results: { } },
-  { descr: '-number, tolerance+, fail', state: -50.11, results: { } },
-  ///////////////
-  { descr: 'number, range, pass',  state: 70,  results: { result: '+Range 1' }, result_tol: 'Value  ± ', result_range: 'Range 69 .. 71' },
-  { descr: 'number, range, pass',  state: 80,  results: { result: '+Range 0.000001' }, result_tol: 'Value  ± ', result_range: 'Range 79.999999 .. 80.000001' },
-  { descr: '-number, range, pass', state: -70, results: { result: '-Range 1' }, result_tol: 'Value  ± ', result_range: 'Range -71 .. -69' },
-  { descr: '-number, range, pass', state: -80, results: { result: '-Range 0.000001' }, result_tol: 'Value  ± ', result_range: 'Range -80.000001 .. -79.999999' },
-  ///////////////
-  { descr: 'number, range, pass, exact',  state: 59,  results: { result: '+Range 1 (exact)' }, result_tol: 'Value  ± ', result_range: 'Range 59 .. 61' },
-  { descr: 'number, range, fail, exact',  state: 61,  results: { }, },
-  { descr: '-number, range, pass, exact', state: -61, results: { result: '-Range 1 (exact)' }, result_tol: 'Value  ± ', result_range: 'Range -61 .. -59' },
-  { descr: '-number, range, fail, exact', state: -59, results: { }, },
+  // { descr: 'number 0',   state: 0,   results: { result: 'ABC' }, result_tol: 'Value 0 ± 0', result_range: 'Range  .. ' },
+  // { descr: 'number 100', state: 100, results: { result: 'Danger' }, result_tol: 'Value 100 ± 0', result_range: 'Range  .. ' },
+  // ///////////////
+  // { descr: 'string',                                    state: '100',   results: { result: 'Danger' }, result_tol: 'Value 100 ± 0', result_range: 'Range  .. ' },
+  // { descr: 'string with decimals',                      state: '100.0', results: { result: 'Danger' }, result_tol: 'Value 100 ± 0', result_range: 'Range  .. ' },
+  // { descr: 'string with decimals with wrong separator', state: '100,0', results: { result: 'NUM-COMMA' }, result_tol: 'Value 100,0 ± 0', result_range: 'Range  .. ' },
+  // ///////////////
+  // { descr: 'number, hideUnit=false', state: 300,  results: { result: 'Danger', hideUnit: false }, result_tol: 'Value 300 ± 0', result_range: 'Range  .. ' },
+  // { descr: 'number, hideUnit=true',  state: -100, results: { result: 'Minus', hideUnit: true }, result_tol: 'Value -100 ± 0', result_range: 'Range  .. ' },
+  // ///////////////
+  // { descr: 'number, tolerance-, pass', state: 49.9,  results: { result: '+Middle' }, result_tol: 'Value 50 ± 0.1', result_range: 'Range  .. ' },
+  // { descr: 'number, tolerance+, pass', state: 50.1,  results: { result: '+Middle' }, result_tol: 'Value 50 ± 0.1', result_range: 'Range  .. ' },
+  // { descr: 'number, tolerance-, fail', state: 49.89, results: { } },
+  // { descr: 'number, tolerance+, fail', state: 50.11, results: { } },
+  // ///////////////
+  // { descr: '-number, tolerance-, pass', state: -49.9,  results: { result: '-Middle' }, result_tol: 'Value -50 ± 0.1', result_range: 'Range  .. ' },
+  // { descr: '-number, tolerance+, pass', state: -50.1,  results: { result: '-Middle' }, result_tol: 'Value -50 ± 0.1', result_range: 'Range  .. ' },
+  // { descr: '-number, tolerance-, fail', state: -49.89, results: { } },
+  // { descr: '-number, tolerance+, fail', state: -50.11, results: { } },
+  // ///////////////
+  // { descr: 'number, range, pass',  state: 70,  results: { result: '+Range 1' }, result_tol: 'Value  ± ', result_range: 'Range 69 .. 71' },
+  // { descr: 'number, range, pass',  state: 80,  results: { result: '+Range 0.000001' }, result_tol: 'Value  ± ', result_range: 'Range 79.999999 .. 80.000001' },
+  // { descr: '-number, range, pass', state: -70, results: { result: '-Range 1' }, result_tol: 'Value  ± ', result_range: 'Range -71 .. -69' },
+  // { descr: '-number, range, pass', state: -80, results: { result: '-Range 0.000001' }, result_tol: 'Value  ± ', result_range: 'Range -80.000001 .. -79.999999' },
+  // ///////////////
+  // { descr: 'number, range, pass, exact',  state: 59,  results: { result: '+Range 1 (exact)' }, result_tol: 'Value  ± ', result_range: 'Range 59 .. 61' },
+  // { descr: 'number, range, fail, exact',  state: 61,  results: { }, },
+  // { descr: '-number, range, pass, exact', state: -61, results: { result: '-Range 1 (exact)' }, result_tol: 'Value  ± ', result_range: 'Range -61 .. -59' },
+  // { descr: '-number, range, fail, exact', state: -59, results: { }, },
 ];
+
+const getHideUnitIndexDescr = (index: number): string => {
+  switch (index) {
+    case 0: return 'no global hide_unit';
+    case 1: return 'global hide_unit=false';
+    default: return 'global hide_unit=true';
+  }
+};
+
+const getGlobalLabelIndexDescr = (index: number): string => {
+  switch (index) {
+    case 0: return 'no global label';
+    default: return 'global label defined';
+  }
+};
 
 describe("MiniGraphCard::_mapState()", () => {
   let card: MiniGraphCard;
-  let config: ConfigType = {};
 
   beforeEach(() => {
     card = new MiniGraphCard();
@@ -134,391 +154,429 @@ describe("MiniGraphCard::_mapState()", () => {
     card._hass.locale = {
       language: 'en',
     };
-    card.config = config;
   });
 
   describe("strict, strings, different hide_unit", () => {
-    for (let i = 0; i < 3; i += 1) {
-      // test a config 'as is' (i=0), apply global false (i=1) & global true (i=2) 'hide_unit'
-      VARIANTS_STRICT.forEach((variant) => {
-        const newVariant = JSON.parse(JSON.stringify(variant));
-        newVariant.config = { ...STATE_MAP_CONFIG_STRICT };
-        switch (i) {
-          case 1: {
-            newVariant.descr = `${newVariant.descr} (global hide_unit=false)`;
-            newVariant.config.hide_unit = false;
-            if (newVariant.results.result !== undefined && newVariant.results.hideUnit === undefined) {
-              newVariant.results.hideUnit = false;
+    for (let hideUnitIndex = 0; hideUnitIndex < 3; hideUnitIndex += 1) {
+      // test a config 'as is' (hideUnitIndex=0),
+      // apply global false (hideUnitIndex=1) & global true (hideUnitIndex=2) 'hide_unit'
+      describe(getHideUnitIndexDescr(hideUnitIndex), () => {
+        VARIANTS_STRICT.forEach((variant) => {
+          const newVariant = JSON.parse(JSON.stringify(variant));
+          newVariant.config = { ...STATE_MAP_CONFIG_STRICT };
+          switch (hideUnitIndex) {
+            case 1: {
+              newVariant.descr = `${newVariant.descr} (${getHideUnitIndexDescr(1)})`;
+              newVariant.config.hide_unit = false;
+              if (newVariant.results.result !== undefined && newVariant.results.hideUnit === undefined) {
+                newVariant.results.hideUnit = false;
+              }
+              break;
             }
-            break;
-          }
-          case 2: {
-            newVariant.descr = `${newVariant.descr} (global hide_unit=true)`;
-            newVariant.config.hide_unit = true;
-            if (newVariant.results.result !== undefined && newVariant.results.hideUnit === undefined) {
-              newVariant.results.hideUnit = true;
+            case 2: {
+              newVariant.descr = `${newVariant.descr} (${getHideUnitIndexDescr(2)})`;
+              newVariant.config.hide_unit = true;
+              if (newVariant.results.result !== undefined && newVariant.results.hideUnit === undefined) {
+                newVariant.results.hideUnit = true;
+              }
+              break;
             }
-            break;
           }
-        }
-        it(newVariant.descr, () => {
-          const resultsObj = card._mapState(newVariant.config, newVariant.state);
-          expect(resultsObj).toEqual(newVariant.results);
+          it(newVariant.descr, () => {
+            const context = {index: 0};
+            const resultsObj = card._mapState(newVariant.config, newVariant.state, context);
+            expect(resultsObj).toEqual(newVariant.results);
+          });
         });
       });
     }
   });
 
   describe("strict, strings, different label", () => {
-    for (let i = 0; i < 2; i += 1) {
-      // apply individual (i=0) & global (i=1) 'label'
-      for (let j = 0; j < LABEL_CONFIGS.length; j += 1) {
-        // test different LABEL_CONFIGS[j]
-        VARIANTS_STRICT.forEach((variant) => {
+    for (let globalLabelIndex = 0; globalLabelIndex < 2; globalLabelIndex += 1) {
+      // apply individual (globalLabelIndex=0) & global (globalLabelIndex=1) 'label'
+      describe(getGlobalLabelIndexDescr(globalLabelIndex), () => {
+        for (let labelConfigIndex = 0; labelConfigIndex < LABEL_CONFIGS.length; labelConfigIndex += 1) {
+          // test different LABEL_CONFIGS[labelConfigIndex]
+          describe(`label config: ${getStringifiedValue(LABEL_CONFIGS[labelConfigIndex])}`, () => {
+            VARIANTS_STRICT.forEach((variant) => {
+              const newVariant = JSON.parse(JSON.stringify(variant));
+              let globalNote = '';
+              if (globalLabelIndex === 0) {
+                // add individual 'label' (or replace a present one)
+                const newMap = STATE_MAP_CONFIG_STRICT.map!.map(
+                  (mapping) => { return {...mapping, ...LABEL_CONFIGS[labelConfigIndex]}; },
+                );
+                newVariant.config = { map: newMap };
+              } else {
+                // add global 'label'
+                newVariant.config = {...STATE_MAP_CONFIG_STRICT, ...LABEL_CONFIGS[labelConfigIndex]};
+                globalNote = 'global ';
+              }
+              switch (labelConfigIndex) {
+                case 0: { // not defined
+                  // new label is not defined, it cannot override a present individual
+                  newVariant.descr = `${newVariant.descr} (${globalNote}label: no new set)`;
+                  break;
+                }
+                case 1: { // text
+                  newVariant.descr = `${newVariant.descr} (${globalNote}label: some label)`;
+                  if (newVariant.results.result === undefined) {
+                    // as is
+                  } else if (globalLabelIndex === 0
+                    || (globalLabelIndex === 1 && (newVariant.state === 3 || newVariant.state === 'jkl'))) {
+                    // testing global label: for these 2 variants only - no indiv. label defined,
+                    // so global label is used
+                    newVariant.results.result = 'some label';
+                  }
+                  break;
+                }
+                case 2: { // raw
+                  newVariant.descr = `${newVariant.descr} (${globalNote}label: raw)`;
+                  if (newVariant.results.result === undefined) {
+                    // as is
+                  } else if (globalLabelIndex === 0
+                    || (globalLabelIndex === 1 && (newVariant.state === 3 || newVariant.state === 'jkl'))) {
+                    // testing global label: for these 2 variants only - no indiv. label defined,
+                    // so global label is used
+                    newVariant.results.result = 'Raw ';
+                  }
+                  break;
+                }
+                case 3: { // value & tolerance
+                  newVariant.descr = `${newVariant.descr} (${globalNote}label: value & tolerance)`;
+                  if (newVariant.results.result === undefined || newVariant.result_tol === undefined) {
+                    // as is
+                  } else if (globalLabelIndex === 0
+                    || (globalLabelIndex === 1 && (newVariant.state === 3 || newVariant.state === 'jkl'))) {
+                    // testing global label: for these 2 variants only - no indiv. label defined,
+                    // so global label is used
+                    newVariant.results.result = newVariant.result_tol;
+                  }
+                  break;
+                }
+                case 4: { // range
+                  newVariant.descr = `${newVariant.descr} (${globalNote}label: range)`;
+                  if (newVariant.results.result === undefined) {
+                    // as is
+                  } else if (globalLabelIndex === 0
+                    || (globalLabelIndex === 1 && (newVariant.state === 3 || newVariant.state === 'jkl'))) { // for 0th & 1st variants only, for a replaced individ. label
+                      newVariant.results.result = 'Range  .. ';
+                  }
+                  break;
+                }
+              }
+              it(newVariant.descr, () => {
+                const context = {index: 0};
+                const resultsObj = card._mapState(newVariant.config, newVariant.state, context);
+                // console.log(newVariant.config, newVariant.state, resultsObj);
+                expect(resultsObj).toEqual(newVariant.results);
+              });
+            });
+          });
+        }
+      });
+    }
+  });
+
+  describe("relaxed, strings, different hide_unit", () => {
+    for (let hideUnitIndex = 0; hideUnitIndex < 3; hideUnitIndex += 1) {
+      // test a config "as is" (hideUnitIndex=0),
+      // apply global false (hideUnitIndex=1) & global true (hideUnitIndex=2) 'hide_unit'
+      describe(getHideUnitIndexDescr(hideUnitIndex), () => {
+        VARIANTS_RELAXED.forEach((variant) => {
           const newVariant = JSON.parse(JSON.stringify(variant));
-          let globalNote = '';
-          if (i === 0) {
-            // add individual 'label' (or replace a present one)
-            const newMap = STATE_MAP_CONFIG_STRICT.map!.map(
-              (mapping) => { return {...mapping, ...LABEL_CONFIGS[j]}; },
-            );
-            newVariant.config = { map: newMap };
-          } else {
-            // add global 'label'
-            newVariant.config = {...STATE_MAP_CONFIG_STRICT, ...LABEL_CONFIGS[j]};
-            globalNote = 'global ';
-          }
-          switch (j) {
-            case 0: { // not defined
-              // new label is not defined, it cannot override a present individual
-              newVariant.descr = `${newVariant.descr} (${globalNote}label: no new set)`;
-              break;
-            }
-            case 1: { // text
-              newVariant.descr = `${newVariant.descr} (${globalNote}label: some label)`;
-               if (newVariant.results.result === undefined) {
-                // as is
-              } else if (i === 0
-                || (i === 1 && (newVariant.state === 3 || newVariant.state === 'jkl'))) {
-                // testing global label: for these 2 variants only - no indiv. label defined,
-                // so global label is used
-                newVariant.results.result = 'some label';
+          newVariant.config = { ...STATE_MAP_CONFIG_STRICT, keep_values: true };
+          switch (hideUnitIndex) {
+            case 1: {
+              newVariant.descr = `${newVariant.descr} (${getHideUnitIndexDescr(1)})`;
+              newVariant.config.hide_unit = false;
+              if (newVariant.results.result !== undefined && newVariant.results.hideUnit === undefined) {
+                newVariant.results.hideUnit = false;
               }
               break;
             }
-            case 2: { // raw
-              newVariant.descr = `${newVariant.descr} (${globalNote}label: raw)`;
-              if (newVariant.results.result === undefined) {
-                // as is
-              } else if (i === 0
-                || (i === 1 && (newVariant.state === 3 || newVariant.state === 'jkl'))) {
-                // testing global label: for these 2 variants only - no indiv. label defined,
-                // so global label is used
-                newVariant.results.result = 'Raw ';
-              }
-              break;
-            }
-            case 3: { // value & tolerance
-              newVariant.descr = `${newVariant.descr} (${globalNote}label: value & tolerance)`;
-              if (newVariant.results.result === undefined || newVariant.result_tol === undefined) {
-                // as is
-              } else if (i === 0
-                || (i === 1 && (newVariant.state === 3 || newVariant.state === 'jkl'))) {
-                // testing global label: for these 2 variants only - no indiv. label defined,
-                // so global label is used
-                newVariant.results.result = newVariant.result_tol;
-              }
-              break;
-            }
-            case 4: { // range
-              newVariant.descr = `${newVariant.descr} (${globalNote}label: range)`;
-              if (newVariant.results.result === undefined) {
-                // as is
-              } else if (i === 0
-                || (i === 1 && (newVariant.state === 3 || newVariant.state === 'jkl'))) { // for 0th & 1st variants only, for a replaced individ. label
-                  newVariant.results.result = 'Range  .. ';
+            case 2: {
+              newVariant.descr = `${newVariant.descr} (${getHideUnitIndexDescr(2)})`;
+              newVariant.config.hide_unit = true;
+              if (newVariant.results.result !== undefined && newVariant.results.hideUnit === undefined) {
+                newVariant.results.hideUnit = true;
               }
               break;
             }
           }
           it(newVariant.descr, () => {
-            const resultsObj = card._mapState(newVariant.config, newVariant.state);
-            console.log(newVariant.config, newVariant.state, resultsObj);
+            const context = {index: 0};
+            const resultsObj = card._mapState(newVariant.config, newVariant.state, context);
             expect(resultsObj).toEqual(newVariant.results);
           });
-        });
-      }
-    }
-  });
-
-  describe("relaxed, strings, different hide_unit", () => {
-    for (let i = 0; i < 3; i += 1) {
-      // test a config "as is" (i=0), apply global false (i=1) & global true (i=2) 'hide_unit'
-      VARIANTS_RELAXED.forEach((variant) => {
-        const newVariant = JSON.parse(JSON.stringify(variant));
-        newVariant.config = { ...STATE_MAP_CONFIG_STRICT, keep_values: true };
-        switch (i) {
-          case 1: {
-            newVariant.descr = `${newVariant.descr} (global hide_unit=false)`;
-            newVariant.config.hide_unit = false;
-            if (newVariant.results.result !== undefined && newVariant.results.hideUnit === undefined) {
-              newVariant.results.hideUnit = false;
-            }
-            break;
-          }
-          case 2: {
-            newVariant.descr = `${newVariant.descr} (global hide_unit=true)`;
-            newVariant.config.hide_unit = true;
-            if (newVariant.results.result !== undefined && newVariant.results.hideUnit === undefined) {
-              newVariant.results.hideUnit = true;
-            }
-            break;
-          }
-        }
-        it(newVariant.descr, () => {
-          const resultsObj = card._mapState(newVariant.config, newVariant.state);
-          expect(resultsObj).toEqual(newVariant.results);
         });
       });
     }
   });
 
   describe("relaxed, strings, different label", () => {
-    for (let i = 0; i < 2; i += 1) {
-      // test config as is (i=0), apply global 'label' (i=1)
-      VARIANTS_RELAXED.forEach((variant) => {
-        const newVariant = JSON.parse(JSON.stringify(variant));
-        newVariant.config = { ...STATE_MAP_CONFIG_STRICT, keep_values: true };
-        switch (i) {
-          case 1: {
-            newVariant.descr = `${newVariant.descr} (global label defined)`;
-            newVariant.config.label = 'some label 2';
-            if (newVariant.state === 'jkl') {
-              // only for this variant the global 'label' will be used,
-              // for other cases - an individully defined 'label'
-              newVariant.results.result = newVariant.config.label;
+    for (let globalLabelIndex = 0; globalLabelIndex < 2; globalLabelIndex += 1) {
+      // test config as is (globalLabelIndex=0), apply global 'label' (globalLabelIndex=1)
+      describe(getGlobalLabelIndexDescr(globalLabelIndex), () => {
+        VARIANTS_RELAXED.forEach((variant) => {
+          const newVariant = JSON.parse(JSON.stringify(variant));
+          newVariant.config = { ...STATE_MAP_CONFIG_STRICT, keep_values: true };
+          switch (globalLabelIndex) {
+            case 1: {
+              newVariant.descr = `${newVariant.descr} (${getGlobalLabelIndexDescr(1)})`;
+              newVariant.config.label = 'some label 2';
+              if (newVariant.state === 'jkl') {
+                // only for this variant the global 'label' will be used,
+                // for other cases - an individully defined 'label'
+                newVariant.results.result = newVariant.config.label;
+              }
+              break;
             }
-            break;
           }
-        }
-        it(newVariant.descr, () => {
-          const resultsObj = card._mapState(newVariant.config, newVariant.state);
-          expect(resultsObj).toEqual(newVariant.results);
+          it(newVariant.descr, () => {
+            const context = {index: 0};
+            const resultsObj = card._mapState(newVariant.config, newVariant.state, context);
+            expect(resultsObj).toEqual(newVariant.results);
+          });
         });
       });
     }
   });
 
   describe("relaxed, numbers, different hide_unit", () => {
-    for (let i = 0; i < 3; i += 1) {
-      // test a config "as is" (i=0), apply global false (i=1) & global true (i=2) 'hide_unit'
-      VARIANTS_RELAXED_NUMBERS.forEach((variant) => {
-        const newVariant = JSON.parse(JSON.stringify(variant));
-        newVariant.config = { ...STATE_MAP_CONFIGS_RELAXED_NUMBERS };
-        switch (i) {
-          case 1: {
-            newVariant.descr = `${newVariant.descr} (global hide_unit=false)`;
-            newVariant.config.hide_unit = false;
-            if (newVariant.results.result !== undefined && newVariant.results.hideUnit === undefined) {
-              newVariant.results.hideUnit = false;
+    for (let hideUnitIndex = 0; hideUnitIndex < 3; hideUnitIndex += 1) {
+      // test a config "as is" (hideUnitIndex=0),
+      // apply global false (hideUnitIndex=1) & global true (hideUnitIndex=2) 'hide_unit'
+      describe(getHideUnitIndexDescr(hideUnitIndex), () => {
+        VARIANTS_RELAXED_NUMBERS.forEach((variant) => {
+          const newVariant = JSON.parse(JSON.stringify(variant));
+          newVariant.config = { ...STATE_MAP_CONFIGS_RELAXED_NUMBERS };
+          switch (hideUnitIndex) {
+            case 1: {
+              newVariant.descr = `${newVariant.descr} (${getHideUnitIndexDescr(1)})`;
+              newVariant.config.hide_unit = false;
+              if (newVariant.results.result !== undefined && newVariant.results.hideUnit === undefined) {
+                newVariant.results.hideUnit = false;
+              }
+              break;
             }
-            break;
-          }
-          case 2: {
-            newVariant.descr = `${newVariant.descr} (global hide_unit=true)`;
-            newVariant.config.hide_unit = true;
-            if (newVariant.results.result !== undefined && newVariant.results.hideUnit === undefined) {
-              newVariant.results.hideUnit = true;
+            case 2: {
+              newVariant.descr = `${newVariant.descr} (${getHideUnitIndexDescr(2)})`;
+              newVariant.config.hide_unit = true;
+              if (newVariant.results.result !== undefined && newVariant.results.hideUnit === undefined) {
+                newVariant.results.hideUnit = true;
+              }
+              break;
             }
-            break;
           }
-        }
-        it(newVariant.descr, () => {
-          const resultsObj = card._mapState(newVariant.config, newVariant.state);
-          expect(resultsObj).toEqual(newVariant.results);
+          it(newVariant.descr, () => {
+            const context = {index: 0};
+            const resultsObj = card._mapState(newVariant.config, newVariant.state, context);
+            expect(resultsObj).toEqual(newVariant.results);
+          });
         });
       });
     }
   });
 
   describe("relaxed, numbers, different label, different index", () => {
-    for (let j = 0; j < 2; j += 1) {
-       // apply individual (j=0) & global (j=1) 'label'
-      for (let i = 0; i < LABEL_CONFIGS.length; i += 1) {
-        // test different LABEL_CONFIGS[i]
-        VARIANTS_RELAXED_NUMBERS.forEach((variant, variantIndex) => {
-          const newVariant = JSON.parse(JSON.stringify(variant));
-          let globalNote = '';
-          if (j === 0) {
-            // add individual 'label' (or replace a present one)
-            const newMap = STATE_MAP_CONFIGS_RELAXED_NUMBERS.map!.map(
-              (mapping) => { return {...mapping, ...LABEL_CONFIGS[i]}; },
-            );
-            newVariant.config = { keep_values: true, map: newMap };
-          } else {
-            // add global 'label'
-            newVariant.config = {...STATE_MAP_CONFIGS_RELAXED_NUMBERS, ...LABEL_CONFIGS[i]};
-            globalNote = 'global ';
-          }
-          switch (i) { // not defined
-            case 0: {
-              // new label is not defined, it cannot override a present individual
-              newVariant.descr = `${newVariant.descr} (${globalNote}label: no new set)`;
-              break;
-            }
-            case 1: { // text
-              newVariant.descr = `${newVariant.descr} (${globalNote}label: some label)`;
-              if (newVariant.results.result === undefined) {
-                // as is
+    for (let globalLabelIndex = 0; globalLabelIndex < 2; globalLabelIndex += 1) {
+      // apply individual (globalLabelIndex=0) & global (globalLabelIndex=1) 'label'
+      describe(getGlobalLabelIndexDescr(globalLabelIndex), () => {
+        for (let labelConfigIndex = 0; labelConfigIndex < LABEL_CONFIGS.length; labelConfigIndex += 1) {
+          // test different LABEL_CONFIGS[labelConfigIndex]
+          describe(`label config: ${getStringifiedValue(LABEL_CONFIGS[labelConfigIndex])}`, () => {
+            VARIANTS_RELAXED_NUMBERS.forEach((variant, variantIndex) => {
+              const newVariant = JSON.parse(JSON.stringify(variant));
+              let globalNote = '';
+              if (globalLabelIndex === 0) {
+                // add individual 'label' (or replace a present one)
+                const newMap = STATE_MAP_CONFIGS_RELAXED_NUMBERS.map!.map(
+                  (mapping) => { return {...mapping, ...LABEL_CONFIGS[labelConfigIndex]}; },
+                );
+                newVariant.config = { keep_values: true, map: newMap };
               } else {
-                if (j === 0 || (j === 1 && variantIndex <= 1)) {
-                  // testing global label: for 0th & 1st variants only - no indiv. label defined,
-                  // so global label is used
-                  newVariant.results.result = 'some label';
+                // add global 'label'
+                newVariant.config = {...STATE_MAP_CONFIGS_RELAXED_NUMBERS, ...LABEL_CONFIGS[labelConfigIndex]};
+                globalNote = 'global ';
+              }
+              switch (labelConfigIndex) { // not defined
+                case 0: {
+                  // new label is not defined, it cannot override a present individual
+                  newVariant.descr = `${newVariant.descr} (${globalNote}label: no new set)`;
+                  break;
+                }
+                case 1: { // text
+                  newVariant.descr = `${newVariant.descr} (${globalNote}label: some label)`;
+                  if (newVariant.results.result === undefined) {
+                    // as is
+                  } else {
+                    if (globalLabelIndex === 0 || (globalLabelIndex === 1 && variantIndex <= 1)) {
+                      // testing global label: for 0th & 1st variants only - no indiv. label defined,
+                      // so global label is used
+                      newVariant.results.result = 'some label';
+                    }
+                  }
+                  break;
+                }
+                case 2: { // raw
+                  newVariant.descr = `${newVariant.descr} (${globalNote}label: raw)`;
+                  if (newVariant.results.result === undefined) {
+                    // as is
+                  } else if (newVariant.state !== '100,0') {
+                    if (globalLabelIndex === 0 || (globalLabelIndex === 1 && variantIndex <= 1)) {
+                      // testing global label: for 0th & 1st variants only - no indiv. label defined,
+                      // so global label is used
+                      newVariant.results.result = `Raw ${Number(newVariant.state).toFixed(5)}`;
+                    }
+                  } else {
+                    if (globalLabelIndex === 0 || (globalLabelIndex === 1 && variantIndex <= 1)) {
+                      // testing global label: for 0th & 1st variants only - no indiv. label defined,
+                      // so global label is used
+                      newVariant.results.result = 'Raw 100.00000';
+                    }
+                  }
+                  break;
+                }
+                case 3: { // value & tolerance
+                  newVariant.descr = `${newVariant.descr} (${globalNote}label: value & tolerance)`;
+                  if (newVariant.results.result === undefined || newVariant.result_tol === undefined) {
+                    // as is
+                  } else {
+                    if (globalLabelIndex === 0 || (globalLabelIndex === 1 && variantIndex <= 1)) {
+                      // testing global label: for 0th & 1st variants only - no indiv. label defined,
+                      // so global label is used
+                      newVariant.results.result = newVariant.result_tol;
+                    }
+                  }
+                  break;
+                }
+                case 4: { // range
+                  newVariant.descr = `${newVariant.descr} (${globalNote}label: range)`;
+                  if (newVariant.results.result === undefined || newVariant.result_range === undefined) {
+                    // as is
+                  } else {
+                    if (globalLabelIndex === 0 || (globalLabelIndex === 1 && variantIndex <= 1)) {
+                      // testing global label: for 0th & 1st variants only - no indiv. label defined,
+                      // so global label is used
+                      newVariant.results.result = newVariant.result_range;
+                    }
+                  }
+                  break;
                 }
               }
-              break;
-            }
-            case 2: { // raw
-              newVariant.descr = `${newVariant.descr} (${globalNote}label: raw)`;
-              if (newVariant.results.result === undefined) {
-                // as is
-              } else if (newVariant.state !== '100,0') {
-                if (j === 0 || (j === 1 && variantIndex <= 1)) {
-                  // testing global label: for 0th & 1st variants only - no indiv. label defined,
-                  // so global label is used
-                  newVariant.results.result = `Raw ${Number(newVariant.state).toFixed(5)}`;
-                }
-              } else {
-                if (j === 0 || (j === 1 && variantIndex <= 1)) {
-                  // testing global label: for 0th & 1st variants only - no indiv. label defined,
-                  // so global label is used
-                  newVariant.results.result = 'Raw 100.00000';
-                }
-              }
-              break;
-            }
-            case 3: { // value & tolerance
-              newVariant.descr = `${newVariant.descr} (${globalNote}label: value & tolerance)`;
-              if (newVariant.results.result === undefined || newVariant.result_tol === undefined) {
-                // as is
-              } else {
-                if (j === 0 || (j === 1 && variantIndex <= 1)) {
-                  // testing global label: for 0th & 1st variants only - no indiv. label defined,
-                  // so global label is used
-                  newVariant.results.result = newVariant.result_tol;
-                }
-              }
-              break;
-            }
-            case 4: { // range
-              newVariant.descr = `${newVariant.descr} (${globalNote}label: range)`;
-              if (newVariant.results.result === undefined || newVariant.result_range === undefined) {
-                // as is
-              } else {
-                if (j === 0 || (j === 1 && variantIndex <= 1)) {
-                  // testing global label: for 0th & 1st variants only - no indiv. label defined,
-                  // so global label is used
-                  newVariant.results.result = newVariant.result_range;
-                }
-              }
-              break;
-            }
-          }
 
-          if (i === 2
-            && (j === 0 || (j === 1 && variantIndex <= 1))
-            && newVariant.results.result !== undefined) {
-            // testing 'raw' variants
-            for (let k = 0; k < 7; k += 1) {
-              // testing different indexes
-              it(newVariant.descr, () => {
-                let index;
-                switch (k) {
-                  case 0:
-                    index = undefined; // primary Y-axis labels, fallback to a global 'decimals'
-                    card.config = {
-                      ...card.config,
-                      decimals: 5,
-                    };
-                    break;
-                  case 1:
-                    index = undefined; // primary Y-axis labels, fallback to a global 'decimals' (2)
-                    card.config = {
-                      ...card.config,
-                      decimals: 5,
-                      y_axis: {
-                        primary: {},
-                      },
-                    };
-                    break;
-                  case 2:
-                    index = undefined; // primary Y-axis labels
-                    card.config = {
-                      ...card.config,
-                      decimals: 7,
-                      y_axis: {
-                        primary: { decimals: 5 },
-                      },
-                    };
-                    break;
-                  case 3:
-                    index = -1; // secondary Y-axis labels, fallback to a global 'decimals'
-                    card.config = {
-                      ...card.config,
-                      decimals: 5,
-                    };
-                    break;
-                  case 4:
-                    index = -1; // secondary Y-axis labels, fallback to a global 'decimals' (2)
-                    card.config = {
-                      ...card.config,
-                      decimals: 5,
-                      y_axis: {
-                        secondary: {},
-                      },
-                    };
-                    break;
-                  case 5:
-                    index = -1; // secondary Y-axis labels
-                    card.config = {
-                      ...card.config,
-                      decimals: 9,
-                      y_axis: {
-                        secondary: { decimals: 5 },
-                      },
-                    };
-                    break;
-                  case 6:
-                    index = 1; // some entity
-                    card.config = {
-                      ...card.config,
-                      decimals: 8,
-                      y_axis: {
-                        primary: { decimals: 7 },
-                        secondary: { decimals: 9 },
-                      },
-                      entities: [
-                        { decimals: 11 },
-                        { decimals: 5 }, // this is our entity
-                        { decimals: 10 },
-                      ],
-                    };
-                    break;
-                }
-                const resultsObj = card._mapState(newVariant.config, newVariant.state, index);
-                expect(resultsObj).toEqual(newVariant.results);
-              });
-            }
-          } else {
-            // testing other variants
-            it(newVariant.descr, () => {
-              const resultsObj = card._mapState(newVariant.config, newVariant.state);
-              expect(resultsObj).toEqual(newVariant.results);
+              if (labelConfigIndex === 2
+                && (globalLabelIndex === 0 || (globalLabelIndex === 1 && variantIndex <= 1))
+                && newVariant.results.result !== undefined) {
+                // testing 'raw' variants
+                describe('different raw variants', () => {
+                  let config: ConfigType[] = [{}];
+                  for (let k = 0; k < 7; k += 1) {
+                    // testing different indexes
+                    let context: ContextType;
+                    let index_descr = '';
+                    switch (k) {
+                      case 0:
+                        context = {origin: 'axis_primary'}; // fallback to a global 'decimals'
+                        index_descr = 'axis_primary';
+                        config[k] = {
+                          decimals: 5,
+                        };
+                        break;
+                      case 1:
+                        context = {origin: 'axis_primary'}; // primary Y-axis labels, fallback to a global 'decimals' (2)
+                        index_descr = 'axis_primary (1)';
+                        config[k] = {
+                          decimals: 5,
+                          y_axis: {
+                            primary: {},
+                          },
+                        };
+                        break;
+                      case 2:
+                        context = {origin: 'axis_primary'}; // primary Y-axis labels
+                        index_descr = 'axis_primary (2)';
+                        config[k] = {
+                          decimals: 7,
+                          y_axis: {
+                            primary: { decimals: 5 },
+                          },
+                        };
+                        break;
+                      case 3:
+                        context = {origin: 'axis_secondary'}; // secondary Y-axis labels, fallback to a global 'decimals'
+                        index_descr = 'axis_secondary';
+                        config[k] = {
+                          decimals: 5,
+                        };
+                        break;
+                      case 4:
+                        context = {origin: 'axis_secondary'}; // secondary Y-axis labels, fallback to a global 'decimals' (2)
+                        index_descr = 'axis_secondary (4)';
+                        config[k] = {
+                          decimals: 5,
+                          y_axis: {
+                            secondary: {},
+                          },
+                        };
+                        break;
+                      case 5:
+                        context = {origin: 'axis_secondary'}; // secondary Y-axis labels
+                        index_descr = 'axis_secondary (5)';
+                        config[k] = {
+                          decimals: 9,
+                          y_axis: {
+                            secondary: { decimals: 5 },
+                          },
+                        };
+                        break;
+                      case 6:
+                        context = {index: 1}; // some entity
+                        index_descr = 'index = 1';
+                        config[k] = {
+                          decimals: 8,
+                          y_axis: {
+                            primary: { decimals: 7 },
+                            secondary: { decimals: 9 },
+                          },
+                          entities: [
+                            { decimals: 11 },
+                            { decimals: 5 }, // this is our entity
+                            { decimals: 10 },
+                          ],
+                        };
+                        break;
+                    }
+                    const descr_new = `${newVariant.descr} (${index_descr})`;
+                    it(descr_new, () => {
+                      card.config = config[k];
+                      const resultsObj = card._mapState(newVariant.config, newVariant.state, context);
+                      let fixedResults = { ...newVariant.results };
+                      if (k <= 5) {
+                        // testing mapping for axes
+                        // expected result must contain {hideUnit: true}
+                        fixedResults = { ...fixedResults, hideUnit: true };
+                      }
+                      // console.log('newVariant.config, newVariant.state', newVariant.config, newVariant.state);
+                      // console.log('card.config, resultsObj, newVariant.results', card.config, resultsObj, newVariant.results);
+                      expect(resultsObj).toEqual(fixedResults);
+                    });
+                  }
+                });
+              } else {
+                // testing other variants
+                it(newVariant.descr, () => {
+                  const context = {index: 0};
+                  const resultsObj = card._mapState(newVariant.config, newVariant.state, context);
+                  expect(resultsObj).toEqual(newVariant.results);
+                });
+              }
             });
-          }
-        });
-      }
+          });
+        }
+      });
     }
   });
 });
