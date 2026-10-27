@@ -235,6 +235,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | y_axis | string |         | If 'secondary', displays using the secondary Y-axis on the right.
 | fixed_value | boolean |         | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 | smoothing | boolean |         | Override for a flag indicating whether to make graph line smooth.
+| state_map | [state map object](#state-map-object) |         | List of entity states to convert.
 | logarithmic | boolean |         | Override logarithmic scaling for this entity only (see [Logarithmic options](#logarithmic-options)).
 | baseline | number |   | Set a custom baseline for the graph or override a global `baseline` option (see [Baseline](#baseline)).
 
@@ -298,6 +299,7 @@ The `primary` & `secondary` keys may contain optional properties listed below:
 | invert | boolean |  `false` | Make the Y-axis inverted, see [Inverted graphs](#inverted-graphs).
 | decimals | integer |  | Specify the exact number of decimals to show for the Y-axis labels, see [Number format](#number-format).
 | value_factor | number or object |   | Scale a value, see [Value factor](#value-factor).
+| state_map | [state map object](#state-map-object) |   | List of entity states to convert.
 | lower_bound | number *or* string |   | Set a fixed lower bound for the Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
 | upper_bound | number *or* string |   | Set a fixed upper bound for the Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
 | min_bound_range | number |   | Applied after everything, makes sure there's a minimum range that the Y-axis will have. Useful for not making small changes look large because of scale.
