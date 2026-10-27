@@ -27,6 +27,7 @@ import {
 } from './const';
 import {
   isNumeric,
+  isNumericEntity,
   isEntryAnimated,
   getIntervalEndDate,
   getBoundsForCustomZeroPosition,
@@ -198,7 +199,7 @@ export default class MiniGraphCard extends LitElement {
   * & for all entities individually
   * @returns {object} min & max "line_width" values
   */
-  getMinMaxLineWidth() {
+  _getMinMaxLineWidth() {
     const arr = this.config.entities
       .filter(entityConfig => entityConfig.show_graph !== false)
       .map((entityConfig) => {
@@ -310,7 +311,7 @@ export default class MiniGraphCard extends LitElement {
       return getFirstDefinedItem(
         entityConfig.smoothing,
         this.config.smoothing,
-        this.getDefaultSmoothing(index),
+        this._getDefaultSmoothing(index),
       );
     });
 
@@ -347,7 +348,7 @@ export default class MiniGraphCard extends LitElement {
     const {
       min: min_line_width,
       max: max_line_width,
-    } = this.getMinMaxLineWidth();
+    } = this._getMinMaxLineWidth();
     this._graphMargin = this.visibleBarEntities.length === this.visibleEntities.length
       ? [DEFAULT_MARGIN, DEFAULT_MARGIN]
       : this.config.show.fill
@@ -396,14 +397,13 @@ export default class MiniGraphCard extends LitElement {
    * @param {number} index Index of an entry in config.entities
    * @returns {boolean} True if smoothing is applicable for an entity, false otherwise
    */
-  getDefaultSmoothing(index) {
+  _getDefaultSmoothing(index) {
     const { entity } = this.config.entities[index];
     if (entity) {
-      // Turn off default smoothing for binary_sensor entities.
-      // Can be also refactored for other non-numerical domains if needed.
+      // Turn off default smoothing for non-numeric entities.
       // Smoothing should be manually turned on in config
       // in case of addressing a numerical attribute.
-      return !entity.startsWith('binary_sensor.');
+      return isNumericEntity(this._hass, entity);
     }
     // processing a possible `static_value` entry
     return false;
@@ -2810,18 +2810,6 @@ export default class MiniGraphCard extends LitElement {
 }
 
 customElements.define('mini-graph-card', MiniGraphCard);
-
-const NUMERIC_DOMAINS = ['counter', 'input_number', 'number'];
-
-const isNumericEntity = (hass, entityId) => {
-  const domain = entityId.split('.')[0];
-  if (NUMERIC_DOMAINS.includes(domain)) return true;
-  if (domain !== 'sensor') return false;
-
-  const stateObj = hass.states[entityId];
-  if (!stateObj) return false;
-  return !!stateObj.attributes.unit_of_measurement || !!stateObj.attributes.state_class;
-};
 
 // Configure the preview in the Lovelace card picker
 window.customCards = window.customCards || [];
