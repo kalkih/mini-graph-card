@@ -1,0 +1,220 @@
+/**
+ * Tests for MiniGraphCard::_getEntityStateMap().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+// @vitest-environment jsdom
+import { expect, describe, it, beforeEach } from 'vitest';
+import MiniGraphCard from '../src/main';
+import { getStringifiedValue } from '../src/utils';
+import type { StateMapType, StateMapEntryType } from './types/stateMapTypes';
+import type { ConfigType } from './types/configType';
+import type { EntityConfigType } from './types/entityConfigType';
+
+const MAP_STRINGS: StateMapEntryType[] = [
+  { value: 'abc' },
+  { value: 'def' },
+  { value: 'ghi' },
+];
+
+const MAP_NUMBERS: StateMapEntryType[] = [
+  { value: 123, label: 'value_123' },
+  { value: 456, label: 'value_456' },
+  { value: 789, label: 'value_789' },
+];
+
+const ENTITIES: EntityConfigType[] = [
+  {},
+  { y_axis: 'secondary' },  // 1
+  {},
+  { y_axis: 'primary' },
+  { y_axis: 'secondary', state_map: { map: [] } }, // 4
+  { y_axis: 'secondary', state_map: { map: MAP_STRINGS } }, // 5
+  { y_axis: 'secondary', state_map: { map: MAP_NUMBERS, keep_values: true } }, // 6
+  {},
+  { y_axis: 'primary' },  // 8
+];
+
+interface VariantType {
+  descr: string;
+  config: ConfigType;
+  index: number;
+  expected: StateMapType | null;
+};
+
+const VARIANTS: VariantType[] = [
+  {
+    descr: 'no state_map',
+    config: {
+      entities: ENTITIES,
+    },
+    index: 1,
+    expected: null,
+  },
+  {
+    descr: 'empty map',
+    config: {
+      entities: ENTITIES,
+    },
+    index: 4,
+    expected: null,
+  },
+  /////////////////////////////////////////////////////////////////////////
+  {
+    descr: 'strict',
+    config: {
+      entities: ENTITIES,
+    },
+    index: 5,
+    expected: { map: MAP_STRINGS },
+  },
+  {
+    descr: 'relaxed',
+    config: {
+      entities: ENTITIES,
+    },
+    index: 6,
+    expected: { map: MAP_NUMBERS, keep_values: true },
+  },
+  /////////////////////////////////////////////////////////////////////////
+  {
+    descr: 'global strict',
+    config: {
+      entities: ENTITIES,
+      state_map: { map: MAP_STRINGS },
+    },
+    index: 0,
+    expected: { map: MAP_STRINGS },
+  },
+  {
+    descr: 'ignore global strict due to a local with empty map',
+    config: {
+      entities: ENTITIES,
+      state_map: { map: MAP_STRINGS },
+    },
+    index: 4,
+    expected: null,
+  },
+  {
+    descr: 'global strict with empty map',
+    config: {
+      entities: ENTITIES,
+      state_map: { map: [] },
+    },
+    index: 0,
+    expected: null,
+  },
+  {
+    descr: 'local strict, ignore global relaxed',
+    config: {
+      entities: ENTITIES,
+      state_map: { map: MAP_NUMBERS },
+    },
+    index: 5,
+    expected: { map: MAP_STRINGS },
+  },
+  /////////////////////////////////////////////////////////////////////////
+  {
+    descr: 'no per-entity, no per-axis',
+    config: {
+      entities: ENTITIES,
+      y_axis: {},
+    },
+    index: 3,
+    expected: null,
+  },
+  {
+    descr: 'no per-entity, no per-axis (2)',
+    config: {
+      entities: ENTITIES,
+      y_axis: { primary: {} },
+    },
+    index: 3,
+    expected: null,
+  },
+  {
+    descr: 'no per-entity, per-axis with empty map (2)',
+    config: {
+      entities: ENTITIES,
+      y_axis: { primary: { state_map: { map: [] } } },
+    },
+    index: 3,
+    expected: null,
+  },
+  {
+    descr: 'no per-entity, per-axis strict',
+    config: {
+      entities: ENTITIES,
+      y_axis: { primary: { state_map: { map: MAP_STRINGS, keep_values: false } } },
+    },
+    index: 3,
+    expected: { map: MAP_STRINGS, keep_values: false },
+  },
+  {
+    descr: 'per-entity strict, per-axis relaxed ignored',
+    config: {
+      entities: ENTITIES,
+      y_axis: { primary: { state_map: { map: MAP_NUMBERS, keep_values: true } } },
+    },
+    index: 5,
+    expected: { map: MAP_STRINGS },
+  },
+  {
+    descr: 'no per-entity, per-axis with empty map, global strict is ignored',
+    config: {
+      entities: ENTITIES,
+      y_axis: { primary: { state_map: { map: [] } } },
+      state_map: { map: MAP_STRINGS },
+    },
+    index: 3,
+    expected: null,
+  },
+  {
+    descr: 'no per-entity, per-axis strict, global relaxed is ignored',
+    config: {
+      entities: ENTITIES,
+      y_axis: { primary: { state_map: { map: MAP_STRINGS } } },
+      state_map: { map: MAP_NUMBERS, keep_values: true },
+    },
+    index: 3,
+    expected: { map: MAP_STRINGS },
+  },
+  {
+    descr: 'no per-entity, no per-axis, global strict',
+    config: {
+      entities: ENTITIES,
+      y_axis: { primary: { } },
+      state_map: { map: MAP_STRINGS },
+    },
+    index: 3,
+    expected: { map: MAP_STRINGS },
+  },
+  {
+    descr: 'no per-entity, no per-axis, global with empty map',
+    config: {
+      entities: ENTITIES,
+      y_axis: { primary: { } },
+      state_map: { map: [] },
+    },
+    index: 3,
+    expected: null,
+  },
+];
+
+describe("MiniGraphCard::_getEntityStateMap()", () => {
+  let card: MiniGraphCard;
+
+  beforeEach(() => {
+    card = new MiniGraphCard();
+  });
+
+  VARIANTS.forEach((variant) => {
+    it(variant.descr, () => {
+      card.config = variant.config;
+      const entityStateMap: (StateMapType | null)[] = card._getEntityStateMap();
+      expect(entityStateMap[variant.index]).toEqual(variant.expected);
+    });
+  });
+});
