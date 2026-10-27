@@ -395,7 +395,7 @@ By default, tapping on an element opens a `more-info` dialog:
 #### State map object
 
 State map object is defined by a `state_map` option and allows to map values from an entity's history to specific graph coordinates and labels. It operates in two modes:
-* **strict mode** (default, when `keep_values: false` or undefined): converts original text values (e.g., `on`, `off`) from a history to sequential numbers (0, 1, ...) to render them on a graph. Unmapped values are left in the history array "as is"; if these unmapped values are numeric - they are shown on a graph & thus may cause a distortion since the properly mapped values are like "0, 1, ..." and can be much smaller than the unmapped values; if the unmapped values are non-numeric - these values are not shown on a graph (since graph is created using _numbers_), and an unmapped value can only be displayed for a **current** value in a "state display" area (since the current value is not taken from a history but is a "live" state). As a conclusion: only use the **strict mode** for entities with non-numeric values & provide a mapping for all possible values.
+* **strict mode** (default, when `keep_values: false` or undefined): converts original text values (e.g., `on`, `off`) from a history to sequential numbers (0, 1, ...) to render them on a graph. Unmapped values are left in the history array "as is"; if these unmapped values are numeric - they are shown on a graph & thus may cause a distortion since the properly mapped values are like "0, 1, ..." and can be much smaller than the unmapped values; if the unmapped values are non-numeric - these values are not shown on a graph (since graph is created using _numbers_), and an unmapped value can only be displayed for a **current** value in a "state display" area (since the current value is not taken from a history but is a "live" state).
 * **relaxed mode** (when `keep_values: true`): is only meaningful for entities with numeric values, retains original numeric history values (i.e. the history data is untouched) while replacing custom text labels for specific numbers (like `Danger` instead of `1000`). Supports an optional `tolerance` parameter to match numeric values within a defined range `[value ± tolerance]`, both bounds are "included". Alternatively, `min` & `max` parameters can be used instead to match numeric values in a defined range `[min, max)`, a right bound in not "included". For matched values, user-defined (or automatically generated) labels are shown instead (like a `Danger` label or a complex dynamically created `Danger: 810 (700..900)` label).
 
 In the description above, a "label" term stands for a text displayed on a card:
@@ -407,7 +407,6 @@ In the description above, a "label" term stands for a text displayed on a card:
 In case of using a mapping with a `state_map` object, these labels contain a mapped value (e.g. `off` & `on` in case of a strict mapping, `Danger` in case of a relaxed mapping, see examples above).
 Note that Y-axis labels will contain mapped values only for a strict mapping (see more details below) like `off` & `on`, and in case of a relaxed mapping the Y-axis labels still contain original unmapped values.
 Also, both strict & relaxed mappings are not applied to "extrema/average" values, original values are shown there.
-
 
 The `state_map` option can be defined in 2 ways:
 * short (or legacy) syntax - the `state_map` option is an array of mappings, this creates "strict" mappings.
@@ -462,8 +461,9 @@ As a shorthand, you can just use a string as a value to convert (then a label is
     - value: blue
       label: Blue
 ```
+It is recommended to only use the "strict mode" for entities with non-numeric values & provide a mapping for all possible values.
 
-The `tolerance`, `min` & `max` options can only be used in the "relaxed" mode as meaningful for numeric values only.
+The `tolerance`, `min` & `max` options can only be used in the "relaxed mode" as meaningful for numeric values only.
 There are 2 ways of matching - either define a `value` (with a possibly defined `tolerance`, otherwise a default "0" tolerance is used) to match values in `[value ± tolerance]` range (both bounds are "included"), or define `min` & `max` to match values in `[min, max)` range (right bound is not included).
 
 The `label` option is processed as follows:
@@ -480,19 +480,20 @@ Here the `${...}` part can contain tokens like `value`, `tolerance`, `min`, `max
 Also, in the "strict mode", only `value` token can be used, other tokens are processed as "empty string".
 Also note that JS templates are not supported inside the `${...}` part.
 
-The `state_map` option can be defined per-entity, per-axis or globally for all entities.
-Per-entity approach is preferable when a conversion is supposed to be done for one particular entity only, otherwise it may cause a distortion on a graph & warnings in a browser's console.
+The `state_map` option can be defined per-entity, per-axis or globally for all entities:
+* global strict `state_map` is used when all entities on a card have non-numeric values & have a same set of possible values. Applying a global strict `state_map` for numeric entities on a card makes no sense - it may cause a distortion on a graph & numerous "value not found in state_map" warnings in a browser's console. Also, a global strict `state_map` can be used when there is only one entity (which is non-numeric) on a card.
+* global relaxed `state_map` is used when all entities on a card have numeric values to define custom labels for some numeric values. Applying a global relaxed `state_map` with numeric mappings makes no sense for non-numeric entities on a card - the mapping will not change a presentation of these on-numeric entities, it will be just a useless job for CPU. Also, a global relaxed `state_map` can be used when there is only one entity (which is numeric) on a card.
+* per-entity strict `state_map` is used when a particular mapping must to be applied for one particular non-numeric entity only, and there are no other numeric entities on the same Y-axis (e.g. all non-numeric entities are on a `primary` axis, all numeric entities - on a `secondary` axis). Also, can be used when there is only one entity (which is non-numeric) on a card.
+* per-entity relaxed `state_map` is used when a particular mapping must be applied for one particular numeric entity only. Also, can be used when there is only one entity (which is numeric) on a card.
+* per-axis strict `state_map` is used when a particular mapping must be applied for all non-numeric entities on some particular Y-axis. Important note: this is the only way to apply a mapping to Y-axis labels (they are not mapped in other cases, see below). Also, can be used when there is only one entity (which is non-numeric) on a card (although, ideologically it has a little sense to define a per-axis mapping instead of a per-entity or a global one).
+* per-axis relaxed `state_map` is used when a particular mapping must be applied for all numeric entities on some particular Y-axis. Also, can be used when there is only one entity (which is numeric) on a card (although, ideologically it has a little sense to define a per-axis mapping instead of a per-entity or a global one).
 
+Mapped values (like `off` & `on` in case of a strict mapping; the relaxed mapping is not considered) are used as Y-axis labels only if (note: logic is a bit simplified below):
+* there is only one entity associated with the axis and it has own per-entity strict `state_map`;
+* none entity associated with the axis has own per-entity `state_map`, then a per-axis strict `state_map` is applied (if defined);
+* none entity associated with the axis has own per-entity `state_map` & there is no per-axis `state_map` defined, then a global strict `state_map` is applied (if defined).
 
-
-Mapped values (like  `Danger [801 .. 1001)`, `Switched off`) are used as Y-axis labels only if (note: logic is a bit simplified below):
-* there is only one entity associated with the axis and it has own per-entity valid strict `state_map`;
-* none entity associated with the axis has own per-entity `state_map`, then a globally defined valid strict `state_map` is applied (if defined).
-Means - the relaxed mapping does not touch Y-axis labels.
-
-Notes:
-1. The `state_map` option can be defined per-entity or globally for all entities. Per-entity approach is preferable when a conversion is supposed to be done for one particular entity only, otherwise it may cause a distortion on a graph & warnings in a browser's console.
-2. If an order of entries is changed in a "strict" `state_map` and a `cache` option is not set to `false`, it is recommended to purge a browser's cache - otherwise old cached history data (generated for the old order) might become wrong for the new config.
+If an order of entries is changed in a "strict" `state_map` mapping array and a `cache` option is not set to `false`, it is recommended to purge a browser's cache - otherwise old cached history data (generated for the old order in `state_map` mapping array) might become wrong for the new config.
 
 See examples [below](#using-state_map).
 
