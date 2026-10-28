@@ -25,6 +25,7 @@ export default class Graph {
     total_bars_in_group = 1, // number of bars (i.e. number of entities with a shown bar graph)
     baseline,
     invert = false,
+    calculateOverall = false,
   }) {
     const aggregateFuncMap = {
       avg: this._average,
@@ -59,7 +60,13 @@ export default class Graph {
     this._endTime = 0;
     this._baseline = baseline;
     this._invert = invert;
+
+    // calculating "overall" aggregated values
+    this._calculateOverall = calculateOverall;
+    this._overall = undefined;
   }
+
+  get overall() { return this._overall; }
 
   get max() { return this._max; }
 
@@ -134,6 +141,13 @@ export default class Graph {
 
     // update interval end date
     this._endTime = endTime;
+
+    // calculate "overall" value
+    if (this._calculateOverall) {
+      this._overall = this._history.length > 0
+        ? this._calcPoint(this._history)
+        : undefined;
+    }
 
     // group history into time buckets
     const histGroups = this._history.reduce((res, item) => this._reducer(res, item), []);
