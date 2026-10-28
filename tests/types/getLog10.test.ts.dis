@@ -1,0 +1,31 @@
+/**
+ * Tests for getLog10().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it } from 'vitest';
+import { getLog10 } from '../src/utils';
+
+interface VariantType {
+  value: number;
+  expected: number;
+};
+
+describe("getLog10()", () => {
+  const values: number[] = [-1000, -100, -10, -1, -0.1, 0, 0.1, 1, 10, 100, 1000];
+  const VARIANTS: VariantType[] = values.map((val) => {
+    const expected = val < 1
+      ? 0
+      : Math.log10(val);
+    return { value: val, expected };
+  });
+
+  VARIANTS.forEach((variant) => {
+    it(`value: ${variant.value}`, () => {
+      const result = getLog10(variant.value);
+      expect(result).toEqual(variant.expected);
+    });
+  });
+});
