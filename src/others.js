@@ -41,7 +41,10 @@ const isNumericEntity = (hass, entityId) => {
   const domain = entityId.split('.')[0];
   if (NUMERIC_DOMAINS.includes(domain)) return true;
   if (domain !== 'sensor') return false;
-
+  if (!hass) {
+    // assumption when hass is not ready
+    return domain === 'sensor';
+  }
   const stateObj = hass.states[entityId];
   if (!stateObj) return false;
   return !!stateObj.attributes.unit_of_measurement || !!stateObj.attributes.state_class;

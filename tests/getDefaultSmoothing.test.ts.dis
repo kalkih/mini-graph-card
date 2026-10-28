@@ -80,13 +80,35 @@ describe("MiniGraphCard::_getDefaultSmoothing()", () => {
   beforeEach(() => {
     card = new MiniGraphCard();
     card.config = config;
-    card._hass = hass;
   });
 
-  VARIANTS.forEach((variant) => {
-    it(variant.descr, () => {
-      const result = card._getDefaultSmoothing(variant.index);
-      expect(result).toEqual(variant.expected);
+  describe("hass is defined", () => {
+    beforeEach(() => {
+      card._hass = hass;
+    });
+
+    VARIANTS.forEach((variant) => {
+      it(variant.descr, () => {
+        const result = card._getDefaultSmoothing(variant.index);
+        expect(result).toEqual(variant.expected);
+      });
+    });
+  });
+
+  describe("hass is defined", () => {
+    const nullHass = null;
+    beforeEach(() => {
+      card._hass = nullHass;
+    });
+
+    VARIANTS.forEach((variant) => {
+      it(variant.descr, () => {
+        const result = card._getDefaultSmoothing(variant.index);
+        const expected = variant.index === 5
+          ? true
+          : variant.expected;
+        expect(result).toEqual(expected);
+      });
     });
   });
 });

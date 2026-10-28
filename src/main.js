@@ -464,6 +464,9 @@ export default class MiniGraphCard extends LitElement {
       // Turn off default smoothing for non-numeric entities.
       // Smoothing should be manually turned on in config
       // in case of addressing a numerical attribute.
+      // Warning: this._hass may be undefined by a time of a call -
+      // then the method considers all sensors as numeric.
+      // Not a big problem since the method is needed in a very rare case
       return isNumericEntity(this._hass, entity);
     }
     // processing a possible `static_value` entry
