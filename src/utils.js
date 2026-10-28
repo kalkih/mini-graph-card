@@ -54,6 +54,7 @@ const renderSimpleTemplate = (template, vars) => {
 
 export {
   getMin, getAvg, getMax,
+  getLog10,
   getMilli,
   compress, decompress,
   log,
