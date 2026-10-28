@@ -117,7 +117,7 @@ Else, if you prefer the graphical editor, use the menu to add the resource:
 3. Enter URL `/local/mini-graph-card-bundle.js` and select type "JavaScript Module".
 4. Restart Home Assistant.
 
-## Updating
+### Updating
 **If you have a version older than v0.0.8 installed, please delete the current files and follow the installation instructions again.**
 
 1. Find your `mini-graph-card-bundle.js` file in `config/www` or wherever you ended up storing it.
