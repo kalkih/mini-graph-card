@@ -1668,13 +1668,11 @@ Note that the `dev` branch is the most up-to-date and matches our beta releases.
 Please refer to the [Contribution Guidelines](./CONTRIBUTING.md) if you're interested in contributing to the project. (And thanks for considering!)
 
 ## Getting errors?
-Make sure you have `javascript_version: latest` in your `configuration.yaml` under `frontend:`.
 
-Make sure you have the latest versions of `mini-graph-card.js` & `mini-graph-lib.js`.
+Make sure you have the latest versions of `mini-graph-card.js`.
 
 If you have issues after updating the card, try clearing your browser cache.
 
-If you have issues displaying the card in older browsers, try changing `type: module` to `type: js` at the card reference in `ui-lovelace.yaml`.
 
 ## License
 This project is under the MIT license.
