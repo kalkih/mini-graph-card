@@ -518,7 +518,8 @@ Mapped values (like `off` & `on` in case of a strict mapping; the relaxed mappin
 * none entity associated with the axis has own per-entity `state_map`, then a per-axis strict `state_map` is applied (if defined);
 * none entity associated with the axis has own per-entity `state_map` & there is no per-axis `state_map` defined, then a global strict `state_map` is applied (if defined).
 
-If an order of entries is changed in a "strict" `state_map` mapping array and a `cache` option is not set to `false`, it is recommended to purge a browser's cache - otherwise old cached history data (generated for the old order in `state_map` mapping array) might become wrong for the new config.
+> [!WARNING]
+> If an order of entries is changed in a "strict" `state_map` mapping array and a `cache` option is not set to `false`, it is recommended to purge a browser's cache - otherwise old cached history data (generated for the old order in `state_map` mapping array) might become wrong for the new config.
 
 See examples [below](#using-state_map).
 
