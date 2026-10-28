@@ -553,21 +553,20 @@ class MiniGraphCard extends LitElement {
       `;
     }
 
-    const { icon, icon_adaptive_color } = this.config.show;
+    const { icon: showIcon, icon_adaptive_color } = this.config.show;
 
-    if (!icon
+    if (!showIcon
       || !this.entity
       || (!this.entity[0] && !this._isStaticValue[0])) {
       return html``;
     }
 
-    const { icon_color } = this.config;
+    const { icon, icon_color } = this.config;
     const iconColor = icon_color || (icon_adaptive_color ? this.color : undefined);
     const stateObj = this.entity[0];
-    // an entity icon is resolved by HA (incl. icon translations, e.g. for device classes)
-    const iconElement = stateObj && !this.config.icon
-      ? html`<ha-state-icon .hass=${this._hass} .stateObj=${stateObj}></ha-state-icon>`
-      : html`<ha-icon .icon=${this.computeIcon()}></ha-icon>`;
+    // HA resolves an entity icon (incl. icon translations, e.g. for device classes);
+    // a static value without an `icon` option keeps the previous fallback
+    const resolvedIcon = !stateObj && !icon ? ICONS.temperature : icon;
 
     return html`
       <div
@@ -575,7 +574,11 @@ class MiniGraphCard extends LitElement {
         loc=${iconLoc}
         style=${iconColor !== undefined ? `color: ${iconColor};` : ''}
       >
-        ${iconElement}
+        <ha-state-icon
+          .icon=${resolvedIcon}
+          .stateObj=${stateObj}
+          .hass=${this._hass}
+        ></ha-state-icon>
       </div>
     `;
   }
@@ -1677,16 +1680,6 @@ class MiniGraphCard extends LitElement {
     }
     // use a fixed label for a static value
     return this._isStaticValue[index] ? 'Static' : '';
-  }
-
-  /**
-  * Returns an icon accounting an `icon` option,
-  * fallback to a standard MDI "temperature" icon;
-  * used if an icon is not resolved by "ha-state-icon" (static value or `icon` option)
-  * @returns {string} mdi:icon
-  */
-  computeIcon() {
-    return this.config.icon || ICONS.temperature;
   }
 
   /**
