@@ -758,6 +758,8 @@ The opacity is applied for a color defined as `stroke-color: var(--card-backgrou
 Customizing these 2 variables may be desirable for some client devices.
 
 
+---
+
 ## Example usage
 
 ### Single entity card
@@ -784,6 +786,8 @@ show:
   fill: false
 ```
 
+---
+
 ### Multiple entities card
 
 ![Multiple entities card](https://user-images.githubusercontent.com/457678/52009165-900cc980-24d2-11e9-8cc6-c77de58465b5.png)
@@ -798,6 +802,8 @@ entities:
   - sensor.server_sent
   - sensor.server_received
 ```
+
+---
 
 ### Different graph types
 
@@ -841,8 +847,7 @@ show:
   icon: false
 ```
 
-
-
+---
 
 ### Bar spacing
 
@@ -894,6 +899,7 @@ show:
   name: false
 ```
 
+---
 
 ### Show data from the past week
 ![Show data from the past week](https://user-images.githubusercontent.com/457678/52009167-913df680-24d2-11e9-8732-52fc65e3f0d8.png)
@@ -910,6 +916,8 @@ hours_to_show: 168
 points_per_hour: 0.25
 ```
 
+---
+
 ### Graph only card
 Use the `show` option to show/hide UI elements.
 
@@ -924,6 +932,8 @@ show:
   name: false
   state: false
 ```
+
+---
 
 ### Horizontally stacked cards
 You can stack cards horizontally by using one or more `horizontal-stack(s)`.
@@ -952,6 +962,8 @@ cards:
     line_width: 8
     font_size: 75
 ```
+
+---
 
 ### Dynamic line color
 Have the graph change line color dynamically.
@@ -999,6 +1011,8 @@ show:
   state: false
 ```
 
+---
+
 ### Alternate Y-axis
 Have one or more series plot on a separate Y-axis, which appears on the right side of the graph. This example also
 shows turning off the line, points and legend.
@@ -1026,6 +1040,8 @@ show:
   labels_secondary: true
 ```
 
+---
+
 ### Custom styles for line graphs
 
 Set a custom line style globally for a whole card or per-entity:
@@ -1049,6 +1065,8 @@ entities:
   - entity: sensor.xiaomi_cg_2_temperature
     line_style: 6,6
 ```
+
+---
 
 ### Displaying static values
 
@@ -1172,6 +1190,7 @@ show:
   labels_secondary: true
 ```
 
+---
 
 ### Custom baseline
 
@@ -1247,6 +1266,8 @@ show:
   labels: true
 ```
 
+---
+
 ### Inverted Y-axis
 
 Water level in a well: a 0 value means "well is full", a higher value - "well is depleted/empty":
@@ -1289,6 +1310,8 @@ show:
   labels: true
   graph: bar
 ```
+
+---
 
 ### Opposing dual-axis graphs
 
@@ -1365,6 +1388,8 @@ y_axis:
     invert: true
 ```
 
+---
+
 ### Grouping by date
 
 ![mini_energy_daily](https://user-images.githubusercontent.com/8268674/66688605-3ffc1e80-ec7f-11e9-872e-935870a542f3.png)
@@ -1382,6 +1407,8 @@ group_by: date
 show:
   graph: bar
 ```
+
+---
 
 ### Data aggregation functions
 You can decide how values are aggregated for points on graph. Example how to display min, max, avg temperature per day
@@ -1407,6 +1434,8 @@ name: Temp outside daily (last week)
 hours_to_show: 168
 group_by: date
 ```
+
+---
 
 ### Using `state_map`
 
@@ -1460,6 +1489,8 @@ show:
   labels: true
 ```
 
+---
+
 ### Showing additional info on the card
 
 ![изображение](https://user-images.githubusercontent.com/71872483/170584118-ef826b60-dce3-42ec-a005-0f467616cd37.png)
@@ -1490,6 +1521,8 @@ show:
   labels: true
 ```
 This method may be also used to add a calculated value with it's own `aggregate_func` option.
+
+---
 
 ### Accessing attributes in complex structures
 
@@ -1538,6 +1571,8 @@ entities:
 ```
 ![image](https://github.com/ildar170975/mini-graph-card/assets/71872483/eebd0cea-da93-4bf5-97a1-118edd2a9c5e)
 
+---
+
 ## Development
 
 1. Clone this repository into your `config/www` folder using git:
@@ -1584,6 +1619,8 @@ $ npm run watch
 Note that the `dev` branch is the most up-to-date and matches our beta releases.
 
 Please refer to the [Contribution Guidelines](./CONTRIBUTING.md) if you're interested in contributing to the project. (And thanks for considering!)
+
+---
 
 ## Getting errors?
 Make sure you have `javascript_version: latest` in your `configuration.yaml` under `frontend:`.
