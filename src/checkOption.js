@@ -3,7 +3,7 @@ import {
   getStringifiedValue,
 } from './utils';
 import {
-  isString, isNumber,
+  isString,
   isNumeric,
   logStringWarning,
   getBound,
@@ -214,7 +214,7 @@ const checkBounds = (config, yAxis) => {
  * @param {string} yAxis Y-axis type (primary/secondary)
  * @returns {void}
  */
-const checkYAxisLabels = (axisConfig, yAxis) => {
+const checkYaxisLabels = (axisConfig, yAxis) => {
   if (axisConfig) {
     const rawLabels = axisConfig.labels;
     if (Array.isArray(rawLabels)) {
@@ -261,6 +261,7 @@ const checkColorThresholds = (config, configName) => {
   config.color_thresholds = thresholds
     .map((threshold, index) => {
       if (typeof threshold === 'string') {
+        // shorthand
         return { color: threshold };
       }
 
@@ -303,6 +304,121 @@ const checkColorThresholds = (config, configName) => {
 };
 /* eslint-enable no-param-reassign */
 
+/**
+ * Helper function to check numeric min/max bounds.
+ * Used for check bounds in state_map object.
+ * @param {any} min Lower bound
+ * @param {any} max Upper bound
+ * @param {string} configName Name of a config object
+ * @returns {{min: number, max: number}|null} Bounds, or null if invalid
+ */
+const checkMinMaxBounds = (min, max, configName) => {
+  if (!isNumeric(min, true) || !isNumeric(max, true)) {
+    const error = `Invalid option "${configName}": `
+      + '"min" and "max" must be numeric values; removing the entry';
+    log(error);
+    return null; // whole map entry is dropped
+  }
+  logStringWarning(min, `${configName}.min`);
+  logStringWarning(max, `${configName}.max`);
+  const numMin = Number(min);
+  const numMax = Number(max);
+  if (numMax <= numMin) {
+    const error = `Invalid option "${configName}": `
+      + `"max" (${numMax}) must be greater than "min" (${numMin}); removing the entry`;
+    log(error);
+    return null; // whole map entry is dropped
+  }
+  return { min: numMin, max: numMax };
+};
+
+/**
+ * Helper function to check a tolerance.
+ * Used for check tolerance in state_map object.
+ * @param {any} tolerance Tolerance
+ * @param {string} configName Name of a config object
+ * @returns {number|undefined} Tolerance
+ */
+const checkTolerance = (tolerance, configName) => {
+  logStringWarning(tolerance, `${configName}.tolerance`);
+  let numTolerance = Number(tolerance);
+  if (!Number.isFinite(numTolerance) || numTolerance < 0) {
+    log(`Invalid option "${configName}": "tolerance" must be a positive number`);
+    numTolerance = undefined;
+  }
+  return numTolerance;
+};
+
+/**
+ * Check if ranges are crossing, then remove overlapping duplicate elements.
+ * Used for check ranges in state_map object.
+ * @param {object} configArray Array object containing ranges
+ * @param {string} configName Name of an array object
+ * @returns {Array} Updated array with duplicates removed
+ */
+const checkRangesCrossing = (configArray, configName) => {
+  if (!Array.isArray(configArray) || configArray.length <= 1) {
+    return configArray;
+  }
+
+  const intervals = configArray
+    .map((entry, index) => {
+      if (entry.min !== undefined && entry.max !== undefined) {
+        return {
+          low: entry.min,
+          high: entry.max,
+          isClosed: false, // right bound is not included
+          index,
+        };
+      }
+      if (entry.value !== undefined && isNumeric(entry.value, true)) {
+        const value = Number(entry.value);
+        const tolerance = entry.tolerance || 0;
+        return {
+          low: value - tolerance,
+          high: value + tolerance,
+          isClosed: true, // both bounds are included
+          index,
+        };
+      }
+      return null;
+    })
+    .filter(entry => entry !== null);
+
+  // Sort, "low" by ascendance
+  intervals.sort((a, b) => a.low - b.low);
+
+  const indexesToRemove = new Set();
+  let lastValidInterval = intervals[0];
+
+  for (let i = 1; i < intervals.length; i += 1) {
+    const current = lastValidInterval;
+    const next = intervals[i];
+
+    if (!current) break;
+
+    const hasOverlap = (current.isClosed || next.isClosed)
+      ? current.high >= next.low
+      : current.high > next.low;
+
+    if (hasOverlap) {
+      const error = `Invalid option "${configName}": `
+        + `zones overlap between elements [${current.index}] and [${next.index}]! `
+        + `Removing the overlapping element [${next.index}] from config`;
+      log(error);
+      indexesToRemove.add(next.index); // drop a duplicate entry which overlaps with the prev one
+    } else {
+      lastValidInterval = next;
+    }
+  }
+
+  // remove entries with overlapping ranges (duplicates only)
+  const clearedArray = indexesToRemove.size > 0
+    ? configArray.filter((_, index) => !indexesToRemove.has(index))
+    : configArray;
+  return clearedArray;
+};
+
 /* eslint-disable no-param-reassign */
 /**
  * Check if state_map is properly defined.
@@ -311,45 +427,143 @@ const checkColorThresholds = (config, configName) => {
  * @returns {void}
  */
 const checkStateMap = (config, configName) => {
-  const stateMap = config.state_map;
-  if (!Array.isArray(stateMap)) {
-    const error = `Please provide the "${configName}.state_map" option as a list`;
-    log(error);
-    config.state_map = [];
+  if (config.state_map === undefined || config.state_map === null) {
+    // state_map is not defined, normal situation
+    return;
+  }
+  const stateMap = config.state_map && config.state_map.map;
+  if (!Array.isArray(stateMap)) { // also works for undefined/null
+    // stateMap not a list
+    log(`Invalid option "${configName}.state_map.map": expected a list; unsetting to []`);
+    config.state_map = { map: [] };
     return;
   }
 
-  const validEntries = [];
-  stateMap.forEach((entry, index) => {
-    const isShorthandString = isString(entry) || isNumber(entry);
-    const hasValue = entry
-      && (isString(entry.value) || isNumber(entry.value));
-    if (!isShorthandString && !hasValue) {
-      const error = `Invalid option "${configName}.state_map[${index}]": "value" must be specified`;
-      log(error);
-      return; // filter out wrong entries
-    }
-    // convert string values to objects
-    if (isShorthandString) {
-      validEntries.push({ value: String(entry), label: String(entry) });
-    } else {
-      // make sure a "value" is a string
-      const value = String(entry.value);
-      // make sure a "label" is set & a string
-      let label;
-      if (!entry.label) {
-        label = value;
-      } else if (!isString(entry.label) && !isNumber(entry.label)) {
-        const error = `Invalid option "${configName}.state_map[${index}]": "label" must be a string`;
-        log(error);
-        label = value;
-      } else {
-        label = String(entry.label);
+  let keepValues = config.state_map.keep_values;
+  if (keepValues !== undefined && keepValues !== null) {
+    keepValues = !!keepValues;
+    config.state_map.keep_values = keepValues;
+  }
+
+  const globalLabel = config.state_map.label;
+  if (globalLabel !== undefined && globalLabel !== null) {
+    config.state_map.label = String(globalLabel);
+  }
+
+  const globalHideUnit = config.state_map.hide_unit;
+  if (globalHideUnit !== undefined && globalHideUnit !== null) {
+    config.state_map.hide_unit = !!globalHideUnit;
+  }
+
+  config.state_map.map = stateMap
+    .map((entry, index) => {
+      if (typeof entry === 'string' || typeof entry === 'number') {
+        // shorthand
+        return { value: String(entry) };
       }
-      validEntries.push({ value, label });
-    }
-  });
-  config.state_map = validEntries;
+
+      if (entry
+        && typeof entry === 'object'
+        && !Array.isArray(entry) // just in case to filter out arrays
+      ) {
+        let {
+          value,
+          label,
+          tolerance,
+          min,
+          max,
+          hide_unit: hideUnit,
+        } = entry;
+
+        const hasValue = value !== undefined && value !== null;
+        const hasMinMax = min !== undefined && max !== undefined
+          && min !== null && max !== null;
+
+        if (!hasValue && !keepValues) {
+          const error = `Invalid option "${configName}.state_map.map[${index}]": `
+            + '"value" must be specified; removing the entry';
+          log(error);
+          return null;
+        }
+        if (!hasValue && !hasMinMax && keepValues) {
+          const error = `Invalid option "${configName}.state_map.map[${index}]": `
+            + '"value" or both "min" and "max" must be specified; removing the entry';
+          log(error);
+          return null;
+        }
+        if (hasValue) {
+          if (typeof value !== 'string' && typeof value !== 'number') {
+            const error = `Invalid option "${configName}.state_map.map[${index}]": `
+              + '"value" is missing or not a string/number; removing the entry';
+            log(error);
+            return null;
+          }
+          value = String(value);
+        }
+        if (!hasValue && hasMinMax && keepValues) {
+          const bounds = checkMinMaxBounds(
+            min,
+            max,
+            `${configName}.state_map.map[${index}]`,
+          );
+          if (!bounds) return null;
+          ({ min, max } = bounds);
+        }
+
+        if (label !== undefined && label !== null
+          && (typeof label === 'string' || typeof label === 'number')
+          && String(label).trim() !== '') {
+          label = String(label);
+        } else {
+          label = undefined;
+        }
+
+        if (!hasValue
+          || !keepValues
+          || hasMinMax
+          || tolerance === undefined || tolerance === null
+          || !isNumeric(tolerance, true)) {
+          tolerance = undefined;
+        } else {
+          tolerance = checkTolerance(tolerance, `${configName}.map[${index}]`);
+        }
+
+        if (hideUnit !== undefined && hideUnit !== null) {
+          hideUnit = !!hideUnit;
+        } else {
+          hideUnit = undefined;
+        }
+
+        const result = {};
+        if (label !== undefined) {
+          result.label = label;
+        }
+        if (hasValue) {
+          result.value = value;
+        }
+        if (!hasValue && hasMinMax && keepValues) {
+          result.min = min;
+          result.max = max;
+        }
+        if (tolerance !== undefined && keepValues) {
+          result.tolerance = tolerance;
+        }
+        if (hideUnit !== undefined) {
+          result.hide_unit = hideUnit;
+        }
+        return result;
+      }
+
+      // other invalid content
+      log(`Invalid option "${configName}.state_map.map[${index}]": expected an object or a string/number`);
+      return null;
+    })
+    .filter(entry => entry !== null);
+
+  // check wrong crossing of ranges
+  if (keepValues === true) {
+    config.state_map.map = checkRangesCrossing(config.state_map.map, 'state_map.map');
+  }
 };
 /* eslint-enable no-param-reassign */
 
@@ -486,8 +700,9 @@ export {
   checkIntegerOption,
   checkBoundOption,
   checkBounds,
-  checkYAxisLabels,
+  checkYaxisLabels,
   checkColorThresholds,
+  checkRangesCrossing, // testing only
   checkStateMap,
   checkLineStyle,
   checkGroupBy,

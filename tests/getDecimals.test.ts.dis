@@ -1,0 +1,237 @@
+/**
+ * Tests for MiniGraphCard::_getDecimals().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+// @vitest-environment jsdom
+import { expect, describe, it, beforeEach } from 'vitest';
+import MiniGraphCard from '../src/main';
+
+const VARIANTS: any[] = [
+  {
+    descr: 'per-entity: entities is empty, fallback to global decimals',
+    context: {index: 0},
+    config: {
+      entities: [],
+      decimals: 55,
+    },
+    expected: 55,
+  },
+  {
+    descr: 'per-entity: entities is empty, fallback to global decimals (undefined)',
+    context: {index: 0},
+    config: {
+      entities: [],
+    },
+    expected: undefined,
+  },
+  {
+    descr: 'per-entity: decimals not defined per-entity, fallback to global decimals',
+    context: {index: 0},
+    config: {
+      entities: [{entity: 'sensor.xxx'}],
+      decimals: 66,
+    },
+    expected: 66,
+  },
+  {
+    descr: 'per-entity: decimals not defined per-entity, fallback to global decimals (undefined)',
+    context: {index: 0},
+    config: {
+      entities: [{entity: 'sensor.xxx'}],
+    },
+    expected: undefined,
+  },
+  ///////////////////////////////////////////////////////////////////////////////////
+  {
+    descr: 'per-entity: index out of range, fallback to global decimals',
+    context: {index: 1},
+    config: {
+      entities: [{decimals: 1}],
+      decimals: 5,
+    },
+    expected: 5,
+  },
+  {
+    descr: 'per-entity: index out of range, fallback to global decimals (undefined)',
+    context: {index: 1},
+    config: {
+      entities: [{decimals: 1}],
+    },
+    expected: undefined,
+  },
+  ///////////////////////////////////////////////////////////////////////////////////
+  {
+    descr: 'per-entity: use per-entity decimals',
+    context: {index: 0},
+    config: {
+      entities: [{entity: 'sensor.xxx', decimals: 5}],
+    },
+    expected: 5,
+  },
+  {
+    descr: 'per-entity: fallback to global decimals',
+    context: {index: 0},
+    config: {
+      entities: [{entity: 'sensor.xxx'}],
+      decimals: 4,
+    },
+    expected: 4,
+  },
+  {
+    descr: 'per-entity: use per-entity decimals, do not fallback to global decimals',
+    context: {index: 0},
+    config: {
+      entities: [{entity: 'sensor.xxx', decimals: 6}],
+      decimals: 7,
+    },
+    expected: 6,
+  },
+  ///////////////////////////////////////////////////////////////////////////////////
+  {
+    descr: 'primary axis: set decimals for primary axis, fallback to global decimals',
+    context: {origin: 'axis_primary'},
+    config: {
+      entities: [{entity: 'sensor.xxx', decimals: 1}],
+      decimals: 8,
+    },
+    expected: 8,
+  },
+  {
+    descr: 'primary axis: set decimals for primary axis, fallback to global decimals (undefined)',
+    context: {origin: 'axis_primary'},
+    config: {
+      entities: [{entity: 'sensor.xxx', decimals: 1}],
+    },
+    expected: undefined,
+  },
+  {
+    descr: 'primary axis: set decimals for primary axis, fallback to global decimals (undefined) (2)',
+    context: {origin: 'axis_primary'},
+    config: {
+      entities: [{entity: 'sensor.xxx', decimals: 1}],
+      y_axis: {},
+    },
+    expected: undefined,
+  },
+  {
+    descr: 'primary axis: set decimals for primary axis, fallback to global decimals (undefined) (3)',
+    context: {origin: 'axis_primary'},
+    config: {
+      entities: [{entity: 'sensor.xxx', decimals: 1}],
+      y_axis: { primary: {} },
+    },
+    expected: undefined,
+  },
+  {
+    descr: 'primary axis: set decimals for primary axis, fallback to global decimals (undefined) (4)',
+    context: {origin: 'axis_primary'},
+    config: {
+      entities: [{entity: 'sensor.xxx', decimals: 1}],
+      y_axis: { primary: { lower_bound: 1 } },
+    },
+    expected: undefined,
+  },
+  {
+    descr: 'primary axis: set decimals for primary axis',
+    context: {origin: 'axis_primary'},
+    config: {
+      entities: [{entity: 'sensor.xxx', decimals: 1}],
+      y_axis: { primary: { lower_bound: 1, decimals: 9 } },
+    },
+    expected: 9,
+  },
+  {
+    descr: 'primary axis: set decimals for primary axis, do not fallback to global decimals',
+    context: {origin: 'axis_primary'},
+    config: {
+      entities: [{entity: 'sensor.xxx', decimals: 1}],
+      y_axis: { primary: { lower_bound: 1, decimals: 10 } },
+      decimals: 11,
+    },
+    expected: 10,
+  },
+  ///////////////////////////////////////////////////////////////////////////////////
+  {
+    descr: 'secondary axis: set decimals for secondary axis, fallback to global decimals',
+    context: {origin: 'axis_secondary'},
+    config: {
+      entities: [{entity: 'sensor.xxx', decimals: 1}],
+      decimals: 80,
+    },
+    expected: 80,
+  },
+  {
+    descr: 'secondary axis: set decimals for secondary axis, fallback to global decimals (undefined)',
+    context: {origin: 'axis_secondary'},
+    config: {
+      entities: [{entity: 'sensor.xxx', decimals: 1}],
+    },
+    expected: undefined,
+  },
+  {
+    descr: 'secondary axis: set decimals for secondary axis, fallback to global decimals (undefined) (2)',
+    context: {origin: 'axis_secondary'},
+    config: {
+      entities: [{entity: 'sensor.xxx', decimals: 1}],
+      y_axis: {},
+    },
+    expected: undefined,
+  },
+  {
+    descr: 'secondary axis: set decimals for secondary axis, fallback to global decimals (undefined) (3)',
+    context: {origin: 'axis_secondary'},
+    config: {
+      entities: [{entity: 'sensor.xxx', decimals: 1}],
+      y_axis: { secondary: {} },
+    },
+    expected: undefined,
+  },
+  {
+    descr: 'secondary axis: set decimals for secondary axis, fallback to global decimals (undefined) (4)',
+    context: {origin: 'axis_secondary'},
+    config: {
+      entities: [{entity: 'sensor.xxx', decimals: 1}],
+      y_axis: { secondary: { lower_bound: 1 } },
+    },
+    expected: undefined,
+  },
+  {
+    descr: 'secondary axis: set decimals for secondary axis',
+    context: {origin: 'axis_secondary'},
+    config: {
+      entities: [{entity: 'sensor.xxx', decimals: 1}],
+      y_axis: { secondary: { lower_bound: 1, decimals: 90 } },
+    },
+    expected: 90,
+  },
+  {
+    descr: 'secondary axis: set decimals for secondary axis, do not fallback to global decimals',
+    context: {origin: 'axis_secondary'},
+    config: {
+      entities: [{entity: 'sensor.xxx', decimals: 1}],
+      y_axis: { secondary: { lower_bound: 1, decimals: 100 } },
+      decimals: 110,
+    },
+    expected: 100,
+  },
+];
+
+describe("MiniGraphCard::_getDecimals()", () => {
+  let card: MiniGraphCard;
+
+  beforeEach(() => {
+    card = new MiniGraphCard();
+  });
+
+  VARIANTS.forEach((variant) => {
+    it(variant.descr, () => {
+      card.config = JSON.parse(JSON.stringify(variant.config));
+      // console.log('variant.config, card.config', variant.config, card.config);
+      const result = card._getDecimals(variant.context);
+      expect(result).toEqual(variant.expected);
+    });
+  });
+});

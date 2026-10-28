@@ -205,5 +205,4 @@ describe("checkGroupBy", () => {
       expect(result).toEqual(expectedValue);
     });
   });
-
 });

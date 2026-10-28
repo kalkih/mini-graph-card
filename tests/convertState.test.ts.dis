@@ -1,0 +1,119 @@
+/**
+ * Tests for MiniGraphCard::_convertState().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+// @vitest-environment jsdom
+import { expect, describe, it, beforeEach } from 'vitest';
+import MiniGraphCard from '../src/main';
+import type { StateMapType } from './types/stateMapTypes';
+import type { ConfigType } from './types/configType';
+
+describe("MiniGraphCard::_convertState()", () => {
+  let card: MiniGraphCard;
+  let stateMapConfig: StateMapType;
+
+  beforeEach(() => {
+    card = new MiniGraphCard();
+    card.config = {
+      state_map: {
+        keep_values: false,
+        map: [],
+      }};
+    stateMapConfig = (card.config as ConfigType).state_map as StateMapType;
+  });
+
+  describe('keep_values=false/undefined', () => {
+
+    beforeEach(() => {
+      stateMapConfig.keep_values = false;
+      stateMapConfig.map = [
+        { value: 'red', label: 'Red' },
+        { value: 'green', label: 'Green' },
+        { value: 'blue', label: 'Blue' },
+      ];
+    });
+
+    it('convert to index', () => {
+      const res = { state: 'green' };
+      card._convertState(res, stateMapConfig);
+      expect(res.state).toEqual(1);
+    });
+
+    it('no mapping, convert to NaN', () => {
+      const res = { state: 'cyan' };
+      card._convertState(res, stateMapConfig);
+      expect(res.state).to.be.NaN;
+    });
+
+    it('unavailable, no mapping, convert to NaN', () => {
+      const res = { state: 'unavailable' };
+      card._convertState(res, stateMapConfig);
+      expect(res.state).to.be.NaN;
+    });
+
+    it('unavailable, use mapping', () => {
+      stateMapConfig.map = [
+        ...stateMapConfig.map!,
+        {value: 'unavailable'},
+      ];
+      const res = { state: 'unavailable' };
+      card._convertState(res, stateMapConfig);
+      expect(res.state).toEqual(3);
+    });
+  });
+
+  ///////////////////////////////////////////////////////////////////////////////////////
+
+  describe('keep_values=true', () => {
+    beforeEach(() => {
+      stateMapConfig.keep_values = true;
+      stateMapConfig.map = [
+        { value: '10', label: 'Red' },
+        { value: '11', label: 'Green' },
+        { value: '12', label: 'Blue' },
+      ];
+    });
+
+    it('use mapping', () => {
+      const res = { state: '10' };
+      card._convertState(res, stateMapConfig);
+      expect(res.state).toEqual('10');
+    });
+
+    it('no mapping', () => {
+      const res = { state: '9' };
+      card._convertState(res, stateMapConfig);
+      expect(res.state).toEqual('9');
+    });
+
+    it('unavailable, no mapping', () => {
+      const res = { state: 'unavailable' };
+      card._convertState(res, stateMapConfig);
+      expect(res.state).toEqual('unavailable');
+    });
+  });
+
+  ///////////////////////////////////////////////////////////////////////////////////////
+
+  describe('others', () => {
+    beforeEach(() => {
+      stateMapConfig.map = [];
+    });
+
+    it('state_map.map is empty', () => {
+      const res = { state: 'xxx' };
+      card._convertState(res, stateMapConfig);
+      expect(res.state).toEqual('xxx');
+    });
+
+    it('state_map.map is empty, keep_values=true', () => {
+      stateMapConfig.keep_values = true;
+      const res = { state: 'xxx' };
+      card._convertState(res, stateMapConfig);
+      expect(res.state).toEqual('xxx');
+    });
+  });
+});
