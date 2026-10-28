@@ -139,10 +139,10 @@ Else, if you prefer the graphical editor, use the menu to add the resource:
 We recommend looking at the [Example usage section](#example-usage) to understand the basics to configure this card.
 (also) pay attention to the **required** options mentioned below.
 
-[!WARNING]
-It is highly recommended to have your server's & client's system time synchronized with NTP servers.
-Otherwise, you may observe glitches.
-A possible glitch occurs when a client's time is 10 sec behind: assume there is a sensor with a high update frequency, and after a value's change (let it be an "increase" for instance) a corresponding "peak" is like "stuck" to a right edge instead of moving to the left, and is instantly shifted only after 10 sec.
+> [!WARNING]
+> It is highly recommended to have your server's & client's system time synchronized with NTP servers.
+> Otherwise, you may observe glitches.
+> A possible glitch occurs when a client's time is 10 sec behind: assume there is a sensor with a high update frequency, and after a value's change (let it be an "increase" for instance) a corresponding "peak" is like "stuck" to a right edge instead of moving to the left, and is instantly shifted only after 10 sec.
 
 ### Card options
 | Name | Type | Default | Since | Description |
