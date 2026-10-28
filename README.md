@@ -134,6 +134,8 @@ Else, if you prefer the graphical editor, use the menu to add the resource:
 
 *You may need to empty the browsers cache if you have problems loading the updated card.*
 
+---
+
 ## Using the card
 
 We recommend looking at the [Example usage section](#example-usage) to understand the basics to configure this card.
@@ -143,6 +145,8 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 > It is highly recommended to have your server's & client's system time synchronized with NTP servers.
 > Otherwise, you may observe glitches.
 > A possible glitch occurs when a client's time is 10 sec behind: assume there is a sensor with a high update frequency, and after a value's change (let it be an "increase" for instance) a corresponding "peak" is like "stuck" to a right edge instead of moving to the left, and is instantly shifted only after 10 sec.
+
+---
 
 ### Card options
 | Name | Type | Default | Since | Description |
@@ -254,6 +258,8 @@ entities:
   - sensor.humidity
 ```
 
+---
+
 ### Available show options
 All properties are optional.
 
@@ -277,6 +283,8 @@ All properties are optional.
 | loading_indicator | `true` | `true` / `false` | Show loading indicator while attempting to retrieve a history.
 | graph_order | `direct` | `direct` / `reversed` | Define an order of displaying graphs (see [Graphs order](#graphs-order)).
 
+---
+
 ### Graph types
 
 Two graph types are supported - linear & bars.
@@ -285,6 +293,7 @@ To set a common type for all graphs - use a `show.graph` option (see [Available 
 To set an individual type for a particular graph, use a per-entity `graph` option (see [Entities object](#entities-object)).
 See examples [below](#different-graph-types).
 
+---
 
 ### Y-axis object
 
@@ -327,6 +336,7 @@ y_axis:
     labels: ...
 ```
 
+---
 
 ### Line color object
 See [dynamic line color](#dynamic-line-color) for example usage.
@@ -379,6 +389,8 @@ As a shorthand, you can just use a color string for the stops that you want inte
     color: "#0000ff"
 ```
 
+---
+
 ### Action object options
 
 All card's area - except a graph part - supports processing of actions.
@@ -395,6 +407,8 @@ By default, tapping on an element opens a `more-info` dialog:
 | service_data | object |  | Any service data | Service data to include with the service call (e.g. `entity_id: media_player.office`).
 | navigation_path | string |  | Any path | Path to navigate to (e.g. `/lovelace/0/`) when `action` is defined as `navigate`.
 | url | string |  | Any URL | URL to open when `action` is defined as `url`.
+
+---
 
 #### State map object
 
@@ -501,6 +515,8 @@ If an order of entries is changed in a "strict" `state_map` mapping array and a 
 
 See examples [below](#using-state_map).
 
+---
+
 ### Value factor
 
 Defines a coefficient (factor) applied to displayed values (including Y-axis labels).
@@ -524,6 +540,7 @@ An `object` value can be used to define either an "exponent" factor or a "scale"
 
 Invalid values (absent/undefined/invalid `type` or `factor`) passed in the object lead to a fallback to a default "1" factor.
 
+---
 
 ### Aggregate functions
 Recorded values are grouped in time buckets which are determined by `group_by`, `points_per_hour` configuration.
@@ -541,6 +558,8 @@ These buckets are converted later to single point/bar on the graph. Aggregate fu
 | `delta` | v0.9.4 | Calculates difference between max and min value
 | `diff` | v0.11.0 | Calculates difference between first and last value
 
+---
+
 ### Alignment for "name" & "icon" elements
 
 Depending on the configuration, the "name" & "icon" elements are aligned as follows:
@@ -553,7 +572,7 @@ Depending on the configuration, the "name" & "icon" elements are aligned as foll
 6. If both `align_header` & `align_icon` are defined — the "icon" is aligned to the left/right depending on `align_icon`, and the "name" is placed on the left (if `align_icon: right`), on the right (if `align_icon: left`), or in the center (if `align_header: center`), meaning `align_icon` takes precedence.
 7. If `align_header` is not defined & `align_icon` is defined — the "icon" is aligned to the left/right depending on `align_icon`, and the "name" is placed on the left (if `align_icon: right`) or on the right (if `align_icon: left`).
 
-
+---
 
 ### Structured names
 
@@ -573,6 +592,8 @@ Available part types are `entity`, `device`, `area`, `floor`, and `text` (a lite
 See the [Home Assistant developer documentation](https://developers.home-assistant.io/docs/frontend/data#hassformatentitynamestateobj-name-options)
 for details.
 
+---
+
 ### Static values
 
 A static horizontal line is drawn for a user-defined static value.
@@ -585,6 +606,8 @@ Notes:
 4. It is possible to display a static value's badge on a corresponding static line: the `show.static_value_labels` option (see [Available show options](#available-show-options)) allows to display the badge either on the left or on the right side of the card; the per-entity `show_static_value_label` option (see [Entities object](#entities-object)) can be used to hide a label for a particular static line; the `static_value_label_offset` global option can be used to define a custom horizontal offset for the static value line label. Also, if a `static_value` entry has a `bar` type (either individually set or inherited from a global `show.graph` option) then a static label cannot not displayed.
 
 See examples [below](#displaying-static-values).
+
+---
 
 ### Number format
 
@@ -612,6 +635,7 @@ A "default presentation" refers to a default look in HA:
 3. For Y-axis labels, [static values](#static-values): "maximum 2 decimals" accuracy is used.
 And for all values, HA number format settings (like `xxxx.xx` or `x xxx.x` or `x,xxx.x`) are used.
 
+---
 
 ### Custom format for datetime values
 
@@ -631,16 +655,22 @@ A singular whitespace must be used to separate date & time formats. Letter case 
 Any values which do not match the pattern - lead to a fallback to a "day weekday" format (used as the only and default format till v.0.13).
 For clarity, it is recommended to explicitly define a `day_weekday` value in case the legacy "day weekday" format is needed.
 
+---
+
 ### Logarithmic options
 
 Normally gaps between numbers on the graph are equal; the gap between 1 and 2 on the graph is the same as the gap between 100 and 101. The `logarithmic` option applies a [logarithmic transformation](https://en.wikipedia.org/wiki/Log_transformation_(statistics)) to the graph. With `logarithmic`, the graph is scaled by powers of 10, so the gap between 1, 10, 100, etc are equal. This is useful when your values span a wide range. Illuminance, for example, can swing from 1 to 5000 over the course of a day, and without a transformation it's hard to read the smaller values on the graph.
 
 Note that this option rounds up the input to 1 so negative numbers or numbers less than 1 are rendered as 0; this is different from the formal definition of logarithm, where `log(x) < 0` when `x > 0 && x < 1` and $\infty$ or `NaN` when `x <= 0`.
 
+---
+
 ### Line styles
 
 A default line style is a "solid line". A style should be defined in a format used for a standard CSS `stroke-dasharray` property. Examples: `10,10` (dashes), `20,10` (long dashes); see cards examples [below](#custom-styles-for-line-graphs). It is better to use along with a `line_width` option.
 Warning: the `line_style` option is not accounted if `animation: true` option is set.
+
+---
 
 ### Baseline
 
@@ -656,6 +686,8 @@ Additionally, the `baseline` option can be set individually for entities; may no
 
 See examples [below](#custom-baseline).
 
+---
+
 ### Inverted graphs
 
 An inverted graph has a vertically flipped Y-scale: lower values are shown at the top, higher values are shown at the bottom.
@@ -665,6 +697,8 @@ This type of graph is mainly used when smaller values need to be shown at the to
 Examples: a ping value (smaller ping is better), a water level in a well (0 level means "well is full", higher values mean "well is empty").
 
 See examples [below](#inverted-y-axis).
+
+---
 
 ### Force a zero vertical position
 
@@ -676,6 +710,8 @@ After fixing a zero vertical position, all upper/lower bounds (including ones de
 Could be useful for these scenarios:
 1. Fix a vertical position of a 0-baseline for a rapidly changing graph (although positive & negative peaks will be re-scaled automatically). So it is up to a user whether to see a 0-baseline moving up/down or peaks re-scaled.
 2. More interesting case - use for 2 graphs, one graph is inverted, see examples [below](#opposing-dual-axis-graphs).
+
+---
 
 ### Graphs order
 
@@ -702,10 +738,13 @@ Similarly for overlapping bars graphs (when `bar_spacing: -1`): by default (or w
 
 With `graph_order: reversed`, bars for the 1st entity/static value become topmost.
 
+---
+
 ### Configuration validation
 
 Before the 1st rendering, the card performs a validation of some settings provided in the YAML configuration.
 If a misconfigured option is detected, the card reacts dynamically based on the severity of the error.
+
 
 #### Error severity levels
 
@@ -727,6 +766,7 @@ The list below is not comprehensive:
 
 > **Troubleshooting tip:** If your card is shown blank or behaves unexpectedly, press `F12` to open your browser's Developer Tools, navigate to the **Console** tab and check the logged warnings emitted by `mini-graph-card`.
 
+---
 
 ### Supported color formats
 Color can be defined as:
@@ -737,7 +777,7 @@ Color can be defined as:
 - `rgba(255, 0, 0, 0.2)` (RGB format with opacity)
 - `var(--primary-text-color)`, `var(--red-color)` (or any other theme variable supported by HA Frontend)
 
-
+---
 
 ### Theme variables
 The following theme variables can be set in your HA theme to customize the appearance of the card.
