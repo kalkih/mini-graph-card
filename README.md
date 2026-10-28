@@ -209,6 +209,8 @@ These options are legacy and moved into [Y-axis config object](#y-axis-object):
 
 Card config can still keep legacy options, yet it is recommended to upgrade.
 
+---
+
 ### Entities object
 Entities may be listed directly (as per `sensor.temperature` in the example below), or defined using
 properties of the Entity object detailed in the following table (as per `sensor.pressure` in the example below).
