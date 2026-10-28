@@ -4,7 +4,10 @@ import {
   ONE_HOUR,
   DEFAULT_BAR_SPACING,
 } from './const';
-import { log } from './utils';
+import {
+  getLog10,
+  log,
+} from './utils';
 
 export default class Graph {
   constructor({
@@ -228,8 +231,8 @@ export default class Graph {
    */
   calcY(coords) {
     // account for logarithmic graph
-    const max = this._logarithmic ? Math.log10(Math.max(1, this.max)) : this.max;
-    const min = this._logarithmic ? Math.log10(Math.max(1, this.min)) : this.min;
+    const max = this._logarithmic ? getLog10(this.max) : this.max;
+    const min = this._logarithmic ? getLog10(this.min) : this.min;
 
     const delta = Math.abs(max - min);
     let yRatio;
@@ -239,7 +242,7 @@ export default class Graph {
       yRatio = delta / this._height;
     }
     const coords2 = coords.map((coord) => {
-      const val = this._logarithmic ? Math.log10(Math.max(1, coord[V])) : coord[V];
+      const val = this._logarithmic ? getLog10(coord[V]) : coord[V];
       let coordY;
       if (this._invert) {
         coordY = ((val - min) / yRatio) + this._margin[Y] * 2;
@@ -305,7 +308,7 @@ export default class Graph {
    */
   computeGradient(thresholds) {
     const scale = this._logarithmic
-      ? Math.log10(Math.max(1, this._max)) - Math.log10(Math.max(1, this._min))
+      ? getLog10(this._max) - getLog10(this._min)
       : this._max - this._min;
 
     const gradientStops = thresholds.map((stop, index, arr) => {
