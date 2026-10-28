@@ -12,7 +12,7 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
       + [Manual install](#manual-install)
       + [CLI install](#cli-install)
       + [Add resource reference](#add-resource-reference)
-   * [Updating](#updating)
+      + [Updating](#updating)
    * [Using the card](#using-the-card)
       + [Card options](#card-options)
       + [Entities object](#entities-object)
