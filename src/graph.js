@@ -18,6 +18,7 @@ export default class Graph {
     hours_to_show = 24,
     points_per_hour = 1,
     aggregateFuncName = 'avg',
+    calculateOverall = false,
     smoothing = true,
     logarithmic = false,
     bar_spacing = DEFAULT_BAR_SPACING, // spacing between bars
@@ -48,9 +49,14 @@ export default class Graph {
     this._min = 0;
     this._points_per_hour = points_per_hour;
     this._hours_to_show = hours_to_show;
+
     this._aggregateFuncName = aggregateFuncName;
     this._calcPoint = aggregateFuncMap[aggregateFuncName]
      || this._average; // fallback in case a wrong func is passed
+    // calculating "overall" aggregated values
+    this._calculateOverall = calculateOverall;
+    this._overall = undefined;
+
     this._smoothing = smoothing;
     this._logarithmic = logarithmic;
     this._bar_spacing = bar_spacing;
@@ -60,6 +66,8 @@ export default class Graph {
     this._baseline = baseline;
     this._invert = invert;
   }
+
+  get overall() { return this._overall; }
 
   get max() { return this._max; }
 
@@ -134,6 +142,13 @@ export default class Graph {
 
     // update interval end date
     this._endTime = endTime;
+
+    // calculate "overall" value
+    if (this._calculateOverall) {
+      this._overall = this._history.length > 0
+        ? this._calcPoint(this._history)
+        : undefined;
+    }
 
     // group history into time buckets
     const histGroups = this._history.reduce((res, item) => this._reducer(res, item), []);
