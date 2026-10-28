@@ -417,7 +417,7 @@ By default, tapping on an element opens a `more-info` dialog:
 
 ---
 
-#### State map object
+### State map object
 
 State map object is defined by a `state_map` option and allows users to map values from an entity's history to specific graph coordinates and labels. It operates in two modes:
 * **strict mode** (default, when `keep_values: false` or undefined): converts original text values (e.g., `on`, `off`) from a history to sequential numbers (0, 1, ...) to render them on a graph. Unmapped values are left in the history array "as is"; if these unmapped values are numeric - they are shown on a graph & thus may cause a distortion since the properly mapped values are like "0, 1, ..." and can be much smaller than the unmapped values; if the unmapped values are non-numeric - these values are not shown on a graph (since graph is created using _numbers_), and an unmapped value can only be displayed for a **current** value in a "state display" area (since the current value is not taken from a history but is a "live" state).
