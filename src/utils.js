@@ -10,6 +10,8 @@ const getMax = (arr, val) => arr.reduce((max, p) => (
   Number(p[val]) > Number(max[val]) ? p : max
 ), arr[0]);
 
+const getLog10 = value => Math.log10(Math.max(1, value));
+
 const getMilli = hours => hours * 60 ** 2 * 10 ** 3;
 
 const compress = data => lzStringCompress(JSON.stringify(data));
