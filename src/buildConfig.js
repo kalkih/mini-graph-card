@@ -15,7 +15,7 @@ import {
   checkNumericOption,
   checkIntegerOption,
   checkBounds,
-  checkYAxisLabels,
+  checkYaxisLabels,
   checkColorThresholds,
   checkStateMap,
   checkLineStyle,
@@ -24,7 +24,10 @@ import {
   checkName,
 } from './checkOption';
 import { getFactor } from './others';
-import { migrateYaxisConfig } from './migrate';
+import {
+  migrateYaxisConfig,
+  migrateStateMapConfig,
+} from './migrate';
 import { log } from './utils';
 
 /**
@@ -149,7 +152,8 @@ export default (config) => {
   }
 
   // migrate legacy options, currently belonging to y_axis object
-  const migratedConfig = migrateYaxisConfig(config);
+  let migratedConfig = migrateYaxisConfig(config);
+  migratedConfig = migrateStateMapConfig(migratedConfig);
 
   const conf = {
     animate: false,
@@ -166,12 +170,11 @@ export default (config) => {
     bar_spacing: DEFAULT_BAR_SPACING,
     compress: false,
     smoothing: true,
-    state_map: [],
     cache: true,
     tap_action: {
       action: 'more-info',
     },
-    ...JSON.parse(JSON.stringify(migratedConfig)),
+    ...migratedConfig,
     show: { ...DEFAULT_SHOW, ...migratedConfig.show },
   };
 
@@ -213,7 +216,7 @@ export default (config) => {
       { minBound: 0, allowString: true, logOptionName: 'primary.decimals' },
     );
 
-    checkYAxisLabels(conf.y_axis.primary, 'primary');
+    checkYaxisLabels(conf.y_axis.primary, 'primary');
   }
   if (conf.y_axis && conf.y_axis.secondary) {
     const secondaryBounds = checkBounds(conf.y_axis.secondary, 'secondary');
@@ -236,7 +239,7 @@ export default (config) => {
       { minBound: 0, allowString: true, logOptionName: 'secondary.decimals' },
     );
 
-    checkYAxisLabels(conf.y_axis.secondary, 'secondary');
+    checkYaxisLabels(conf.y_axis.secondary, 'secondary');
   }
   if (conf.y_axis) {
     conf.y_axis.zero_position = checkNumericOption(
@@ -301,6 +304,13 @@ export default (config) => {
           entity.color_thresholds,
           entity.color_thresholds_transition || conf.color_thresholds_transition,
         );
+      }
+
+      if (entity.state_map) {
+        // migrate per-entity state_map
+        conf.entities[i] = migrateStateMapConfig(entity);
+        // check per-entity state_map
+        checkStateMap(conf.entities[i], `entities[${i}]`);
       }
     }
   });

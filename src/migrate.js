@@ -68,6 +68,55 @@ const migrateYaxisConfig = (config) => {
   return conf;
 };
 
+/**
+ * Migrate legacy state_map array option to the new object structure.
+ * @param {object} config Config object containing state_map
+ * @returns {object} Updated config object
+ */
+const migrateStateMapConfig = (config) => {
+  const newConfig = { ...config };
+
+  if (config.state_map !== undefined && config.state_map !== null) {
+    // "state_map" is defined
+    if (Array.isArray(config.state_map)) {
+      // state_map -> state_map.map
+      newConfig.state_map = { map: config.state_map };
+    } else if (typeof config.state_map === 'object') {
+      const {
+        map,
+        keep_values,
+        label,
+        hide_unit,
+      } = config.state_map;
+      // map is copied as is
+      newConfig.state_map = { map: map || [] };
+      if (keep_values !== undefined) {
+        // keep_values is copied as is
+        newConfig.state_map.keep_values = keep_values;
+      }
+      if (label !== undefined) {
+        // label is copied as is
+        newConfig.state_map.label = label;
+      }
+      if (hide_unit !== undefined) {
+        // hide_unit is copied as is
+        newConfig.state_map.hide_unit = hide_unit;
+      }
+      // only map, keep_values, label & hide_unit are copied
+      // inner structure is to be checked in checkStateMap()
+    } else {
+      // wrong structure of "state_map"
+      newConfig.state_map = { map: [] };
+    }
+  } else {
+    // "state_map" is not defined
+    newConfig.state_map = { map: [] };
+  }
+
+  return newConfig;
+};
+
 export {
   migrateYaxisConfig,
+  migrateStateMapConfig,
 };

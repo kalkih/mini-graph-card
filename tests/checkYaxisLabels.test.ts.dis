@@ -1,12 +1,12 @@
 /**
- * Tests for checkYAxisLabels().
+ * Tests for checkYaxisLabels().
  *
  * The file is disabled (renamed to *.dis) & thus is not used during a build process;
  * remove the "dis" extension to use it locally in your VSCode devcontainer.
  */
 
 import { expect, describe, it } from 'vitest';
-import { checkYAxisLabels } from '../src/checkOption';
+import { checkYaxisLabels } from '../src/checkOption';
 import { OTHER_OPTIONS } from './otherOptions';
 
 const AXES: string[] = [
@@ -68,12 +68,12 @@ const VARIANTS: any[] = [
   },
 ];
 
-describe("checkYAxisLabels", () => {
+describe("checkYaxisLabels", () => {
   AXES.forEach((axis) => {
     VARIANTS.forEach((variant) => {
-      it(`checkYAxisLabels: check [${JSON.stringify(variant)}], ${variant.description}`, () => {
+      it(`checkYaxisLabels: check [${JSON.stringify(variant)}], ${variant.description}`, () => {
         const config = {...variant.config};
-        checkYAxisLabels(config, axis);
+        checkYaxisLabels(config, axis);
         const result = config;
         const expectedValue = variant.expected;
         expect(result).toEqual(expectedValue);

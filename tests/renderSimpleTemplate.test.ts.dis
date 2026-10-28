@@ -1,0 +1,69 @@
+/**
+ * Tests for renderSimpleTemplate().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it } from 'vitest';
+import { renderSimpleTemplate } from '../src/utils';
+
+const VARS = {
+  a: 123,
+  b: 'abc',
+  c: [0, 1, 3],
+};
+
+const VARIANTS: any[] = [
+  {
+    descr: "simple",
+    template: "${a} Hello! [${b}] array=${c}",
+    vars: VARS,
+    result: "123 Hello! [abc] array=0,1,3",
+  },
+  {
+    descr: "cannot address an array's element",
+    template: "Array element=${c[1]}",
+    vars: VARS,
+    result: "Array element=${c[1]}",
+  },
+  {
+    descr: 'cannot do math in templates',
+    template: "Calculated=${a - c[1]}",
+    vars: VARS,
+    result: "Calculated=${a - c[1]}",
+  },
+  {
+    descr: "whitespaces are not processed in ${}",
+    template: "${  a  } Hello! [${   b}] array=${c    }",
+    vars: VARS,
+    result: "123 Hello! [abc] array=0,1,3",
+  },
+  {
+    descr: "unknown variables are untouched",
+    template: "${a} Hello! [${b}] unknown=${xyz} array=${c}",
+    vars: VARS,
+    result: "123 Hello! [abc] unknown=${xyz} array=0,1,3",
+  },
+  {
+    descr: "missing closing bracket (1)",
+    template: "${a} Hello! [${b}] array=${c",
+    vars: VARS,
+    result: "123 Hello! [abc] array=${c",
+  },
+  {
+    descr: "missing closing bracket (2)",
+    template: "${a} Hello! [${b] array=${c}",
+    vars: VARS,
+    result: "123 Hello! [${b] array=0,1,3",
+  },
+];
+
+describe("renderSimpleTemplate()", () => {
+  VARIANTS.forEach((variant) => {
+    it(variant.descr, () => {
+      const result = renderSimpleTemplate(variant.template, variant.vars);
+      expect(result).toEqual(variant.result);
+    });
+  });
+});
