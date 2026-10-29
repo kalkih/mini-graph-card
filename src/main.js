@@ -16,7 +16,6 @@ import {
 import './initialize';
 import { version } from '../package.json';
 import {
-  ICONS,
   X, Y, V,
   ONE_HOUR,
   MAX_BARS,
@@ -696,8 +695,8 @@ export default class MiniGraphCard extends LitElement {
     const iconColor = icon_color || (icon_adaptive_color ? this.color : undefined);
     const stateObj = this.entity[0];
     // HA resolves an entity icon (incl. icon translations, e.g. for device classes);
-    // a static value without an `icon` option keeps the previous fallback
-    const resolvedIcon = !stateObj && !icon ? ICONS.temperature : icon;
+    // a static value without an `icon` option gets the default sensor icon
+    const resolvedIcon = !stateObj && !icon ? 'mdi:eye' : icon;
 
     return html`
       <div
