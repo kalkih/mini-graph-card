@@ -24,6 +24,7 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
       + [State map object](#state-map-object)
       + [Value factor](#value-factor)
       + [Aggregate functions](#aggregate-functions)
+      + ["Overall" aggregated value](#overall-aggregated-value)
       + [Alignment for "name" & "icon" elements](#alignment-for-name--icon-elements)
       + [Structured names](#structured-names)
       + [Static values](#static-values)
@@ -269,7 +270,7 @@ All properties are optional.
 |------|:-------:|:-------:|-------------|
 | name | `true` | `true` / `false` | Display name.
 | icon | `true` | `true` / `false` | Display icon.
-| state | `true` | `true` / `false` / `last` | Display current state.<br>`last` will show the last graph point's or bar's value (fallback to `true` if points are not shown for a line graph).<br>`overall` will show an [aggregated value](#aggregate-functions) for a whole period.
+| state | `true` | `true` / `false` / `last` | Display current state.<br>`last` will show the last graph point's or bar's value (fallback to `true` if points are not shown for a line graph).<br>`overall` will show an [aggregated value](#aggregate-functions) for the entire period calculated. More variants of aggregation are supported, see more details [here](#overall-aggregated-value).
 | graph | `line` | `line` / `bar` / `false` | Display option for the graph. If set to `bar` a maximum of `96` bars will be displayed. See [Graph types](#graph-types).
 | fill | `true` | `true` / `false` / `fade` | Display the line graph fill.
 | points | `hover` | `true` / `false` / `hover` | Display graph data points (for a line graph only).
@@ -284,6 +285,8 @@ All properties are optional.
 | icon_adaptive_color | `false` | `true` / `false` | Make the icon color adapt with the primary entity/static value color.
 | loading_indicator | `true` | `true` / `false` | Show loading indicator while attempting to retrieve a history.
 | graph_order | `direct` | `direct` / `reversed` | Define an order of displaying graphs (see [Graphs order](#graphs-order)).
+
+
 
 ---
 
@@ -564,6 +567,16 @@ These buckets are converted later to single point/bar on the graph. Aggregate fu
 | `sum` | v0.9.2 |
 | `delta` | v0.9.4 | Calculates difference between max and min value
 | `diff` | v0.11.0 | Calculates difference between first and last value
+
+### "Overall" aggregated value
+It is possible to show an "overall" value for the entire period.
+A value is calculated using a specified [aggregate function](#aggregate-functions).
+The "overall" value is shown instead of a current state or a last graph point's or bar's value.
+To show the "overall" value, set `show.state: overall` option.
+In this case the "overall" value is calculated using the same aggregate function which is used for building a graph (defined by a global or per-entity `aggregate_func` option).
+To use a different aggregate function, set e.g. `show.state: overall_diff` option - here a `diff` function is used.
+Any aggregate function can be used like `overall_sum`, `overall_delta` etc.
+
 
 ---
 
