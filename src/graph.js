@@ -41,7 +41,7 @@ export default class Graph {
 
     this._aggregateFuncName = aggregateFuncName;
     this._calcPoint = aggregateFuncMap[aggregateFuncName]
-     || aggregateFuncMap['avg']; // fallback in case a wrong func is passed
+     || aggregateFuncMap.avg; // fallback in case a wrong func is passed
     // calculating "overall" aggregated values
     this._calculateOverall = calculateOverall;
     this._overall = undefined;
