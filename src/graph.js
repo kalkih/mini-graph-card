@@ -8,6 +8,7 @@ import {
   getLog10,
   log,
 } from './utils';
+import { aggregateFuncMap } from './aggregate';
 
 export default class Graph {
   constructor({
@@ -27,18 +28,6 @@ export default class Graph {
     baseline,
     invert = false,
   }) {
-    const aggregateFuncMap = {
-      avg: this._average,
-      median: this._median,
-      max: this._maximum,
-      min: this._minimum,
-      first: this._first,
-      last: this._last,
-      sum: this._sum,
-      delta: this._delta,
-      diff: this._diff,
-    };
-
     this._graphType = graphType;
     this._history = undefined;
     this.coords = [];
@@ -52,7 +41,7 @@ export default class Graph {
 
     this._aggregateFuncName = aggregateFuncName;
     this._calcPoint = aggregateFuncMap[aggregateFuncName]
-     || this._average; // fallback in case a wrong func is passed
+     || aggregateFuncMap.avg; // fallback in case a wrong func is passed
     // calculating "overall" aggregated values
     this._calculateOverall = calculateOverall;
     this._overall = undefined;
@@ -145,8 +134,9 @@ export default class Graph {
 
     // calculate "overall" value
     if (this._calculateOverall) {
-      this._overall = this._history.length > 0
-        ? this._calcPoint(this._history)
+      const numberHistory = this._history.map(item => parseFloat(item.state));
+      this._overall = numberHistory.length > 0
+        ? this._calcPoint(numberHistory)
         : undefined;
     }
 
@@ -230,7 +220,8 @@ export default class Graph {
       } else {
         const bucket = history[i - 1];
         if (bucket && bucket.length > 0) {
-          lastValue = this._calcPoint(bucket);
+          const numberBucket = bucket.map(item => parseFloat(item.state));
+          lastValue = this._calcPoint(numberBucket);
         }
         coords.push([x, 0, lastValue]);
       }
@@ -442,63 +433,5 @@ export default class Graph {
     const Zx = (Ax - Bx) / 2 + Bx;
     const Zy = (Ay - By) / 2 + By;
     return [Zx, Zy];
-  }
-
-  _getValidNumbers(items) {
-    return items.map(item => parseFloat(item.state));
-  }
-
-  _average(items) {
-    const validNumbers = this._getValidNumbers(items);
-    if (!validNumbers.length) return NaN;
-    return validNumbers.reduce((sum, val) => sum + val, 0) / validNumbers.length;
-  }
-
-  _median(items) {
-    const validNumbers = this._getValidNumbers(items);
-    const itemsDup = [...validNumbers].sort((a, b) => a - b);
-    const mid = Math.floor(itemsDup.length / 2);
-    if (itemsDup.length % 2 === 1)
-      return itemsDup[mid];
-    return (itemsDup[mid - 1] + itemsDup[mid]) / 2;
-  }
-
-  _maximum(items) {
-    const validNumbers = this._getValidNumbers(items);
-    return Math.max(...validNumbers);
-  }
-
-  _minimum(items) {
-    const validNumbers = this._getValidNumbers(items);
-    return Math.min(...validNumbers);
-  }
-
-  _first(items) {
-    return parseFloat(items[0].state);
-  }
-
-  _last(items) {
-    return parseFloat(items[items.length - 1].state);
-  }
-
-  _sum(items) {
-    const validNumbers = this._getValidNumbers(items);
-    return validNumbers.reduce((sum, val) => sum + val, 0);
-  }
-
-  _delta(items) {
-    return this._maximum(items) - this._minimum(items);
-  }
-
-  _diff(items) {
-    return this._last(items) - this._first(items);
-  }
-
-  _lastValue(items) {
-    if (['delta', 'diff'].includes(this._aggregateFuncName)) {
-      return 0;
-    } else {
-      return parseFloat(items[items.length - 1].state) || 0;
-    }
   }
 }
