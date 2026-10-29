@@ -1,7 +1,7 @@
 # Lovelace Mini Graph Card
 A minimalistic and customizable graph card for [Home Assistant](https://github.com/home-assistant/home-assistant) Lovelace UI.
 
-The card works with entities from within the **sensor** & **binary_sensor** domain and displays the sensors current state as well as a line graph representation of the history.
+The card works with entities from within the **sensor** & other domains (includind non-numeric) and displays the sensors current state as well as a line graph representation of the history.
 
 ![Preview](https://user-images.githubusercontent.com/457678/52977264-edf34980-33cc-11e9-903b-cee43b307ed8.png)
 
@@ -518,7 +518,8 @@ Mapped values (like `off` & `on` in case of a strict mapping; the relaxed mappin
 * none entity associated with the axis has own per-entity `state_map`, then a per-axis strict `state_map` is applied (if defined);
 * none entity associated with the axis has own per-entity `state_map` & there is no per-axis `state_map` defined, then a global strict `state_map` is applied (if defined).
 
-If an order of entries is changed in a "strict" `state_map` mapping array and a `cache` option is not set to `false`, it is recommended to purge a browser's cache - otherwise old cached history data (generated for the old order in `state_map` mapping array) might become wrong for the new config.
+> [!WARNING]
+> If an order of entries is changed in a "strict" `state_map` mapping array and a `cache` option is not set to `false`, it is recommended to purge a browser's cache - otherwise old cached history data (generated for the old order in `state_map` mapping array) might become wrong for the new config.
 
 See examples [below](#using-state_map).
 
@@ -1668,13 +1669,11 @@ Note that the `dev` branch is the most up-to-date and matches our beta releases.
 Please refer to the [Contribution Guidelines](./CONTRIBUTING.md) if you're interested in contributing to the project. (And thanks for considering!)
 
 ## Getting errors?
-Make sure you have `javascript_version: latest` in your `configuration.yaml` under `frontend:`.
 
-Make sure you have the latest versions of `mini-graph-card.js` & `mini-graph-lib.js`.
+Make sure you have the latest versions of `mini-graph-card.js`.
 
 If you have issues after updating the card, try clearing your browser cache.
 
-If you have issues displaying the card in older browsers, try changing `type: module` to `type: js` at the card reference in `ui-lovelace.yaml`.
 
 ## License
 This project is under the MIT license.
