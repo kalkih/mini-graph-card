@@ -6,8 +6,8 @@
  */
 
 import { expect, describe, it } from 'vitest';
-import { checkPointsPerHour } from '../src/checkOption';
-import { OTHER_OPTIONS } from './otherOptions';
+import { checkPointsPerHour } from '../../src/checkOption';
+import { OTHER_OPTIONS } from '../otherOptions';
 
 const VARIANTS: any[] = [
   {
