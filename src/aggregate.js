@@ -14,7 +14,7 @@ const minimum = items => Math.min(...items);
 const first = items => items[0];
 const last = items => items[items.length - 1];
 
-const sum = items => items.reduce((sum, val) => sum + val, 0);
+const sum = items => items.reduce((sumVal, val) => sumVal + val, 0);
 
 const delta = items => maximum(items) - minimum(items);
 
