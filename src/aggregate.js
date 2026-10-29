@@ -22,14 +22,14 @@ const diff = items => last(items) - first(items);
 
 const aggregateFuncMap = {
   avg: average,
-  median: median,
+  median,
   max: maximum,
   min: minimum,
-  first: first,
-  last: last,
-  sum: sum,
-  delta: delta,
-  diff: diff,
+  first,
+  last,
+  sum,
+  delta,
+  diff,
 };
 
 export {
