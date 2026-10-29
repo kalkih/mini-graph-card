@@ -7,8 +7,8 @@
 
 // @vitest-environment jsdom
 import { expect, describe, it, beforeEach } from 'vitest';
-import MiniGraphCard from '../src/main';
-import { hass } from './hass';
+import MiniGraphCard from '../../src/main';
+import { hass } from '../hass';
 
 const config: any = {
   entities: [
