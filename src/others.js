@@ -287,6 +287,29 @@ const getIntervalEndDate = (date, groupBy) => {
   return date;
 };
 
+/**
+ * Check if 'show.state' option enables an 'overall' calculation
+ * @param {string} stateOption config.show.state option value
+ * @returns {boolean} True if overall calculation is requested, false otherwise
+ */
+const isOverallState = (stateOption) => {
+  if (typeof stateOption !== 'string') return false;
+  return stateOption === 'overall'
+    || (stateOption.startsWith('overall_') && stateOption.length > 8);
+};
+
+/**
+ * Parses the 'show.state' option to determine a method for 'overall' calculation
+ * @param {string} stateOption config.show.state option value
+ * @returns {string|undefined} Aggregate function name
+ */
+const parseOverallFuncName = (stateOption) => {
+  if (!isOverallState(stateOption) || stateOption === 'overall') {
+    return undefined;
+  }
+  return stateOption.substring(8);
+};
+
 export {
   isString,
   isNumber,
@@ -298,4 +321,6 @@ export {
   getBoundsForCustomZeroPosition,
   isEntryAnimated,
   getIntervalEndDate,
+  parseOverallFuncName,
+  isOverallState,
 };
