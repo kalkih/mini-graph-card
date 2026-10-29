@@ -568,12 +568,15 @@ These buckets are converted later to single point/bar on the graph. Aggregate fu
 | `delta` | v0.9.4 | Calculates difference between max and min value
 | `diff` | v0.11.0 | Calculates difference between first and last value
 
+---
+
 ### "Overall" aggregated value
 It is possible to show an "overall" value for the entire period.
 A value is calculated using a specified [aggregate function](#aggregate-functions).
 The "overall" value is shown instead of a current state or a last graph point's or bar's value.
 To show the "overall" value, set `show.state: overall` option.
 In this case the "overall" value is calculated using the same aggregate function which is used for building a graph (defined by a global or per-entity `aggregate_func` option).
+
 To use a different aggregate function, set e.g. `show.state: overall_diff` option - here a `diff` function is used.
 Any aggregate function can be used like `overall_sum`, `overall_delta` etc.
 
