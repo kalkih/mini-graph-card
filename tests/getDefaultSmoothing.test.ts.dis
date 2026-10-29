@@ -1,0 +1,114 @@
+/**
+ * Tests for MiniGraphCard::_getDefaultSmoothing().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+// @vitest-environment jsdom
+import { expect, describe, it, beforeEach } from 'vitest';
+import MiniGraphCard from '../src/main';
+import { hass } from './hass';
+
+const config: any = {
+  entities: [
+    { entity: 'input_number.test' }, // 0
+    { entity: 'number.test' },
+    { entity: 'counter.test' },
+    { entity: 'sun.sun' },
+    { entity: 'automation.test' }, // 4
+    { entity: 'sensor.non_numerical' },
+    { entity: 'sensor.numerical_1' },
+    { entity: 'sensor.numerical_2' },
+    { entity: 'sensor.numerical_3' }, // 8
+  ],
+};
+
+const VARIANTS: any[] = [
+  {
+    descr: 'Numeric: input_number',
+    index: 0,
+    expected: true,
+  },
+  {
+    descr: 'Numeric: number',
+    index: 1,
+    expected: true,
+  },
+  {
+    descr: 'Numeric: counter',
+    index: 2,
+    expected: true,
+  },
+  //////////////////////////////////////////
+  {
+    descr: 'Non-numeric: sun',
+    index: 3,
+    expected: false,
+  },
+  {
+    descr: 'Non-numeric: automation',
+    index: 4,
+    expected: false,
+  },
+  {
+    descr: 'Non-numeric: sensor',
+    index: 5,
+    expected: false,
+  },
+  //////////////////////////////////////////
+  {
+    descr: 'Numeric: sensor (1)',
+    index: 6,
+    expected: true,
+  },
+  {
+    descr: 'Numeric: sensor (2)',
+    index: 7,
+    expected: true,
+  },
+  {
+    descr: 'Numeric: sensor (3)',
+    index: 8,
+    expected: true,
+  },
+];
+
+describe("MiniGraphCard::_getDefaultSmoothing()", () => {
+  let card: MiniGraphCard;
+
+  beforeEach(() => {
+    card = new MiniGraphCard();
+    card.config = config;
+  });
+
+  describe("hass is defined", () => {
+    beforeEach(() => {
+      card._hass = hass;
+    });
+
+    VARIANTS.forEach((variant) => {
+      it(variant.descr, () => {
+        const result = card._getDefaultSmoothing(variant.index);
+        expect(result).toEqual(variant.expected);
+      });
+    });
+  });
+
+  describe("hass is defined", () => {
+    const nullHass = null;
+    beforeEach(() => {
+      card._hass = nullHass;
+    });
+
+    VARIANTS.forEach((variant) => {
+      it(variant.descr, () => {
+        const result = card._getDefaultSmoothing(variant.index);
+        const expected = variant.index === 5
+          ? true
+          : variant.expected;
+        expect(result).toEqual(expected);
+      });
+    });
+  });
+});

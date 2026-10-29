@@ -5,7 +5,6 @@
  * remove the "dis" extension to use it locally in your VSCode devcontainer.
  */
 
-// @vitest-environment jsdom
 import { expect, describe, it, beforeEach } from 'vitest';
 import { migrateYaxisConfig } from '../src/migrate';
 import { OTHER_OPTIONS } from './otherOptions';

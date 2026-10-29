@@ -35,6 +35,21 @@ const isNumeric = (value, allowString = false) => {
   return false;
 };
 
+const NUMERIC_DOMAINS = ['counter', 'input_number', 'number'];
+
+const isNumericEntity = (hass, entityId) => {
+  const domain = entityId.split('.')[0];
+  if (NUMERIC_DOMAINS.includes(domain)) return true;
+  if (domain !== 'sensor') return false;
+  if (!hass) {
+    // assumption when hass is not ready
+    return domain === 'sensor';
+  }
+  const stateObj = hass.states[entityId];
+  if (!stateObj) return false;
+  return !!stateObj.attributes.unit_of_measurement || !!stateObj.attributes.state_class;
+};
+
 /**
  * Log a warning if a configuration numeric value is passed as a string.
  * @param {any} value Value to check
@@ -276,6 +291,7 @@ export {
   isString,
   isNumber,
   isNumeric,
+  isNumericEntity,
   logStringWarning,
   getFactor,
   getBound,

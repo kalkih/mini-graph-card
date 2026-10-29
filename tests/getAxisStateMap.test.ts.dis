@@ -1,0 +1,518 @@
+/**
+ * Tests for MiniGraphCard::_getAxisStateMap().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+// @vitest-environment jsdom
+import { expect, describe, it, beforeEach } from 'vitest';
+import MiniGraphCard from '../src/main';
+import type { StateMapType, StateMapEntryType } from './types/stateMapTypes';
+import type { ConfigType } from './types/configType';
+import type { EntityConfigType } from './types/entityConfigType';
+import type { AllYaxesType } from './types/yaxisType';
+
+const MAP_STRINGS: StateMapEntryType[] = [
+  { value: 'abc' },
+  { value: 'def' },
+  { value: 'ghi' },
+];
+
+const MAP_STRINGS_AXIS: StateMapEntryType[] = [
+  ...MAP_STRINGS,
+  { value: 'yyy' },
+];
+
+const MAP_STRINGS_GLOBAL: StateMapEntryType[] = [
+  ...MAP_STRINGS,
+  { value: 'xxx' },
+];
+
+const MAP_NUMBERS: StateMapEntryType[] = [
+  { value: 123, label: 'value_123' },
+  { value: 456, label: 'value_456' },
+  { value: 789, label: 'value_789' },
+];
+
+const STATE_MAP_STRICT_EMPTY: StateMapType = {
+  map: [],
+};
+
+const STATE_MAP_RELAXED_EMPTY: StateMapType = {
+  map: [],
+  keep_values: true,
+};
+
+const STATE_MAP_STRICT: StateMapType = {
+  map: MAP_STRINGS,
+};
+
+const STATE_MAP_STRICT_GLOBAL: StateMapType = {
+  map: MAP_STRINGS_GLOBAL,
+};
+
+const STATE_MAP_RELAXED: StateMapType = {
+  map: MAP_NUMBERS,
+  keep_values: true,
+};
+
+/////////////////////////////////////////////////////////////////////////
+const ENTITIES: EntityConfigType[] = [
+  {},
+  {},
+  {},
+  { y_axis: 'primary' },
+  { y_axis: 'primary' },
+  { y_axis: 'primary' },
+  { y_axis: 'primary' },
+  { y_axis: 'secondary' },
+  { y_axis: 'secondary' },
+  { y_axis: 'secondary' },
+];
+/////////////////////////////////////////////////////////////////////////
+const ENTITIES_WITH_STATE_MAP_STRICT_EMPTY: EntityConfigType[] = [
+  { state_map: STATE_MAP_STRICT_EMPTY },
+  { state_map: STATE_MAP_STRICT_EMPTY },
+  { state_map: STATE_MAP_STRICT_EMPTY },
+];
+
+const ENTITIES_WITH_STATE_MAP_RELAXED_EMPTY: EntityConfigType[] = [
+  { state_map: STATE_MAP_RELAXED_EMPTY },
+  { state_map: STATE_MAP_RELAXED_EMPTY },
+  { state_map: STATE_MAP_RELAXED_EMPTY },
+];
+/////////////////////////////////////////////////////////////////////////
+const ENTITIES_WITH_STATE_MAP_STRICT_EMPTY_PRIMARY: EntityConfigType[] = [
+  { y_axis: 'primary', state_map: STATE_MAP_STRICT_EMPTY },
+  { y_axis: 'primary', state_map: STATE_MAP_STRICT_EMPTY },
+  { y_axis: 'primary', state_map: STATE_MAP_STRICT_EMPTY },
+];
+
+const ENTITIES_WITH_STATE_MAP_STRICT_EMPTY_SECONDARY: EntityConfigType[] = [
+  { y_axis: 'secondary', state_map: STATE_MAP_STRICT_EMPTY },
+  { y_axis: 'secondary', state_map: STATE_MAP_STRICT_EMPTY },
+  { y_axis: 'secondary', state_map: STATE_MAP_STRICT_EMPTY },
+];
+
+const ENTITIES_WITH_STATE_MAP_RELAXED_EMPTY_PRIMARY: EntityConfigType[] = [
+  { y_axis: 'primary', state_map: STATE_MAP_RELAXED_EMPTY },
+  { y_axis: 'primary', state_map: STATE_MAP_RELAXED_EMPTY },
+  { y_axis: 'primary', state_map: STATE_MAP_RELAXED_EMPTY },
+];
+
+const ENTITIES_WITH_STATE_MAP_RELAXED_EMPTY_SECONDARY: EntityConfigType[] = [
+  { y_axis: 'secondary', state_map: STATE_MAP_RELAXED_EMPTY },
+  { y_axis: 'secondary', state_map: STATE_MAP_RELAXED_EMPTY },
+  { y_axis: 'secondary', state_map: STATE_MAP_RELAXED_EMPTY },
+];
+/////////////////////////////////////////////////////////////////////////
+const ENTITIES_WITH_STATE_MAP_STRICT: EntityConfigType[] = [
+  { state_map: STATE_MAP_STRICT },
+  { state_map: STATE_MAP_STRICT },
+  { state_map: STATE_MAP_STRICT },
+];
+
+const ENTITIES_WITH_STATE_MAP_RELAXED: EntityConfigType[] = [
+  { state_map: STATE_MAP_RELAXED },
+  { state_map: STATE_MAP_RELAXED },
+  { state_map: STATE_MAP_RELAXED },
+];
+/////////////////////////////////////////////////////////////////////////
+const ENTITIES_WITH_STATE_MAP_STRICT_PRIMARY: EntityConfigType[] = [
+  { y_axis: 'primary', state_map: STATE_MAP_STRICT },
+  { y_axis: 'primary', state_map: STATE_MAP_STRICT },
+  { y_axis: 'primary', state_map: STATE_MAP_STRICT },
+];
+
+const ENTITIES_WITH_STATE_MAP_STRICT_SECONDARY: EntityConfigType[] = [
+  { y_axis: 'secondary', state_map: STATE_MAP_STRICT },
+  { y_axis: 'secondary', state_map: STATE_MAP_STRICT },
+  { y_axis: 'secondary', state_map: STATE_MAP_STRICT },
+];
+/////////////////////////////////////////////////////////////////////////
+const ENTITIES_WITH_STATE_MAP_RELAXED_PRIMARY: EntityConfigType[] = [
+  { y_axis: 'primary', state_map: STATE_MAP_RELAXED },
+  { y_axis: 'primary', state_map: STATE_MAP_RELAXED },
+  { y_axis: 'primary', state_map: STATE_MAP_RELAXED },
+];
+
+const ENTITIES_WITH_STATE_MAP_RELAXED_SECONDARY: EntityConfigType[] = [
+  { y_axis: 'secondary', state_map: STATE_MAP_RELAXED },
+  { y_axis: 'secondary', state_map: STATE_MAP_RELAXED },
+  { y_axis: 'secondary', state_map: STATE_MAP_RELAXED },
+];
+/////////////////////////////////////////////////////////////////////////
+const ENTITIES_WITH_DIFF_STATE_MAP = [
+  ...ENTITIES,
+  ///
+  ...ENTITIES_WITH_STATE_MAP_STRICT,
+  ...ENTITIES_WITH_STATE_MAP_RELAXED,
+  ///
+  ...ENTITIES_WITH_STATE_MAP_STRICT_EMPTY,
+  ...ENTITIES_WITH_STATE_MAP_RELAXED_EMPTY,
+  ///
+  ...ENTITIES_WITH_STATE_MAP_STRICT_PRIMARY,
+  ...ENTITIES_WITH_STATE_MAP_STRICT_SECONDARY,
+  ...ENTITIES_WITH_STATE_MAP_RELAXED_PRIMARY,
+  ...ENTITIES_WITH_STATE_MAP_RELAXED_SECONDARY,
+  ///
+  ...ENTITIES_WITH_STATE_MAP_STRICT_EMPTY_PRIMARY,
+  ...ENTITIES_WITH_STATE_MAP_STRICT_EMPTY_SECONDARY,
+  ...ENTITIES_WITH_STATE_MAP_RELAXED_EMPTY_PRIMARY,
+  ...ENTITIES_WITH_STATE_MAP_RELAXED_EMPTY_SECONDARY,
+];
+
+const ENTITIES_WITH_EMPTY_STATE_MAP = [
+  ...ENTITIES,
+  ///
+  ...ENTITIES_WITH_STATE_MAP_STRICT_EMPTY,
+  ...ENTITIES_WITH_STATE_MAP_RELAXED_EMPTY,
+  ...ENTITIES_WITH_STATE_MAP_STRICT_EMPTY_PRIMARY,
+  ...ENTITIES_WITH_STATE_MAP_STRICT_EMPTY_SECONDARY,
+  ...ENTITIES_WITH_STATE_MAP_RELAXED_EMPTY_PRIMARY,
+  ...ENTITIES_WITH_STATE_MAP_RELAXED_EMPTY_SECONDARY,
+];
+
+/////////////////////////////////////////////////////////////////////////
+
+type TemplatedDescrType = (
+  mode: string,
+  empty: string,
+  axis: string,
+  note?: string,
+) => string;
+
+interface VariantType {
+  descr: string | TemplatedDescrType;
+  config?: ConfigType;
+  expected_global_primary?: boolean; // expected value when a global state_map is applied
+  expected_global_secondary?: boolean; // expected value when a global state_map is applied
+};
+
+const VARIANTS: VariantType[] = [
+  {
+    descr: 'no state_map',
+    config: {
+      entities: ENTITIES,
+    },
+    // expected null - unless overidden by a global strict state_map
+    expected_global_primary: true,
+    expected_global_secondary: true,
+  },
+  {
+    descr: 'state_map per-entity, many instances',
+    config: {
+      entities: ENTITIES_WITH_DIFF_STATE_MAP,
+    },
+    // expected null
+  },
+  {
+    descr: 'state_map per-entity, many instances (all empty)',
+    config: {
+      entities: ENTITIES_WITH_EMPTY_STATE_MAP,
+    },
+    // expected null
+  },
+];
+/////////////////////////////////////////////////////////////////////////////////////////
+const VARIANTS_SINGLE_ENTITY_WITH_STATE_MAP: VariantType[] = [
+  {
+    // there is only one entity on the axis, and it has per-entity state_map
+    descr: (mode, empty, axis, note) =>
+      `${mode} state_map per-entity${empty}, only one ${axis} entity${note}`,
+  },
+];
+/////////////////////////////////////////////////////////////////////////////////////////
+const VARIANTS_ONE_INSTANCE: VariantType[] = [
+  {
+    // there are many entities on the axis, and there is only one entity with state_map
+    descr: (mode, empty, axis) => `state_map per-entity, ONE instance (${mode}, ${axis}${empty}), many ${axis} entities`,
+  },
+];
+/////////////////////////////////////////////////////////////////////////////////////////
+
+describe("MiniGraphCard::_getAxisStateMap()", () => {
+  let card: MiniGraphCard;
+
+  beforeEach(() => {
+    card = new MiniGraphCard();
+    card._visibleEntitiesCache = undefined;
+    card._primaryYaxisEntitiesCache = undefined;
+    card._secondaryYaxisEntitiesCache = undefined;
+  });
+
+  for (let globalIndex = 0; globalIndex < 5; globalIndex += 1) {
+    // global state_map: no, strict, strict empty, relaxed, relaxed empty
+    let globalDescr = '';
+    let globalStateMap: StateMapType | undefined;
+    const nullGlobalStateMap = globalIndex !== 1; // only strict global state_map can be used
+    switch (globalIndex) {
+      case 0:
+        globalDescr = "No global state_map";
+        globalStateMap = undefined;
+        break;
+      case 1:
+        globalDescr = "global strict state_map";
+        globalStateMap = STATE_MAP_STRICT_GLOBAL;
+        break;
+      case 2:
+        globalDescr = "global strict state_map (empty map)";
+        globalStateMap = STATE_MAP_STRICT_EMPTY;
+        break;
+      case 3:
+        globalDescr = "global relaxed state_map";
+        globalStateMap = STATE_MAP_RELAXED;
+        break;
+      case 4:
+        globalDescr = "global relaxed state_map (empty map)";
+        globalStateMap = STATE_MAP_RELAXED_EMPTY;
+        break;
+    }
+    describe(globalDescr, () => {
+      for (let axisConfigVariantIndex = 0; axisConfigVariantIndex < 3; axisConfigVariantIndex += 1) {
+        // per-axis state_map: not defined, for primary, for secondary
+        const axisConfigVariant = axisConfigVariantIndex === 0
+          ? 'undefined'
+          : axisConfigVariantIndex === 1
+            ? 'primary'
+            : 'secondary';
+        describe(`per-axis state_map: ${axisConfigVariant}`, () => {
+          for (let axisConfigModeIndex = 0; axisConfigModeIndex < 2; axisConfigModeIndex += 1) {
+            // per-axis state_map: strict, relaxed
+            const axisConfigKeepValues = axisConfigModeIndex === 0
+              ? undefined
+              : true;
+            const axisConfigMappingType = axisConfigModeIndex === 0
+              ? 'strict'
+              : 'relaxed';
+            describe(`per-axis state_map mode: ${axisConfigMappingType}`, () => {
+              for (let axisConfigEmptyIndex = 0; axisConfigEmptyIndex < 2; axisConfigEmptyIndex += 1) {
+                // per-axis state_map: non-empty, empty map
+                const isAxisConfigMapEmpty = axisConfigEmptyIndex === 1;
+                describe(`per-axis state_map map: ${isAxisConfigMapEmpty ? 'empty' : 'non-empty'}`, () => {
+                  const axisConfigMap = !isAxisConfigMapEmpty
+                    ? axisConfigKeepValues
+                      ? MAP_NUMBERS
+                      : MAP_STRINGS_AXIS
+                    : [];
+                  const axisConfig: {y_axis: AllYaxesType} = { y_axis: {}};
+                  let axisStateMap = undefined;
+                  if (axisConfigVariantIndex !== 0) {
+                    const axisKey = axisConfigVariant as 'primary'|'secondary';
+                    axisStateMap = { map: axisConfigMap, keep_values: axisConfigKeepValues };
+                    axisConfig.y_axis[axisKey] = {
+                      state_map: axisStateMap,
+                    };
+                  }
+
+                  describe('simple cases', () => {
+                    VARIANTS.forEach((variant) => {
+                      // simple cases: no per-entity state_map configs, many entities with per-entity state_map
+                      it(variant.descr, () => {
+                        card.config = {
+                          ...variant.config,
+                          ...axisConfig,
+                          ...{ state_map: globalStateMap },
+                        };
+                        const stateMapConfig = card._getAxisStateMap();
+                        const expectedPrimary = axisConfigVariantIndex === 0 // per-axis state_map undefined
+                          || axisConfigVariant === 'secondary' // per-axis state_map is defined for 'secondary'
+                          ? !nullGlobalStateMap && variant.expected_global_primary
+                            ? STATE_MAP_STRICT_GLOBAL
+                            : null
+                          : // per-axis state_map is defined for 'primary'
+                            axisConfigMappingType === 'strict' && !isAxisConfigMapEmpty && variant.expected_global_primary
+                            ? axisStateMap
+                            : null;
+                        const expectedSecondary = axisConfigVariantIndex === 0 // per-axis state_map undefined
+                          || axisConfigVariant === 'primary' // per-axis state_map is defined for 'primary'
+                          ? !nullGlobalStateMap && variant.expected_global_secondary
+                            ? STATE_MAP_STRICT_GLOBAL
+                            : null
+                          : // per-axis state_map is defined for 'secondary'
+                            axisConfigMappingType === 'strict' && !isAxisConfigMapEmpty && variant.expected_global_secondary
+                            ? axisStateMap
+                            : null;
+                        const expected = { primary: expectedPrimary, secondary: expectedSecondary };
+                        // console.log(
+                        //   `axisConfigVariantIndex ${axisConfigVariantIndex},`
+                        //   + ` axisConfigMappingType ${axisConfigMappingType},`
+                        //   + ` isAxisConfigMapEmpty ${isAxisConfigMapEmpty},`
+                        //   + ` card.config ${card.config},`
+                        //   + ` axisStateMap ${axisStateMap}, expected ${expected}`);
+                        expect(stateMapConfig).toEqual(expected);
+                      });
+                    });
+                  });
+
+                  for (let entityAxisIndex = 0; entityAxisIndex < 2; entityAxisIndex += 1) {
+                    // entity axis: primary, secondary
+                    const entityAxis = entityAxisIndex === 0
+                      ? 'primary'
+                      : 'secondary';
+
+                    describe(`entity axis: ${entityAxis}`, () => {
+                      for (let entityConfigModeIndex = 0; entityConfigModeIndex < 2; entityConfigModeIndex += 1) {
+                        // per-entity state_map config: strict or relaxed
+                        const entityConfigKeepValues = entityConfigModeIndex === 0
+                          ? undefined
+                          : true;
+                        const entityConfigMappingType = entityConfigModeIndex === 0
+                          ? 'strict'
+                          : 'relaxed';
+
+                        describe(`entity config mode: ${entityConfigMappingType}`, () => {
+                          for (let entityConfigEmptyIndex = 0; entityConfigEmptyIndex < 2; entityConfigEmptyIndex += 1) {
+                            // per-entity state_map config: non-empty or empty map
+                            const isEntityConfigMapEmpty = entityConfigEmptyIndex === 1;
+                            const entityConfigEmptyLabel = !isEntityConfigMapEmpty
+                              ? ''
+                              : ', empty map';
+                            const entityConfigMap = !isEntityConfigMapEmpty
+                              ? entityConfigKeepValues
+                                ? MAP_NUMBERS
+                                : MAP_STRINGS
+                              : [];
+                            describe(`entity config map ${isEntityConfigMapEmpty ? 'empty' : 'non-empty'}`, () => {
+                              describe('one entity on the axis, and it has per-entity state_map', () => {
+                                // there is only one entity on the axis, and it has per-entity state_map
+                                VARIANTS_SINGLE_ENTITY_WITH_STATE_MAP.forEach((variant) => {
+                                  const entityConfigOppositeAxis = entityAxis === 'primary'
+                                    ? 'secondary'
+                                    : 'primary';
+                                  for (let moreEntitiesIndex = 0; moreEntitiesIndex < 2; moreEntitiesIndex += 1) {
+                                    // there is none or some entities on an opposite axis
+                                    const moreEntitiesNote = moreEntitiesIndex === 1
+                                      ? ` (there are some ${entityConfigOppositeAxis} entities)`
+                                      : '';
+                                    const descr: string = (variant.descr as TemplatedDescrType)(
+                                      entityConfigMappingType, entityConfigEmptyLabel, entityAxis, moreEntitiesNote,
+                                    );
+                                    it(descr, () => {
+                                      const baseConfig = {
+                                        entities: [
+                                          {
+                                            y_axis: entityAxis,
+                                            state_map: { map: entityConfigMap, keep_values: entityConfigKeepValues },
+                                          },
+                                          ...(moreEntitiesIndex === 1
+                                              ? [
+                                                { y_axis: entityConfigOppositeAxis },
+                                                { y_axis: entityConfigOppositeAxis },
+                                                { y_axis: entityConfigOppositeAxis },
+                                              ]
+                                              : []
+                                            ),
+                                        ],
+                                      };
+                                      card.config = {
+                                        ...baseConfig,
+                                        ...axisConfig,
+                                        ...{ state_map: globalStateMap },
+                                      };
+                                      const stateMapConfig = card._getAxisStateMap();
+                                      const expectedPrimary = (entityAxis === 'primary'
+                                        && !isEntityConfigMapEmpty
+                                        && entityConfigMappingType === 'strict')
+                                        ? STATE_MAP_STRICT // use a per-entity valid strict state_map
+                                        : entityAxis === 'primary' // map empty or relaxed
+                                          ? null // still stick to the empty or relaxed state_map
+                                          : // for entityAxis = secondary
+                                            axisConfigVariantIndex === 0  // per-axis state_map undefined
+                                              || axisConfigVariant === 'secondary' // per-axis state_map is defined for 'secondary'
+                                            ? !nullGlobalStateMap // global strict non-empty state_map might be used
+                                              ? STATE_MAP_STRICT_GLOBAL
+                                              : null
+                                            : // axisConfigVariant = primary
+                                              axisConfigMappingType === 'strict' && !isAxisConfigMapEmpty
+                                                ? axisStateMap
+                                                : null;
+                                      const expectedSecondary = (entityAxis === 'secondary'
+                                        && !isEntityConfigMapEmpty
+                                        && entityConfigMappingType === 'strict')
+                                        ? STATE_MAP_STRICT // use a per-entity valid strict state_map
+                                        : entityAxis === 'secondary' // map empty or relaxed
+                                          ? null // still stick to the empty or relaxed state_map
+                                          : // for entityAxis = primary
+                                            axisConfigVariantIndex === 0  // per-axis state_map undefined
+                                              || axisConfigVariant === 'primary' // per-axis state_map is defined for 'primary'
+                                            ? !nullGlobalStateMap // global strict non-empty state_map might be used
+                                              ? STATE_MAP_STRICT_GLOBAL
+                                              : null
+                                            : // axisConfigVariant = secondary
+                                              axisConfigMappingType === 'strict' && !isAxisConfigMapEmpty
+                                                ? axisStateMap
+                                                : null;
+                                      const expected = { primary: expectedPrimary, secondary: expectedSecondary };
+                                      // console.log(`card.config ${card.config}, axisConfig ${axisConfig}, expected ${expected}`);
+                                      expect(stateMapConfig).toEqual(expected);
+                                    });
+                                  }
+                                });
+                              });
+
+                              describe('many entities on the axis, and there is only one entity with state_map', () => {
+                                // there are many entities on the axis, and there is only one entity with state_map
+                                VARIANTS_ONE_INSTANCE.forEach((variant) => {
+                                  const descr: string = (variant.descr as TemplatedDescrType)(
+                                    entityConfigMappingType, entityConfigEmptyLabel, entityAxis,
+                                  );
+                                  it(descr, () => {
+                                    card.config = {
+                                      entities: [
+                                        ...ENTITIES,
+                                        {
+                                          y_axis: entityAxis,
+                                          state_map: { map: entityConfigMap, keep_values: entityConfigKeepValues },
+                                        },
+                                      ],
+                                      ...axisConfig,
+                                      ...{ state_map: globalStateMap },
+                                    };
+                                    const stateMapConfig = card._getAxisStateMap();
+                                    const expectedPrimary = entityAxis === 'primary'
+                                      ? null
+                                      : // entityAxis = secondary
+                                        axisConfigVariantIndex === 0 // per-axis state_map undefined
+                                          || axisConfigVariant === 'secondary' // per-axis state_map is defined for 'secondary'
+                                          ? !nullGlobalStateMap
+                                              ? STATE_MAP_STRICT_GLOBAL
+                                              : null
+                                          : // axisConfigVariant = primary
+                                            axisConfigMappingType === 'strict' && !isAxisConfigMapEmpty
+                                              ? axisStateMap
+                                              : null;
+                                    const expectedSecondary = entityAxis === 'secondary'
+                                      ? null
+                                      : // entityAxis = primary
+                                        axisConfigVariantIndex === 0 // per-axis state_map undefined
+                                          || axisConfigVariant === 'primary' // per-axis state_map is defined for 'primary'
+                                          ? !nullGlobalStateMap
+                                              ? STATE_MAP_STRICT_GLOBAL
+                                              : null
+                                          : // axisConfigVariant = secondary
+                                            axisConfigMappingType === 'strict' && !isAxisConfigMapEmpty
+                                              ? axisStateMap
+                                              : null;
+                                    const expected = { primary: expectedPrimary, secondary: expectedSecondary };
+                                    // console.log(`card.config ${card.config}, axisConfig ${axisConfig}, expected ${expected}`);
+                                    expect(stateMapConfig).toEqual(expected);
+                                  });
+                                });
+                              });
+                            });
+                          }
+                        });
+                      }
+                    });
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+  }
+});

@@ -4,7 +4,10 @@ import {
   ONE_HOUR,
   DEFAULT_BAR_SPACING,
 } from './const';
-import { log } from './utils';
+import {
+  getLog10,
+  log,
+} from './utils';
 
 export default class Graph {
   constructor({
@@ -15,6 +18,7 @@ export default class Graph {
     hours_to_show = 24,
     points_per_hour = 1,
     aggregateFuncName = 'avg',
+    calculateOverall = false,
     smoothing = true,
     logarithmic = false,
     bar_spacing = DEFAULT_BAR_SPACING, // spacing between bars
@@ -45,9 +49,14 @@ export default class Graph {
     this._min = 0;
     this._points_per_hour = points_per_hour;
     this._hours_to_show = hours_to_show;
+
     this._aggregateFuncName = aggregateFuncName;
     this._calcPoint = aggregateFuncMap[aggregateFuncName]
      || this._average; // fallback in case a wrong func is passed
+    // calculating "overall" aggregated values
+    this._calculateOverall = calculateOverall;
+    this._overall = undefined;
+
     this._smoothing = smoothing;
     this._logarithmic = logarithmic;
     this._bar_spacing = bar_spacing;
@@ -57,6 +66,8 @@ export default class Graph {
     this._baseline = baseline;
     this._invert = invert;
   }
+
+  get overall() { return this._overall; }
 
   get max() { return this._max; }
 
@@ -131,6 +142,13 @@ export default class Graph {
 
     // update interval end date
     this._endTime = endTime;
+
+    // calculate "overall" value
+    if (this._calculateOverall) {
+      this._overall = this._history.length > 0
+        ? this._calcPoint(this._history)
+        : undefined;
+    }
 
     // group history into time buckets
     const histGroups = this._history.reduce((res, item) => this._reducer(res, item), []);
@@ -228,8 +246,8 @@ export default class Graph {
    */
   calcY(coords) {
     // account for logarithmic graph
-    const max = this._logarithmic ? Math.log10(Math.max(1, this.max)) : this.max;
-    const min = this._logarithmic ? Math.log10(Math.max(1, this.min)) : this.min;
+    const max = this._logarithmic ? getLog10(this.max) : this.max;
+    const min = this._logarithmic ? getLog10(this.min) : this.min;
 
     const delta = Math.abs(max - min);
     let yRatio;
@@ -239,7 +257,7 @@ export default class Graph {
       yRatio = delta / this._height;
     }
     const coords2 = coords.map((coord) => {
-      const val = this._logarithmic ? Math.log10(Math.max(1, coord[V])) : coord[V];
+      const val = this._logarithmic ? getLog10(coord[V]) : coord[V];
       let coordY;
       if (this._invert) {
         coordY = ((val - min) / yRatio) + this._margin[Y] * 2;
@@ -305,7 +323,7 @@ export default class Graph {
    */
   computeGradient(thresholds) {
     const scale = this._logarithmic
-      ? Math.log10(Math.max(1, this._max)) - Math.log10(Math.max(1, this._min))
+      ? getLog10(this._max) - getLog10(this._min)
       : this._max - this._min;
 
     const gradientStops = thresholds.map((stop, index, arr) => {

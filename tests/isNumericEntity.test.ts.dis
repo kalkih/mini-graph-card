@@ -1,0 +1,69 @@
+/**
+ * Tests for isNumericEntity().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it } from 'vitest';
+import { isNumericEntity } from '../src/others';
+import { hass } from './hass';
+
+const VARIANTS: any[] = [
+  {
+    descr: 'Numeric: input_number',
+    entityId: 'input_number',
+    expected: true,
+  },
+  {
+    descr: 'Numeric: number',
+    entityId: 'number',
+    expected: true,
+  },
+  {
+    descr: 'Numeric: counter',
+    entityId: 'counter',
+    expected: true,
+  },
+  //////////////////////////////////////////
+  {
+    descr: 'Non-numeric: sun',
+    entityId: 'sun.sun',
+    expected: false,
+  },
+  {
+    descr: 'Non-numeric: automation',
+    entityId: 'automation.test',
+    expected: false,
+  },
+  {
+    descr: 'Non-numeric: sensor',
+    entityId: 'sensor.non_numerical',
+    expected: false,
+  },
+  //////////////////////////////////////////
+  {
+    descr: 'Numeric: sensor (1)',
+    entityId: 'sensor.numerical_1',
+    expected: true,
+  },
+  {
+    descr: 'Numeric: sensor (2)',
+    entityId: 'sensor.numerical_2',
+    expected: true,
+  },
+  {
+    descr: 'Numeric: sensor (3)',
+    entityId: 'sensor.numerical_3',
+    expected: true,
+  },
+];
+
+describe("isNumericEntity", () => {
+  VARIANTS.forEach((variant) => {
+    it(variant.descr, () => {
+      const result = isNumericEntity(hass, variant.entityId);
+      expect(result).toEqual(variant.expected)
+    });
+  });
+});
