@@ -6,8 +6,8 @@
  */
 
 import { expect, describe, it, beforeEach } from 'vitest';
-import { migrateYaxisConfig } from '../src/migrate';
-import { OTHER_OPTIONS } from './otherOptions';
+import { migrateYaxisConfig } from '../../src/migrate';
+import { OTHER_OPTIONS } from '../otherOptions';
 
 const OPTIONS_PRIMARY = {
   old: {

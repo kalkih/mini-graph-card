@@ -7,7 +7,7 @@
 
 // @vitest-environment jsdom
 import { expect, describe, it, beforeEach } from 'vitest';
-import MiniGraphCard from '../src/main';
+import MiniGraphCard from '../../src/main';
 
 const VARIANTS: any[] = [
   {
