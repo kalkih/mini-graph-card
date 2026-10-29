@@ -1,6 +1,5 @@
 import { LitElement, html, svg } from 'lit-element';
 import localForage from 'localforage/src/localforage';
-import { stateIcon } from 'custom-card-helpers';
 import SparkMD5 from 'spark-md5';
 import { interpolateRGB } from './color';
 import Graph from './graph';
@@ -17,7 +16,6 @@ import {
 import './initialize';
 import { version } from '../package.json';
 import {
-  ICONS,
   X, Y, V,
   ONE_HOUR,
   MAX_BARS,
@@ -685,16 +683,20 @@ export default class MiniGraphCard extends LitElement {
       `;
     }
 
-    const { icon, icon_adaptive_color } = this.config.show;
+    const { icon: showIcon, icon_adaptive_color } = this.config.show;
 
-    if (!icon
+    if (!showIcon
       || !this.entity
       || (!this.entity[0] && !this._isStaticValue[0])) {
       return html``;
     }
 
-    const { icon_color } = this.config;
+    const { icon, icon_color } = this.config;
     const iconColor = icon_color || (icon_adaptive_color ? this.color : undefined);
+    const stateObj = this.entity[0];
+    // HA resolves an entity icon (incl. icon translations, e.g. for device classes);
+    // a static value without an `icon` option gets the default sensor icon
+    const resolvedIcon = !stateObj && !icon ? 'mdi:eye' : icon;
 
     return html`
       <div
@@ -702,7 +704,11 @@ export default class MiniGraphCard extends LitElement {
         loc=${iconLoc}
         style=${iconColor !== undefined ? `color: ${iconColor};` : ''}
       >
-        <ha-icon .icon=${this.computeIcon(this.entity[0])}></ha-icon>
+        <ha-state-icon
+          .icon=${resolvedIcon}
+          .stateObj=${stateObj}
+          .hass=${this._hass}
+        ></ha-state-icon>
       </div>
     `;
   }
@@ -1814,22 +1820,6 @@ export default class MiniGraphCard extends LitElement {
     }
     // use a fixed label for a static value
     return this._isStaticValue[index] ? 'Static' : '';
-  }
-
-  /**
-  * Returns an icon for an entity
-  * accounting an `icon` option, entity's native `icon` attribute,
-  * fallback to a standard MDI "temperature" icon
-  * @returns {string} mdi:icon
-  * @param {object} stateObj stateObj for an entity
-  */
-  computeIcon(stateObj) {
-    return (
-      this.config.icon
-      || stateObj && stateObj.attributes.icon
-      || typeof stateIcon === 'function' && stateObj && stateIcon(stateObj)
-      || ICONS.temperature
-    );
   }
 
   /**
