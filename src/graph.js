@@ -20,12 +20,13 @@ export default class Graph {
     points_per_hour = 1,
     aggregateFuncName = 'avg',
     calculateOverall = false,
+    overallAggregateFuncName = undefined,
     smoothing = true,
     logarithmic = false,
     bar_spacing = DEFAULT_BAR_SPACING, // spacing between bars
     bar_spacing_group = DEFAULT_BAR_SPACING, // spacing between groups of bars
     total_bars_in_group = 1, // number of bars (i.e. number of entities with a shown bar graph)
-    baseline,
+    baseline = undefined,
     invert = false,
   }) {
     this._graphType = graphType;
@@ -42,9 +43,13 @@ export default class Graph {
     this._aggregateFuncName = aggregateFuncName;
     this._calcPoint = aggregateFuncMap[aggregateFuncName]
      || aggregateFuncMap.avg; // fallback in case a wrong func is passed
-    // calculating "overall" aggregated values
+
+    // calculating "overall" aggregated values:
     this._calculateOverall = calculateOverall;
     this._overall = undefined;
+    this._overallAggregateFuncName = overallAggregateFuncName;
+    this._overallAggregateFunc = aggregateFuncMap[overallAggregateFuncName]
+     || this._calcPoint; // fallback in case a wrong func is passed
 
     this._smoothing = smoothing;
     this._logarithmic = logarithmic;
@@ -134,10 +139,7 @@ export default class Graph {
 
     // calculate "overall" value
     if (this._calculateOverall) {
-      const numberHistory = this._history.map(item => parseFloat(item.state));
-      this._overall = numberHistory.length > 0
-        ? this._calcPoint(numberHistory)
-        : undefined;
+      this._overall = this._calcOverall();
     }
 
     // group history into time buckets
@@ -433,5 +435,17 @@ export default class Graph {
     const Zx = (Ax - Bx) / 2 + Bx;
     const Zy = (Ay - By) / 2 + By;
     return [Zx, Zy];
+  }
+
+  /**
+   * Return "overall" value calculated for a whole period
+   * using the overall aggregate function
+   * @returns {number|undefined} "Overall" value
+   */
+  _calcOverall() {
+    const numberHistStates = this._history.map(item => parseFloat(item.state));
+    return numberHistStates.length > 0
+      ? this._overallAggregateFunc(numberHistStates)
+      : undefined;
   }
 }
