@@ -6,8 +6,8 @@
  */
 
 import { expect, describe, it, beforeEach } from 'vitest';
-import { migrateStateMapConfig } from '../src/migrate';
-import { OTHER_OPTIONS } from './otherOptions';
+import { migrateStateMapConfig } from '../../src/migrate';
+import { OTHER_OPTIONS } from '../otherOptions';
 
 const VARIANTS_OLD: any[] = [
   {
