@@ -29,6 +29,8 @@ import {
   isEntryAnimated,
   getIntervalEndDate,
   getBoundsForCustomZeroPosition,
+  parseOverallFuncName,
+  isOverallState,
 } from './others';
 import {
   getMin, getAvg, getMax,
@@ -433,7 +435,8 @@ export default class MiniGraphCard extends LitElement {
         hours_to_show: this.config.hours_to_show,
         points_per_hour: this.config.points_per_hour,
         aggregateFuncName: entityConfig.aggregate_func || this.config.aggregate_func,
-        calculateOverall: this.config.show.state === 'overall',
+        calculateOverall: isOverallState(this.config.show.state),
+        overallAggregateFuncName: parseOverallFuncName(this.config.show.state),
         smoothing: this._graphSmoothing[index],
         logarithmic: getFirstDefinedItem(
           entityConfig.logarithmic,
@@ -795,7 +798,7 @@ export default class MiniGraphCard extends LitElement {
     const { config } = this;
     const entityConfig = config.entities[index];
     const isStateLast = config.show.state === 'last';
-    const isStateOverall = config.show.state === 'overall';
+    const isStateOverall = isOverallState(config.show.state);
 
     // process "overall" value
     if (isStateOverall) {
