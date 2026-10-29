@@ -12,6 +12,7 @@ import {
   formatDateTime,
   parseDateTimeFormatFromCfg,
   getDateFormat, getTimeFormat,
+  resolveTimeZone,
 } from './locale';
 import './initialize';
 import { version } from '../package.json';
@@ -2895,7 +2896,11 @@ export default class MiniGraphCard extends LitElement {
   * @returns {Date} Datetime of the interval's end
   */
   getIntervalEndDate() {
-    return getIntervalEndDate(new Date(), this.config.group_by);
+    const timeZone = resolveTimeZone(
+      this._hass && this._hass.locale && this._hass.locale.time_zone,
+      this._hass && this._hass.config && this._hass.config.time_zone,
+    );
+    return getIntervalEndDate(new Date(), this.config.group_by, timeZone);
   }
 
   getCardSize() {
