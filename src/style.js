@@ -120,9 +120,6 @@ const style = css`
   .icon {
     color: var(--state-icon-color, #44739e);
   }
-  .icon > ha-state-icon {
-    --mdc-icon-size: 1.7em;
-  }
   .icon[loc="left"] {
     grid-column: 1;
     justify-self: start;
@@ -161,9 +158,6 @@ const style = css`
   .states[loc="center"] .state__time {
     left: 50%;
     transform: translateX(-50%);
-  }
-  .states > .icon > ha-state-icon {
-    --mdc-icon-size: 2em;
   }
   .states--secondary {
     display: flex;
