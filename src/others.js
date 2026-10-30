@@ -6,6 +6,7 @@
  */
 
 import { log } from './utils';
+import { GRAPH_WIDTH } from './const';
 
 const isString = value => typeof value === 'string' && value.trim() !== '';
 
@@ -330,6 +331,20 @@ const getObjectAttr = (obj, path) => {
 */
 const isObjectAttr = path => path.includes('.');
 
+/**
+ * Calculate a graph height (in SVG units) matching the size of its container,
+ * so that the graph fills the container without being distorted
+ * @param {number} pxWidth Container's width in px
+ * @param {number} pxHeight Container's height in px
+ * @param {number} minHeight Minimal graph height in SVG units
+ * @returns {number|undefined} Graph height, or undefined if the container is not laid out
+ */
+const getAutoGraphHeight = (pxWidth, pxHeight, minHeight) => {
+  if (!(pxWidth > 0) || !(pxHeight > 0)) return undefined;
+  const height = Math.round((GRAPH_WIDTH * pxHeight / pxWidth) * 10) / 10;
+  return Math.max(minHeight, height);
+};
+
 export {
   isString,
   isNumber,
@@ -345,4 +360,5 @@ export {
   isOverallState,
   getObjectAttr,
   isObjectAttr,
+  getAutoGraphHeight,
 };
