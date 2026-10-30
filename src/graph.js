@@ -117,6 +117,13 @@ export default class Graph {
     return this.baselineY / (this._height + this._margin[Y] * 4);
   }
 
+  /**
+   * Set a new graph height (in SVG units);
+   * coords are recalculated by the next getPath()/getPoints()/getBars() call
+   * @param {number} height Graph's height
+   */
+  set height(height) { this._height = height - this._margin[Y] * 4; }
+
   get history() { return this._history; }
 
   set history(data) { this._history = data; }

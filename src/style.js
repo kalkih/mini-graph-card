@@ -1,13 +1,10 @@
 import { css } from 'lit-element';
 
 const style = css`
-  :host {
-    display: flex;
-    flex-direction: column;
-  }
   ha-card {
     flex-direction: column;
-    flex: 1;
+    height: 100%;
+    box-sizing: border-box;
     padding: 16px 0 0 0;
     position: relative;
     overflow: hidden;
@@ -249,6 +246,12 @@ const style = css`
     margin-top: auto;
     width: 100%;
   }
+  /* fill the height available to the card (sections, grid, horizontal-stack) */
+  .graph[auto-height],
+  .graph[auto-height] .graph__container {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
   .graph__container {
     display: grid;
     grid-template-columns: 1fr;
@@ -267,6 +270,12 @@ const style = css`
   svg {
     overflow: hidden;
     display: block;
+  }
+  /* sized by the container, never by the SVG content */
+  .graph__container__svg > svg {
+    position: absolute;
+    top: 0;
+    left: 0;
   }
   path {
     stroke-linecap: round;

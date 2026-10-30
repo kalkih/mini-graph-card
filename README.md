@@ -36,6 +36,7 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
       + [Inverted graphs](#inverted-graphs)
       + [Force a zero vertical position](#force-a-zero-vertical-position)
       + [Graphs order](#graphs-order)
+      + [Card height](#card-height)
       + [Configuration validation](#configuration-validation)
          - [Error severity levels](#error-severity-levels)
          - [Validation rules](#validation-rules)
@@ -170,7 +171,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | show | [show object](#available-show-options) |  | v0.2.0 | UI elements display/hide options.
 | y_axis | [Y-axis config object](#y-axis-object) |  | v0.14.0 | Settings related to Y-axes.
 | animate | boolean | `false` | v0.2.0 | Add a reveal animation to the graph.
-| height | number | `150` | v0.0.1 | Set a custom height of the line graph.
+| height | number | `100` | v0.0.1 | Set a custom height of the graph. If not set, the graph fills the height available to the card in a sections view, `grid` or `horizontal-stack` card (otherwise `100` is used). See [Card height](#card-height).
 | bar_spacing | number | `4` | v0.9.0 | Set the spacing between bars in bar graph. Value `-1` is used to place bars on each other. See [examples](#bar-spacing-examples).
 | bar_spacing_group | number |   | 0.14.0 | Set an additional spacing between bar groups (multiple entities) in bar graph. Fallback to `bar_spacing` if undefined; if `bar_spacing: -1` - then a default `4` value is used. See [examples](#bar-spacing-examples).
 | line_width | number | `5` | v0.0.1 | Set the thickness of the line.
@@ -762,6 +763,15 @@ Similarly for overlapping bars graphs (when `bar_spacing: -1`): by default (or w
 With `graph_order: reversed`, bars for the 1st entity/static value become topmost.
 
 ---
+
+### Card height
+
+In a sections view, a `grid` card or a `horizontal-stack` card, the card takes the height of its cell.
+If the `height` option is not set, the graph fills the space left by the other elements, keeping round points and the configured `line_width`.
+In a sections view the card's default size is 6 columns by 3 rows; the minimal number of rows depends on the shown elements (header, state, graph).
+
+If `height` is set, the graph keeps that height and the remaining space stays empty.
+In a masonry view the card looks the same with or without `height` set (the default height is `100`).
 
 ### Configuration validation
 
