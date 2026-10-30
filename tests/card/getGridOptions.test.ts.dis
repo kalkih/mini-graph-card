@@ -1,0 +1,54 @@
+/**
+ * Tests for MiniGraphCard::getGridOptions().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+// @vitest-environment jsdom
+import { expect, describe, it, beforeEach } from 'vitest';
+import MiniGraphCard from '../../src/main';
+import { DEFAULT_SHOW } from '../../src/const';
+
+const VARIANTS: any[] = [
+  {
+    descr: 'default: header, state & graph',
+    show: {},
+    expected: { columns: 6, rows: 3, min_columns: 3, min_rows: 3 },
+  },
+  {
+    descr: 'no header',
+    show: { name: false, icon: false },
+    expected: { columns: 6, rows: 3, min_columns: 3, min_rows: 2 },
+  },
+  {
+    descr: 'icon only keeps the header row',
+    show: { name: false },
+    expected: { columns: 6, rows: 3, min_columns: 3, min_rows: 3 },
+  },
+  {
+    descr: 'graph only',
+    show: { name: false, icon: false, state: false },
+    expected: { columns: 6, rows: 3, min_columns: 3, min_rows: 1 },
+  },
+  {
+    descr: 'nothing shown',
+    show: { name: false, icon: false, state: false, graph: false },
+    expected: { columns: 6, rows: 3, min_columns: 3, min_rows: 1 },
+  },
+];
+
+describe('MiniGraphCard::getGridOptions()', () => {
+  let card: MiniGraphCard;
+
+  beforeEach(() => {
+    card = new MiniGraphCard();
+  });
+
+  VARIANTS.forEach((variant) => {
+    it(variant.descr, () => {
+      card.config = { show: { ...DEFAULT_SHOW, ...variant.show } };
+      expect(card.getGridOptions()).toEqual(variant.expected);
+    });
+  });
+});
