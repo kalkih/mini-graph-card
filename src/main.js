@@ -2404,13 +2404,16 @@ export default class MiniGraphCard extends LitElement {
       // index of a bar (only used for bars & only increments if a particular graph to be shown)
       let graphPos = 0;
       this.entity.forEach((stateObj, i) => {
-        if ((!stateObj && !this._isStaticValue[i])
-          || this.Graph[i].coords.length === 0) {
+        const entityConfig = config.entities[i];
+        if ((!stateObj && !this._isStaticValue[i]) // static line
+          || this.Graph[i].coords.length === 0 // Graph coords are empty
+          // displaying of a graph is off
+          || entityConfig.show_graph === false) {
           return;
         }
 
         // renew max/min values in Graph[i] object
-        const bound = config.entities[i].y_axis === 'secondary'
+        const bound = entityConfig.y_axis === 'secondary'
           ? this.boundSecondary
           : this.bound;
         [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
@@ -2422,18 +2425,21 @@ export default class MiniGraphCard extends LitElement {
         } else {
           // line graph
           const line = this.Graph[i].getPath();
-          if (config.entities[i].show_line !== false) this.line[i] = line;
-          if (config.show.fill
-            && config.entities[i].show_fill !== false) this.fill[i] = this.Graph[i].getFill(line);
-          if (config.show.points && (config.entities[i].show_points !== false)) {
+          if (entityConfig.show_line !== false) {
+            this.line[i] = line;
+          }
+          if (config.show.fill && entityConfig.show_fill !== false) {
+            this.fill[i] = this.Graph[i].getFill(line);
+          }
+          if (config.show.points && entityConfig.show_points !== false) {
             this.points[i] = this.Graph[i].getPoints();
           }
           if ((config.color_thresholds.length > 0
-            || (config.entities[i].color_thresholds
-                && config.entities[i].color_thresholds.length > 0))
-            && !config.entities[i].color)
+            || (entityConfig.color_thresholds && entityConfig.color_thresholds.length > 0))
+            && !entityConfig.color) {
             this.gradient[i] = this.Graph[i]
-              .computeGradient(config.entities[i].color_thresholds || config.color_thresholds);
+              .computeGradient(entityConfig.color_thresholds || config.color_thresholds);
+          }
         }
       });
       this.line = [...this.line]; // force the card's re-rendering
