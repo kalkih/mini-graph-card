@@ -3019,17 +3019,21 @@ export default class MiniGraphCard extends LitElement {
   }
 
   /**
-   * Default & minimal size in a sections view;
-   * the graph fills any height assigned to the card
+   * Minimal size in a sections view; the default size is left to HA
+   * (full width, natural height), the graph fills any height assigned to the card
    * @returns {Object} Grid options
    */
   getGridOptions() {
     const { show } = this.config;
-    // one row each for the header, the state & the graph
-    const minRows = [show.name || show.icon, show.state, show.graph].filter(Boolean).length || 1;
+    // one row each for the header, the state, the graph, the legend & the extrema/average info
+    const minRows = [
+      show.name || show.icon,
+      show.state,
+      show.graph,
+      show.graph && show.legend && this.visibleLegends.length > 1,
+      show.extrema || show.average,
+    ].filter(Boolean).length || 1;
     return {
-      columns: 6,
-      rows: Math.max(minRows, 3),
       min_columns: 3,
       min_rows: minRows,
     };

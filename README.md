@@ -771,7 +771,7 @@ With `graph_order: reversed`, bars for the 1st entity/static value become topmos
 
 In a sections view, a `grid` card or a `horizontal-stack` card, the card takes the height of its cell.
 If the `height` option is not set, the graph fills the space left by the other elements, keeping round points and the configured `line_width`.
-In a sections view the card's default size is 6 columns by 3 rows; the minimal number of rows depends on the shown elements (header, state, graph).
+In a sections view the card keeps HA's default size (full width, natural height) until a size is set in the layout editor; the minimal number of rows depends on the shown elements (header, state, graph, legend, extrema/average).
 
 If `height` is set, the graph keeps that height and the remaining space stays empty.
 In a masonry view the card looks the same with or without `height` set (the default height is `100`).
