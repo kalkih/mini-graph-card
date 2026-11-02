@@ -580,6 +580,8 @@ In this case the "overall" value is calculated using the same aggregate function
 To use a different aggregate function, set e.g. `show.state: overall_diff` option - here a `diff` function is used.
 Any aggregate function can be used like `overall_sum`, `overall_delta` etc.
 
+Note: it is possible to define an "overall" value for an entity even when a graph is hidden for this entity with `show_graph: false`.
+
 
 ---
 
