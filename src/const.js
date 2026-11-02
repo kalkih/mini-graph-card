@@ -8,20 +8,6 @@ const DEFAULT_HOURS_TO_SHOW = 24;
 const DEFAULT_POINTS_PER_HOUR = 0.5;
 const DEFAULT_STATIC_VALUE_LABEL_OFFSET = 20; // in %
 const NBSP = '\u00A0';
-const ICONS = {
-  humidity: 'hass:water-percent',
-  illuminance: 'hass:brightness-5',
-  temperature: 'hass:thermometer',
-  battery: 'hass:battery',
-  pressure: 'hass:gauge',
-  power: 'hass:flash',
-  signal_strength: 'hass:wifi',
-  motion: 'hass:walk',
-  door: 'hass:door-closed',
-  window: 'hass:window-closed',
-  presence: 'hass:account',
-  light: 'hass:lightbulb',
-};
 const DEFAULT_COLORS = [
   'var(--accent-color)',
   '#3498db',
@@ -66,7 +52,6 @@ export {
   DEFAULT_POINTS_PER_HOUR,
   DEFAULT_STATIC_VALUE_LABEL_OFFSET,
   NBSP,
-  ICONS,
   DEFAULT_COLORS,
   DEFAULT_SHOW,
   X,

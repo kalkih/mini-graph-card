@@ -14,11 +14,19 @@ import {
   checkNumericOption,
   checkIntegerOption,
   checkBounds,
+  checkYaxisLabels,
   checkColorThresholds,
+  checkStateMap,
   checkLineStyle,
+  checkGroupBy,
+  checkPointsPerHour,
+  checkName,
 } from './checkOption';
 import { getFactor } from './others';
-import { migrateYaxisConfig } from './migrate';
+import {
+  migrateYaxisConfig,
+  migrateStateMapConfig,
+} from './migrate';
 import { log } from './utils';
 
 /**
@@ -143,7 +151,8 @@ export default (config) => {
   }
 
   // migrate legacy options, currently belonging to y_axis object
-  const migratedConfig = migrateYaxisConfig(config);
+  let migratedConfig = migrateYaxisConfig(config);
+  migratedConfig = migrateStateMapConfig(migratedConfig);
 
   const conf = {
     animate: false,
@@ -159,12 +168,11 @@ export default (config) => {
     bar_spacing: DEFAULT_BAR_SPACING,
     compress: false,
     smoothing: true,
-    state_map: [],
     cache: true,
     tap_action: {
       action: 'more-info',
     },
-    ...JSON.parse(JSON.stringify(migratedConfig)),
+    ...migratedConfig,
     show: { ...DEFAULT_SHOW, ...migratedConfig.show },
   };
 
@@ -183,7 +191,7 @@ export default (config) => {
   conf.points_per_hour = checkNumericOption(conf, 'points_per_hour', DEFAULT_POINTS_PER_HOUR, { minBound: 0.001, allowString: true });
   conf.update_interval = checkNumericOption(conf, 'update_interval', undefined, { minBound: 0, allowString: true });
 
-  // axis options
+  // axis options - check them & prepare parsed bounds data
   const boundsParsed = [{}, {}];
   if (conf.y_axis && conf.y_axis.primary) {
     const primaryBounds = checkBounds(conf.y_axis.primary, 'primary');
@@ -205,6 +213,8 @@ export default (config) => {
       undefined,
       { minBound: 0, allowString: true, logOptionName: 'primary.decimals' },
     );
+
+    checkYaxisLabels(conf.y_axis.primary, 'primary');
   }
   if (conf.y_axis && conf.y_axis.secondary) {
     const secondaryBounds = checkBounds(conf.y_axis.secondary, 'secondary');
@@ -225,6 +235,21 @@ export default (config) => {
       'decimals',
       undefined,
       { minBound: 0, allowString: true, logOptionName: 'secondary.decimals' },
+    );
+
+    checkYaxisLabels(conf.y_axis.secondary, 'secondary');
+  }
+  if (conf.y_axis) {
+    conf.y_axis.zero_position = checkNumericOption(
+      conf.y_axis,
+      'zero_position',
+      undefined,
+      {
+        minBound: 0,
+        maxBound: 1,
+        allowString: true,
+        logOptionName: 'y_axis.zero_position',
+      },
     );
   }
 
@@ -278,6 +303,13 @@ export default (config) => {
           entity.color_thresholds_transition || conf.color_thresholds_transition,
         );
       }
+
+      if (entity.state_map) {
+        // migrate per-entity state_map
+        conf.entities[i] = migrateStateMapConfig(entity);
+        // check per-entity state_map
+        checkStateMap(conf.entities[i], `entities[${i}]`);
+      }
     }
   });
   /* eslint-enable no-param-reassign */
@@ -289,12 +321,8 @@ export default (config) => {
     secondary: getFactor(conf, -1),
   };
 
-  conf.state_map.forEach((state, i) => {
-    // convert string values to objects
-    if (typeof state === 'string') conf.state_map[i] = { value: state, label: state };
-    // make sure label is set
-    conf.state_map[i].label = conf.state_map[i].label || conf.state_map[i].value;
-  });
+  // check state_map
+  checkStateMap(conf, 'config');
 
   if (typeof config.line_color === 'string')
     conf.line_color = [config.line_color, ...DEFAULT_COLORS];
@@ -319,17 +347,14 @@ export default (config) => {
   // warn if line_style is defined along with animate=true
   checkLineStyle(conf);
 
-  // override points per hour to mach group_by function
-  switch (conf.group_by) {
-    case 'date':
-      conf.points_per_hour = 1 / 24;
-      break;
-    case 'hour':
-      conf.points_per_hour = 1;
-      break;
-    default:
-      break;
-  }
+  // check if group_by & hours_to_show fit together
+  conf.group_by = checkGroupBy(conf);
+
+  // override points_per_hour to match group_by option
+  conf.points_per_hour = checkPointsPerHour(conf);
+
+  // check a global "name" option
+  checkName(conf);
 
   return {
     config: conf,

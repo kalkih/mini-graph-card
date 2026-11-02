@@ -7,15 +7,19 @@
 
 import { log } from './utils';
 
+const isString = value => typeof value === 'string' && value.trim() !== '';
+
+const isNumber = value => typeof value === 'number' && Number.isFinite(value);
+
 /**
   * Check if a value is a valid number
   * @param {any} value Value to be checked
   * @param {boolean} [allowString=false] Optional flag
   * to allow string representations of numbers (like "123")
-  * @returns {boolean} True if value is a valid number, false - otherwise
+  * @returns {boolean} True if value is a valid number, false otherwise
   */
 const isNumeric = (value, allowString = false) => {
-  if (typeof value === 'number' && Number.isFinite(value)) {
+  if (isNumber(value)) {
     return true;
   }
   if (allowString && typeof value === 'string') {
@@ -29,6 +33,21 @@ const isNumeric = (value, allowString = false) => {
     return Number.isFinite(num);
   }
   return false;
+};
+
+const NUMERIC_DOMAINS = ['counter', 'input_number', 'number'];
+
+const isNumericEntity = (hass, entityId) => {
+  const domain = entityId.split('.')[0];
+  if (NUMERIC_DOMAINS.includes(domain)) return true;
+  if (domain !== 'sensor') return false;
+  if (!hass) {
+    // assumption when hass is not ready
+    return domain === 'sensor';
+  }
+  const stateObj = hass.states[entityId];
+  if (!stateObj) return false;
+  return !!stateObj.attributes.unit_of_measurement || !!stateObj.attributes.state_class;
 };
 
 /**
@@ -155,10 +174,66 @@ const getBound = (bound) => {
 };
 
 /**
+ * Applies zero_position constraint to boundaries [lower, upper]
+ * @param {Array<number>} boundary Current [lower, upper] boundaries
+ * @param {number} zeroPos zero_position config value (0..1)
+ * @param {boolean} invert True if the Y-axis is inverted, false otherwise
+ * @returns {Array<number>} New boundaries
+ */
+const getBoundsForCustomZeroPosition = (boundary, zeroPos, invert) => {
+  if (zeroPos === undefined || zeroPos === null) {
+    return boundary;
+  }
+
+  let l1 = boundary[0];
+  const u1 = boundary[1];
+
+  // prevent division by 0
+  const safeZeroPos = Math.max(0.0001, Math.min(0.9999, zeroPos));
+
+  const topWeight = invert
+    ? (1 - safeZeroPos)
+    : safeZeroPos;
+  const bottomWeight = invert
+    ? safeZeroPos
+    : (1 - safeZeroPos);
+
+  if (u1 === l1) {
+    l1 = u1 - Number.EPSILON;
+  }
+
+  let l2;
+  let u2;
+
+  const prioritizedUpper = (u1 >= 0 && l1 >= 0)
+    || ((u1 > 0 && l1 < 0)
+      && (Math.abs(u1) >= Math.abs(l1))
+    );
+
+  if (prioritizedUpper) {
+    u2 = u1;
+    l2 = -u2 * bottomWeight / topWeight;
+    if (l1 < 0 && Math.abs(l2) < Math.abs(l1)) {
+      l2 = l1;
+      u2 = -l2 * topWeight / bottomWeight;
+    }
+  } else {
+    l2 = l1;
+    u2 = -l2 * topWeight / bottomWeight;
+    if (u1 > 0 && Math.abs(u2) < Math.abs(u1)) {
+      u2 = u1;
+      l2 = -u2 * bottomWeight / topWeight;
+    }
+  }
+
+  return [l2, u2];
+};
+
+/**
  * Checks if animation is enabled for a specific entry in config.entities.
  * @param {object} config Config object
  * @param {number} index Index of an entry in config.entities
- * @returns {boolean} True if animated, false - otherwise
+ * @returns {boolean} True if animated, false otherwise
  */
 const isEntryAnimated = (config, index) => {
   const entryConf = config.entities && config.entities[index];
@@ -168,10 +243,84 @@ const isEntryAnimated = (config, index) => {
   return config.animate === true;
 };
 
+const getDaysUntilNextMonday = day => (day === 0 ? 1 : 8 - day);
+
+/**
+ * Get a datetime of the interval's end
+ * @param {string} groupBy Type of grouping
+ * @param {Date} date Current datetime
+ * @returns {Date} Datetime of the interval's end
+ */
+const getIntervalEndDate = (date, groupBy) => {
+  switch (groupBy) {
+    // case 'month': // Not supported yet officially
+    //   date.setMonth(date.getMonth() + 1);
+    //   date.setDate(1);
+    //   date.setHours(0, 0, 0, 0);
+    //   break;
+    case 'week':
+      date.setDate(date.getDate() + getDaysUntilNextMonday(date.getDay()));
+      date.setHours(0, 0, 0, 0);
+      break;
+    case 'date':
+      date.setDate(date.getDate() + 1);
+      date.setHours(0, 0, 0, 0);
+      break;
+    case 'hour':
+      date.setHours(date.getHours() + 1, 0, 0, 0);
+      break;
+    case '30min': {
+      const minutes = date.getMinutes();
+      const newMinutes = Math.ceil((minutes + 1) / 30) * 30;
+      date.setMinutes(newMinutes, 0, 0);
+      break;
+    }
+    case '15min': {
+      const minutes = date.getMinutes();
+      const newMinutes = Math.ceil((minutes + 1) / 15) * 15;
+      date.setMinutes(newMinutes, 0, 0);
+      break;
+    }
+    default:
+      break;
+  }
+  return date;
+};
+
+/**
+ * Check if 'show.state' option enables an 'overall' calculation
+ * @param {string} stateOption config.show.state option value
+ * @returns {boolean} True if overall calculation is requested, false otherwise
+ */
+const isOverallState = (stateOption) => {
+  if (typeof stateOption !== 'string') return false;
+  return stateOption === 'overall'
+    || (stateOption.startsWith('overall_') && stateOption.length > 8);
+};
+
+/**
+ * Parses the 'show.state' option to determine a method for 'overall' calculation
+ * @param {string} stateOption config.show.state option value
+ * @returns {string|undefined} Aggregate function name
+ */
+const parseOverallFuncName = (stateOption) => {
+  if (!isOverallState(stateOption) || stateOption === 'overall') {
+    return undefined;
+  }
+  return stateOption.substring(8);
+};
+
 export {
+  isString,
+  isNumber,
   isNumeric,
+  isNumericEntity,
   logStringWarning,
   getFactor,
   getBound,
+  getBoundsForCustomZeroPosition,
   isEntryAnimated,
+  getIntervalEndDate,
+  parseOverallFuncName,
+  isOverallState,
 };

@@ -20,7 +20,7 @@ import {
   TimeFormat,
   DateFormat,
   TimeZone,
-} from '../locale';
+} from '../src/locale';
 
 // Set UTC time if your vitest is configired for UTC or has a default config;
 // also, set UTC for HASS_TIME_ZONE

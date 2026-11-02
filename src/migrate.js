@@ -30,35 +30,36 @@ const migrateYaxisConfig = (config) => {
     const oldValue = conf[oldKey];
 
     // check if the legacy option is present in config
-    if (oldValue !== undefined && oldValue !== null) {
-      // check if the option is already defined in the new y_axis object
-      const hasNewValue = conf.y_axis
-        && conf.y_axis[axis]
-        && conf.y_axis[axis][newKey] !== undefined
-        && conf.y_axis[axis][newKey] !== null;
+    if (oldValue !== undefined) {
+      if (oldValue !== null) {
+        // check if the option is already defined in the new y_axis object
+        const hasNewValue = conf.y_axis
+          && conf.y_axis[axis]
+          && conf.y_axis[axis][newKey] !== undefined
+          && conf.y_axis[axis][newKey] !== null;
 
-      if (!hasNewValue) {
-        // new option is missing
+        if (!hasNewValue) {
+          // new option is missing
 
-        // create empty object if it was not created yet
-        if (!conf.y_axis) {
-          conf.y_axis = {};
+          // create empty object if it was not created yet
+          if (!conf.y_axis) {
+            conf.y_axis = {};
+          }
+          if (!conf.y_axis[axis]) {
+            conf.y_axis[axis] = {};
+          }
+          // copy a value
+          conf.y_axis[axis][newKey] = oldValue;
+
+          log(`option "${oldKey}" is deprecated and has been automatically migrated. `
+            + `Please update your YAML configuration to "y_axis.${axis}.${newKey}"`);
+        } else {
+          // new option is also present
+          // legacy option is ignored in favor of the new option
+          log(`option "${oldKey}" is ignored `
+            + `because you have already configured "y_axis.${axis}.${newKey}". Please remove "${oldKey}" from your YAML`);
         }
-        if (!conf.y_axis[axis]) {
-          conf.y_axis[axis] = {};
-        }
-        // copy a value
-        conf.y_axis[axis][newKey] = oldValue;
-
-        log(`option "${oldKey}" is deprecated and has been automatically migrated. `
-          + `Please update your YAML configuration to "y_axis.${axis}.${newKey}"`);
-      } else {
-        // new option is also present
-        // legacy option is ignored in favor of the new option
-        log(`option "${oldKey}" is ignored `
-          + `because you have already configured "y_axis.${axis}.${newKey}". Please remove "${oldKey}" from your YAML`);
       }
-
       // remove old option
       delete conf[oldKey];
     }
@@ -67,7 +68,55 @@ const migrateYaxisConfig = (config) => {
   return conf;
 };
 
+/**
+ * Migrate legacy state_map array option to the new object structure.
+ * @param {object} config Config object containing state_map
+ * @returns {object} Updated config object
+ */
+const migrateStateMapConfig = (config) => {
+  const newConfig = { ...config };
+
+  if (config.state_map !== undefined && config.state_map !== null) {
+    // "state_map" is defined
+    if (Array.isArray(config.state_map)) {
+      // state_map -> state_map.map
+      newConfig.state_map = { map: config.state_map };
+    } else if (typeof config.state_map === 'object') {
+      const {
+        map,
+        keep_values,
+        label,
+        hide_unit,
+      } = config.state_map;
+      // map is copied as is
+      newConfig.state_map = { map: map || [] };
+      if (keep_values !== undefined) {
+        // keep_values is copied as is
+        newConfig.state_map.keep_values = keep_values;
+      }
+      if (label !== undefined) {
+        // label is copied as is
+        newConfig.state_map.label = label;
+      }
+      if (hide_unit !== undefined) {
+        // hide_unit is copied as is
+        newConfig.state_map.hide_unit = hide_unit;
+      }
+      // only map, keep_values, label & hide_unit are copied
+      // inner structure is to be checked in checkStateMap()
+    } else {
+      // wrong structure of "state_map"
+      newConfig.state_map = { map: [] };
+    }
+  } else {
+    // "state_map" is not defined
+    newConfig.state_map = { map: [] };
+  }
+
+  return newConfig;
+};
 
 export {
   migrateYaxisConfig,
+  migrateStateMapConfig,
 };

@@ -5,6 +5,71 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
 
 ![Preview](https://user-images.githubusercontent.com/457678/52977264-edf34980-33cc-11e9-903b-cee43b307ed8.png)
 
+## Table of Contents:
+
+   * [Install](#install)
+      + [HACS (recommended)](#hacs-recommended)
+      + [Manual install](#manual-install)
+      + [CLI install](#cli-install)
+      + [Add resource reference](#add-resource-reference)
+      + [Updating](#updating)
+   * [Using the card](#using-the-card)
+      + [Card options](#card-options)
+      + [Entities object](#entities-object)
+      + [Available show options](#available-show-options)
+      + [Graph types](#graph-types)
+      + [Y-axis object](#y-axis-object)
+      + [Line color object](#line-color-object)
+      + [Action object options](#action-object-options)
+      + [State map object](#state-map-object)
+      + [Value factor](#value-factor)
+      + [Aggregate functions](#aggregate-functions)
+      + ["Overall" aggregated value](#overall-aggregated-value)
+      + [Alignment for "name" & "icon" elements](#alignment-for-name--icon-elements)
+      + [Structured names](#structured-names)
+      + [Static values](#static-values)
+      + [Number format](#number-format)
+      + [Custom format for datetime values](#custom-format-for-datetime-values)
+      + [Logarithmic options](#logarithmic-options)
+      + [Line styles](#line-styles)
+      + [Baseline](#baseline)
+      + [Inverted graphs](#inverted-graphs)
+      + [Force a zero vertical position](#force-a-zero-vertical-position)
+      + [Graphs order](#graphs-order)
+      + [Configuration validation](#configuration-validation)
+         - [Error severity levels](#error-severity-levels)
+         - [Validation rules](#validation-rules)
+      + [Supported color formats](#supported-color-formats)
+      + [Theme variables](#theme-variables)
+   * [Example usage](#example-usage)
+      + [Single entity card](#single-entity-card)
+      + [Multiple entities card](#multiple-entities-card)
+      + [Different graph types](#different-graph-types)
+      + [Bar spacing](#bar-spacing)
+      + [Show data from the past week](#show-data-from-the-past-week)
+      + [Graph only card](#graph-only-card)
+      + [Horizontally stacked cards](#horizontally-stacked-cards)
+      + [Dynamic line color](#dynamic-line-color)
+      + [Alternate Y-axis](#alternate-y-axis)
+      + [Custom styles for line graphs](#custom-styles-for-line-graphs)
+      + [Displaying static values](#displaying-static-values)
+      + [Custom baseline](#custom-baseline)
+      + [Inverted Y-axis](#inverted-y-axis)
+      + [Opposing dual-axis graphs](#opposing-dual-axis-graphs)
+      + [Grouping by date](#grouping-by-date)
+      + [Data aggregation functions](#data-aggregation-functions)
+      + [Using state_map](#using-state_map)
+      + [Showing additional info on the card](#showing-additional-info-on-the-card)
+      + [Accessing attributes in complex structures](#accessing-attributes-in-complex-structures)
+         - [Accessing dictionary attributes](#accessing-dictionary-attributes)
+         - [Accessing list attributes](#accessing-list-attributes)
+   * [Development](#development)
+      + [Instructions](#instructions)
+   * [Getting errors?](#getting-errors)
+   * [License](#license)
+
+---
+
 ## Install
 
 ### HACS (recommended)
@@ -53,7 +118,7 @@ Else, if you prefer the graphical editor, use the menu to add the resource:
 3. Enter URL `/local/mini-graph-card-bundle.js` and select type "JavaScript Module".
 4. Restart Home Assistant.
 
-## Updating
+### Updating
 **If you have a version older than v0.0.8 installed, please delete the current files and follow the installation instructions again.**
 
 1. Find your `mini-graph-card-bundle.js` file in `config/www` or wherever you ended up storing it.
@@ -70,14 +135,21 @@ Else, if you prefer the graphical editor, use the menu to add the resource:
 
 *You may need to empty the browsers cache if you have problems loading the updated card.*
 
+---
+
 ## Using the card
 
 We recommend looking at the [Example usage section](#example-usage) to understand the basics to configure this card.
 (also) pay attention to the **required** options mentioned below.
 
-### Options
+> [!NOTE]
+> It is highly recommended to have your server's & client's system time synchronized with NTP servers.
+> Otherwise, you may observe glitches.
+> A possible glitch occurs when a client's time is 10 sec behind: assume there is a sensor with a high update frequency, and after a value's change (let it be an "increase" for instance) a corresponding "peak" is like "stuck" to a right edge instead of moving to the left, and is instantly shifted only after 10 sec.
 
-#### Card options
+---
+
+### Card options
 | Name | Type | Default | Since | Description |
 |------|:----:|:-------:|:-----:|-------------|
 | type ***(required)*** | string |  | v0.0.1 | `custom:mini-graph-card`.
@@ -92,7 +164,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | hours_to_show | integer | `24` | v0.0.2 | Specify how many hours of history the graph should present.
 | points_per_hour | number | `0.5` | v0.2.0 | Specify amount of data points the graph should display for each hour, *(basically the detail/accuracy/smoothing of the graph)*.
 | aggregate_func | string | `avg` | v0.8.0 | Specify [aggregate function](#aggregate-functions) used to calculate point/bar in the graph.
-| group_by | string | `interval` | v0.8.0 | Specify type of grouping of data, dynamic `interval`, `date` or `hour`.
+| group_by | string | `interval` | v0.8.0 | Specify type of grouping of data, dynamic `interval`, `week`, `date`, `hour`, `30min` or `15min`.
 | update_interval | number |  | v0.4.0 | Specify a custom update interval of the history data (in seconds), instead of on every state change.
 | cache | boolean | `true` | v0.9.0 | Enable/disable local caching of history data.
 | show | [show object](#available-show-options) |  | v0.2.0 | UI elements display/hide options.
@@ -115,7 +187,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | align_icon | string | `right` | v0.2.0 | Set the alignment of the icon, `left`, `right` or `state`. See more details [here](#alignment-for-name--icon-elements).
 | align_state | string | `left` | v0.2.0 | Set the alignment of the current state, `left`, `right` or `center`.
 | smoothing | boolean | `true` | v0.8.0 | Whether to make graph line smooth.
-| state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert (order matters as position becomes a value on the graph).
+| state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert.
 | logarithmic | boolean | `false` | v0.10.0 | Use a logarithmic scale for the graph (see [Logarithmic options](#logarithmic-options)).
 | baseline | number |  | v0.14.0 | Set a custom baseline for the graph (see [Baseline](#baseline)).
 | static_value_label_offset | number |  `20` | v0.14.0 | Set a custom horizontal offset for the [static value line label](#static-values), as percentage of the graph area's width.
@@ -136,8 +208,11 @@ These options are legacy and moved into [Y-axis config object](#y-axis-object):
 | value_factor | number or object |   | v0.9.4<br>v0.14.0-dev.1 | Scale a value, see [Value factor](#value-factor).
 | value_factor_secondary | number or object |   | v0.14.0-dev.1  | Scale a value, see [Value factor](#value-factor).
 
+Card config can still keep legacy options, yet it is recommended to upgrade.
 
-#### Entities object
+---
+
+### Entities object
 Entities may be listed directly (as per `sensor.temperature` in the example below), or defined using
 properties of the Entity object detailed in the following table (as per `sensor.pressure` in the example below).
 
@@ -146,7 +221,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | entity ***(required)*** | string |         | Entity id of the sensor. Either `entity` or `static_value` must be defined.
 | attribute | string |         | Retrieves an attribute or [sub-attribute (attr1.attr2...)](#accessing-attributes-in-complex-structures) instead of the state
 | static_value | number |         | Set a value for a [static line or bar](#static-values). Either `entity` or `static_value` must be defined.
-| name | string |         | Set a custom display name, defaults to entity's friendly_name or a `Static` label for a [static value](#static-values).
+| name | string / list |         | Set a custom display name, defaults to entity's name or a `Static` label for a [static value](#static-values). Accepts a [structured name](#structured-names) on Home Assistant 2026.4 and later.
 | animate    | boolean |        | Override for a reveal animation to the graph.
 | graph | string |         | Override for a graph type, `line` or `bar` (see [Graph types](#graph-types)).
 | line_width | number |         | Override for a thickness of the line.
@@ -155,11 +230,11 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | color_thresholds | list |  | v0.14.0 | Override the thresholds for dynamic graph colors.
 | color_thresholds_transition | string |  | v0.14.0 | Override the color threshold transition.
 | unit | string |         | Set a custom unit of measurement, overrides `unit` set in base config (`''` value for an empty unit).
-| aggregate_func | string |         | Override for aggregate function used to calculate point on the graph, `avg`, `median`, `min`, `max`, `first`, `last`, `sum`.
+| aggregate_func | string |         | Override for [aggregate function](#aggregate-functions) used to calculate point on the graph, `avg`, `median`, `min`, `max`, `first`, `last`, `sum`.
 | decimals | integer |    | Override the exact number of decimals to show for number values, see [Number format](#number-format).
 | show_state | boolean |         | Display the current state.
-| show_legend_state | boolean |  false  | Display the current state as part of the legend.
-| show_indicator | boolean |         | Display a color indicator next to the state.
+| show_legend_state | boolean |  `false`  | Display the current state as part of the legend.
+| show_indicator | boolean |   `false`      | Display a color indicator next to the state.
 | show_graph | boolean |         | Set to false to completely hide the graph.
 | show_line | boolean |         | Set to false to hide the line.
 | show_fill | boolean |         | Set to false to hide the fill.
@@ -171,6 +246,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | y_axis | string |         | If 'secondary', displays using the secondary Y-axis on the right.
 | fixed_value | boolean |         | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
 | smoothing | boolean |         | Override for a flag indicating whether to make graph line smooth.
+| state_map | [state map object](#state-map-object) |         | List of entity states to convert.
 | logarithmic | boolean |         | Override logarithmic scaling for this entity only (see [Logarithmic options](#logarithmic-options)).
 | baseline | number |   | Set a custom baseline for the graph or override a global `baseline` option (see [Baseline](#baseline)).
 
@@ -185,14 +261,16 @@ entities:
   - sensor.humidity
 ```
 
-#### Available show options
+---
+
+### Available show options
 All properties are optional.
 
 | Name | Default | Options | Description |
 |------|:-------:|:-------:|-------------|
 | name | `true` | `true` / `false` | Display name.
 | icon | `true` | `true` / `false` | Display icon.
-| state | `true` | `true` / `false` / `last` | Display current state. `last` will show the last graph point's or bar's value (fallback to `true` if points are not shown for a line graph).
+| state | `true` | `true` / `false` / `last` | Display current state.<br>`last` will show the last graph point's or bar's value (fallback to `true` if points are not shown for a line graph).<br>`overall` will show an [aggregated value](#aggregate-functions) for the entire period calculated. More variants of aggregation are supported, see more details [here](#overall-aggregated-value).
 | graph | `line` | `line` / `bar` / `false` | Display option for the graph. If set to `bar` a maximum of `96` bars will be displayed. See [Graph types](#graph-types).
 | fill | `true` | `true` / `false` / `fade` | Display the line graph fill.
 | points | `hover` | `true` / `false` / `hover` | Display graph data points (for a line graph only).
@@ -206,49 +284,71 @@ All properties are optional.
 | name_adaptive_color | `false` | `true` / `false` | Make the name color adapt with the primary entity/static value color.
 | icon_adaptive_color | `false` | `true` / `false` | Make the icon color adapt with the primary entity/static value color.
 | loading_indicator | `true` | `true` / `false` | Show loading indicator while attempting to retrieve a history.
-| graphs_order | `direct` | `direct` / `reversed` | Define an order of displaying graphs (see [Graphs order](#graphs-order)).
+| graph_order | `direct` | `direct` / `reversed` | Define an order of displaying graphs (see [Graphs order](#graphs-order)).
 
-#### Graph types
+
+
+---
+
+### Graph types
 
 Two graph types are supported - linear & bars.
 By default, all graphs have a `line` type.
 To set a common type for all graphs - use a `show.graph` option (see [Available show options](#available-show-options)).
 To set an individual type for a particular graph, use a per-entity `graph` option (see [Entities object](#entities-object)).
-
 See examples [below](#different-graph-types).
 
+---
 
-#### Y-axis object
+### Y-axis object
 
-The object has a tree-like structure with optional `primary` & `secondary` keys. Each key may contain optional properties listed below:
+The `y_axis` option has an object structure with optional `zero_position`, `primary` & `secondary` keys:
 
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
-| invert | boolean |  | Make the Y-axis inverted, see [Inverted graphs](#inverted-graphs).
+| zero_position | number |  | Set a vertical position of a zero baseline (0..1, measured from a top edge of a graph area), see [Force a zero vertical position](#force-a-zero-vertical-position).
+| primary | object |  | Specify options for a `primary` axis, see below.
+| secondary | object |  | Specify options for a `secondary` axis, see below.
+
+The `primary` & `secondary` keys may contain optional properties listed below:
+
+| Name | Type | Default | Description |
+|------|:----:|:-------:|-------------|
+| invert | boolean |  `false` | Make the Y-axis inverted, see [Inverted graphs](#inverted-graphs).
 | decimals | integer |  | Specify the exact number of decimals to show for the Y-axis labels, see [Number format](#number-format).
+| state_map | [state map object](#state-map-object) |   | List of entity states to convert.
 | value_factor | number or object |   | Scale a value, see [Value factor](#value-factor).
 | lower_bound | number *or* string |   | Set a fixed lower bound for the Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
 | upper_bound | number *or* string |   | Set a fixed upper bound for the Y-axis. String value starting with ~ (e.g. `~50`) specifies soft bound.
 | min_bound_range | number |   | Applied after everything, makes sure there's a minimum range that the Y-axis will have. Useful for not making small changes look large because of scale.
+| labels | list | `['min', 'max']`  | Set types of Y-axis labels to display. Possible values are `max`, `min`, `zero`, `all` (includes all of them); `max` & `min` stand for a max & min Y-axis labels correspondingly, `zero` - for a 0 label. The 0 label is only shown if max & min labels have different signs.
 
 ```yaml
 y_axis:
+  zero_position: ...
   primary:
+    invert: ...
     decimals: ...
+    state_map: ...
     value_factor: ...
     lower_bound: ...
     upper_bound: ...
     min_bound_range: ...
+    labels: ...
   secondary:
+    invert: ...
     decimals: ...
+    state_map: ...
     value_factor: ...
     lower_bound: ...
     upper_bound: ...
     min_bound_range: ...
+    labels: ...
 ```
 
+---
 
-#### Line color object
+### Line color object
 See [dynamic line color](#dynamic-line-color) for example usage.
 
 | Name | Type | Default | Description |
@@ -256,7 +356,7 @@ See [dynamic line color](#dynamic-line-color) for example usage.
 | value ***(required [except in interpolation (see below)](#line-color-interpolation-of-stop-values))*** | number |  | The threshold for the color stop.
 | color ***(required)*** | string |  | Color. See [Supported color formats](#supported-color-formats).
 
-##### Line color interpolation of stop values
+Line color interpolation of stop values:
 As long as the first and last threshold stops have `value` properties, intermediate stops can exclude `value`; they will be interpolated linearly. For example, given stops like:
 
 ```yaml
@@ -299,7 +399,9 @@ As a shorthand, you can just use a color string for the stops that you want inte
     color: "#0000ff"
 ```
 
-#### Action object options
+---
+
+### Action object options
 
 All card's area - except a graph part - supports processing of actions.
 By default, tapping on an element opens a `more-info` dialog:
@@ -316,13 +418,116 @@ By default, tapping on an element opens a `more-info` dialog:
 | navigation_path | string |  | Any path | Path to navigate to (e.g. `/lovelace/0/`) when `action` is defined as `navigate`.
 | url | string |  | Any URL | URL to open when `action` is defined as `url`.
 
-#### State map object
+---
+
+### State map object
+
+State map object is defined by a `state_map` option and allows users to map values from an entity's history to specific graph coordinates and labels. It operates in two modes:
+* **strict mode** (default, when `keep_values: false` or undefined): converts original text values (e.g., `on`, `off`) from a history to sequential numbers (0, 1, ...) to render them on a graph. Unmapped values are left in the history array "as is"; if these unmapped values are numeric - they are shown on a graph & thus may cause a distortion since the properly mapped values are like "0, 1, ..." and can be much smaller than the unmapped values; if the unmapped values are non-numeric - these values are not shown on a graph (since graph is created using _numbers_), and an unmapped value can only be displayed for a **current** value in a "state display" area (since the current value is not taken from a history but is a "live" state).
+* **relaxed mode** (when `keep_values: true`): is only meaningful for entities with numeric values, retains original numeric history values (i.e. the history data is untouched) while replacing custom text labels for specific numbers (like `Danger` instead of `1000`). Supports an optional `tolerance` parameter to match numeric values within a defined range `[value ± tolerance]`, both bounds are "included". Alternatively, `min` & `max` parameters can be used instead to match numeric values in a defined range `[min, max)`, a right bound is not "included". For matched values, user-defined (or automatically generated) labels are shown instead (like a `Danger` label or a complex dynamically created `Danger: 810 (700..900)` label).
+
+In the description above, a "label" term stands for a text displayed on a card:
+* current state displayed in a "state display" area;
+* state for a selected point/bar in a "state display" area;
+* current state displayed in a "legend" area (if `show_legend_state: true`);
+* Y-axis "min/max" labels.
+
+In case of using a mapping with a `state_map` object, these labels contain a mapped value (e.g. `off` & `on` in case of a strict mapping, `Danger` in case of a relaxed mapping, see examples above).
+Note that Y-axis labels will contain mapped values only for a strict mapping (see more details below) like `off` & `on`, and in case of a relaxed mapping the Y-axis labels still contain original unmapped values.
+Also, both strict & relaxed mappings are not applied to "extrema/average" values, original values are shown there.
+
+The `state_map` option can be defined in 2 ways:
+* short (or legacy) syntax - the `state_map` option is an array of mappings, this creates "strict" mappings.
+* full syntax - the `state_map` option is an object, this may be used to define either "strict" or "relaxed" mappings.
+
+The `state_map` option in a "full syntax" has an object structure with mandatory `map` & other optional keys:
+
+| Name | Type | Default | Description |
+|------|:----:|:-------:|-------------|
+| map | list |  | Array of mappings between a historical value and a graph coordinate or a displayed label.
+| keep_values | boolean |  `false` | Set to `true` for the "relaxed" mapping.
+| hide_unit | boolean |  `false` | Set to `true` to hide a native or a custom unit for a mapped value (e.g. to show a `Danger` label instead of `Danger %`) for ALL mappings (unless it is overridden by setting the `hide_unit` option for a particular mapping).
+| label | string |   | Set to define a common label for all mappings (see more details about labels below).
+
+The `map` key contains a list of entries.
+When `keep_values` is not `true` (or in case of the "short/legacy syntax") - the **order of entries matters** as the entry's index determines its position (Y-value) on the graph.
+Each entry may contain properties listed below:
+
 | Name | Type | Default | Description |
 |------|:----:|:-------:|-------------|
 | value ***(required)*** | string |  | Value to convert.
-| label | string | same as value | String to show as label (if the value is not precise).
+| label | string | same as value | String to show as a label, overrides a common `label` if defined.
+| tolerance | number |  | Absolute numeric deviation allowed when matching values, e.g. a value `3.14` in a history & a `value` option's value `3.142` are matched with a `tolerance: 0.005`. Only accounted when `keep_values: true`.
+| min | number |  | Left bound of a range of matching values. Only accounted when `keep_values: true`.
+| max | number |  | Right bound of a range of matching values. Only accounted when `keep_values: true`.
+| hide_unit | boolean | `false` | Hide a unit for a mapped value (overrides a common `hide_unit` if defined).
 
-#### Value factor
+Example of a "short/legacy syntax":
+```yaml
+state_map:
+  - value: off
+    label: Switched off
+  - value: on
+    label: Switched on
+```
+Example of a "full syntax":
+```yaml
+state_map:
+  keep_values: true
+  map:
+    - value: 123
+    - value: 456
+  label: Danger
+  hide_unit: true
+```
+As a shorthand, you can just use a string as a value to convert (then a label is defined automatically or using a possibly defined common `label` option):
+```yaml
+  map:
+    - value: red
+      label: Red
+    - green
+    - value: blue
+      label: Blue
+```
+It is recommended to only use the "strict mode" for entities with non-numeric values & provide a mapping for all possible values.
+
+The `tolerance`, `min` & `max` options can only be used in the "relaxed mode" as meaningful for numeric values only.
+There are 2 ways of matching - either define a `value` (with a possibly defined `tolerance`, otherwise a default "0" tolerance is used) to match values in `[value ± tolerance]` range (both bounds are "included"), or define `min` & `max` to match values in `[min, max)` range (right bound is not included).
+
+The `label` option is processed as follows:
+1. In "strict mode": if `label` is defined - then it is used; otherwise:
+* if a common `label` is defined - it is used;
+* otherwise - a displayed label is same as `value`.
+2. In "relaxed mode": if `label` is defined - then it is used; otherwise:
+* if a common `label` is defined - it is used;
+* if a `value` option is defined - then a displayed label is same as `value`;
+* if `min` & `max` options are defined - then an automatically generated `${min} .. ${max}` label is used.
+
+It is possible to define the `label` option as a template like `${min} .. ${max}`, `${raw}, range [${min} .. ${max}]` - a combination of a user-defined text & tokens.
+Here the `${...}` part can contain tokens like `value`, `tolerance`, `min`, `max` & `raw`, where the `raw` token stands for a matched value, and other tokens stand for corresponding options; note that if some option (e.g. `min`) is not defined for a particular mapping entry - then a corresponding template (`${min}` in this case) is processed as "empty string".
+Also, in the "strict mode", only `value` token can be used, other tokens are processed as "empty string".
+Also note that JS templates are not supported inside the `${...}` part.
+
+The `state_map` option can be defined per-entity, per-axis or globally for all entities:
+* global strict `state_map` is used when all entities on a card have non-numeric values & have a same set of possible values. Applying a global strict `state_map` for numeric entities on a card makes no sense - it may cause a distortion on a graph & numerous "value not found in state_map" warnings in a browser's console. Also, a global strict `state_map` can be used when there is only one entity (which is non-numeric) on a card.
+* global relaxed `state_map` is used when all entities on a card have numeric values to define custom labels for some numeric values. Applying a global relaxed `state_map` with numeric mappings makes no sense for non-numeric entities on a card - the mapping will not change a presentation of these non-numeric entities, it will be just a useless job for CPU. Also, a global relaxed `state_map` can be used when there is only one entity (which is numeric) on a card.
+* per-entity strict `state_map` is used when a particular mapping must be applied for one particular non-numeric entity only, and there are no other numeric entities on the same Y-axis (e.g. all non-numeric entities are on a `primary` axis, all numeric entities - on a `secondary` axis). Also, can be used when there is only one entity (which is non-numeric) on a card.
+* per-entity relaxed `state_map` is used when a particular mapping must be applied for one particular numeric entity only. Also, can be used when there is only one entity (which is numeric) on a card.
+* per-axis strict `state_map` is used when a particular mapping must be applied for all non-numeric entities on some particular Y-axis (and there are no numeric entities on the same axis). Important note: this is the only way to apply a mapping to Y-axis labels when an axis contains several entities (they are not mapped in other cases, see below). Also, can be used when there is only one entity (which is non-numeric) on a card (although, ideologically it makes little sense to define a per-axis mapping instead of a per-entity or a global one).
+* per-axis relaxed `state_map` is used when a particular mapping must be applied for all numeric entities on some particular Y-axis (and there are no non-numeric entities on the same axis). Also, can be used when there is only one entity (which is numeric) on a card (although, ideologically it makes little sense to define a per-axis mapping instead of a per-entity or a global one).
+
+Mapped values (like `off` & `on` in case of a strict mapping; the relaxed mapping is not considered) are used as Y-axis labels only if (note: logic is a bit simplified below):
+* there is only one entity associated with the axis and it has own per-entity strict `state_map`;
+* none entity associated with the axis has own per-entity `state_map`, then a per-axis strict `state_map` is applied (if defined);
+* none entity associated with the axis has own per-entity `state_map` & there is no per-axis `state_map` defined, then a global strict `state_map` is applied (if defined).
+
+If an order of entries is changed in a "strict" `state_map` mapping array and a `cache` option is not set to `false`, it is recommended to purge a browser's cache - otherwise old cached history data (generated for the old order in `state_map` mapping array) might become wrong for the new config.
+
+See examples [below](#using-state_map).
+
+---
+
+### Value factor
 
 Defines a coefficient (factor) applied to displayed values (including Y-axis labels).
 There are two available options per each Y-axis - `y_axis.primary.value_factor` & `y_axis.secondary.value_factor`:
@@ -345,6 +550,7 @@ An `object` value can be used to define either an "exponent" factor or a "scale"
 
 Invalid values (absent/undefined/invalid `type` or `factor`) passed in the object lead to a fallback to a default "1" factor.
 
+---
 
 ### Aggregate functions
 Recorded values are grouped in time buckets which are determined by `group_by`, `points_per_hour` configuration.
@@ -362,6 +568,21 @@ These buckets are converted later to single point/bar on the graph. Aggregate fu
 | `delta` | v0.9.4 | Calculates difference between max and min value
 | `diff` | v0.11.0 | Calculates difference between first and last value
 
+---
+
+### "Overall" aggregated value
+It is possible to show an "overall" value for the entire period.
+A value is calculated using a specified [aggregate function](#aggregate-functions).
+The "overall" value is shown instead of a current state or a last graph point's or bar's value.
+To show the "overall" value, set `show.state: overall` option.
+In this case the "overall" value is calculated using the same aggregate function which is used for building a graph (defined by a global or per-entity `aggregate_func` option).
+
+To use a different aggregate function, set e.g. `show.state: overall_diff` option - here a `diff` function is used.
+Any aggregate function can be used like `overall_sum`, `overall_delta` etc.
+
+
+---
+
 ### Alignment for "name" & "icon" elements
 
 Depending on the configuration, the "name" & "icon" elements are aligned as follows:
@@ -374,7 +595,27 @@ Depending on the configuration, the "name" & "icon" elements are aligned as foll
 6. If both `align_header` & `align_icon` are defined — the "icon" is aligned to the left/right depending on `align_icon`, and the "name" is placed on the left (if `align_icon: right`), on the right (if `align_icon: left`), or in the center (if `align_header: center`), meaning `align_icon` takes precedence.
 7. If `align_header` is not defined & `align_icon` is defined — the "icon" is aligned to the left/right depending on `align_icon`, and the "name" is placed on the left (if `align_icon: right`) or on the right (if `align_icon: left`).
 
+---
 
+### Structured names
+
+*Requires Home Assistant 2026.4 or later. On earlier versions a structured `name` falls back to the entity's friendly name.*
+
+Home Assistant composes an entity's display name out of its registry context (entity, device, area, floor) rather than one `friendly_name` string. A `name` option can be a list of those parts instead of a plain string, so the name keeps following renames and matches what the built-in cards show:
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.living_room_thermostat_temperature
+    name:
+      - type: area
+      - type: entity
+```
+Available part types are `entity`, `device`, `area`, `floor`, and `text` (a literal, written as `{type: text, text: 'Indoor'}`). Parts that resolve to nothing are dropped, so the surrounding parts still render. A plain string `name` keeps working exactly as before.
+
+See the [Home Assistant developer documentation](https://developers.home-assistant.io/docs/frontend/data#hassformatentitynamestateobj-name-options)
+for details.
+
+---
 
 ### Static values
 
@@ -388,6 +629,8 @@ Notes:
 4. It is possible to display a static value's badge on a corresponding static line: the `show.static_value_labels` option (see [Available show options](#available-show-options)) allows to display the badge either on the left or on the right side of the card; the per-entity `show_static_value_label` option (see [Entities object](#entities-object)) can be used to hide a label for a particular static line; the `static_value_label_offset` global option can be used to define a custom horizontal offset for the static value line label. Also, if a `static_value` entry has a `bar` type (either individually set or inherited from a global `show.graph` option) then a static label cannot not displayed.
 
 See examples [below](#displaying-static-values).
+
+---
 
 ### Number format
 
@@ -415,6 +658,7 @@ A "default presentation" refers to a default look in HA:
 3. For Y-axis labels, [static values](#static-values): "maximum 2 decimals" accuracy is used.
 And for all values, HA number format settings (like `xxxx.xx` or `x xxx.x` or `x,xxx.x`) are used.
 
+---
 
 ### Custom format for datetime values
 
@@ -434,16 +678,22 @@ A singular whitespace must be used to separate date & time formats. Letter case 
 Any values which do not match the pattern - lead to a fallback to a "day weekday" format (used as the only and default format till v.0.13).
 For clarity, it is recommended to explicitly define a `day_weekday` value in case the legacy "day weekday" format is needed.
 
+---
+
 ### Logarithmic options
 
 Normally gaps between numbers on the graph are equal; the gap between 1 and 2 on the graph is the same as the gap between 100 and 101. The `logarithmic` option applies a [logarithmic transformation](https://en.wikipedia.org/wiki/Log_transformation_(statistics)) to the graph. With `logarithmic`, the graph is scaled by powers of 10, so the gap between 1, 10, 100, etc are equal. This is useful when your values span a wide range. Illuminance, for example, can swing from 1 to 5000 over the course of a day, and without a transformation it's hard to read the smaller values on the graph.
 
 Note that this option rounds up the input to 1 so negative numbers or numbers less than 1 are rendered as 0; this is different from the formal definition of logarithm, where `log(x) < 0` when `x > 0 && x < 1` and $\infty$ or `NaN` when `x <= 0`.
 
+---
+
 ### Line styles
 
 A default line style is a "solid line". A style should be defined in a format used for a standard CSS `stroke-dasharray` property. Examples: `10,10` (dashes), `20,10` (long dashes); see cards examples [below](#custom-styles-for-line-graphs). It is better to use along with a `line_width` option.
 Warning: the `line_style` option is not accounted if `animation: true` option is set.
+
+---
 
 ### Baseline
 
@@ -459,6 +709,8 @@ Additionally, the `baseline` option can be set individually for entities; may no
 
 See examples [below](#custom-baseline).
 
+---
+
 ### Inverted graphs
 
 An inverted graph has a vertically flipped Y-scale: lower values are shown at the top, higher values are shown at the bottom.
@@ -468,6 +720,21 @@ This type of graph is mainly used when smaller values need to be shown at the to
 Examples: a ping value (smaller ping is better), a water level in a well (0 level means "well is full", higher values mean "well is empty").
 
 See examples [below](#inverted-y-axis).
+
+---
+
+### Force a zero vertical position
+
+The `zero_position` option defines a vertical offset of a "Y=0" baseline from a top edge of a graph area.
+Although any number `[0..1]` (incl. `0` & `1`) can be set, only values like `0.5` (symmetric split), `0.25` (more attention to a bottom part) or `0.75` (more attention to a top part) should be set.
+
+After fixing a zero vertical position, all upper/lower bounds (including ones defined by a user with `lower_bound` & `upper_bound` options) are automatically re-calculated to fit in new proportions.
+
+Could be useful for these scenarios:
+1. Fix a vertical position of a 0-baseline for a rapidly changing graph (although positive & negative peaks will be re-scaled automatically). So it is up to a user whether to see a 0-baseline moving up/down or peaks re-scaled.
+2. More interesting case - use for 2 graphs, one graph is inverted, see examples [below](#opposing-dual-axis-graphs).
+
+---
 
 ### Graphs order
 
@@ -494,6 +761,36 @@ Similarly for overlapping bars graphs (when `bar_spacing: -1`): by default (or w
 
 With `graph_order: reversed`, bars for the 1st entity/static value become topmost.
 
+---
+
+### Configuration validation
+
+Before the 1st rendering, the card performs a validation of some settings provided in the YAML configuration.
+If a misconfigured option is detected, the card reacts dynamically based on the severity of the error.
+
+
+#### Error severity levels
+
+1. **Critical errors:**
+Occurs when the basic configuration is broken (e.g., passing a plain string instead of an array to `entities`). In this case, the card completely blocks its rendering process.
+2. **Non-critical warnings:**
+If a parameter contains an incorrect data type or an invalid value (e.g., a negative `decimals`), the card outputs a detailed warning to the browser console, assigns that specific option to its safe default value, and then continues to render the card.
+
+#### Validation rules
+
+The list below is not comprehensive:
+
+* **Numeric values**: all numeric options (like `baseline`) are validated against numeric types (`number`).
+* **Integers:** all integer numeric options (like `decimals`) are additionally validated to ensure they are integers rather than floating-point values.
+* **Quoted numbers**: the card allows numeric values wrapped in quotes (like `hours_to_show: "24"`). The internal parser will safely convert them to numbers, but it will emit a warning in the browser console prompting you to fix the type in your YAML file.
+* **Complex config objects**: Complex objects (like `color_thresholds` or `state_map`) undergo a deeper structural audit: the card verifies not only the overall container structure but also the presence, validity, and precise data types of all important inner options .
+* **Feature-specific**: check values using more specific criteria (like "`hours_to_show`, `points_per_hour` & `group_by` should match with each other").
+  
+
+> **Troubleshooting tip:** If your card is shown blank or behaves unexpectedly, press `F12` to open your browser's Developer Tools, navigate to the **Console** tab and check the logged warnings emitted by `mini-graph-card`.
+
+---
+
 ### Supported color formats
 Color can be defined as:
 - `red` (available web colors)
@@ -503,7 +800,7 @@ Color can be defined as:
 - `rgba(255, 0, 0, 0.2)` (RGB format with opacity)
 - `var(--primary-text-color)`, `var(--red-color)` (or any other theme variable supported by HA Frontend)
 
-
+---
 
 ### Theme variables
 The following theme variables can be set in your HA theme to customize the appearance of the card.
@@ -524,9 +821,11 @@ The opacity is applied for a color defined as `stroke-color: var(--card-backgrou
 Customizing these 2 variables may be desirable for some client devices.
 
 
-### Example usage
+---
 
-#### Single entity card
+## Example usage
+
+### Single entity card
 
 ![Single entity card](https://user-images.githubusercontent.com/457678/52009150-884d2500-24d2-11e9-9f2b-2981210d3897.png)
 
@@ -536,7 +835,7 @@ entities:
  - sensor.illumination
 ```
 
-#### Alternative style
+Alternative style:
 
 ![Alternative style](https://user-images.githubusercontent.com/457678/52009161-8daa6f80-24d2-11e9-8678-47658a181615.png)
 
@@ -550,7 +849,9 @@ show:
   fill: false
 ```
 
-#### Multiple entities card
+---
+
+### Multiple entities card
 
 ![Multiple entities card](https://user-images.githubusercontent.com/457678/52009165-900cc980-24d2-11e9-8cc6-c77de58465b5.png)
 
@@ -565,7 +866,9 @@ entities:
   - sensor.server_received
 ```
 
-#### Different graph types
+---
+
+### Different graph types
 
 See above for simple "Only linear graphs" examples.
 
@@ -607,10 +910,9 @@ show:
   icon: false
 ```
 
+---
 
-
-
-#### Bar spacing
+### Bar spacing
 
 Custom `bar_spacing` & `bar_spacing_group`:
 
@@ -660,8 +962,9 @@ show:
   name: false
 ```
 
+---
 
-#### Show data from the past week
+### Show data from the past week
 ![Show data from the past week](https://user-images.githubusercontent.com/457678/52009167-913df680-24d2-11e9-8732-52fc65e3f0d8.png)
 
 Use the `hours_to_show` option to specify how many hours of history the graph should represent.
@@ -676,7 +979,9 @@ hours_to_show: 168
 points_per_hour: 0.25
 ```
 
-#### Graph only card
+---
+
+### Graph only card
 Use the `show` option to show/hide UI elements.
 
 <img width="482" height="127" alt="image" src="https://github.com/user-attachments/assets/95196d3b-4de9-49a1-ae88-72bf19b3f3d2" />
@@ -691,7 +996,9 @@ show:
   state: false
 ```
 
-#### Horizontally stacked cards
+---
+
+### Horizontally stacked cards
 You can stack cards horizontally by using one or more `horizontal-stack(s)`.
 
 ![Horizontally stacked cards](https://user-images.githubusercontent.com/457678/52009171-926f2380-24d2-11e9-9dd4-28f010608858.png)
@@ -719,7 +1026,9 @@ cards:
     font_size: 75
 ```
 
-#### Dynamic line color
+---
+
+### Dynamic line color
 Have the graph change line color dynamically.
 
 ![Dynamic line color](https://user-images.githubusercontent.com/457678/52573150-cbd05900-2e19-11e9-9e01-740753169093.png)
@@ -739,7 +1048,35 @@ color_thresholds:
     color: "#c0392b"
 ```
 
-#### Alternate Y-axis
+With `color_thresholds_transition: hard`:
+
+<img width="479" height="220" alt="image" src="https://github.com/user-attachments/assets/1e976185-3c0d-4ce8-89cc-d0be99bcdb8a" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.xiaomi_cg_1_co2
+color_thresholds:
+ - value: 400
+   color: green
+ - value: 780
+   color: orange
+ - value: 850
+   color: red
+color_thresholds_transition: hard   
+hours_to_show: 1
+points_per_hour: 60
+height: 200
+show:
+  name: false
+  icon: false
+  labels: true
+  state: false
+```
+
+---
+
+### Alternate Y-axis
 Have one or more series plot on a separate Y-axis, which appears on the right side of the graph. This example also
 shows turning off the line, points and legend.
 
@@ -766,7 +1103,9 @@ show:
   labels_secondary: true
 ```
 
-#### Custom styles for line graphs
+---
+
+### Custom styles for line graphs
 
 Set a custom line style globally for a whole card or per-entity:
 
@@ -790,7 +1129,9 @@ entities:
     line_style: 6,6
 ```
 
-#### Displaying static values
+---
+
+### Displaying static values
 
 Threshold line:
 
@@ -912,8 +1253,9 @@ show:
   labels_secondary: true
 ```
 
+---
 
-#### Custom baseline
+### Custom baseline
 
 Baseline is set to 0:
 
@@ -987,7 +1329,9 @@ show:
   labels: true
 ```
 
-#### Inverted Y-axis
+---
+
+### Inverted Y-axis
 
 Water level in a well: a 0 value means "well is full", a higher value - "well is depleted/empty":
 
@@ -1030,9 +1374,86 @@ show:
   graph: bar
 ```
 
+---
 
+### Opposing dual-axis graphs
 
-#### Grouping by date
+Linear graphs (a static line stands for a 0-baseline, only `max` & `zero` labels are shown):
+
+<img width="480" height="307" alt="image" src="https://github.com/user-attachments/assets/9e951595-f9bd-4aff-9047-bbc464039a9a" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.ac68u_download
+    state_adaptive_color: true
+  - entity: sensor.ac68u_upload
+    y_axis: secondary
+    show_state: true
+    state_adaptive_color: true
+  - static_value: 0
+    line_width: 1
+    line_style: 2,4
+    show_state: false
+    show_fill: false
+    show_legend: false
+    color: red
+    graph: line
+height: 200
+show:
+  name: false
+  icon: false
+  labels: true
+  labels_secondary: true
+baseline: 0
+y_axis:
+  zero_position: 0.75
+  primary:
+    labels: ['max','zero']
+  secondary:
+    invert: true
+    labels: ['max','zero']
+```
+
+A similar presentation with bar graphs (a "zero" label is added as a static line label):
+
+<img width="480" height="310" alt="image" src="https://github.com/user-attachments/assets/43f292ea-a645-4f44-98c8-0fd91c50328a" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.ac68u_download
+    state_adaptive_color: true
+  - entity: sensor.ac68u_upload
+    y_axis: secondary
+    show_state: true
+    state_adaptive_color: true
+  - static_value: 0
+    line_width: 1
+    line_style: 2,4
+    show_state: false
+    show_fill: false
+    show_legend: false
+    color: red
+    graph: line
+height: 200
+bar_spacing: -1
+static_value_label_offset: 10
+show:
+  graph: bar
+  static_value_labels: left
+  name: false
+  icon: false
+baseline: 0
+y_axis:
+  zero_position: 0.75
+  secondary:
+    invert: true
+```
+
+---
+
+### Grouping by date
 
 ![mini_energy_daily](https://user-images.githubusercontent.com/8268674/66688605-3ffc1e80-ec7f-11e9-872e-935870a542f3.png)
 
@@ -1050,7 +1471,9 @@ show:
   graph: bar
 ```
 
-#### Data aggregation functions
+---
+
+### Data aggregation functions
 You can decide how values are aggregated for points on graph. Example how to display min, max, avg temperature per day
 from last week.
 
@@ -1075,11 +1498,13 @@ hours_to_show: 168
 group_by: date
 ```
 
-#### Non-numeric sensor states
+---
+
+### Using `state_map`
+
+Show data coming from binary sensors:
 
 ![mini_binary_sensor](https://user-images.githubusercontent.com/8268674/66825779-e1ff5d80-ef42-11e9-89eb-673d2ada8d34.png)
-
-You can render non-numeric states by providing state_map config. For example this way you can show data coming from binary sensors.
 
 ```yaml
 type: custom:mini-graph-card
@@ -1107,8 +1532,29 @@ state_map:
     label: Detected
 ```
 
+Show a custom label for numeric values:
 
-#### Showing additional info on the card
+<img width="484" height="181" alt="image" src="https://github.com/user-attachments/assets/a9260a39-b4a1-423f-9ef5-649a4bdbcc0c" />
+
+```yaml
+type: custom:mini-graph-card
+entities:
+  - entity: sensor.xiaomi_cg_1_co2
+state_map:
+  keep_values: true
+  map:
+    - min: 650
+      max: 750
+      label: Warning - ${raw}
+show:
+  name: false
+  icon: false
+  labels: true
+```
+
+---
+
+### Showing additional info on the card
 
 ![изображение](https://user-images.githubusercontent.com/71872483/170584118-ef826b60-dce3-42ec-a005-0f467616cd37.png)
 
@@ -1139,11 +1585,13 @@ show:
 ```
 This method may be also used to add a calculated value with it's own `aggregate_func` option.
 
-#### Accessing attributes in complex structures
+---
+
+### Accessing attributes in complex structures
 
 When using the `attribute` option in the [entities object](#entities-object), you can access data in structured attributes, such as dictionaries and lists.
 
-##### Accessing dictionary attributes
+#### Accessing dictionary attributes
 Suppose you have data stored inside a *dictionary* attribute named `dict_attribute`
 ```yaml
 dict_attribute:
@@ -1161,7 +1609,7 @@ entities:
 ```
 ![image](https://github.com/ildar170975/mini-graph-card/assets/71872483/0549afd5-901e-4e86-a144-edc4cd207440)
 
-##### Accessing list attributes
+#### Accessing list attributes
 
 Suppose you have data stored inside a *list* attribute named `list_attribute`:
 ```yaml
@@ -1185,6 +1633,8 @@ entities:
     name: value_1 from first element of list attribute
 ```
 ![image](https://github.com/ildar170975/mini-graph-card/assets/71872483/eebd0cea-da93-4bf5-97a1-118edd2a9c5e)
+
+---
 
 ## Development
 
