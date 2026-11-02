@@ -253,6 +253,8 @@ const style = css`
     min-height: 0;
   }
   .graph__container {
+    /* a definite width: WebKit derives the width from a flexed height via aspect-ratio */
+    width: 100%;
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
