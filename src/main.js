@@ -2664,7 +2664,7 @@ export default class MiniGraphCard extends LitElement {
       : undefined;
     if (history && history.hours_to_show === this.config.hours_to_show) {
       // process a cached history
-      stateHistory = history.data;
+      stateHistory = history.data.map(item => ({ ...item }));
       isCacheConverted = history.state_map_converted === true;
 
       let currDataIndex = stateHistory.findIndex(item => new Date(item.last_changed) > start);
