@@ -45,13 +45,13 @@ describe("MiniGraphCard::_convertState()", () => {
     it('no mapping, convert to NaN', () => {
       const res = { state: 'cyan' };
       card._convertState(res, stateMapConfig);
-      expect(res.state).to.be.NaN;
+      expect(Number.isNaN(res.state)).toBe(true);
     });
 
     it('unavailable, no mapping, convert to NaN', () => {
       const res = { state: 'unavailable' };
       card._convertState(res, stateMapConfig);
-      expect(res.state).to.be.NaN;
+      expect(Number.isNaN(res.state)).toBe(true);
     });
 
     it('unavailable, use mapping', () => {
