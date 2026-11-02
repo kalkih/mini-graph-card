@@ -2617,6 +2617,9 @@ export default class MiniGraphCard extends LitElement {
    */
   async updateEntity(stateObj, index, start, end) {
     const entityConfig = this.config.entities[index];
+    // "overall" value is shown for this entity
+    const isStateOverall = (index === 0 || entityConfig.show_state)
+      && isOverallState(this.config.show.state);
 
     if ((!stateObj && !this._isStaticValue[index])
       // skip static values which are not queued
@@ -2624,7 +2627,8 @@ export default class MiniGraphCard extends LitElement {
       // skip entities which are not queued
       || (stateObj && !this.updateQueue.includes(`${stateObj.entity_id}-${index}`))
       // do not process a history if no graph is displayed
-      || entityConfig.show_graph === false
+      // unless "overall" value is displayed
+      || (entityConfig.show_graph === false && !isStateOverall)
     ) return;
 
     if (this._isStaticValue[index]) {
