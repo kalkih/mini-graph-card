@@ -133,7 +133,8 @@ Else, if you prefer the graphical editor, use the menu to add the resource:
       type: module
   ```
 
-*You may need to empty the browsers cache if you have problems loading the updated card.*
+> [!NOTE]
+> It is highly recommended to empty a browser's cache after updating the card to avoid possible issues with cached histories: by default, historical data for an entity are kept in a browser's cache for a better performance to reduce a number of queries to a HA server, and a structure of the cached history may be different in a newer version of the card causing glitches.
 
 ---
 
