@@ -7,7 +7,7 @@
 
 import { expect, describe, it } from 'vitest';
 import { isNumericEntity } from '../src/others';
-import { hass } from './hass';
+import { hass } from './common/hass';
 
 const VARIANTS: any[] = [
   {
