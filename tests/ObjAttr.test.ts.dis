@@ -1,0 +1,97 @@
+/**
+ * Tests for getObjectAttr(), isObjectAttr() functions.
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it } from 'vitest';
+import { getObjectAttr, isObjectAttr } from '../src/others';
+
+const OBJECT = {
+  abc: 123,
+  def: 'xyz xyz',
+  arr: [1, 2, 3],
+  arr_complex: [
+    {value_1: 1, value_2: 2},
+    {value_1: 3, value_2: 4},
+    {value_1: 5, value_2: 6},
+  ],
+  dict: {
+    ijk: 123,
+    lmn: 'zzz',
+  },
+};
+
+interface VariantType {
+  path: string;
+  expected: number | string | any;
+};
+
+const VARIANTS: VariantType[] = [
+  {
+    path: 'abc',
+    expected: OBJECT.abc,
+  },
+  {
+    path: 'def',
+    expected: OBJECT.def,
+  },
+  {
+    path: 'arr.1',
+    expected: OBJECT.arr[1],
+  },
+  {
+    path: 'arr_complex.2.value_2',
+    expected: OBJECT.arr_complex[2].value_2,
+  },
+  {
+    path: 'dict.lmn',
+    expected: OBJECT.dict.lmn,
+  },
+];
+
+describe("isObjectAttr", () => {
+  it('contains a dot separator', () => {
+    const result = isObjectAttr('x.y');
+    expect(result).toBe(true);
+  });
+  it('does not contain a dot separator', () => {
+    const result = isObjectAttr('xy');
+    expect(result).toBe(false);
+  });
+});
+
+describe("getObjectAttr", () => {
+  it('object = null', () => {
+    const result = getObjectAttr(null, 'abc');
+    expect(result).toBeUndefined();
+  });
+
+  it('object = undefined', () => {
+    const result = getObjectAttr(undefined, 'abc');
+    expect(result).toBeUndefined();
+  });
+
+  it('object = empty', () => {
+    const result = getObjectAttr({}, 'abc');
+    expect(result).toBeUndefined();
+  });
+
+  it('object does not contain the attr', () => {
+    const result = getObjectAttr(OBJECT, 'abcdef');
+    expect(result).toBeUndefined();
+  });
+
+  it('path is incorrect - middle part is wrong', () => {
+    const result = getObjectAttr(OBJECT, 'arr_complex.5.value_2');
+    expect(result).toBeUndefined();
+  });
+
+  VARIANTS.forEach((variant) => {
+    it(`${variant.path}`, () => {
+      const result = getObjectAttr(OBJECT, variant.path);
+      expect(result).toEqual(variant.expected);
+    });
+  });
+});
