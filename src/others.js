@@ -310,6 +310,26 @@ const parseOverallFuncName = (stateOption) => {
   return stateOption.substring(8);
 };
 
+/**
+* Returns an object attribute value
+* @returns {any} Value of an attribute/subattribute
+* @param obj stateObj.attributes
+* @param path Attribute defined as either a singular attribute or a tree-like path
+*/
+const getObjectAttr = (obj, path) => {
+  if (!obj) {
+    return;
+  }
+  return path.split('.').reduce((res, key) => res && res[key], obj);
+};
+
+/**
+* Check if an attribute path represents a nested object path (contains a dot separator)
+* @returns {boolean} True if a path contains a dot separator, false otherwise
+* @param {string} path Attribute defined as either a singular attribute or a tree-like path
+*/
+const isObjectAttr = path => path.includes('.');
+
 export {
   isString,
   isNumber,
@@ -323,4 +343,6 @@ export {
   getIntervalEndDate,
   parseOverallFuncName,
   isOverallState,
+  getObjectAttr,
+  isObjectAttr,
 };

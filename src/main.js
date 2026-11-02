@@ -31,6 +31,8 @@ import {
   getBoundsForCustomZeroPosition,
   parseOverallFuncName,
   isOverallState,
+  getObjectAttr,
+  isObjectAttr,
 } from './others';
 import {
   getMin, getAvg, getMax,
@@ -847,7 +849,7 @@ export default class MiniGraphCard extends LitElement {
     // process current attribute's value
     if (entityConfig.attribute) {
       // current attribute value
-      return this.getObjectAttr(stateObj.attributes, entityConfig.attribute);
+      return getObjectAttr(stateObj.attributes, entityConfig.attribute);
     }
     // process current state's value
     return stateObj.state;
@@ -1877,7 +1879,7 @@ export default class MiniGraphCard extends LitElement {
         } else {
           // retrieving a native unit
           const { attribute } = this.config.entities[index];
-          if (!attribute || !this.isObjectAttr(attribute)) {
+          if (!attribute || !isObjectAttr(attribute)) {
             // any cases except an object attribute
             let parts;
             if (attribute) {
@@ -2190,7 +2192,7 @@ export default class MiniGraphCard extends LitElement {
           );
         }
 
-        if (attribute && !this.isObjectAttr(attribute)) {
+        if (attribute && !isObjectAttr(attribute)) {
           // formatting not-object attribute
           const attrParts = this._hass.formatEntityAttributeValueToParts(
             stateObj,
@@ -2200,7 +2202,7 @@ export default class MiniGraphCard extends LitElement {
           const partValue = attrParts.find(part => part.type === 'value');
           const value = partValue && partValue.value;
           return value;
-        } else if (attribute && this.isObjectAttr(attribute)) {
+        } else if (attribute && isObjectAttr(attribute)) {
           // formatting object attribute - similar to Y-axis labels
           return formatNumber(
             state,
@@ -2251,7 +2253,7 @@ export default class MiniGraphCard extends LitElement {
     if (!entityId && this._isStaticValue[index]) {
       // processing static_value
       return { directOrder: true, delimiter: '' };
-    } else if (!attribute || !this.isObjectAttr(attribute)) {
+    } else if (!attribute || !isObjectAttr(attribute)) {
       // processing entity, any cases except an object attribute
       const stateObj = this._hass.states[entityId];
       if (!stateObj || isUnavailableState(stateObj.state)) {
@@ -2719,7 +2721,7 @@ export default class MiniGraphCard extends LitElement {
 
     // current value of state/attribute
     let currentValue = entityConfig.attribute
-      ? this.getObjectAttr(stateObj.attributes, entityConfig.attribute)
+      ? getObjectAttr(stateObj.attributes, entityConfig.attribute)
       : stateObj.state;
 
     // process state_map
@@ -2736,7 +2738,7 @@ export default class MiniGraphCard extends LitElement {
     // last value of state/attribute from history
     let lastHistoryValue = lastHistoryItem
       ? entityConfig.attribute && lastHistoryItem.attributes
-        ? this.getObjectAttr(lastHistoryItem.attributes, entityConfig.attribute)
+        ? getObjectAttr(lastHistoryItem.attributes, entityConfig.attribute)
         : lastHistoryItem.state
       : null;
     if (lastHistoryValue && isLastItemTakenFromCache
@@ -2780,7 +2782,7 @@ export default class MiniGraphCard extends LitElement {
         fetchedHistory[0].forEach((item) => {
           if (entityConfig.attribute) {
             // eslint-disable-next-line no-param-reassign
-            item.state = this.getObjectAttr(item.attributes, entityConfig.attribute);
+            item.state = getObjectAttr(item.attributes, entityConfig.attribute);
             // eslint-disable-next-line no-param-reassign
             delete item.attributes;
           }
