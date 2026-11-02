@@ -797,7 +797,8 @@ export default class MiniGraphCard extends LitElement {
   getEntityState(index) {
     const { config } = this;
     const entityConfig = config.entities[index];
-    const isStateLast = config.show.state === 'last';
+    const isStateLast = config.show.state === 'last'
+      && entityConfig.show_graph !== false; // graph cannot be hidden
     const isStateOverall = isOverallState(config.show.state);
 
     // process "overall" value
