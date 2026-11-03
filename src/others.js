@@ -330,6 +330,29 @@ const getObjectAttr = (obj, path) => {
 */
 const isObjectAttr = path => path.includes('.');
 
+/**
+* Convert a raw historic value using a state_map option
+* @param {object} res Record from a history
+* @param {object} stateMapConfig state_map config object
+* @returns {void}
+*/
+const convertStateByMap = (res, stateMapConfig) => {
+  const stateMapArray = stateMapConfig.map;
+  const keepValues = stateMapConfig.keep_values;
+  if (stateMapArray.length === 0 || keepValues === true) {
+    // the "stateMapArray.length === 0" check is only needed for tests
+    // comment when not debugging
+    return;
+  }
+  const stringState = String(res.state);
+  const resultIndex = stateMapArray.findIndex(s => s.value === stringState);
+  if (resultIndex !== -1) {
+    res.state = resultIndex;
+  } else {
+    res.state = NaN;
+  }
+};
+
 export {
   isString,
   isNumber,
@@ -345,4 +368,5 @@ export {
   isOverallState,
   getObjectAttr,
   isObjectAttr,
+  convertStateByMap,
 };
