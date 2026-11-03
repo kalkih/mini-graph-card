@@ -771,28 +771,6 @@ export default class MiniGraphCard extends LitElement {
     `;
   }
 
-  /**
-  * Returns an object attribute value
-  * @returns {any} Value of an attribute/subattribute
-  * @param obj stateObj.attributes
-  * @param path Attribute defined as either a singular attribute or a tree-like path
-  */
-  getObjectAttr(obj, path) {
-    if (!obj) {
-      return;
-    }
-    return path.split('.').reduce((res, key) => res && res[key], obj);
-  }
-
-  /**
-  * Check if an attribute path represents a nested object path (contains a dot separator)
-  * @returns {boolean} True if a path contains a dot separator, false otherwise
-  * @param {string} path Attribute defined as either a singular attribute or a tree-like path
-  */
-  isObjectAttr(path) {
-    return path.includes('.');
-  }
-
   /** Returns a state/attribute value or a static_value
   * @returns {any} value of a state/attribute or a static_value
   * @param {number} index Index of an entry in config.entities
