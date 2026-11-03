@@ -2717,7 +2717,7 @@ export default class MiniGraphCard extends LitElement {
     }
 
     // last value of state/attribute from history
-    let lastHistoryValue = lastHistoryItem
+    const lastHistoryValue = lastHistoryItem
       ? entityConfig.attribute && lastHistoryItem.attributes
         ? getObjectAttr(lastHistoryItem.attributes, entityConfig.attribute)
         : lastHistoryItem.state
