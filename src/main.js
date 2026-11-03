@@ -33,6 +33,7 @@ import {
   isOverallState,
   getObjectAttr,
   isObjectAttr,
+  convertStateByMap,
 } from './others';
 import {
   getMin, getAvg, getMax,
@@ -768,28 +769,6 @@ export default class MiniGraphCard extends LitElement {
         ${this.config.align_icon === 'state' ? this.renderIcon('state') : html``}
       </div>
     `;
-  }
-
-  /**
-  * Returns an object attribute value
-  * @returns {any} Value of an attribute/subattribute
-  * @param obj stateObj.attributes
-  * @param path Attribute defined as either a singular attribute or a tree-like path
-  */
-  getObjectAttr(obj, path) {
-    if (!obj) {
-      return;
-    }
-    return path.split('.').reduce((res, key) => res && res[key], obj);
-  }
-
-  /**
-  * Check if an attribute path represents a nested object path (contains a dot separator)
-  * @returns {boolean} True if a path contains a dot separator, false otherwise
-  * @param {string} path Attribute defined as either a singular attribute or a tree-like path
-  */
-  isObjectAttr(path) {
-    return path.includes('.');
   }
 
   /** Returns a state/attribute value or a static_value
@@ -2730,7 +2709,7 @@ export default class MiniGraphCard extends LitElement {
     const isStateMapStrictMode = stateMapConfig && stateMapConfig.keep_values !== true;
     if (isCacheConverted && isStateMapStrictMode) {
       const mock = { state: currentValue };
-      this._convertState(mock, stateMapConfig);
+      convertStateByMap(mock, stateMapConfig);
       // get a converted currentValue (index)
       currentValue = mock.state;
     }
@@ -2744,7 +2723,7 @@ export default class MiniGraphCard extends LitElement {
     if (lastHistoryValue && isLastItemTakenFromCache
       && isCacheConverted && isStateMapStrictMode) {
       const mock = { state: lastHistoryValue };
-      this._convertState(mock, stateMapConfig);
+      convertStateByMap(mock, stateMapConfig);
       // get a converted last value (index)
       lastHistoryValue = mock.state;
     }
@@ -2787,7 +2766,7 @@ export default class MiniGraphCard extends LitElement {
             delete item.attributes;
           }
           if (stateMapConfig && isStateMapStrictMode) {
-            this._convertState(item, stateMapConfig);
+            convertStateByMap(item, stateMapConfig);
           }
         });
       }
@@ -2864,29 +2843,6 @@ export default class MiniGraphCard extends LitElement {
         ...getMax(history, 'state'),
       }] : []),
     ];
-  }
-
-  /**
-  * Convert a raw historic value using a state_map option
-  * @param {object} res Record from a history
-  * @param {object} stateMapConfig state_map config object
-  * @returns {void}
-  */
-  _convertState(res, stateMapConfig) {
-    const stateMapArray = stateMapConfig.map;
-    const keepValues = stateMapConfig.keep_values;
-    if (stateMapArray.length === 0 || keepValues === true) {
-      // the "stateMapArray.length === 0" check is only needed for tests
-      // comment when not debugging
-      return;
-    }
-    const stringState = String(res.state);
-    const resultIndex = stateMapArray.findIndex(s => s.value === stringState);
-    if (resultIndex !== -1) {
-      res.state = resultIndex;
-    } else {
-      res.state = NaN;
-    }
   }
 
   /**
