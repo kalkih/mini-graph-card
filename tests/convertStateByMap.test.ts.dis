@@ -1,31 +1,17 @@
 /**
- * Tests for MiniGraphCard::_convertState().
+ * Tests for convertStateByMap().
  *
  * The file is disabled (renamed to *.dis) & thus is not used during a build process;
  * remove the "dis" extension to use it locally in your VSCode devcontainer.
  */
 
-// @vitest-environment jsdom
 import { expect, describe, it, beforeEach } from 'vitest';
-import MiniGraphCard from '../../src/main';
-import type { StateMapType } from '../types/stateMapTypes';
-import type { ConfigType } from '../types/configType';
+import { convertStateByMap } from '../src/others';
+import type { StateMapType } from './types/stateMapTypes';
 
-describe("MiniGraphCard::_convertState()", () => {
-  let card: MiniGraphCard;
-  let stateMapConfig: StateMapType;
-
-  beforeEach(() => {
-    card = new MiniGraphCard();
-    card.config = {
-      state_map: {
-        keep_values: false,
-        map: [],
-      }};
-    stateMapConfig = (card.config as ConfigType).state_map as StateMapType;
-  });
-
+describe("convertStateByMap()", () => {
   describe('keep_values=false/undefined', () => {
+    let stateMapConfig: StateMapType = {};
 
     beforeEach(() => {
       stateMapConfig.keep_values = false;
@@ -38,19 +24,19 @@ describe("MiniGraphCard::_convertState()", () => {
 
     it('convert to index', () => {
       const res = { state: 'green' };
-      card._convertState(res, stateMapConfig);
+      convertStateByMap(res, stateMapConfig);
       expect(res.state).toEqual(1);
     });
 
     it('no mapping, convert to NaN', () => {
       const res = { state: 'cyan' };
-      card._convertState(res, stateMapConfig);
+      convertStateByMap(res, stateMapConfig);
       expect(Number.isNaN(res.state)).toBe(true);
     });
 
     it('unavailable, no mapping, convert to NaN', () => {
       const res = { state: 'unavailable' };
-      card._convertState(res, stateMapConfig);
+      convertStateByMap(res, stateMapConfig);
       expect(Number.isNaN(res.state)).toBe(true);
     });
 
@@ -60,7 +46,7 @@ describe("MiniGraphCard::_convertState()", () => {
         {value: 'unavailable'},
       ];
       const res = { state: 'unavailable' };
-      card._convertState(res, stateMapConfig);
+      convertStateByMap(res, stateMapConfig);
       expect(res.state).toEqual(3);
     });
   });
@@ -68,6 +54,8 @@ describe("MiniGraphCard::_convertState()", () => {
   ///////////////////////////////////////////////////////////////////////////////////////
 
   describe('keep_values=true', () => {
+    let stateMapConfig: StateMapType = {};
+
     beforeEach(() => {
       stateMapConfig.keep_values = true;
       stateMapConfig.map = [
@@ -79,19 +67,19 @@ describe("MiniGraphCard::_convertState()", () => {
 
     it('use mapping', () => {
       const res = { state: '10' };
-      card._convertState(res, stateMapConfig);
+      convertStateByMap(res, stateMapConfig);
       expect(res.state).toEqual('10');
     });
 
     it('no mapping', () => {
       const res = { state: '9' };
-      card._convertState(res, stateMapConfig);
+      convertStateByMap(res, stateMapConfig);
       expect(res.state).toEqual('9');
     });
 
     it('unavailable, no mapping', () => {
       const res = { state: 'unavailable' };
-      card._convertState(res, stateMapConfig);
+      convertStateByMap(res, stateMapConfig);
       expect(res.state).toEqual('unavailable');
     });
   });
@@ -99,20 +87,22 @@ describe("MiniGraphCard::_convertState()", () => {
   ///////////////////////////////////////////////////////////////////////////////////////
 
   describe('others', () => {
+    let stateMapConfig: StateMapType = {};
+
     beforeEach(() => {
       stateMapConfig.map = [];
     });
 
     it('state_map.map is empty', () => {
       const res = { state: 'xxx' };
-      card._convertState(res, stateMapConfig);
+      convertStateByMap(res, stateMapConfig);
       expect(res.state).toEqual('xxx');
     });
 
     it('state_map.map is empty, keep_values=true', () => {
       stateMapConfig.keep_values = true;
       const res = { state: 'xxx' };
-      card._convertState(res, stateMapConfig);
+      convertStateByMap(res, stateMapConfig);
       expect(res.state).toEqual('xxx');
     });
   });
