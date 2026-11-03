@@ -331,7 +331,9 @@ const getObjectAttr = (obj, path) => {
 const isObjectAttr = path => path.includes('.');
 
 /**
-* Convert a raw historic value using a state_map option
+* Convert a raw historic value using a state_map option.
+* Strict mapping converts a raw value into an index.
+* Relaxed mapping keeps original data untouched
 * @param {object} res Record from a history
 * @param {object} stateMapConfig state_map config object
 * @returns {void}
