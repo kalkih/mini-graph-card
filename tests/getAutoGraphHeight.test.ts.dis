@@ -1,0 +1,70 @@
+/**
+ * Tests for getAutoGraphHeight().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it } from 'vitest';
+import { getAutoGraphHeight } from '../src/others';
+import { GRAPH_WIDTH } from '../src/const';
+
+const MIN_HEIGHT = 21;
+
+const VARIANTS: any[] = [
+  {
+    descr: 'container with the default 5:1 ratio',
+    size: [500, 100],
+    expected: 100,
+  },
+  {
+    descr: 'graph width is scaled to the SVG width',
+    size: [250, 100],
+    expected: 200,
+  },
+  {
+    descr: 'rounded to 0.1',
+    size: [244, 69.390625],
+    expected: 142.2,
+  },
+  {
+    descr: 'tall container',
+    size: [244, 500],
+    expected: 1024.6,
+  },
+  {
+    descr: 'clamped to the minimal height',
+    size: [244, 5],
+    expected: MIN_HEIGHT,
+  },
+  {
+    descr: 'not laid out: zero height',
+    size: [244, 0],
+    expected: undefined,
+  },
+  {
+    descr: 'not laid out: zero width',
+    size: [0, 100],
+    expected: undefined,
+  },
+  {
+    descr: 'not laid out: undefined size',
+    size: [undefined, undefined],
+    expected: undefined,
+  },
+];
+
+describe('getAutoGraphHeight()', () => {
+  VARIANTS.forEach((variant) => {
+    it(variant.descr, () => {
+      const [width, height] = variant.size;
+      expect(getAutoGraphHeight(width, height, MIN_HEIGHT)).toEqual(variant.expected);
+    });
+  });
+
+  it('keeps the container aspect ratio', () => {
+    const [width, height] = [312, 137];
+    const result = getAutoGraphHeight(width, height, MIN_HEIGHT);
+    expect(GRAPH_WIDTH / result).toBeCloseTo(width / height, 2);
+  });
+});

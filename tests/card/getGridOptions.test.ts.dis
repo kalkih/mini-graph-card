@@ -1,0 +1,98 @@
+/**
+ * Tests for MiniGraphCard::getGridOptions().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+// @vitest-environment jsdom
+import { expect, describe, it, beforeEach } from 'vitest';
+import MiniGraphCard from '../../src/main';
+import { DEFAULT_SHOW } from '../../src/const';
+
+const ONE_ENTITY = [{ entity: 'sensor.a' }];
+const TWO_ENTITIES = [{ entity: 'sensor.a' }, { entity: 'sensor.b' }];
+
+const VARIANTS: any[] = [
+  {
+    descr: 'default: header, state & graph',
+    show: {},
+    entities: ONE_ENTITY,
+    expected: { min_columns: 3, min_rows: 3 },
+  },
+  {
+    descr: 'no header',
+    show: { name: false, icon: false },
+    entities: ONE_ENTITY,
+    expected: { min_columns: 3, min_rows: 2 },
+  },
+  {
+    descr: 'icon only keeps the header row',
+    show: { name: false },
+    entities: ONE_ENTITY,
+    expected: { min_columns: 3, min_rows: 3 },
+  },
+  {
+    descr: 'graph only',
+    show: { name: false, icon: false, state: false },
+    entities: ONE_ENTITY,
+    expected: { min_columns: 3, min_rows: 1 },
+  },
+  {
+    descr: 'nothing shown',
+    show: { name: false, icon: false, state: false, graph: false },
+    entities: ONE_ENTITY,
+    expected: { min_columns: 3, min_rows: 1 },
+  },
+  {
+    descr: 'legend for 2 entities adds a row',
+    show: {},
+    entities: TWO_ENTITIES,
+    expected: { min_columns: 3, min_rows: 4 },
+  },
+  {
+    descr: 'legend disabled',
+    show: { legend: false },
+    entities: TWO_ENTITIES,
+    expected: { min_columns: 3, min_rows: 3 },
+  },
+  {
+    descr: 'legend hidden for all but 1 entity',
+    show: {},
+    entities: [{ entity: 'sensor.a' }, { entity: 'sensor.b', show_legend: false }],
+    expected: { min_columns: 3, min_rows: 3 },
+  },
+  {
+    descr: 'no legend without a graph',
+    show: { graph: false },
+    entities: TWO_ENTITIES,
+    expected: { min_columns: 3, min_rows: 2 },
+  },
+  {
+    descr: 'extrema add a row',
+    show: { extrema: true },
+    entities: ONE_ENTITY,
+    expected: { min_columns: 3, min_rows: 4 },
+  },
+  {
+    descr: 'extrema & average share a row',
+    show: { extrema: true, average: true },
+    entities: TWO_ENTITIES,
+    expected: { min_columns: 3, min_rows: 5 },
+  },
+];
+
+describe('MiniGraphCard::getGridOptions()', () => {
+  let card: MiniGraphCard;
+
+  beforeEach(() => {
+    card = new MiniGraphCard();
+  });
+
+  VARIANTS.forEach((variant) => {
+    it(variant.descr, () => {
+      card.config = { show: { ...DEFAULT_SHOW, ...variant.show }, entities: variant.entities };
+      expect(card.getGridOptions()).toEqual(variant.expected);
+    });
+  });
+});
