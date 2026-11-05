@@ -1,0 +1,80 @@
+/**
+ * Tests for convertCompressedHistory().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it } from 'vitest';
+import { convertCompressedHistory } from '../src/others';
+
+describe('convertCompressedHistory()', () => {
+  it('returns an empty array for a missing entity', () => {
+    expect(convertCompressedHistory(undefined)).toEqual([]);
+    expect(convertCompressedHistory(null)).toEqual([]);
+    expect(convertCompressedHistory({})).toEqual([]);
+  });
+
+  it('returns an empty array for an empty history', () => {
+    expect(convertCompressedHistory([])).toEqual([]);
+  });
+
+  it('converts a minimal response (no "lc", no "a")', () => {
+    const result = convertCompressedHistory([
+      { s: '20.5', lu: 1793593287.135 },
+      { s: 'unavailable', lu: 1793593300 },
+    ]);
+    expect(result).toEqual([
+      {
+        state: '20.5',
+        last_changed: '2026-11-02T04:21:27.135Z',
+        last_updated: '2026-11-02T04:21:27.135Z',
+      },
+      {
+        state: 'unavailable',
+        last_changed: '2026-11-02T04:21:40.000Z',
+        last_updated: '2026-11-02T04:21:40.000Z',
+      },
+    ]);
+    expect(result[0]).not.toHaveProperty('attributes');
+  });
+
+  it('uses "lc" for last_changed when present', () => {
+    const [result] = convertCompressedHistory([
+      { s: 'on', lc: 1793593200.5, lu: 1793593287.25 },
+    ]);
+    expect(result.last_changed).toBe('2026-11-02T04:20:00.500Z');
+    expect(result.last_updated).toBe('2026-11-02T04:21:27.250Z');
+  });
+
+  it('keeps attributes incl. nested ones', () => {
+    const attributes = { temperature: 21, forecast: { sub: 3, list: [1, 2] } };
+    const [result] = convertCompressedHistory([
+      { s: 'heat', a: attributes, lu: 1793593287 },
+    ]);
+    expect(result.attributes).toEqual(attributes);
+    expect(result.attributes.forecast.sub).toBe(3);
+  });
+
+  it('keeps empty attributes', () => {
+    const [result] = convertCompressedHistory([{ s: '1', a: {}, lu: 1793593287 }]);
+    expect(result.attributes).toEqual({});
+  });
+
+  it('matches REST timestamps (µs isoformat) at ms precision', () => {
+    // REST renders the same float timestamp with python's isoformat()
+    const rest = '2026-11-02T04:21:27.135123+00:00';
+    const [result] = convertCompressedHistory([{ s: '1', lu: 1793593287.135123 }]);
+    expect(new Date(result.last_changed).getTime()).toBe(new Date(rest).getTime());
+    expect(new Date(result.last_updated).getTime()).toBe(new Date(rest).getTime());
+  });
+
+  it('keeps the order of states', () => {
+    const result = convertCompressedHistory([
+      { s: '1', lu: 1793593201 },
+      { s: '2', lu: 1793593202 },
+      { s: '3', lu: 1793593203 },
+    ]);
+    expect(result.map(item => item.state)).toEqual(['1', '2', '3']);
+  });
+});

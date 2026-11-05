@@ -34,6 +34,7 @@ import {
   getObjectAttr,
   isObjectAttr,
   convertStateByMap,
+  convertCompressedHistory,
 } from './others';
 import {
   getMin, getAvg, getMax,
@@ -2817,14 +2818,19 @@ export default class MiniGraphCard extends LitElement {
   }
 
   async fetchRecent(entityId, start, end, skipInitialState, withAttributes) {
-    let url = 'history/period';
-    if (start) url += `/${start.toISOString()}`;
-    url += `?filter_entity_id=${entityId}`;
-    if (end) url += `&end_time=${end.toISOString()}`;
-    if (skipInitialState) url += '&skip_initial_state';
-    if (!withAttributes) url += '&minimal_response&no_attributes';
-    if (withAttributes) url += '&significant_changes_only=0';
-    return this._hass.callApi('GET', url);
+    // fetched via websocket (authenticated once per connection)
+    // instead of a REST request with a token per entity
+    const history = await this._hass.callWS({
+      type: 'history/history_during_period',
+      start_time: start.toISOString(),
+      end_time: end.toISOString(),
+      entity_ids: [entityId],
+      include_start_time_state: !skipInitialState,
+      significant_changes_only: !withAttributes,
+      minimal_response: !withAttributes,
+      no_attributes: !withAttributes,
+    });
+    return [convertCompressedHistory(history && history[entityId])];
   }
 
   updateExtrema(history) {

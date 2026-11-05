@@ -355,6 +355,31 @@ const convertStateByMap = (res, stateMapConfig) => {
   }
 };
 
+/**
+* Convert a history of a single entity received via the "history/history_during_period"
+* websocket command (compressed state format) into records of the same shape
+* as returned by the "history/period" REST API
+* @param {Array} states Compressed states: {s, lu, lc?, a?}
+* @returns {Array} History records: {state, last_changed, last_updated, attributes?}
+*/
+const convertCompressedHistory = (states) => {
+  if (!Array.isArray(states)) {
+    return [];
+  }
+  return states.map((item) => {
+    const res = {
+      state: item.s,
+      // "lc" (last_changed) is omitted if it equals "lu" (last_updated)
+      last_changed: new Date((item.lc || item.lu) * 1000).toISOString(),
+      last_updated: new Date(item.lu * 1000).toISOString(),
+    };
+    if (item.a) {
+      res.attributes = item.a;
+    }
+    return res;
+  });
+};
+
 export {
   isString,
   isNumber,
@@ -371,4 +396,5 @@ export {
   getObjectAttr,
   isObjectAttr,
   convertStateByMap,
+  convertCompressedHistory,
 };
