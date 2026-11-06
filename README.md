@@ -81,7 +81,7 @@ It is highly recommended to empty a browser's cache after updating the card to a
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=kalkih&repository=mini-graph-card)
 
 > [!NOTE]
-> Marketplace became available in HA 2026.11. If you are running a lower version of HA, use [HACS](https://hacs.xyz/) (Home Assistant Community Store).
+> Marketplace became available in HA 2026.11 as a part of Home Assistance. If you are running a lower version of HA, use [HACS](https://hacs.xyz/) (Home Assistant Community Store).
 
 
 ### Manual install
