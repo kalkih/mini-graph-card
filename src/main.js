@@ -1441,9 +1441,10 @@ export default class MiniGraphCard extends LitElement {
       const oneMinute = group_by !== 'interval' ? 60000 : 0;
 
       const now = this.getIntervalEndDate();
-      // current time (not mutated)
+
+      // current time (not aligned to an interval)
       // needed to show a time with a yesterday's date if hours_to_show>=24
-      const nowPersistent = new Date(now.getTime());
+      const nowExact = this.getIntervalEndDate(true);
 
       now.setMilliseconds(now.getMilliseconds() - oneMinute - interval * count);
       end = formatDateTime(
@@ -1453,7 +1454,7 @@ export default class MiniGraphCard extends LitElement {
         this._datetimeFormatDateOptions,
         this._datetimeFormatTimeOptions,
         this._hass,
-        nowPersistent,
+        nowExact,
       );
 
       const smoothingType = this._graphSmoothing[entityIndex];
@@ -1469,7 +1470,7 @@ export default class MiniGraphCard extends LitElement {
           this._datetimeFormatDateOptions,
           this._datetimeFormatTimeOptions,
           this._hass,
-          nowPersistent,
+          nowExact,
         );
       }
     }
@@ -2864,10 +2865,14 @@ export default class MiniGraphCard extends LitElement {
 
   /**
   * Get a datetime of the interval's end
+  * @param {boolean} [doNotAlign=false] If true - returns time without interval alignment
   * @returns {Date} Datetime of the interval's end
   */
-  getIntervalEndDate() {
-    return getIntervalEndDate(new Date(), this.config.group_by);
+  getIntervalEndDate(doNotAlign = false) {
+    const groupBy = doNotAlign
+      ? 'interval'
+      : this.config.group_by;
+    return getIntervalEndDate(new Date(), groupBy);
   }
 
   getCardSize() {
