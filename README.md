@@ -8,7 +8,7 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
 ## Table of Contents:
 
    * [Install](#install)
-      + [HACS (recommended)](#hacs-recommended)
+      + [Marketplace, former HACS (recommended)](#marketplace-former-hacs-recommended)
       + [Manual install](#manual-install)
       + [CLI install](#cli-install)
       + [Add resource reference](#add-resource-reference)
@@ -72,13 +72,15 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
 
 ## Install
 
-### HACS (recommended)
+### Marketplace, former HACS (recommended)
 
-This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community Store).
-
-<small>*HACS is a third party community store and is not included in Home Assistant out of the box.*</small>
+This card is available in HA Marketplace.
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=kalkih&repository=mini-graph-card)
+
+> [!NOTE]
+> Marketplace became available in HA 2026.11 as a part of Home Assistance. If you are running a lower version of HA, use [HACS](https://hacs.xyz/) (Home Assistant Community Store).
+
 
 ### Manual install
 
@@ -97,11 +99,11 @@ This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community St
   $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.13.0/mini-graph-card-bundle.js
   ```
 
-3. Add the resource reference as decribed below.
+3. Add the resource reference as described below.
 
 ### Add resource reference
 
-Note: If you install the card via HACS, you do not need to add the resource reference manually; HACS handles this automatically during the installation process.
+Note: If you install the card via HA Marketplace (former HACS), you do not need to add the resource reference manually; Marketplace handles this automatically during the installation process.
 
 If you configure Lovelace via YAML, add a reference to `mini-graph-card-bundle.js` inside your `configuration.yaml`:
 
