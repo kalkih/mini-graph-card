@@ -2685,6 +2685,7 @@ export default class MiniGraphCard extends LitElement {
     }
 
     // check if the latest point corresponds to the current state
+    // for that, take the last history item
     let isLastItemTakenFromCache = false;
     let lastHistoryItem;
     if (fetchedHistory[0].length > 0) {
@@ -2703,30 +2704,24 @@ export default class MiniGraphCard extends LitElement {
       ? getObjectAttr(stateObj.attributes, entityConfig.attribute)
       : stateObj.state;
 
-    // process state_map
-    // null if state_map is undefined or has an empty map array
+    // cached history may contain mapped values (indexes),
+    // to compare a current value with an index, we need to process state_map.
+    // note: stateMapConfig is null if state_map is undefined or has an empty map array
     const stateMapConfig = this._entityStateMap[index];
     const isStateMapStrictMode = stateMapConfig && stateMapConfig.keep_values !== true;
-    if (isCacheConverted && isStateMapStrictMode) {
+    if (isLastItemTakenFromCache && isCacheConverted && isStateMapStrictMode) {
+      // need to convert before comparing
       const mock = { state: currentValue };
       convertStateByMap(mock, stateMapConfig);
-      // get a converted currentValue (index)
-      currentValue = mock.state;
+      currentValue = mock.state; // currentValue is an index now
     }
 
     // last value of state/attribute from history
-    let lastHistoryValue = lastHistoryItem
+    const lastHistoryValue = lastHistoryItem
       ? entityConfig.attribute && lastHistoryItem.attributes
         ? getObjectAttr(lastHistoryItem.attributes, entityConfig.attribute)
         : lastHistoryItem.state
       : null;
-    if (lastHistoryValue && isLastItemTakenFromCache
-      && isCacheConverted && isStateMapStrictMode) {
-      const mock = { state: lastHistoryValue };
-      convertStateByMap(mock, stateMapConfig);
-      // get a converted last value (index)
-      lastHistoryValue = mock.state;
-    }
 
     // if the latest record from the history does not correspond to the current state/attribute
     // - add the current state/attribute to the history
