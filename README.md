@@ -76,8 +76,6 @@ The card works with entities from within the **sensor** & **binary_sensor** doma
 
 This card is available in HA Marketplace.
 
-It is highly recommended to empty a browser's cache after updating the card to avoid possible issues with cached histories: by default, historical data for an entity are kept in a browser's cache for a better performance to reduce a number of queries to a HA server, and a structure of the cached history may be different in a newer version of the card causing glitches.
-
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=kalkih&repository=mini-graph-card)
 
 > [!NOTE]
