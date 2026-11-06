@@ -169,7 +169,6 @@ export default (config) => {
     line_width: DEFAULT_MARGIN,
     bar_spacing: DEFAULT_BAR_SPACING,
     compress: false,
-    smoothing: true,
     cache: true,
     tap_action: {
       action: 'more-info',
