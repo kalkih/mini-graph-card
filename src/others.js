@@ -308,7 +308,7 @@ const isOverallState = (stateOption) => {
 };
 
 /**
- * Parses the 'show.state' option to determine a method for 'overall' calculation
+ * Parse the 'show.state' option to determine a method for 'overall' calculation
  * @param {string} stateOption config.show.state option value
  * @returns {string|undefined} Aggregate function name
  */
@@ -320,7 +320,7 @@ const parseOverallFuncName = (stateOption) => {
 };
 
 /**
-* Returns an object attribute value
+* Return an object attribute value
 * @returns {any} Value of an attribute/subattribute
 * @param obj stateObj.attributes
 * @param path Attribute defined as either a singular attribute or a tree-like path
