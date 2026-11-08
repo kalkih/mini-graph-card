@@ -1,0 +1,356 @@
+/**
+ * Tests for alignFetchedWithCurrent() function.
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it } from 'vitest';
+import { alignFetchedWithCurrent } from '../../src/history';
+import { STATE_OBJ_NUMERIC, STATE_OBJ_STRING } from '../common/stateObj';
+import {
+  STATE_MAP_NUMERIC_RELAXED,
+  STATE_MAP_NUMERIC_STRICT,
+  STATE_MAP_STRINGS_STRICT,
+} from '../common/stateMap';
+import type { HistoryItemType } from '../common/history';
+import { sortHistoryByDate } from '../common/utils';
+
+const DATA_NUMERIC_CACHED: HistoryItemType[] = [
+  { state: "50.0", last_changed: "2026-11-01T10:00:00.000Z" },
+  { state: "60.0", last_changed: "2026-11-01T10:05:00.000Z" },
+  { state: "70.0", last_changed: "2026-11-01T10:10:00.000Z" },
+  { state: "80.0", last_changed: "2026-11-01T10:15:00.000Z" },
+];
+
+const DATA_NUMERIC_FETCHED: HistoryItemType[] = [
+  { state: "51.0", last_changed: "2026-11-01T11:00:00.000Z" },
+  { state: "61.0", last_changed: "2026-11-01T11:05:00.000Z" },
+  { state: "71.0", last_changed: "2026-11-01T11:10:00.000Z" },
+  { state: "81.0", last_changed: "2026-11-01T11:15:00.000Z" },
+];
+
+const DATA_STRINGS_CACHED: HistoryItemType[] = [
+  { state: "off", last_changed: "2026-11-01T10:00:00.000Z" },
+  { state: "on", last_changed: "2026-11-01T10:05:00.000Z" },
+  { state: "off", last_changed: "2026-11-01T10:10:00.000Z" },
+  { state: "on", last_changed: "2026-11-01T10:15:00.000Z" },
+];
+
+const DATA_STRINGS_FETCHED: HistoryItemType[] = [
+  { state: "off", last_changed: "2026-11-01T11:00:00.000Z" },
+  { state: "on", last_changed: "2026-11-01T11:05:00.000Z" },
+  { state: "off", last_changed: "2026-11-01T11:10:00.000Z" },
+  { state: "on", last_changed: "2026-11-01T11:15:00.000Z" },
+];
+
+const DATA_JUNK_CACHED: HistoryItemType[] = [
+  { state: NaN, last_changed: "2026-11-01T10:01:00.000Z" },
+  { state: NaN, last_changed: "2026-11-01T10:06:00.000Z" },
+  { state: NaN, last_changed: "2026-11-01T10:11:00.000Z" },
+  { state: NaN, last_changed: "2026-11-01T10:16:00.000Z" },
+];
+
+const DATA_JUNK_FETCHED: HistoryItemType[] = [
+  { state: undefined, last_changed: "2026-11-01T11:01:00.000Z" },
+  { state: NaN, last_changed: "2026-11-01T11:06:00.000Z" },
+  { state: "unavailable", last_changed: "2026-11-01T11:11:00.000Z" },
+  { state: "unknown", last_changed: "2026-11-01T11:16:00.000Z" },
+];
+
+const DATA_ALL_NUMERIC_FETCHED: HistoryItemType[] = sortHistoryByDate([...DATA_NUMERIC_FETCHED, ...DATA_JUNK_FETCHED]);
+const DATA_ALL_NUMERIC_CACHED: HistoryItemType[] = sortHistoryByDate([...DATA_NUMERIC_CACHED, ...DATA_JUNK_CACHED]);
+const DATA_ALL_STRINGS_FETCHED: HistoryItemType[] = sortHistoryByDate([...DATA_STRINGS_FETCHED, ...DATA_JUNK_FETCHED]);
+const DATA_ALL_STRINGS_CACHED: HistoryItemType[] = sortHistoryByDate([...DATA_STRINGS_CACHED, ...DATA_JUNK_CACHED]);
+
+const CACHED_HISTORY_NUMERIC: HistoryItemType[] = DATA_ALL_NUMERIC_CACHED;
+const CACHED_HISTORY_STRINGS: HistoryItemType[] = DATA_ALL_STRINGS_CACHED;
+
+const FETCHED_HISTORY_NUMERIC: HistoryItemType[] = DATA_ALL_NUMERIC_FETCHED;
+const FETCHED_HISTORY_STRINGS: HistoryItemType[] = DATA_ALL_STRINGS_FETCHED;
+
+const STATE_OBJ_COMMON = {
+  last_changed: "2026-11-01T12:00:00.000Z",
+  last_updated: "2026-11-01T12:01:00.000Z",
+  attributes: {
+    abc: 456,
+    status: 'on',
+  },
+};
+
+const getStateObj = (
+  typeOfDataIndex: number,
+  entityStatusIndex: number,
+  attributeIndex: number,
+) => structuredClone(
+  entityStatusIndex === 0
+    ? typeOfDataIndex === 0
+      ? STATE_OBJ_NUMERIC
+      : STATE_OBJ_STRING
+    : /*entityStatusIndex === 1
+      ? */attributeIndex === 0
+        ? typeOfDataIndex === 0
+          ? { ...STATE_OBJ_NUMERIC, state: 'unavailable' }
+          : { ...STATE_OBJ_STRING, state: 'unavailable' }
+        : typeOfDataIndex === 0
+          ? { ...STATE_OBJ_NUMERIC, attributes: {} }
+          : { ...STATE_OBJ_STRING, attributes: {} }
+      /*: undefined*/
+);
+
+const getAttribute = (attributeIndex: number) => attributeIndex === 0
+  ? undefined
+  : 'abc';
+
+describe('alignFetchedWithCurrent()', () => {
+  for (let typeOfDataIndex = 0; typeOfDataIndex < 2; typeOfDataIndex += 1) {
+    // 0 - numbers, 1 - strings
+    const typeOfDataDescr = typeOfDataIndex === 0
+      ? 'numbers'
+      : 'strings';
+
+    describe(`state/attribute values are ${typeOfDataDescr}`, () => {
+      for (let stateMapIndex = 0; stateMapIndex < 3; stateMapIndex += 1) {
+        // 0 - state_map undefined, 1 - state_map relaxed, 2 - state_map strict
+        if (stateMapIndex === 1 && typeOfDataIndex === 1) {
+          continue; // no relaxed mapping for strings
+        }
+        const stateMapConfig = stateMapIndex === 0
+          ? undefined
+          : typeOfDataIndex === 0
+            ? stateMapIndex === 1
+              ? { ...STATE_MAP_NUMERIC_RELAXED }
+              : { ...STATE_MAP_NUMERIC_STRICT }
+            : { ...STATE_MAP_STRINGS_STRICT };
+        const isStateMapStrictMode = stateMapIndex === 2
+          ? true
+          : false;
+        const stateMapDescr = stateMapIndex === 0
+          ? 'no state_map'
+          : stateMapIndex === 1
+            ? 'state_map relaxed'
+            : 'state_map strict';
+        const isStrictStateMap = stateMapIndex === 2;
+
+        describe(stateMapDescr, () => {
+          for (let isCacheConvertedIndex = 0; isCacheConvertedIndex < 2; isCacheConvertedIndex += 1) {
+            // 0 - isCacheConvertedIndex=false, 1 - isCacheConvertedIndex=true
+            const isCacheConverted = isCacheConvertedIndex === 0
+              ? false
+              : true;
+
+            describe(`isCacheConverted = ${isCacheConverted}`, () => {
+              for (let attributeIndex = 0; attributeIndex < 2; attributeIndex += 1) {
+                // 0 - state is considered,
+                // 1 - attribute is considered
+                const attributeDescr = attributeIndex === 0
+                  ? 'state'
+                  : 'attribute';
+
+                describe(attributeDescr, () => {
+                  for (let entityStatusIndex = 0; entityStatusIndex < 2 /* 3 */; entityStatusIndex += 1) {
+                    // 0 - state/attribute is normal,
+                    // 1 - state=unavailable, attribute=undefined,
+                    // 2 - stateObj=undefined /// ?????? not implemented yet
+                    const entityStatusDescr = entityStatusIndex === 0
+                      ? 'normal value'
+                      : entityStatusIndex === 1
+                        ? attributeIndex === 0
+                          ? 'state = unavailable'
+                          : 'attribute = undefined'
+                        : 'stateObj = undefined';
+                    describe(entityStatusDescr, () => {
+                      describe('fetchedPoints is empty', () => {
+                        it(`cached history is empty -> add a current state to the fetched history`, () => {
+                          const fetchedPoints: HistoryItemType[] = [];
+                          const cachedHistory: HistoryItemType[] = [];
+                          const stateObj = getStateObj(typeOfDataIndex, entityStatusIndex, attributeIndex);
+                          const refStateObj = structuredClone(stateObj);
+                          const attribute = getAttribute(attributeIndex);
+                          ///////
+                          const fetchedPointsOldSize = fetchedPoints.length;
+                          const cachedHistoryOldSize = cachedHistory.length;
+                          ///////
+                          alignFetchedWithCurrent(
+                            fetchedPoints, cachedHistory,
+                            stateObj, attribute,
+                            stateMapConfig, isStateMapStrictMode,
+                            isCacheConverted,
+                          );
+                          ///////
+                          expect(fetchedPointsOldSize).toEqual(0);
+                          const fetchedPointsNewSize = fetchedPoints.length;
+                          expect(fetchedPointsNewSize).toEqual(1);
+                          ///////
+                          const cachedHistorySize = 0;
+                          expect(cachedHistoryOldSize).toEqual(cachedHistorySize);
+                          const cachedHistoryNewSize = cachedHistory.length;
+                          expect(cachedHistoryNewSize).toEqual(cachedHistorySize);
+                          ///////
+                          const lastRecord = fetchedPoints[fetchedPoints.length - 1];
+                          expect((lastRecord as HistoryItemType).state).toEqual(refStateObj.state);
+                          expect((lastRecord as HistoryItemType).last_changed).toEqual(refStateObj.last_changed);
+                        });
+
+                        describe('cached history is not empty', () => {
+                          for (let addCurrentIndex = 0; addCurrentIndex < 2; addCurrentIndex += 1) {
+                            // 0 - add a curr. state, 1 - do not add
+                            const addCurrentDescr = addCurrentIndex === 0
+                              ? 'Add'
+                              : 'Do not add';
+
+                            describe(`${addCurrentDescr} a current state to the fetched history`, () => {
+                              for (let lastValueIsMappedIndex = 0; lastValueIsMappedIndex < 2; lastValueIsMappedIndex += 1) {
+                                // 0 - last historical record contains a raw value,
+                                // 1 - last historical record contains an index which can be successfully converted to a raw value (or NaN)
+                                const lastValueIsMappedDescr = lastValueIsMappedIndex === 0
+                                  ? 'last hist. record = raw value'
+                                  : 'last hist. record = index which can be successfully converted to a raw value';
+
+                                it(lastValueIsMappedDescr, () => {
+                                  const fetchedPoints: HistoryItemType[] = [];
+                                  let cachedHistory: HistoryItemType[] = structuredClone(
+                                    typeOfDataIndex === 0
+                                      ? CACHED_HISTORY_NUMERIC
+                                      : CACHED_HISTORY_STRINGS
+                                  );
+                                  const stateObj = getStateObj(typeOfDataIndex, entityStatusIndex, attributeIndex);
+                                  const refStateObj = structuredClone(stateObj);
+                                  if (addCurrentIndex === 1) {
+                                    if (lastValueIsMappedIndex === 0) {
+                                      cachedHistory = [
+                                        ...cachedHistory,
+                                        ...[refStateObj],
+                                      ];
+                                    } else {
+                                      if (entityStatusIndex === 0) {
+                                        if (attributeIndex === 0) {
+                                          cachedHistory = [...cachedHistory, ...[{
+                                            // manually adding a new record containing an index=1
+                                            state: 1, // index=1 for values "55" & 'on'
+                                            last_changed: refStateObj.last_changed,
+                                          }]];
+                                        } else {
+                                          cachedHistory = [...cachedHistory, ...[{
+                                            // manually adding a new record containing an index=2
+                                            state: 2, // index=2 for value "456" (both for numbers & strings)
+                                            last_changed: refStateObj.last_changed,
+                                          }]];
+                                        }
+                                      } else /* if (entityStatusIndex === 1) */ { // ?????
+                                        cachedHistory = [...cachedHistory, ...[{
+                                          state: NaN, // for state=unavaialble, attr=undefined
+                                          last_changed: refStateObj.last_changed,
+                                        }]];
+                                      }
+                                    }
+                                  }
+                                  const attribute = getAttribute(attributeIndex);
+                                  ///////
+                                  const fetchedPointsOldSize = fetchedPoints.length;
+                                  const cachedHistoryOldSize = cachedHistory.length;
+                                  ///////
+                                  alignFetchedWithCurrent(
+                                    fetchedPoints, cachedHistory,
+                                    stateObj, attribute,
+                                    stateMapConfig, isStateMapStrictMode,
+                                    isCacheConverted,
+                                  );
+                                  ///////
+                                  expect(fetchedPointsOldSize).toEqual(0);
+                                  const fetchedPointsNewSize = fetchedPoints.length;
+                                  expect(fetchedPointsNewSize).toEqual(addCurrentIndex === 0
+                                    ? 1
+                                    : lastValueIsMappedIndex === 0
+                                      ? isStrictStateMap && isCacheConverted
+                                        ? 1 // last historical value (which is a raw value) is not same as a mapped current value
+                                        : 0
+                                      : isStrictStateMap && isCacheConverted
+                                        ? entityStatusIndex === 1 && addCurrentIndex === 1 && lastValueIsMappedIndex === 1
+                                          ? 1 // last historical value = NaN
+                                          : 0 // last historical value (which is an index) = mapped current value
+                                        : 1);
+                                  ///////
+                                  const cachedHistorySize = addCurrentIndex === 0
+                                    ? 8
+                                    : 9;
+                                  expect(cachedHistoryOldSize).toEqual(cachedHistorySize);
+                                  const cachedHistoryNewSize = cachedHistory.length;
+                                  expect(cachedHistoryNewSize).toEqual(cachedHistorySize);
+                                  ///////
+                                  if (addCurrentIndex === 0
+                                    || (entityStatusIndex === 1 && addCurrentIndex === 1 && lastValueIsMappedIndex === 1)
+                                  ) {
+                                    const lastRecord = fetchedPoints[fetchedPoints.length - 1];
+                                    expect((lastRecord as HistoryItemType).state).toEqual(refStateObj.state);
+                                    expect((lastRecord as HistoryItemType).last_changed).toEqual(refStateObj.last_changed);
+                                  }
+                                });
+                              }
+                            });
+                          }
+                        });
+                      });
+
+                      describe('fetchedPoints is not empty', () => {
+                        for (let addCurrentIndex = 0; addCurrentIndex < 2; addCurrentIndex += 1) {
+                          // 0 - add a curr. state, 1 - do not add
+                          const addCurrentDescr = addCurrentIndex === 0
+                            ? 'Add'
+                            : 'Do not add';
+
+                          it(`${addCurrentDescr} a current state to the fetched history`, () => {
+                            const stateObj = getStateObj(typeOfDataIndex, entityStatusIndex, attributeIndex);
+                            const refStateObj = structuredClone(stateObj);
+                            let fetchedPoints = structuredClone(
+                              typeOfDataIndex === 0
+                                ? FETCHED_HISTORY_NUMERIC
+                                : FETCHED_HISTORY_STRINGS
+                            );
+                            if (addCurrentIndex === 1) {
+                              fetchedPoints = [
+                                ...fetchedPoints,
+                                ...[refStateObj],
+                              ];
+                            }
+                            const cachedHistory: HistoryItemType[] = [];
+                            const attribute = getAttribute(attributeIndex);
+                            ///////
+                            const fetchedPointsOldSize = fetchedPoints.length;
+                            const cachedHistoryOldSize = cachedHistory.length;
+                            ///////
+                            alignFetchedWithCurrent(
+                              fetchedPoints, cachedHistory,
+                              stateObj, attribute,
+                              stateMapConfig, isStateMapStrictMode,
+                              isCacheConverted,
+                            );
+                            ///////
+                            expect(fetchedPointsOldSize).toEqual(addCurrentIndex === 0
+                                ? 8
+                                : 9);
+                            const fetchedPointsNewSize = fetchedPoints.length;
+                            expect(fetchedPointsNewSize).toEqual(9);
+                            ///////
+                            const cachedHistorySize = 0;
+                            expect(cachedHistoryOldSize).toEqual(cachedHistorySize);
+                            const cachedHistoryNewSize = cachedHistory.length;
+                            expect(cachedHistoryNewSize).toEqual(cachedHistorySize);
+                            ///////
+                            const lastRecord = fetchedPoints[fetchedPoints.length - 1];
+                            expect(lastRecord.state).toEqual(refStateObj.state);
+                            expect(lastRecord.last_changed).toEqual(refStateObj.last_changed);
+                          });
+                        }
+                      });
+                    });
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+  }
+});
