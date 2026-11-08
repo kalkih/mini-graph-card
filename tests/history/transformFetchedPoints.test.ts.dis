@@ -1,0 +1,198 @@
+/**
+ * Tests for transformFetchedPoints() function.
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it } from 'vitest';
+import { transformFetchedPoints } from '../../src/history';
+import type { HistoryItemType } from '../common/history';
+import {
+  HISTORY_JUNK,
+  HISTORY_ALL_NUMERIC,
+  HISTORY_ALL_STRINGS,
+  getNumbersCountInHistory,
+  getNansCountInHistory,
+} from '../common/history';
+import {
+  STATE_MAP_NUMERIC_RELAXED,
+  STATE_MAP_NUMERIC_STRICT,
+  STATE_MAP_STRINGS_STRICT,
+} from '../common/stateMap';
+import type { StateMapType } from '../types/stateMapTypes';
+
+const getHistoryArrayLength = (
+  attribute: string|undefined,
+  skipInitialState: boolean,
+  fetchedPointsArray: HistoryItemType[],
+) => attribute && skipInitialState
+  ? fetchedPointsArray.length - 1
+  : fetchedPointsArray.length;
+
+describe('transformFetchedPoints()', () => {
+
+  for (let typeOfDataIndex = 0; typeOfDataIndex < 2; typeOfDataIndex += 1) {
+    // 0 - numbers, 1 - strings
+    const typeOfDataDescr = typeOfDataIndex === 0
+      ? 'numbers'
+      : 'strings';
+
+    describe(typeOfDataDescr, () => {
+      for (let attributeIndex = 0; attributeIndex < 2; attributeIndex += 1) {
+        // 0 - state, 1- atttribute
+        const attribute = attributeIndex === 0
+          ? undefined
+          : 'xyz'
+        const attributeDescr = attributeIndex === 0
+          ? 'state'
+          : 'attribute';
+
+        describe(attributeDescr, () => {
+          for (let stateMapIndex = 0; stateMapIndex < 3; stateMapIndex += 1) {
+            // 0 - state_map undefined, 1 - state_map relaxed, 2 - state_map strict
+            if (stateMapIndex === 1 && typeOfDataIndex === 1) {
+              continue; // no relaxed mapping for strings
+            }
+            const stateMapConfig = stateMapIndex === 0
+              ? undefined
+              : typeOfDataIndex === 0
+                ? stateMapIndex === 1
+                  ? { ...STATE_MAP_NUMERIC_RELAXED }
+                  : { ...STATE_MAP_NUMERIC_STRICT }
+                : { ...STATE_MAP_STRINGS_STRICT };
+            const isStateMapStrictMode = stateMapIndex === 2
+              ? true
+              : false;
+            const stateMapDescr = stateMapIndex === 0
+              ? 'no state_map'
+              : stateMapIndex === 1
+                ? 'state_map relaxed'
+                : 'state_map strict';
+            const isStrictStateMap = stateMapIndex === 2;
+
+            describe(stateMapDescr, () => {
+              for (let skipInitialStateIndex = 0; skipInitialStateIndex < 2; skipInitialStateIndex += 1) {
+                // skipInitialState: 0 - false, 1- true
+                const skipInitialState = !(skipInitialStateIndex === 0);
+                const skipInitialStateDescr = `skipInitialState = ${skipInitialState}`;
+
+                describe(skipInitialStateDescr, () => {
+                  let fetchedPoints;
+
+                  it('fetchedPoints is empty', () => {
+                    fetchedPoints = [] as Array<object>;
+                    const formattedPoints: HistoryItemType[] = transformFetchedPoints(
+                      fetchedPoints,
+                      attribute,
+                      stateMapConfig,
+                      isStateMapStrictMode,
+                      skipInitialState,
+                    );
+                    expect(formattedPoints.length === 0).toBe(true);
+                  });
+
+                  /////////////////////////////////////////////////////////////////////////
+
+                  it('fetchedPoints only contains junk', () => {
+                    fetchedPoints = structuredClone(HISTORY_JUNK);
+                    const historyArrayLength = getHistoryArrayLength(
+                      attribute,
+                      skipInitialState,
+                      fetchedPoints,
+                    );
+                    let testStateMapConfig = stateMapConfig
+                      ? structuredClone(stateMapConfig)
+                      : undefined;
+                    if (isStateMapStrictMode) {
+                      if (attribute) {
+                        // adding a value with a mapping in state_map
+                        (testStateMapConfig! as StateMapType).map!.push({ value: 17 });
+                      }
+                    }
+                    const formattedPoints: HistoryItemType[] = transformFetchedPoints(
+                      fetchedPoints,
+                      attribute,
+                      testStateMapConfig,
+                      isStateMapStrictMode,
+                      skipInitialState,
+                    );
+                    expect(formattedPoints.length).toBe(historyArrayLength);
+                    const expectedNumbersCount = !attribute
+                      ? 0
+                      : !isStrictStateMap
+                        ? historyArrayLength - 1 // 7 - 1 undefined
+                        : 3; // 3 (passed through state_map)
+                    expect(getNumbersCountInHistory(formattedPoints)).toEqual(expectedNumbersCount);
+                    const expectedNansCount = !attribute
+                      ? historyArrayLength // 8
+                      : !isStrictStateMap
+                        ? 1 // 1 undefined
+                        : historyArrayLength - 3; // total - 3 (passed through state_map)
+                    expect(getNansCountInHistory(formattedPoints)).toEqual(expectedNansCount);
+                  });
+
+                  /////////////////////////////////////////////////////////////////////////
+
+                  it('fetchedPoints contains data & junk', () => {
+                    fetchedPoints = typeOfDataIndex === 0
+                      ? structuredClone(HISTORY_ALL_NUMERIC)
+                      : structuredClone(HISTORY_ALL_STRINGS);
+                    const historyArrayLength = getHistoryArrayLength(
+                      attribute,
+                      skipInitialState,
+                      fetchedPoints,
+                    );
+                    let testStateMapConfig = stateMapConfig
+                      ? structuredClone(stateMapConfig)
+                      : undefined;
+                    if (isStateMapStrictMode) {
+                      // adding a value with a mapping in state_map
+                      if (!attribute) {
+                        (testStateMapConfig! as StateMapType).map!.push({ value: '45.2' });
+                      } else {
+                        (testStateMapConfig! as StateMapType).map!.push({ value: 17 });
+                      }
+                    }
+                    const formattedPoints: HistoryItemType[] = transformFetchedPoints(
+                      fetchedPoints,
+                      attribute,
+                      testStateMapConfig,
+                      isStateMapStrictMode,
+                      skipInitialState,
+                    );
+                    const numbersCountInHistory = !isStrictStateMap
+                      ? !attribute
+                        ? typeOfDataIndex === 0
+                          ? 11 // all records are numbers
+                          : 0 // strings array does not contain numbers
+                        : historyArrayLength - 3 // total (19 or 18) - 3 (undefined) = 16 or 15
+                      : !attribute
+                        ? typeOfDataIndex === 0
+                          ? 1 // 1 state passed through state_map
+                          : 10 // 11 - 1 (xxx) = 10
+                        : 6; // 6 attributes past through state_map
+                    const nansCountInHistory = !isStrictStateMap
+                      ? !attribute
+                        ? typeOfDataIndex === 0
+                          ? 8 // all "state" NaNs
+                          : historyArrayLength
+                        : 3 // 3 undefined
+                      : !attribute
+                        ? typeOfDataIndex === 0
+                          ? historyArrayLength - 1 // 18 - 1 (passed through state_map)
+                          : 9 // 8 (records from junk array) + 1 (xxx)
+                        : historyArrayLength - 6; // total (19 or 18) - 6 (passed through state_map) = 13 or 12
+                    expect(formattedPoints.length).toBe(historyArrayLength);
+                    expect(getNumbersCountInHistory(formattedPoints)).toEqual(numbersCountInHistory);
+                    expect(getNansCountInHistory(formattedPoints)).toEqual(nansCountInHistory);
+                  });
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+  }
+});
