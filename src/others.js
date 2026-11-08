@@ -356,7 +356,7 @@ const convertStateByMap = (res, stateMapConfig) => {
     return;
   }
   const stringState = String(res.state);
-  const resultIndex = stateMapArray.findIndex(s => s.value === stringState);
+  const resultIndex = stateMapArray.findIndex(s => String(s.value) === stringState);
   if (resultIndex !== -1) {
     res.state = resultIndex;
   } else {
