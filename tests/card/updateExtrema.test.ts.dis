@@ -1,0 +1,84 @@
+/**
+ * Tests for MiniGraphCard::updateExtrema().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+// @vitest-environment jsdom
+import { expect, describe, it, beforeEach } from 'vitest';
+import MiniGraphCard from '../../src/main';
+import { HISTORY_JUNK, HISTORY_ALL_NUMERIC } from '../common/history';
+import type { HistoryItemType } from '../common/history';
+import type { ConfigType } from '../types/configType';
+
+
+type AbsTypeType =
+    | 'min'
+    | 'max'
+    | 'avg';
+
+interface AbsType extends HistoryItemType {
+  type: AbsTypeType;
+};
+
+const findType = (items: AbsType[], type: AbsTypeType) => items.find((i) => i.type === type);
+
+describe("MiniGraphCard::updateExtrema()", () => {
+  let card: MiniGraphCard;
+
+  beforeEach(() => {
+    card = new MiniGraphCard();
+    card.abs = [];
+    card.config = {
+      show: {},
+    };
+  });
+
+  it('show.extrema/avg undefined', () => {
+    card.updateExtrema(HISTORY_ALL_NUMERIC);
+    expect(card.abs.length).toEqual(0);
+  });
+
+  it('show.extrema/avg false', () => {
+    (card.config as ConfigType).show!.extrema = false;
+    (card.config as ConfigType).show!.average = false;
+    card.updateExtrema(HISTORY_ALL_NUMERIC);
+    expect(card.abs.length).toEqual(0);
+  });
+
+  it('show.extrema = true', () => {
+    (card.config as ConfigType).show!.extrema = true;
+    card.updateExtrema(HISTORY_ALL_NUMERIC);
+    expect(card.abs.length).toEqual(2);
+    const min = findType(card.abs, 'min');
+    expect(min).toBeDefined();
+    expect(parseFloat(min?.state)).toEqual(-88);
+    const max = findType(card.abs, 'max');
+    expect(max).toBeDefined();
+    expect(parseFloat(max?.state)).toEqual(100);
+    expect(findType(card.abs, 'avg')).toBeUndefined();
+  });
+
+  it('show.average = true', () => {
+    (card.config as ConfigType).show!.average = true;
+    card.updateExtrema(HISTORY_ALL_NUMERIC);
+    expect(card.abs.length).toEqual(1);
+    const avg = findType(card.abs, 'avg');
+    expect(avg).toBeDefined();
+    expect(parseFloat(avg?.state)).toBeCloseTo(13.26, 6);
+    expect(findType(card.abs, 'min')).toBeUndefined();
+    expect(findType(card.abs, 'max')).toBeUndefined();
+  });
+
+  it('show.average = true, histoty only contains NaNs', () => {
+    (card.config as ConfigType).show!.average = true;
+    card.updateExtrema(HISTORY_JUNK);
+    expect(card.abs.length).toEqual(1);
+    const avg = findType(card.abs, 'avg');
+    expect(avg).toBeDefined();
+    expect(avg!.state).toBeUndefined();
+    expect(findType(card.abs, 'min')).toBeUndefined();
+    expect(findType(card.abs, 'max')).toBeUndefined();
+  });
+});
