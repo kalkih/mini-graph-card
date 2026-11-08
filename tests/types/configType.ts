@@ -7,6 +7,7 @@ export interface ConfigType {
   y_axis?: AllYaxesType;
   decimals?: number|string;
   entities?: (EntityConfigType | string)[];
+  show?: Record<string, boolean|string>;
 
   // just for tests; in fact it cannot be undefined since it is defined in buildConfig()
   line_width?: number|string;
