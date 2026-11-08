@@ -63,6 +63,26 @@ const OBJECTS: any[] = [
 ];
 
 describe("isNumeric", () => {
+  it(`isNumeric: check a number = undefined`, () => {
+    const value = undefined;
+    const result = isNumeric(value);
+    const expectedValue = false;
+    assert.strictEqual(
+      result,
+      expectedValue,
+    );
+  });
+
+  it(`isNumeric: check a number = null`, () => {
+    const value = null;
+    const result = isNumeric(value);
+    const expectedValue = false;
+    assert.strictEqual(
+      result,
+      expectedValue,
+    );
+  });
+
   NUMBERS.forEach((value) => {
     it(`isNumeric: check a number [${value}]`, () => {
       const result = isNumeric(value);
@@ -150,5 +170,4 @@ describe("isNumeric", () => {
       );
     });
   });
-
 });
