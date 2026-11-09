@@ -7,9 +7,9 @@
 
 import { log } from './utils';
 
-const fallbackUndefinedNull = (value, fallback) => value !== null && value !== undefined
+const fallbackUndefinedNull = (value, fallback) => (value !== null && value !== undefined
   ? value
-  : fallback;
+  : fallback);
 
 const isString = value => typeof value === 'string' && value.trim() !== '';
 
