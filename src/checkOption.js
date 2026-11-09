@@ -615,6 +615,11 @@ const checkGroupBy = (config) => {
       logReset('24 (1 day)');
       return 'interval';
     }
+  } else if (groupBy === '12h') {
+    if (hoursToShow < 12 || hoursToShow % 12 !== 0) {
+      logReset('12 (12 hours)');
+      return 'interval';
+    }
   } else if (groupBy === 'hour') {
     if (hoursToShow < 1 || hoursToShow % 1 !== 0) {
       logReset('1 (1 hour)');
@@ -652,6 +657,10 @@ const checkPointsPerHour = (config) => {
       break;
     case 'date':
       newPointsPerHour = 1 / 24;
+      pointsPerHourAdjusted = true;
+      break;
+    case '12h':
+      newPointsPerHour = 1 / 12;
       pointsPerHourAdjusted = true;
       break;
     case 'hour':

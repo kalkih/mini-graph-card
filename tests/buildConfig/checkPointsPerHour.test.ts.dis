@@ -87,6 +87,22 @@ const VARIANTS: any[] = [
   },
   ///////////////////////////////////////////////////////////////////
   {
+    description: 'group_by=12h, points_per_hour=1',
+    config: { points_per_hour: 1, group_by: '12h' },
+    expected: 1/12,
+  },
+  {
+    description: 'group_by=12h, points_per_hour=1/12',
+    config: { points_per_hour: 1/12, group_by: '12h' },
+    expected: 1/12,
+  },
+  {
+    description: 'group_by=12h, points_per_hour=1/24',
+    config: { points_per_hour: 1/24, group_by: '12h' },
+    expected: 1/12,
+  },
+  ///////////////////////////////////////////////////////////////////
+  {
     description: 'group_by=date, points_per_hour=1',
     config: { points_per_hour: 1, group_by: 'date' },
     expected: 1/24,

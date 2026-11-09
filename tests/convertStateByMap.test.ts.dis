@@ -13,44 +13,84 @@ describe("convertStateByMap()", () => {
   describe('keep_values=false/undefined', () => {
     let stateMapConfig: StateMapType = {};
 
-    beforeEach(() => {
-      stateMapConfig.keep_values = false;
-      stateMapConfig.map = [
-        { value: 'red', label: 'Red' },
-        { value: 'green', label: 'Green' },
-        { value: 'blue', label: 'Blue' },
-      ];
+    describe('strings in mapping', () => {
+      beforeEach(() => {
+        stateMapConfig.keep_values = false;
+        stateMapConfig.map = [
+          { value: 'red', label: 'Red' },
+          { value: 'green', label: 'Green' },
+          { value: 'blue', label: 'Blue' },
+        ];
+      });
+
+      it('convert to index', () => {
+        const res = { state: 'green' };
+        convertStateByMap(res, stateMapConfig);
+        expect(res.state).toEqual(1);
+      });
+
+      it('no mapping, convert to NaN', () => {
+        const res = { state: 'cyan' };
+        convertStateByMap(res, stateMapConfig);
+        expect(Number.isNaN(res.state)).toBe(true);
+      });
+
+      it('unavailable, no mapping, convert to NaN', () => {
+        const res = { state: 'unavailable' };
+        convertStateByMap(res, stateMapConfig);
+        expect(Number.isNaN(res.state)).toBe(true);
+      });
+
+      it('unavailable, use mapping', () => {
+        stateMapConfig.map = [
+          ...stateMapConfig.map!,
+          {value: 'unavailable'},
+        ];
+        const res = { state: 'unavailable' };
+        convertStateByMap(res, stateMapConfig);
+        expect(res.state).toEqual(3);
+      });
     });
 
-    it('convert to index', () => {
-      const res = { state: 'green' };
-      convertStateByMap(res, stateMapConfig);
-      expect(res.state).toEqual(1);
-    });
+    describe('numbers in mapping', () => {
+      beforeEach(() => {
+        stateMapConfig.keep_values = false;
+        stateMapConfig.map = [
+          { value: 11, label: 'Red' },
+          { value: 12, label: 'Green' },
+          { value: 13, label: 'Blue' },
+        ];
+      });
 
-    it('no mapping, convert to NaN', () => {
-      const res = { state: 'cyan' };
-      convertStateByMap(res, stateMapConfig);
-      expect(Number.isNaN(res.state)).toBe(true);
-    });
+      it('convert to index', () => {
+        const res = { state: '11' };
+        convertStateByMap(res, stateMapConfig);
+        expect(res.state).toEqual(0);
+      });
 
-    it('unavailable, no mapping, convert to NaN', () => {
-      const res = { state: 'unavailable' };
-      convertStateByMap(res, stateMapConfig);
-      expect(Number.isNaN(res.state)).toBe(true);
-    });
+      it('no mapping, convert to NaN', () => {
+        const res = { state: '14' };
+        convertStateByMap(res, stateMapConfig);
+        expect(Number.isNaN(res.state)).toBe(true);
+      });
 
-    it('unavailable, use mapping', () => {
-      stateMapConfig.map = [
-        ...stateMapConfig.map!,
-        {value: 'unavailable'},
-      ];
-      const res = { state: 'unavailable' };
-      convertStateByMap(res, stateMapConfig);
-      expect(res.state).toEqual(3);
+      it('unavailable, no mapping, convert to NaN', () => {
+        const res = { state: 'unavailable' };
+        convertStateByMap(res, stateMapConfig);
+        expect(Number.isNaN(res.state)).toBe(true);
+      });
+
+      it('unavailable, use mapping', () => {
+        stateMapConfig.map = [
+          ...stateMapConfig.map!,
+          {value: 'unavailable'},
+        ];
+        const res = { state: 'unavailable' };
+        convertStateByMap(res, stateMapConfig);
+        expect(res.state).toEqual(3);
+      });
     });
   });
-
   ///////////////////////////////////////////////////////////////////////////////////////
 
   describe('keep_values=true', () => {
