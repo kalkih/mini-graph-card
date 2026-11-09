@@ -1,0 +1,102 @@
+/**
+ * Tests for fallbackUndefinedNull().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it } from 'vitest';
+import { fallbackUndefinedNull } from '../src/others';
+
+const DEFAULT_VALUE = 123;
+
+interface VariantType {
+  descr: string;
+  value: any;
+  fallback: any;
+  expected: any;
+};
+
+const VARIANTS: VariantType[] = [
+  {
+    descr: "undefined",
+    value: undefined,
+    fallback: DEFAULT_VALUE,
+    expected: DEFAULT_VALUE,
+  },
+  {
+    descr: "null",
+    value: null,
+    fallback: DEFAULT_VALUE,
+    expected: DEFAULT_VALUE,
+  },
+  {
+    descr: "boolean = false",
+    value: false,
+    fallback: DEFAULT_VALUE,
+    expected: false,
+  },
+  {
+    descr: "number",
+    value: 456,
+    fallback: DEFAULT_VALUE,
+    expected: 456,
+  },
+  {
+    descr: "number = 0",
+    value: 0,
+    fallback: DEFAULT_VALUE,
+    expected: 0,
+  },
+  {
+    descr: "number = NaN",
+    value: NaN,
+    fallback: DEFAULT_VALUE,
+    expected: NaN,
+  },
+  {
+    descr: "string",
+    value: 'abc',
+    fallback: DEFAULT_VALUE,
+    expected: 'abc',
+  },
+  {
+    descr: "string empty",
+    value: '',
+    fallback: DEFAULT_VALUE,
+    expected: '',
+  },
+  {
+    descr: "dict",
+    value: { abc: 456 },
+    fallback: DEFAULT_VALUE,
+    expected: { abc: 456 },
+  },
+  {
+    descr: "dict empty",
+    value: {},
+    fallback: DEFAULT_VALUE,
+    expected: {},
+  },
+  {
+    descr: "array",
+    value: [ 0, 1, 2, 'abc' ],
+    fallback: DEFAULT_VALUE,
+    expected: [ 0, 1, 2, 'abc' ],
+  },
+  {
+    descr: "array empty",
+    value: [],
+    fallback: DEFAULT_VALUE,
+    expected: [],
+  },
+];
+
+describe("fallbackUndefinedNull()", () => {
+  VARIANTS.forEach((variant) => {
+    it(variant.descr, () => {
+      const result = fallbackUndefinedNull(variant.value, variant.fallback);
+      expect(result).toEqual(variant.expected);
+    });
+  });
+});
