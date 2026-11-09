@@ -33,7 +33,6 @@ import {
   isOverallState,
   getObjectAttr,
   isObjectAttr,
-  convertStateByMap,
 } from './others';
 import {
   getExtrema,
@@ -1931,7 +1930,7 @@ export default class MiniGraphCard extends LitElement {
         // note: no usual need to map the "unavailable" word
         if (!stateMap && !isUnavailableState(inState)) {
           log(`value [${inState}] not found in state_map: `
-            + `[${getStringifiedValue(stateMapArray)}]`); // ?? { isError: false }
+            + `[${getStringifiedValue(stateMapArray)}]`);
         }
       } else {
         // relaxed mode - state_map presumably contains particular values to be "re-labeled"
@@ -2621,7 +2620,7 @@ export default class MiniGraphCard extends LitElement {
     const isStateOverall = (index === 0 || entityConfig.show_state)
       && isOverallState(this.config.show.state);
 
-    if ((!stateObj && !this._isStaticValue[index] /*&& !this.updateQueue.includes(`${entityId}-${index}`)*/) // ???
+    if ((!stateObj && !this._isStaticValue[index])
       // skip static values which are not queued
       || (!stateObj && this._isStaticValue[index] && !this.updateQueue.includes(`static_value-${index}`))
       // skip entities which are not queued
