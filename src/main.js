@@ -209,18 +209,19 @@ export default class MiniGraphCard extends LitElement {
   * @returns {object} min & max "line_width" values
   */
   _getMinMaxLineWidth() {
+    const defaultValue = fallbackUndefinedNull(this.config.line_width, DEFAULT_LINE_WIDTH);
     const arr = this.config.entities
       .filter(entityConfig => entityConfig.show_graph !== false)
       .map((entityConfig) => {
         const value = entityConfig.line_width;
         return isNumeric(value)
           ? value
-          : fallbackUndefinedNull(this.config.line_width, DEFAULT_LINE_WIDTH);
+          : defaultValue;
       });
     if (arr.length === 0) {
       return ({
-        min: this.config.line_width,
-        max: this.config.line_width,
+        min: defaultValue,
+        max: defaultValue,
       });
     }
     return ({
