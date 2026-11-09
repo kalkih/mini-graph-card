@@ -442,9 +442,8 @@ export default class Graph {
    * @returns {number|undefined} "Overall" value
    */
   _calcOverall() {
-    const numberHistStates = this._history.map(item => parseFloat(item.state));
-    return numberHistStates.length > 0
-      ? this._overallAggregateFunc(numberHistStates)
+    return this._history.length > 0
+      ? this._overallAggregateFunc(this._history)
       : undefined;
   }
 
