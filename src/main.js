@@ -2767,7 +2767,7 @@ export default class MiniGraphCard extends LitElement {
       }] : []),
       ...(extrema ? [{
         type: 'max',
-        ...getExtrema(history,'max'),
+        ...getExtrema(history, 'max'),
       }] : []),
     ];
   }
