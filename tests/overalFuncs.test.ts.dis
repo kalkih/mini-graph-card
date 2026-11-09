@@ -1,0 +1,116 @@
+/**
+ * Tests for isOverallState() & parseOverallFuncName().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it } from 'vitest';
+import { isOverallState, parseOverallFuncName } from '../src/others';
+
+interface VariantType {
+  descr: string;
+  optionValue: string | any;
+  isOverall: boolean;
+  parsed: string|undefined;
+};
+
+const VARIANTS: VariantType[] = [
+  {
+    descr: "option is undefined",
+    optionValue: undefined,
+    isOverall: false,
+    parsed: undefined,
+  },
+  {
+    descr: "option is null",
+    optionValue: null,
+    isOverall: false,
+    parsed: undefined,
+  },
+  {
+    descr: "option is not a string",
+    optionValue: 123,
+    isOverall: false,
+    parsed: undefined,
+  },
+  {
+    descr: "option is not a string (2)",
+    optionValue: [1,2,3],
+    isOverall: false,
+    parsed: undefined,
+  },
+  {
+    descr: "option is not a string (3)",
+    optionValue: ['overall'],
+    isOverall: false,
+    parsed: undefined,
+  },
+  {
+    descr: "option is not a string (4)",
+    optionValue: {state: 'overall'},
+    isOverall: false,
+    parsed: undefined,
+  },
+  {
+    descr: "option is not a string (5)",
+    optionValue: {overall: 123},
+    isOverall: false,
+    parsed: undefined,
+  },
+  {
+    descr: "option is an empty string",
+    optionValue: "",
+    isOverall: false,
+    parsed: undefined,
+  },
+  ///////////////////////
+  {
+    descr: "option does not contain 'overall'",
+    optionValue: 'abc',
+    isOverall: false,
+    parsed: undefined,
+  },
+  {
+    descr: "option does not contain 'overall_'",
+    optionValue: 'overal',
+    isOverall: false,
+    parsed: undefined,
+  },
+  {
+    descr: "option contains 'overall_' and nothing else",
+    optionValue: 'overall_',
+    isOverall: false,
+    parsed: undefined,
+  },
+  {
+    descr: "option contains 'overall_'",
+    optionValue: 'overall_abc',
+    isOverall: true,
+    parsed: 'abc',
+  },
+  {
+    descr: "option is 'overall'",
+    optionValue: 'overall',
+    isOverall: true,
+    parsed: undefined,
+  },
+];
+
+describe("isOverallState()", () => {
+  VARIANTS.forEach((variant) => {
+    it(variant.descr, () => {
+      const result = isOverallState(variant.optionValue);
+      expect(result).toEqual(variant.isOverall);
+    });
+  });
+});
+
+describe("parseOverallFuncName()", () => {
+  VARIANTS.forEach((variant) => {
+    it(variant.descr, () => {
+      const result = parseOverallFuncName(variant.optionValue);
+      expect(result).toEqual(variant.parsed);
+    });
+  });
+});

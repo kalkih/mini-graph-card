@@ -1,6 +1,5 @@
 import { LitElement, html, svg } from 'lit-element';
 import localForage from 'localforage/src/localforage';
-import { stateIcon } from 'custom-card-helpers';
 import SparkMD5 from 'spark-md5';
 import { interpolateRGB } from './color';
 import Graph from './graph';
@@ -17,7 +16,6 @@ import {
 import './initialize';
 import { version } from '../package.json';
 import {
-  ICONS,
   X, Y, V,
   ONE_HOUR,
   MAX_BARS,
@@ -31,6 +29,11 @@ import {
   isEntryAnimated,
   getIntervalEndDate,
   getBoundsForCustomZeroPosition,
+  parseOverallFuncName,
+  isOverallState,
+  getObjectAttr,
+  isObjectAttr,
+  convertStateByMap,
 } from './others';
 import {
   getMin, getAvg, getMax,
@@ -435,6 +438,8 @@ export default class MiniGraphCard extends LitElement {
         hours_to_show: this.config.hours_to_show,
         points_per_hour: this.config.points_per_hour,
         aggregateFuncName: entityConfig.aggregate_func || this.config.aggregate_func,
+        calculateOverall: isOverallState(this.config.show.state),
+        overallAggregateFuncName: parseOverallFuncName(this.config.show.state),
         smoothing: this._graphSmoothing[index],
         logarithmic: getFirstDefinedItem(
           entityConfig.logarithmic,
@@ -684,16 +689,20 @@ export default class MiniGraphCard extends LitElement {
       `;
     }
 
-    const { icon, icon_adaptive_color } = this.config.show;
+    const { icon: showIcon, icon_adaptive_color } = this.config.show;
 
-    if (!icon
+    if (!showIcon
       || !this.entity
       || (!this.entity[0] && !this._isStaticValue[0])) {
       return html``;
     }
 
-    const { icon_color } = this.config;
+    const { icon, icon_color } = this.config;
     const iconColor = icon_color || (icon_adaptive_color ? this.color : undefined);
+    const stateObj = this.entity[0];
+    // HA resolves an entity icon (incl. icon translations, e.g. for device classes);
+    // a static value without an `icon` option gets the default sensor icon
+    const resolvedIcon = !stateObj && !icon ? 'mdi:eye' : icon;
 
     return html`
       <div
@@ -701,7 +710,11 @@ export default class MiniGraphCard extends LitElement {
         loc=${iconLoc}
         style=${iconColor !== undefined ? `color: ${iconColor};` : ''}
       >
-        <ha-icon .icon=${this.computeIcon(this.entity[0])}></ha-icon>
+        <ha-state-icon
+          .icon=${resolvedIcon}
+          .stateObj=${stateObj}
+          .hass=${this._hass}
+        ></ha-state-icon>
       </div>
     `;
   }
@@ -758,28 +771,6 @@ export default class MiniGraphCard extends LitElement {
     `;
   }
 
-  /**
-  * Returns an object attribute value
-  * @returns {any} Value of an attribute/subattribute
-  * @param obj stateObj.attributes
-  * @param path Attribute defined as either a singular attribute or a tree-like path
-  */
-  getObjectAttr(obj, path) {
-    if (!obj) {
-      return;
-    }
-    return path.split('.').reduce((res, key) => res && res[key], obj);
-  }
-
-  /**
-  * Check if an attribute path represents a nested object path (contains a dot separator)
-  * @returns {boolean} True if a path contains a dot separator, false otherwise
-  * @param {string} path Attribute defined as either a singular attribute or a tree-like path
-  */
-  isObjectAttr(path) {
-    return path.includes('.');
-  }
-
   /** Returns a state/attribute value or a static_value
   * @returns {any} value of a state/attribute or a static_value
   * @param {number} index Index of an entry in config.entities
@@ -787,7 +778,16 @@ export default class MiniGraphCard extends LitElement {
   getEntityState(index) {
     const { config } = this;
     const entityConfig = config.entities[index];
-    const isStateLast = config.show.state === 'last';
+    const isStateLast = config.show.state === 'last'
+      && entityConfig.show_graph !== false; // graph cannot be hidden
+    const isStateOverall = isOverallState(config.show.state);
+
+    // process "overall" value
+    if (isStateOverall) {
+      return this.Graph[index]
+        ? this.Graph[index].overall
+        : undefined;
+    }
 
     // process "last" value
     if (isStateLast) {
@@ -828,7 +828,7 @@ export default class MiniGraphCard extends LitElement {
     // process current attribute's value
     if (entityConfig.attribute) {
       // current attribute value
-      return this.getObjectAttr(stateObj.attributes, entityConfig.attribute);
+      return getObjectAttr(stateObj.attributes, entityConfig.attribute);
     }
     // process current state's value
     return stateObj.state;
@@ -1441,9 +1441,10 @@ export default class MiniGraphCard extends LitElement {
       const oneMinute = group_by !== 'interval' ? 60000 : 0;
 
       const now = this.getIntervalEndDate();
-      // current time (not mutated)
+
+      // current time (not aligned to an interval)
       // needed to show a time with a yesterday's date if hours_to_show>=24
-      const nowPersistent = new Date(now.getTime());
+      const nowExact = this.getIntervalEndDate(true);
 
       now.setMilliseconds(now.getMilliseconds() - oneMinute - interval * count);
       end = formatDateTime(
@@ -1453,7 +1454,7 @@ export default class MiniGraphCard extends LitElement {
         this._datetimeFormatDateOptions,
         this._datetimeFormatTimeOptions,
         this._hass,
-        nowPersistent,
+        nowExact,
       );
 
       const smoothingType = this._graphSmoothing[entityIndex];
@@ -1469,7 +1470,7 @@ export default class MiniGraphCard extends LitElement {
           this._datetimeFormatDateOptions,
           this._datetimeFormatTimeOptions,
           this._hass,
-          nowPersistent,
+          nowExact,
         );
       }
     }
@@ -1808,22 +1809,6 @@ export default class MiniGraphCard extends LitElement {
   }
 
   /**
-  * Returns an icon for an entity
-  * accounting an `icon` option, entity's native `icon` attribute,
-  * fallback to a standard MDI "temperature" icon
-  * @returns {string} mdi:icon
-  * @param {object} stateObj stateObj for an entity
-  */
-  computeIcon(stateObj) {
-    return (
-      this.config.icon
-      || stateObj && stateObj.attributes.icon
-      || typeof stateIcon === 'function' && stateObj && stateIcon(stateObj)
-      || ICONS.temperature
-    );
-  }
-
-  /**
   * Returns a unit
   * @returns {string} Unit
   * @param {number} index Index of an entry in config.entities
@@ -1874,7 +1859,7 @@ export default class MiniGraphCard extends LitElement {
         } else {
           // retrieving a native unit
           const { attribute } = this.config.entities[index];
-          if (!attribute || !this.isObjectAttr(attribute)) {
+          if (!attribute || !isObjectAttr(attribute)) {
             // any cases except an object attribute
             let parts;
             if (attribute) {
@@ -2187,7 +2172,7 @@ export default class MiniGraphCard extends LitElement {
           );
         }
 
-        if (attribute && !this.isObjectAttr(attribute)) {
+        if (attribute && !isObjectAttr(attribute)) {
           // formatting not-object attribute
           const attrParts = this._hass.formatEntityAttributeValueToParts(
             stateObj,
@@ -2197,7 +2182,7 @@ export default class MiniGraphCard extends LitElement {
           const partValue = attrParts.find(part => part.type === 'value');
           const value = partValue && partValue.value;
           return value;
-        } else if (attribute && this.isObjectAttr(attribute)) {
+        } else if (attribute && isObjectAttr(attribute)) {
           // formatting object attribute - similar to Y-axis labels
           return formatNumber(
             state,
@@ -2248,7 +2233,7 @@ export default class MiniGraphCard extends LitElement {
     if (!entityId && this._isStaticValue[index]) {
       // processing static_value
       return { directOrder: true, delimiter: '' };
-    } else if (!attribute || !this.isObjectAttr(attribute)) {
+    } else if (!attribute || !isObjectAttr(attribute)) {
       // processing entity, any cases except an object attribute
       const stateObj = this._hass.states[entityId];
       if (!stateObj || isUnavailableState(stateObj.state)) {
@@ -2401,13 +2386,16 @@ export default class MiniGraphCard extends LitElement {
       // index of a bar (only used for bars & only increments if a particular graph to be shown)
       let graphPos = 0;
       this.entity.forEach((stateObj, i) => {
-        if ((!stateObj && !this._isStaticValue[i])
-          || this.Graph[i].coords.length === 0) {
+        const entityConfig = config.entities[i];
+        if ((!stateObj && !this._isStaticValue[i]) // static line
+          || this.Graph[i].coords.length === 0 // Graph coords are empty
+          // displaying of a graph is off
+          || entityConfig.show_graph === false) {
           return;
         }
 
         // renew max/min values in Graph[i] object
-        const bound = config.entities[i].y_axis === 'secondary'
+        const bound = entityConfig.y_axis === 'secondary'
           ? this.boundSecondary
           : this.bound;
         [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
@@ -2419,18 +2407,21 @@ export default class MiniGraphCard extends LitElement {
         } else {
           // line graph
           const line = this.Graph[i].getPath();
-          if (config.entities[i].show_line !== false) this.line[i] = line;
-          if (config.show.fill
-            && config.entities[i].show_fill !== false) this.fill[i] = this.Graph[i].getFill(line);
-          if (config.show.points && (config.entities[i].show_points !== false)) {
+          if (entityConfig.show_line !== false) {
+            this.line[i] = line;
+          }
+          if (config.show.fill && entityConfig.show_fill !== false) {
+            this.fill[i] = this.Graph[i].getFill(line);
+          }
+          if (config.show.points && entityConfig.show_points !== false) {
             this.points[i] = this.Graph[i].getPoints();
           }
           if ((config.color_thresholds.length > 0
-            || (config.entities[i].color_thresholds
-                && config.entities[i].color_thresholds.length > 0))
-            && !config.entities[i].color)
+            || (entityConfig.color_thresholds && entityConfig.color_thresholds.length > 0))
+            && !entityConfig.color) {
             this.gradient[i] = this.Graph[i]
-              .computeGradient(config.entities[i].color_thresholds || config.color_thresholds);
+              .computeGradient(entityConfig.color_thresholds || config.color_thresholds);
+          }
         }
       });
       this.line = [...this.line]; // force the card's re-rendering
@@ -2615,6 +2606,9 @@ export default class MiniGraphCard extends LitElement {
    */
   async updateEntity(stateObj, index, start, end) {
     const entityConfig = this.config.entities[index];
+    // "overall" value is shown for this entity
+    const isStateOverall = (index === 0 || entityConfig.show_state)
+      && isOverallState(this.config.show.state);
 
     if ((!stateObj && !this._isStaticValue[index])
       // skip static values which are not queued
@@ -2622,7 +2616,8 @@ export default class MiniGraphCard extends LitElement {
       // skip entities which are not queued
       || (stateObj && !this.updateQueue.includes(`${stateObj.entity_id}-${index}`))
       // do not process a history if no graph is displayed
-      || entityConfig.show_graph === false
+      // unless "overall" value is displayed
+      || (entityConfig.show_graph === false && !isStateOverall)
     ) return;
 
     if (this._isStaticValue[index]) {
@@ -2651,7 +2646,7 @@ export default class MiniGraphCard extends LitElement {
       : undefined;
     if (history && history.hours_to_show === this.config.hours_to_show) {
       // process a cached history
-      stateHistory = history.data;
+      stateHistory = history.data.map(item => ({ ...item }));
       isCacheConverted = history.state_map_converted === true;
 
       let currDataIndex = stateHistory.findIndex(item => new Date(item.last_changed) > start);
@@ -2691,6 +2686,7 @@ export default class MiniGraphCard extends LitElement {
     }
 
     // check if the latest point corresponds to the current state
+    // for that, take the last history item
     let isLastItemTakenFromCache = false;
     let lastHistoryItem;
     if (fetchedHistory[0].length > 0) {
@@ -2706,33 +2702,27 @@ export default class MiniGraphCard extends LitElement {
 
     // current value of state/attribute
     let currentValue = entityConfig.attribute
-      ? this.getObjectAttr(stateObj.attributes, entityConfig.attribute)
+      ? getObjectAttr(stateObj.attributes, entityConfig.attribute)
       : stateObj.state;
 
-    // process state_map
-    // null if state_map is undefined or has an empty map array
+    // cached history may contain mapped values (indexes),
+    // to compare a current value with an index, we need to process state_map.
+    // note: stateMapConfig is null if state_map is undefined or has an empty map array
     const stateMapConfig = this._entityStateMap[index];
     const isStateMapStrictMode = stateMapConfig && stateMapConfig.keep_values !== true;
-    if (isCacheConverted && isStateMapStrictMode) {
+    if (isLastItemTakenFromCache && isCacheConverted && isStateMapStrictMode) {
+      // need to convert before comparing
       const mock = { state: currentValue };
-      this._convertState(mock, stateMapConfig);
-      // get a converted currentValue (index)
-      currentValue = mock.state;
+      convertStateByMap(mock, stateMapConfig);
+      currentValue = mock.state; // currentValue is an index now
     }
 
     // last value of state/attribute from history
-    let lastHistoryValue = lastHistoryItem
+    const lastHistoryValue = lastHistoryItem
       ? entityConfig.attribute && lastHistoryItem.attributes
-        ? this.getObjectAttr(lastHistoryItem.attributes, entityConfig.attribute)
+        ? getObjectAttr(lastHistoryItem.attributes, entityConfig.attribute)
         : lastHistoryItem.state
       : null;
-    if (lastHistoryValue && isLastItemTakenFromCache
-      && isCacheConverted && isStateMapStrictMode) {
-      const mock = { state: lastHistoryValue };
-      this._convertState(mock, stateMapConfig);
-      // get a converted last value (index)
-      lastHistoryValue = mock.state;
-    }
 
     // if the latest record from the history does not correspond to the current state/attribute
     // - add the current state/attribute to the history
@@ -2767,12 +2757,12 @@ export default class MiniGraphCard extends LitElement {
         fetchedHistory[0].forEach((item) => {
           if (entityConfig.attribute) {
             // eslint-disable-next-line no-param-reassign
-            item.state = this.getObjectAttr(item.attributes, entityConfig.attribute);
+            item.state = getObjectAttr(item.attributes, entityConfig.attribute);
             // eslint-disable-next-line no-param-reassign
             delete item.attributes;
           }
           if (stateMapConfig && isStateMapStrictMode) {
-            this._convertState(item, stateMapConfig);
+            convertStateByMap(item, stateMapConfig);
           }
         });
       }
@@ -2852,29 +2842,6 @@ export default class MiniGraphCard extends LitElement {
   }
 
   /**
-  * Convert a raw historic value using a state_map option
-  * @param {object} res Record from a history
-  * @param {object} stateMapConfig state_map config object
-  * @returns {void}
-  */
-  _convertState(res, stateMapConfig) {
-    const stateMapArray = stateMapConfig.map;
-    const keepValues = stateMapConfig.keep_values;
-    if (stateMapArray.length === 0 || keepValues === true) {
-      // the "stateMapArray.length === 0" check is only needed for tests
-      // comment when not debugging
-      return;
-    }
-    const stringState = String(res.state);
-    const resultIndex = stateMapArray.findIndex(s => s.value === stringState);
-    if (resultIndex !== -1) {
-      res.state = resultIndex;
-    } else {
-      res.state = NaN;
-    }
-  }
-
-  /**
   * Schedule an update in "ONE_HOUR/points_per_hour" milliseconds
   * @returns {void}
   */
@@ -2893,10 +2860,14 @@ export default class MiniGraphCard extends LitElement {
 
   /**
   * Get a datetime of the interval's end
+  * @param {boolean} [doNotAlign=false] If true - returns time without interval alignment
   * @returns {Date} Datetime of the interval's end
   */
-  getIntervalEndDate() {
-    return getIntervalEndDate(new Date(), this.config.group_by);
+  getIntervalEndDate(doNotAlign = false) {
+    const groupBy = doNotAlign
+      ? 'interval'
+      : this.config.group_by;
+    return getIntervalEndDate(new Date(), groupBy);
   }
 
   getCardSize() {

@@ -7,10 +7,10 @@
 
 // @vitest-environment jsdom
 import { expect, describe, it, beforeEach } from 'vitest';
-import MiniGraphCard from '../src/main';
-import type { StateMapEntryType, StateMapType } from './types/stateMapTypes';
-import type { ConfigType } from './types/configType';
-import { getStringifiedValue } from '../src/utils';
+import MiniGraphCard from '../../src/main';
+import type { StateMapEntryType, StateMapType } from '../types/stateMapTypes';
+import type { ConfigType } from '../types/configType';
+import { getStringifiedValue } from '../../src/utils';
 
 interface ContextType {
   index?: number;

@@ -6,7 +6,7 @@
  */
 
 import { expect, describe, it } from 'vitest';
-import { checkGroupBy } from '../src/checkOption';
+import { checkGroupBy } from '../../src/checkOption';
 
 const VARIANTS: any[] = [
   {
@@ -121,6 +121,37 @@ const VARIANTS: any[] = [
   {
     description: 'group_by=hour, hours_to_show: 5.5',
     config: { hours_to_show: 5.5, group_by: 'hour' },
+    expected: 'interval',
+  },
+  ///////////////////////////////////////////////////////////////////
+  {
+    description: 'group_by=12h, hours_to_show: 0.5',
+    config: { hours_to_show: 0.5, group_by: '12h' },
+    expected: 'interval',
+  },
+  {
+    description: 'group_by=12h, hours_to_show: 11',
+    config: { hours_to_show: 11, group_by: '12h' },
+    expected: 'interval',
+  },
+  {
+    description: 'group_by=12h, hours_to_show: 12',
+    config: { hours_to_show: 12, group_by: '12h' },
+    expected: '12h',
+  },
+  {
+    description: 'group_by=12h, hours_to_show: 12.1',
+    config: { hours_to_show: 12.1, group_by: '12h' },
+    expected: 'interval',
+  },
+  {
+    description: 'group_by=12h, hours_to_show: 36',
+    config: { hours_to_show: 36, group_by: '12h' },
+    expected: '12h',
+  },
+  {
+    description: 'group_by=12h, hours_to_show: 61',
+    config: { hours_to_show: 61, group_by: '12h' },
     expected: 'interval',
   },
   ///////////////////////////////////////////////////////////////////

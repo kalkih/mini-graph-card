@@ -8,7 +8,7 @@ The card works with entities from within the **sensor** & other domains (includi
 ## Table of Contents:
 
    * [Install](#install)
-      + [HACS (recommended)](#hacs-recommended)
+      + [Marketplace, former HACS (recommended)](#marketplace-former-hacs-recommended)
       + [Manual install](#manual-install)
       + [CLI install](#cli-install)
       + [Add resource reference](#add-resource-reference)
@@ -24,6 +24,7 @@ The card works with entities from within the **sensor** & other domains (includi
       + [State map object](#state-map-object)
       + [Value factor](#value-factor)
       + [Aggregate functions](#aggregate-functions)
+      + ["Overall" aggregated value](#overall-aggregated-value)
       + [Alignment for "name" & "icon" elements](#alignment-for-name--icon-elements)
       + [Structured names](#structured-names)
       + [Static values](#static-values)
@@ -71,13 +72,15 @@ The card works with entities from within the **sensor** & other domains (includi
 
 ## Install
 
-### HACS (recommended)
+### Marketplace, former HACS (recommended)
 
-This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community Store).
-
-<small>*HACS is a third party community store and is not included in Home Assistant out of the box.*</small>
+This card is available in HA Marketplace.
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=kalkih&repository=mini-graph-card)
+
+> [!NOTE]
+> Marketplace became available in HA 2026.11 as a part of Home Assistance. If you are running a lower version of HA, use [HACS](https://hacs.xyz/) (Home Assistant Community Store).
+
 
 ### Manual install
 
@@ -96,11 +99,11 @@ This card is available in [HACS](https://hacs.xyz/) (Home Assistant Community St
   $ wget https://github.com/kalkih/mini-graph-card/releases/download/v0.13.0/mini-graph-card-bundle.js
   ```
 
-3. Add the resource reference as decribed below.
+3. Add the resource reference as described below.
 
 ### Add resource reference
 
-Note: If you install the card via HACS, you do not need to add the resource reference manually; HACS handles this automatically during the installation process.
+Note: If you install the card via HA Marketplace (former HACS), you do not need to add the resource reference manually; Marketplace handles this automatically during the installation process.
 
 If you configure Lovelace via YAML, add a reference to `mini-graph-card-bundle.js` inside your `configuration.yaml`:
 
@@ -132,7 +135,8 @@ Else, if you prefer the graphical editor, use the menu to add the resource:
       type: module
   ```
 
-*You may need to empty the browsers cache if you have problems loading the updated card.*
+> [!NOTE]
+> It is highly recommended to empty a browser's cache after updating the card to avoid possible issues with cached histories: by default, historical data for an entity are kept in a browser's cache for a better performance to reduce a number of queries to a HA server, and a structure of the cached history may be different in a newer version of the card causing glitches.
 
 ---
 
@@ -163,7 +167,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | hours_to_show | integer | `24` | v0.0.2 | Specify how many hours of history the graph should present.
 | points_per_hour | number | `0.5` | v0.2.0 | Specify amount of data points the graph should display for each hour, *(basically the detail/accuracy/smoothing of the graph)*.
 | aggregate_func | string | `avg` | v0.8.0 | Specify [aggregate function](#aggregate-functions) used to calculate point/bar in the graph.
-| group_by | string | `interval` | v0.8.0 | Specify type of grouping of data, dynamic `interval`, `week`, `date`, `hour`, `30min` or `15min`.
+| group_by | string | `interval` | v0.8.0 | Specify type of grouping of data, dynamic `interval`, `week`, `date`, `12h`, `hour`, `30min` or `15min`.
 | update_interval | number |  | v0.4.0 | Specify a custom update interval of the history data (in seconds), instead of on every state change.
 | cache | boolean | `true` | v0.9.0 | Enable/disable local caching of history data.
 | show | [show object](#available-show-options) |  | v0.2.0 | UI elements display/hide options.
@@ -229,7 +233,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | color_thresholds | list |  | v0.14.0 | Override the thresholds for dynamic graph colors.
 | color_thresholds_transition | string |  | v0.14.0 | Override the color threshold transition.
 | unit | string |         | Set a custom unit of measurement, overrides `unit` set in base config (`''` value for an empty unit).
-| aggregate_func | string |         | Override for aggregate function used to calculate point on the graph, `avg`, `median`, `min`, `max`, `first`, `last`, `sum`.
+| aggregate_func | string |         | Override for [aggregate function](#aggregate-functions) used to calculate point on the graph, `avg`, `median`, `min`, `max`, `first`, `last`, `sum`.
 | decimals | integer |    | Override the exact number of decimals to show for number values, see [Number format](#number-format).
 | show_state | boolean |         | Display the current state.
 | show_legend_state | boolean |  `false`  | Display the current state as part of the legend.
@@ -269,7 +273,7 @@ All properties are optional.
 |------|:-------:|:-------:|-------------|
 | name | `true` | `true` / `false` | Display name.
 | icon | `true` | `true` / `false` | Display icon.
-| state | `true` | `true` / `false` / `last` | Display current state. `last` will show the last graph point's or bar's value (fallback to `true` if points are not shown for a line graph).
+| state | `true` | `true` / `false` / `last` | Display current state.<br>`last` will show the last graph point's or bar's value (fallback to `true` if points are not shown for a line graph, or a line graph is hidden for an entity).<br>`overall` will show an [aggregated value](#aggregate-functions) for the entire period calculated. More variants of aggregation are supported, see more details [here](#overall-aggregated-value).
 | graph | `line` | `line` / `bar` / `false` | Display option for the graph. If set to `bar` a maximum of `96` bars will be displayed. See [Graph types](#graph-types).
 | fill | `true` | `true` / `false` / `fade` | Display the line graph fill.
 | points | `hover` | `true` / `false` / `hover` | Display graph data points (for a line graph only).
@@ -284,6 +288,8 @@ All properties are optional.
 | icon_adaptive_color | `false` | `true` / `false` | Make the icon color adapt with the primary entity/static value color.
 | loading_indicator | `true` | `true` / `false` | Show loading indicator while attempting to retrieve a history.
 | graph_order | `direct` | `direct` / `reversed` | Define an order of displaying graphs (see [Graphs order](#graphs-order)).
+
+
 
 ---
 
@@ -565,6 +571,21 @@ These buckets are converted later to single point/bar on the graph. Aggregate fu
 | `sum` | v0.9.2 |
 | `delta` | v0.9.4 | Calculates difference between max and min value
 | `diff` | v0.11.0 | Calculates difference between first and last value
+
+---
+
+### "Overall" aggregated value
+It is possible to show an "overall" value for the entire period.
+A value is calculated using a specified [aggregate function](#aggregate-functions).
+The "overall" value is shown instead of a current state or a last graph point's or bar's value.
+To show the "overall" value, set `show.state: overall` option.
+In this case the "overall" value is calculated using the same aggregate function which is used for building a graph (defined by a global or per-entity `aggregate_func` option).
+
+To use a different aggregate function, set e.g. `show.state: overall_diff` option - here a `diff` function is used.
+Any aggregate function can be used like `overall_sum`, `overall_delta` etc.
+
+Note: it is possible to define an "overall" value for an entity even when a graph is hidden for this entity with `show_graph: false`.
+
 
 ---
 

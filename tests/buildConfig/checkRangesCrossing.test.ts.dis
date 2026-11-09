@@ -6,8 +6,8 @@
  */
 
 import { expect, describe, it } from 'vitest';
-import { checkRangesCrossing } from '../src/checkOption';
-import { RangeType } from './types/rangeType';
+import { checkRangesCrossing } from '../../src/checkOption';
+import { RangeType } from '../types/rangeType';
 
 const VARIANTS: any[] = [
   {

@@ -4,7 +4,11 @@ import {
   ONE_HOUR,
   DEFAULT_BAR_SPACING,
 } from './const';
-import { log } from './utils';
+import {
+  getLog10,
+  log,
+} from './utils';
+import { aggregateFuncMap } from './aggregate';
 
 export default class Graph {
   constructor({
@@ -15,26 +19,16 @@ export default class Graph {
     hours_to_show = 24,
     points_per_hour = 1,
     aggregateFuncName = 'avg',
+    calculateOverall = false,
+    overallAggregateFuncName = undefined,
     smoothing = true,
     logarithmic = false,
     bar_spacing = DEFAULT_BAR_SPACING, // spacing between bars
     bar_spacing_group = DEFAULT_BAR_SPACING, // spacing between groups of bars
     total_bars_in_group = 1, // number of bars (i.e. number of entities with a shown bar graph)
-    baseline,
+    baseline = undefined,
     invert = false,
   }) {
-    const aggregateFuncMap = {
-      avg: this._average,
-      median: this._median,
-      max: this._maximum,
-      min: this._minimum,
-      first: this._first,
-      last: this._last,
-      sum: this._sum,
-      delta: this._delta,
-      diff: this._diff,
-    };
-
     this._graphType = graphType;
     this._history = undefined;
     this.coords = [];
@@ -45,9 +39,18 @@ export default class Graph {
     this._min = 0;
     this._points_per_hour = points_per_hour;
     this._hours_to_show = hours_to_show;
+
     this._aggregateFuncName = aggregateFuncName;
     this._calcPoint = aggregateFuncMap[aggregateFuncName]
-     || this._average; // fallback in case a wrong func is passed
+     || aggregateFuncMap.avg; // fallback in case a wrong func is passed
+
+    // calculating "overall" aggregated values:
+    this._calculateOverall = calculateOverall;
+    this._overall = undefined;
+    this._overallAggregateFuncName = overallAggregateFuncName;
+    this._overallAggregateFunc = aggregateFuncMap[overallAggregateFuncName]
+     || this._calcPoint; // fallback in case a wrong func is passed
+
     this._smoothing = smoothing;
     this._logarithmic = logarithmic;
     this._bar_spacing = bar_spacing;
@@ -57,6 +60,8 @@ export default class Graph {
     this._baseline = baseline;
     this._invert = invert;
   }
+
+  get overall() { return this._overall; }
 
   get max() { return this._max; }
 
@@ -131,6 +136,11 @@ export default class Graph {
 
     // update interval end date
     this._endTime = endTime;
+
+    // calculate "overall" value
+    if (this._calculateOverall) {
+      this._overall = this._calcOverall();
+    }
 
     // group history into time buckets
     const histGroups = this._history.reduce((res, item) => this._reducer(res, item), []);
@@ -212,7 +222,8 @@ export default class Graph {
       } else {
         const bucket = history[i - 1];
         if (bucket && bucket.length > 0) {
-          lastValue = this._calcPoint(bucket);
+          const numberBucket = bucket.map(item => parseFloat(item.state));
+          lastValue = this._calcPoint(numberBucket);
         }
         coords.push([x, 0, lastValue]);
       }
@@ -228,8 +239,8 @@ export default class Graph {
    */
   calcY(coords) {
     // account for logarithmic graph
-    const max = this._logarithmic ? Math.log10(Math.max(1, this.max)) : this.max;
-    const min = this._logarithmic ? Math.log10(Math.max(1, this.min)) : this.min;
+    const max = this._logarithmic ? getLog10(this.max) : this.max;
+    const min = this._logarithmic ? getLog10(this.min) : this.min;
 
     const delta = Math.abs(max - min);
     let yRatio;
@@ -239,7 +250,7 @@ export default class Graph {
       yRatio = delta / this._height;
     }
     const coords2 = coords.map((coord) => {
-      const val = this._logarithmic ? Math.log10(Math.max(1, coord[V])) : coord[V];
+      const val = this._logarithmic ? getLog10(coord[V]) : coord[V];
       let coordY;
       if (this._invert) {
         coordY = ((val - min) / yRatio) + this._margin[Y] * 2;
@@ -305,7 +316,7 @@ export default class Graph {
    */
   computeGradient(thresholds) {
     const scale = this._logarithmic
-      ? Math.log10(Math.max(1, this._max)) - Math.log10(Math.max(1, this._min))
+      ? getLog10(this._max) - getLog10(this._min)
       : this._max - this._min;
 
     const gradientStops = thresholds.map((stop, index, arr) => {
@@ -426,61 +437,15 @@ export default class Graph {
     return [Zx, Zy];
   }
 
-  _getValidNumbers(items) {
-    return items.map(item => parseFloat(item.state));
-  }
-
-  _average(items) {
-    const validNumbers = this._getValidNumbers(items);
-    if (!validNumbers.length) return NaN;
-    return validNumbers.reduce((sum, val) => sum + val, 0) / validNumbers.length;
-  }
-
-  _median(items) {
-    const validNumbers = this._getValidNumbers(items);
-    const itemsDup = [...validNumbers].sort((a, b) => a - b);
-    const mid = Math.floor(itemsDup.length / 2);
-    if (itemsDup.length % 2 === 1)
-      return itemsDup[mid];
-    return (itemsDup[mid - 1] + itemsDup[mid]) / 2;
-  }
-
-  _maximum(items) {
-    const validNumbers = this._getValidNumbers(items);
-    return Math.max(...validNumbers);
-  }
-
-  _minimum(items) {
-    const validNumbers = this._getValidNumbers(items);
-    return Math.min(...validNumbers);
-  }
-
-  _first(items) {
-    return parseFloat(items[0].state);
-  }
-
-  _last(items) {
-    return parseFloat(items[items.length - 1].state);
-  }
-
-  _sum(items) {
-    const validNumbers = this._getValidNumbers(items);
-    return validNumbers.reduce((sum, val) => sum + val, 0);
-  }
-
-  _delta(items) {
-    return this._maximum(items) - this._minimum(items);
-  }
-
-  _diff(items) {
-    return this._last(items) - this._first(items);
-  }
-
-  _lastValue(items) {
-    if (['delta', 'diff'].includes(this._aggregateFuncName)) {
-      return 0;
-    } else {
-      return parseFloat(items[items.length - 1].state) || 0;
-    }
+  /**
+   * Return "overall" value calculated for a whole period
+   * using the overall aggregate function
+   * @returns {number|undefined} "Overall" value
+   */
+  _calcOverall() {
+    const numberHistStates = this._history.map(item => parseFloat(item.state));
+    return numberHistStates.length > 0
+      ? this._overallAggregateFunc(numberHistStates)
+      : undefined;
   }
 }

@@ -1,0 +1,44 @@
+/**
+ * Tests for aggregation functions.
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it } from 'vitest';
+import { aggregateFuncMap } from '../src/aggregate';
+
+const ITEMS: number[] = [22.5,-10.5,0,100,45.2,-3.14,7,7,15.8,-88,50];
+
+type AggregateKey = keyof typeof aggregateFuncMap;
+
+const EXPECTED: Record<AggregateKey, number> = {
+  avg: 13.26,
+  median: 7,
+  max: 100,
+  min: -88,
+  sum: 145.86,
+  first: 22.5,
+  last: 50,
+  delta: 188,
+  diff: 27.5,
+};
+
+const FUNCS = Object.keys(aggregateFuncMap) as AggregateKey[];
+
+describe('aggregate functions', () => {
+  for (let funcIndex = 0; funcIndex < FUNCS.length; funcIndex += 1) {
+    const funcName = FUNCS[funcIndex];
+    const aggregateFunc = aggregateFuncMap[funcName];
+    const expected = EXPECTED[funcName];
+
+    it(`${funcName}`, () => {
+      const result = aggregateFunc(ITEMS);
+      if (['max', 'min', 'last', 'first'].includes(funcName)) {
+        expect(result).toEqual(expected);
+      } else {
+        expect(result).toBeCloseTo(expected, 6);
+      }
+    });
+  }
+});

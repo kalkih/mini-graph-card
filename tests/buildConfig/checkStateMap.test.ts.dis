@@ -6,10 +6,10 @@
  */
 
 import { expect, describe, it, beforeEach } from 'vitest';
-import { checkStateMap } from '../src/checkOption';
-import { migrateStateMapConfig } from '../src/migrate';
-import type { StateMapType } from './types/stateMapTypes';
-import type { ConfigType } from './types/configType';
+import { checkStateMap } from '../../src/checkOption';
+import { migrateStateMapConfig } from '../../src/migrate';
+import type { StateMapType } from '../types/stateMapTypes';
+import type { ConfigType } from '../types/configType';
 
 const DIFF_VALUES: any[] = [
   "abc",

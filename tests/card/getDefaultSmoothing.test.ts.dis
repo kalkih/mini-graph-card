@@ -7,17 +7,17 @@
 
 // @vitest-environment jsdom
 import { expect, describe, it, beforeEach } from 'vitest';
-import MiniGraphCard from '../src/main';
-import { hass } from './hass';
+import MiniGraphCard from '../../src/main';
+import { hass } from '../common/hass';
 
 const config: any = {
   entities: [
     { entity: 'input_number.test' }, // 0
     { entity: 'number.test' },
-    { entity: 'counter.test' },
+    { entity: 'counter.test' }, // 2
     { entity: 'sun.sun' },
     { entity: 'automation.test' }, // 4
-    { entity: 'sensor.non_numerical' },
+    { entity: 'sensor.non_numerical' }, // 5
     { entity: 'sensor.numerical_1' },
     { entity: 'sensor.numerical_2' },
     { entity: 'sensor.numerical_3' }, // 8
@@ -95,7 +95,7 @@ describe("MiniGraphCard::_getDefaultSmoothing()", () => {
     });
   });
 
-  describe("hass is defined", () => {
+  describe("hass is null", () => {
     const nullHass = null;
     beforeEach(() => {
       card._hass = nullHass;

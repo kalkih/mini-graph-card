@@ -266,6 +266,15 @@ const getIntervalEndDate = (date, groupBy) => {
       date.setDate(date.getDate() + 1);
       date.setHours(0, 0, 0, 0);
       break;
+    case '12h': {
+      if (date.getHours() < 12) {
+        date.setHours(12, 0, 0, 0);
+      } else {
+        date.setDate(date.getDate() + 1);
+        date.setHours(0, 0, 0, 0);
+      }
+      break;
+    }
     case 'hour':
       date.setHours(date.getHours() + 1, 0, 0, 0);
       break;
@@ -287,6 +296,74 @@ const getIntervalEndDate = (date, groupBy) => {
   return date;
 };
 
+/**
+ * Check if 'show.state' option enables an 'overall' calculation
+ * @param {string} stateOption config.show.state option value
+ * @returns {boolean} True if overall calculation is requested, false otherwise
+ */
+const isOverallState = (stateOption) => {
+  if (typeof stateOption !== 'string') return false;
+  return stateOption === 'overall'
+    || (stateOption.startsWith('overall_') && stateOption.length > 8);
+};
+
+/**
+ * Parse the 'show.state' option to determine a method for 'overall' calculation
+ * @param {string} stateOption config.show.state option value
+ * @returns {string|undefined} Aggregate function name
+ */
+const parseOverallFuncName = (stateOption) => {
+  if (!isOverallState(stateOption) || stateOption === 'overall') {
+    return undefined;
+  }
+  return stateOption.substring(8);
+};
+
+/**
+* Return an object attribute value
+* @returns {any} Value of an attribute/subattribute
+* @param obj stateObj.attributes
+* @param path Attribute defined as either a singular attribute or a tree-like path
+*/
+const getObjectAttr = (obj, path) => {
+  if (!obj) {
+    return;
+  }
+  return path.split('.').reduce((res, key) => res && res[key], obj);
+};
+
+/**
+* Check if an attribute path represents a nested object path (contains a dot separator)
+* @returns {boolean} True if a path contains a dot separator, false otherwise
+* @param {string} path Attribute defined as either a singular attribute or a tree-like path
+*/
+const isObjectAttr = path => path.includes('.');
+
+/**
+* Convert a raw historic value using a state_map option.
+* Strict mapping converts a raw value into an index.
+* Relaxed mapping keeps original data untouched
+* @param {object} res Record from a history
+* @param {object} stateMapConfig state_map config object
+* @returns {void}
+*/
+const convertStateByMap = (res, stateMapConfig) => {
+  const stateMapArray = stateMapConfig.map;
+  const keepValues = stateMapConfig.keep_values;
+  if (stateMapArray.length === 0 || keepValues === true) {
+    // the "stateMapArray.length === 0" check is only needed for tests
+    // comment when not debugging
+    return;
+  }
+  const stringState = String(res.state);
+  const resultIndex = stateMapArray.findIndex(s => String(s.value) === stringState);
+  if (resultIndex !== -1) {
+    res.state = resultIndex;
+  } else {
+    res.state = NaN;
+  }
+};
+
 export {
   isString,
   isNumber,
@@ -298,4 +375,9 @@ export {
   getBoundsForCustomZeroPosition,
   isEntryAnimated,
   getIntervalEndDate,
+  parseOverallFuncName,
+  isOverallState,
+  getObjectAttr,
+  isObjectAttr,
+  convertStateByMap,
 };

@@ -7,11 +7,10 @@
 
 // @vitest-environment jsdom
 import { expect, describe, it, beforeEach } from 'vitest';
-import MiniGraphCard from '../src/main';
-import { getStringifiedValue } from '../src/utils';
-import type { StateMapType, StateMapEntryType } from './types/stateMapTypes';
-import type { ConfigType } from './types/configType';
-import type { EntityConfigType } from './types/entityConfigType';
+import MiniGraphCard from '../../src/main';
+import type { StateMapType, StateMapEntryType } from '../types/stateMapTypes';
+import type { ConfigType } from '../types/configType';
+import type { EntityConfigType } from '../types/entityConfigType';
 
 const MAP_STRINGS: StateMapEntryType[] = [
   { value: 'abc' },

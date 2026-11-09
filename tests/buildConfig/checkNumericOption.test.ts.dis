@@ -1,13 +1,13 @@
 /**
- * Tests for checkFunction(), checkIntegerOption().
+ * Tests for checkNumericOption(), checkIntegerOption().
  *
  * The file is disabled (renamed to *.dis) & thus is not used during a build process;
  * remove the "dis" extension to use it locally in your VSCode devcontainer.
  */
 
 import { assert, describe, it } from 'vitest';
-import { checkNumericOption, checkIntegerOption } from '../src/checkOption';
-import { isNumeric } from '../src/others';
+import { checkNumericOption, checkIntegerOption } from '../../src/checkOption';
+import { isNumeric } from '../../src/others';
 
 interface ConfigType {
   some_option?: number | string | any;
