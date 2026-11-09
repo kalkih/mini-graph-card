@@ -24,6 +24,7 @@ import {
   NBSP,
 } from './const';
 import {
+  fallbackUndefinedNull,
   isNumeric,
   isNumericEntity,
   isEntryAnimated,
@@ -213,7 +214,8 @@ export default class MiniGraphCard extends LitElement {
       .map((entityConfig) => {
         const value = entityConfig.line_width;
         return isNumeric(value)
-          ? value : this.config.line_width;
+          ? value
+          : fallbackUndefinedNull(this.config.line_width, DEFAULT_LINE_WIDTH);
       });
     if (arr.length === 0) {
       return ({
