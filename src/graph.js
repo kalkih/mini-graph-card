@@ -2,7 +2,10 @@ import { interpolateRGB } from './color';
 import {
   X, Y, V,
   ONE_HOUR,
+  DEFAULT_GRAPH_HEIGHT,
+  DEFAULT_GRAPH_WIDTH,
   DEFAULT_BAR_SPACING,
+  DEFAULT_LINE_WIDTH,
 } from './const';
 import {
   getLog10,
@@ -13,9 +16,9 @@ import { aggregateFuncMap } from './aggregate';
 export default class Graph {
   constructor({
     graphType = 'line',
-    width,
-    height,
-    margin,
+    width = DEFAULT_GRAPH_WIDTH,
+    height = DEFAULT_GRAPH_HEIGHT,
+    margin = [DEFAULT_LINE_WIDTH, DEFAULT_LINE_WIDTH],
     hours_to_show = 24,
     points_per_hour = 1,
     aggregateFuncName = 'avg',

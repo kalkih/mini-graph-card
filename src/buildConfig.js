@@ -3,7 +3,7 @@ import {
   DEFAULT_FONT_SIZE_HEADER,
   DEFAULT_BAR_SPACING,
   DEFAULT_GRAPH_HEIGHT,
-  DEFAULT_MARGIN,
+  DEFAULT_LINE_WIDTH,
   DEFAULT_HOURS_TO_SHOW,
   DEFAULT_POINTS_PER_HOUR,
   DEFAULT_STATIC_VALUE_LABEL_OFFSET,
@@ -166,7 +166,7 @@ export default (config) => {
     line_color: [...DEFAULT_COLORS],
     color_thresholds: [],
     color_thresholds_transition: 'smooth',
-    line_width: DEFAULT_MARGIN,
+    line_width: DEFAULT_LINE_WIDTH,
     bar_spacing: DEFAULT_BAR_SPACING,
     compress: false,
     cache: true,
@@ -186,7 +186,7 @@ export default (config) => {
 
   conf.height = checkNumericOption(conf, 'height', DEFAULT_GRAPH_HEIGHT, { minBound: 0, allowString: true });
 
-  conf.line_width = checkNumericOption(conf, 'line_width', DEFAULT_MARGIN, { minBound: 0, allowString: true });
+  conf.line_width = checkNumericOption(conf, 'line_width', DEFAULT_LINE_WIDTH, { minBound: 0, allowString: true });
 
   conf.hours_to_show = checkNumericOption(conf, 'hours_to_show', DEFAULT_HOURS_TO_SHOW, { minBound: 0.01, allowString: true });
   conf.points_per_hour = checkNumericOption(conf, 'points_per_hour', DEFAULT_POINTS_PER_HOUR, { minBound: 0.001, allowString: true });

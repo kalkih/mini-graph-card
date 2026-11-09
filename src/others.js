@@ -7,6 +7,16 @@
 
 import { log } from './utils';
 
+/**
+ * Check if a value is 'undefined' or 'null'; fallback to a provided fallback value if true
+ * @param {any} value Value to check
+ * @param {any} fallback Fallback value
+ * @returns {any}
+ */
+const fallbackUndefinedNull = (value, fallback) => (value !== null && value !== undefined
+  ? value
+  : fallback);
+
 const isString = value => typeof value === 'string' && value.trim() !== '';
 
 const isNumber = value => typeof value === 'number' && Number.isFinite(value);
@@ -365,6 +375,7 @@ const convertStateByMap = (res, stateMapConfig) => {
 };
 
 export {
+  fallbackUndefinedNull,
   isString,
   isNumber,
   isNumeric,
