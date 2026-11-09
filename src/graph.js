@@ -158,8 +158,7 @@ export default class Graph {
     }
 
     // define new value boundaries
-    this.min = Math.min(...this.coords.map(item => Number(item[V])));
-    this.max = Math.max(...this.coords.map(item => Number(item[V])));
+    ({ min: this.min, max: this.max } = this._calcBounds());
   }
 
   /**
@@ -448,4 +447,22 @@ export default class Graph {
       ? this._overallAggregateFunc(numberHistStates)
       : undefined;
   }
+
+  /**
+   * Calculate min/max bounds based on "coords" array
+   * @returns {{min: number, max: number}} Min/max bounds (can be NaN for empty or NaN coords)
+   */
+  _calcBounds() {
+    let max = NaN;
+    let min = NaN;
+    for (let i = 0; i < this.coords.length; i += 1) {
+      const val = this.coords[i][V];
+      if (!Number.isNaN(val)) {
+        // process only numeric values
+        if (Number.isNaN(max) || val > max) max = val;
+        if (Number.isNaN(min) || val < min) min = val;
+      }
+    }
+    return { max, min };
+  }  
 }
