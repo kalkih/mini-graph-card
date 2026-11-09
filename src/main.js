@@ -36,7 +36,10 @@ import {
   convertStateByMap,
 } from './others';
 import {
-  getMin, getAvg, getMax,
+  getExtrema,
+  getAvg,
+} from './aggregate';
+import {
   getMilli,
   compress, decompress,
   getFirstDefinedItem,
