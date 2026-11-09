@@ -71,6 +71,22 @@ const SHOW_GRAPH_FALSE_2: {show_graph?: boolean}[] = [
 
 const VARIANTS: VariantType[] = [
   {
+    descr: 'global line_width=undefined',
+    config: {
+      entities: ENTITIES_EMPTY,
+      line_width: undefined,
+    },
+    expected: { min: DEFAULT_LINE_WIDTH, max: DEFAULT_LINE_WIDTH },
+  },
+  {
+    descr: 'global line_width=null',
+    config: {
+      entities: ENTITIES_EMPTY,
+      line_width: null,
+    },
+    expected: { min: DEFAULT_LINE_WIDTH, max: DEFAULT_LINE_WIDTH },
+  },
+  {
     descr: 'global line_width=0',
     config: {
       entities: ENTITIES_EMPTY,
