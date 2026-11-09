@@ -20,6 +20,7 @@ import {
   ONE_HOUR,
   MAX_BARS,
   DEFAULT_GRAPH_HEIGHT,
+  DEFAULT_GRAPH_WIDTH,
   DEFAULT_LINE_WIDTH,
   NBSP,
 } from './const';
@@ -435,7 +436,7 @@ export default class MiniGraphCard extends LitElement {
     return this.config.entities.map(
       (entityConfig, index) => new Graph({
         graphType: this._isBarGraph[index] ? 'bar' : 'line',
-        width: 500,
+        width: DEFAULT_GRAPH_WIDTH,
         height,
         margin: this._graphMargin,
         hours_to_show: this.config.hours_to_show,
@@ -1388,7 +1389,10 @@ export default class MiniGraphCard extends LitElement {
     const { height, show } = this.config;
     const reversed = show.graph_order === 'reversed';
     return svg`
-      <svg width='100%' height=${height !== 0 ? '100%' : 0} viewBox='0 0 500 ${height}'
+      <svg
+        width='100%'
+        height=${height !== 0 ? '100%' : 0}
+        viewBox='0 0 ${DEFAULT_GRAPH_WIDTH} ${height}'
         @click=${e => e.stopPropagation()}>
         <g>
           <defs>
