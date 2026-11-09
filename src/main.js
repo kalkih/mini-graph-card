@@ -20,10 +20,11 @@ import {
   ONE_HOUR,
   MAX_BARS,
   DEFAULT_GRAPH_HEIGHT,
-  DEFAULT_MARGIN,
+  DEFAULT_LINE_WIDTH,
   NBSP,
 } from './const';
 import {
+  fallbackUndefinedNull,
   isNumeric,
   isNumericEntity,
   isEntryAnimated,
@@ -108,7 +109,7 @@ export default class MiniGraphCard extends LitElement {
     this._preservedOrder = [];
 
     // margins for a graph container
-    this._graphMargin = [DEFAULT_MARGIN, DEFAULT_MARGIN];
+    this._graphMargin = [DEFAULT_LINE_WIDTH, DEFAULT_LINE_WIDTH];
 
     // array of hide_unit flags for mapped values (processing state_map)
     this._mappedHideUnit = [];
@@ -208,17 +209,19 @@ export default class MiniGraphCard extends LitElement {
   * @returns {object} min & max "line_width" values
   */
   _getMinMaxLineWidth() {
+    const defaultValue = fallbackUndefinedNull(this.config.line_width, DEFAULT_LINE_WIDTH);
     const arr = this.config.entities
       .filter(entityConfig => entityConfig.show_graph !== false)
       .map((entityConfig) => {
         const value = entityConfig.line_width;
         return isNumeric(value)
-          ? value : this.config.line_width;
+          ? value
+          : defaultValue;
       });
     if (arr.length === 0) {
       return ({
-        min: this.config.line_width,
-        max: this.config.line_width,
+        min: defaultValue,
+        max: defaultValue,
       });
     }
     return ({
@@ -414,7 +417,7 @@ export default class MiniGraphCard extends LitElement {
       max: max_line_width,
     } = this._getMinMaxLineWidth();
     this._graphMargin = this.visibleBarEntities.length === this.visibleEntities.length
-      ? [DEFAULT_MARGIN, DEFAULT_MARGIN]
+      ? [DEFAULT_LINE_WIDTH, DEFAULT_LINE_WIDTH]
       : this.config.show.fill
         ? [0, max_line_width]
         : [min_line_width, max_line_width];
@@ -1137,6 +1140,7 @@ export default class MiniGraphCard extends LitElement {
     const lineWidth = getFirstDefinedItem(
       this.config.entities[index].line_width,
       this.config.line_width,
+      DEFAULT_LINE_WIDTH,
     );
     const path = svg`
       <path
@@ -1217,6 +1221,7 @@ export default class MiniGraphCard extends LitElement {
     const radius = getFirstDefinedItem(
       this.config.entities[index].line_width,
       this.config.line_width,
+      DEFAULT_LINE_WIDTH,
     ) * 1.25;
 
     return svg`
