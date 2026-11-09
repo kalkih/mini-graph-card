@@ -8,6 +8,7 @@
 // @vitest-environment jsdom
 import { expect, describe, it, beforeEach } from 'vitest';
 import MiniGraphCard from '../../src/main';
+import { fallbackUndefinedNull } from '../../src/others';
 import type { ConfigType } from '../types/configType';
 import type { EntityConfigType } from '../types/entityConfigType';
 import { DEFAULT_LINE_WIDTH } from '../../src/const';
@@ -205,7 +206,7 @@ describe("MiniGraphCard::_getMinMaxLineWidth()", () => {
   describe("show_graph=true", () => {
     VARIANTS.forEach((variant) => {
       it(variant.descr, () => {
-        const entityCfgs =  variant.config.entities!.map(
+        const entityCfgs = variant.config.entities!.map(
           (entityConfig, i) => ({ ...entityConfig as EntityConfigType, ...SHOW_GRAPH_TRUE[i] }),
         );
         card.config = { ...variant.config, entities: entityCfgs };
@@ -218,7 +219,7 @@ describe("MiniGraphCard::_getMinMaxLineWidth()", () => {
   describe("show_graph=false (1)", () => {
     VARIANTS.forEach((variant) => {
       it(variant.descr, () => {
-        const entityCfgs =  variant.config.entities!.map(
+        const entityCfgs = variant.config.entities!.map(
           (entityConfig, i) => ({ ...entityConfig as EntityConfigType, ...SHOW_GRAPH_FALSE_1[i] }),
         );
         card.config = { ...variant.config, entities: entityCfgs };
@@ -232,12 +233,27 @@ describe("MiniGraphCard::_getMinMaxLineWidth()", () => {
   describe("show_graph=false (2)", () => {
     VARIANTS.forEach((variant) => {
       it(variant.descr, () => {
-        const entityCfgs =  variant.config.entities!.map(
+        const entityCfgs = variant.config.entities!.map(
           (entityConfig, i) => ({ ...entityConfig as EntityConfigType, ...SHOW_GRAPH_FALSE_2[i] }),
         );
         card.config = { ...variant.config, entities: entityCfgs };
         const result = card._getMinMaxLineWidth();
         const expected = variant.expected_false_2 || variant.expected;
+        expect(result).toEqual(expected);
+      });
+    });
+  });
+
+  describe("show_graph=false for all entities", () => {
+    VARIANTS.forEach((variant) => {
+      it(variant.descr, () => {
+        const entityCfgs = variant.config.entities!.map(
+          (entityConfig) => ({ ...entityConfig as EntityConfigType, show_graph: false }),
+        );
+        card.config = { ...variant.config, entities: entityCfgs };
+        const result = card._getMinMaxLineWidth();
+        const defaultValue = fallbackUndefinedNull(variant.config.line_width, DEFAULT_LINE_WIDTH);
+        const expected = { min: defaultValue, max: defaultValue };
         expect(result).toEqual(expected);
       });
     });
