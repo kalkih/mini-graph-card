@@ -2754,18 +2754,21 @@ export default class MiniGraphCard extends LitElement {
 
   updateExtrema(history) {
     const { extrema, average } = this.config.show;
+    const avg = average ? getAvg(history) : NaN;
     this.abs = [
       ...(extrema ? [{
         type: 'min',
-        ...getMin(history, 'state'),
+        ...getExtrema(history, 'min'),
       }] : []),
       ...(average ? [{
         type: 'avg',
-        state: getAvg(history, 'state'),
+        state: Number.isNaN(avg)
+          ? undefined
+          : avg,
       }] : []),
       ...(extrema ? [{
         type: 'max',
-        ...getMax(history, 'state'),
+        ...getExtrema(history,'max'),
       }] : []),
     ];
   }
