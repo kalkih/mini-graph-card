@@ -79,7 +79,8 @@ const prepareCachedHistory = (historyObj, start) => {
  * @param {object} stateObj stateObj for an entity
  * @param {string|undefined} attribute Attribute name
  * @param {object|undefined} stateMapConfig state_map config object
- * @param {boolean} isStateMapStrictMode True if state_map config defines a strict mapping, false otherwise
+ * @param {boolean} isStateMapStrictMode True if state_map config defines a strict mapping,
+ * false otherwise
  * @param {boolean} isCacheConverted True if cached history was mapped, false otherwise
  * @returns {void}
  */
@@ -132,7 +133,7 @@ const alignFetchedWithCurrent = (
   }
 
   // last value of state/attribute from history
-  let lastHistoryValue = lastHistoryItem
+  const lastHistoryValue = lastHistoryItem
     ? attribute && lastHistoryItem.attributes
       ? getObjectAttr(lastHistoryItem.attributes, attribute)
       : lastHistoryItem.state
@@ -193,8 +194,6 @@ const transformFetchedPoints = (
     fetchedPoints.shift();
   }
 
-  console.log('stateMapConfig, isStateMapStrictMode', stateMapConfig, isStateMapStrictMode);
-  console.log('fetchedPoints before', fetchedPoints);
   // check if we should convert states to numeric values
   if ((stateMapConfig && isStateMapStrictMode) || attribute) {
     /* eslint-disable no-param-reassign */
@@ -212,15 +211,12 @@ const transformFetchedPoints = (
       }
       if (stateMapConfig && isStateMapStrictMode) {
         // map values to numeric indexes (or NaN if no mapping provided)
-        console.log('item before', item);
         convertStateByMap(item, stateMapConfig);
-        console.log('item after', item);
       }
     });
     /* eslint-enable no-param-reassign */
   }
 
-  console.log('fetchedPoints after', fetchedPoints);
   const formattedPoints = fetchedPoints
     .map(item => ({
       // cleanup to ensure it only contains expected values (number as string or NaN)
