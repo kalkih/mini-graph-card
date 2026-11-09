@@ -30,7 +30,8 @@ const getExtrema = (arr, type) => {
 /**
  * Calculate a sum of 'state' values.
  * @param {Array<Object>} arr Array of objects
- * @returns {{sum: number|undefined, count: number}|{}} Object containing a sum of numeric 'state' values
+ * @returns {{sum: number|undefined, count: number}|{}} Object containing a sum
+ * of numeric 'state' values
  * and a count of objects with numeric 'state' values,
  * or an empty object if the source array does not contain numeric 'state' values
  */
