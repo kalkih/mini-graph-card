@@ -43,12 +43,13 @@ const getSum = (arr) => {
     if (Number.isNaN(currValue)) {
       return accum;
     }
-    if (accum.sum === undefined) {
-      accum.sum = 0;
-    }
-    accum.sum += currValue;
-    accum.count += 1;
-    return accum;
+    const currentSum = accum.sum === undefined
+      ? 0
+      : accum.sum;
+    return {
+      sum: currentSum + currValue,
+      count: accum.count + 1,
+    };
   }, { sum: undefined, count: 0 });
 };
 
