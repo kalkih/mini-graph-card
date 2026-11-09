@@ -10,7 +10,7 @@ import { expect, describe, it, beforeEach } from 'vitest';
 import MiniGraphCard from '../../src/main';
 import type { ConfigType } from '../types/configType';
 import type { EntityConfigType } from '../types/entityConfigType';
-import { DEFAULT_MARGIN } from '../../src/const';
+import { DEFAULT_LINE_WIDTH } from '../../src/const';
 
 interface MarginsType {
   min: number;
@@ -82,9 +82,9 @@ const VARIANTS: VariantType[] = [
     descr: 'global line_width',
     config: {
       entities: ENTITIES_EMPTY,
-      line_width: DEFAULT_MARGIN,
+      line_width: DEFAULT_LINE_WIDTH,
     },
-    expected: { min: DEFAULT_MARGIN, max: DEFAULT_MARGIN },
+    expected: { min: DEFAULT_LINE_WIDTH, max: DEFAULT_LINE_WIDTH },
   },
   ////////////////////////////////////////////////////////////////////
   {
