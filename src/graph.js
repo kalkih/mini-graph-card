@@ -463,5 +463,5 @@ export default class Graph {
       }
     }
     return { max, min };
-  }  
+  }
 }
