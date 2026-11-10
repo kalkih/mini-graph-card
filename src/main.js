@@ -2482,7 +2482,7 @@ export default class MiniGraphCard extends LitElement {
    * @param {boolean} isSoftLowerBound "Soft" flag for user-defined min boundary
    * @param {boolean} isSoftUpperBound "Soft" flag for user-defined max boundary
    * @param {Array<number>} fallback Default boundaries if series is empty
-   * @param {number} minRange Constraint to define a minimal range
+   * @param {number|undefined} minRange Constraint to define a minimal range
    * @returns {Array<number>} Calculated boundaries
    */
   getBoundaries(
@@ -2506,21 +2506,24 @@ export default class MiniGraphCard extends LitElement {
       const diff = parseFloat(minRange) - currentRange;
 
       if (diff > 0) {
+        // if (minRange <= range), then boundaries are NOT recalculated
         const weights = [
-          lowerBound !== undefined && !isSoftLowerBound || upperBound === undefined
-            ? 0
+          lowerBound !== undefined && !isSoftLowerBound
+            ? 0 // fixed bound
             : 1,
-          upperBound !== undefined && !isSoftUpperBound || lowerBound === undefined
-            ? 0
+          upperBound !== undefined && !isSoftUpperBound
+            ? 0 // fixed bound
             : 1,
         ];
         const sum = weights[0] + weights[1];
         if (sum > 0) {
+          // move each bound according to a weight
           boundary = [
             boundary[0] - diff * weights[0] / sum,
             boundary[1] + diff * weights[1] / sum,
           ];
         } else {
+          // increase a range symmetrically (if both bounds are fixed)
           boundary = [
             boundary[0] - diff / 2,
             boundary[1] + diff / 2,
