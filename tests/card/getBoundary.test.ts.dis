@@ -1,0 +1,90 @@
+/**
+ * Tests for MiniGraphCard::getBoundary().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+// @vitest-environment jsdom
+import { expect, describe, it, beforeEach } from 'vitest';
+import MiniGraphCard from '../../src/main';
+import { GRAPH_OBJECTS_VALID, GRAPH_OBJECTS_NAN, GRAPH_OBJECTS } from '../common/graph';
+
+describe("MiniGraphCard::getBoundary()", () => {
+  let card: MiniGraphCard;
+
+  beforeEach(() => {
+    card = new MiniGraphCard();
+  });
+
+  for (let minMaxTypeIndex = 0; minMaxTypeIndex < 2; minMaxTypeIndex += 1) {
+    // 0 - testing 'min', 1 - testing 'max'
+    const minMaxType = minMaxTypeIndex === 0
+      ? 'min'
+      : 'max';
+
+    describe(`${minMaxType}`, () => {
+      for (let configValProvidedIndex = 0; configValProvidedIndex < 2; configValProvidedIndex += 1) {
+        // 0 - config value is not provided, 1 - is provided
+        const configVal = configValProvidedIndex === 0
+          ? undefined
+          : 123;
+
+        describe(`configVal = ${configVal}`, () => {
+          for (let isSoftIndex = 0; isSoftIndex < 2; isSoftIndex += 1) {
+            // 0 - not soft, 1 - soft
+            const isSoft = !(isSoftIndex === 0);
+
+            describe(`isSoft = ${isSoft}`, () => {
+              for (let caseIndex = 0; caseIndex < 2; caseIndex += 1) {
+                const caseDescr = caseIndex === 0
+                  ? 'all Graph objects provide valid data for max/min'
+                  : 'some Graph objects provide valid data for max/min, some - NaN';
+
+                it(caseDescr, () => {
+                  const series = caseIndex === 0
+                    ? structuredClone(GRAPH_OBJECTS_VALID)
+                    : structuredClone(GRAPH_OBJECTS);
+                  const fallback = 999; // not used here
+                  const result = card.getBoundary(
+                    minMaxType,
+                    series,
+                    configVal,
+                    isSoft,
+                    fallback,
+                  );
+                  const graphBound = {
+                    min: -300,
+                    max: 150,
+                  };
+                  const expectedResult = configVal
+                    ? isSoft
+                      ? Math[minMaxType](configVal, graphBound[minMaxType])
+                      : configVal
+                    : graphBound[minMaxType];
+                  expect(result).toEqual(expectedResult);
+                });
+              }
+
+              it('all Graph objects provide NaN for max/min', () => {
+                const series = structuredClone(GRAPH_OBJECTS_NAN);
+                const fallback = 999;
+                const result = card.getBoundary(
+                  minMaxType,
+                  series,
+                  configVal,
+                  isSoft,
+                  fallback,
+                );
+                const expectedResult = configVal
+                  ? configVal
+                  : fallback;
+                expect(result).toEqual(expectedResult);
+              });
+            });
+          }
+        });
+      }
+    });
+  }
+});
