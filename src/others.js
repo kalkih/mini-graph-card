@@ -240,6 +240,60 @@ const getBoundsForCustomZeroPosition = (boundary, zeroPos, invert) => {
 };
 
 /**
+ * Recalculate boundaries accounting a 'minRange' value
+ * @param {Array<number>} boundary Boundaries for recalculation
+ * @param {number|undefined} lowerBound User-defined min boundary (clean number)
+ * @param {number|undefined} upperBound User-defined max boundary (clean number)
+ * @param {boolean} isSoftLowerBound "Soft" flag for user-defined min boundary
+ * @param {boolean} isSoftUpperBound "Soft" flag for user-defined max boundary
+ * @param {number|undefined} minRange Constraint to define a minimal range
+ * @returns {Array<number>} Recalculated boundaries
+ */
+const getBoundsForMinRange = (
+  boundary,
+  lowerBound,
+  upperBound,
+  isSoftLowerBound,
+  isSoftUpperBound,
+  minRange,
+) => {
+  let newBoundary = [...boundary];
+  if (!minRange) {
+    return newBoundary;
+  }
+
+  const currentRange = Math.abs(boundary[0] - boundary[1]);
+  const diff = parseFloat(minRange) - currentRange;
+
+  if (diff > 0) {
+    // if (minRange <= range), then boundaries are NOT recalculated
+    const weights = [
+      lowerBound !== undefined && !isSoftLowerBound
+        ? 0
+        : 1,
+      upperBound !== undefined && !isSoftUpperBound
+        ? 0
+        : 1,
+    ];
+    const sum = weights[0] + weights[1];
+    if (sum > 0) {
+      newBoundary = [
+        boundary[0] - diff * weights[0] / sum,
+        boundary[1] + diff * weights[1] / sum,
+      ];
+    } else {
+      // increase a range symmetrically
+      newBoundary = [
+        boundary[0] - diff / 2,
+        boundary[1] + diff / 2,
+      ];
+    }
+  }
+
+  return newBoundary;
+};
+
+/**
  * Checks if animation is enabled for a specific entry in config.entities.
  * @param {object} config Config object
  * @param {number} index Index of an entry in config.entities
@@ -384,6 +438,7 @@ export {
   getFactor,
   getBound,
   getBoundsForCustomZeroPosition,
+  getBoundsForMinRange,
   isEntryAnimated,
   getIntervalEndDate,
   parseOverallFuncName,

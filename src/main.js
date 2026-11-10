@@ -31,6 +31,7 @@ import {
   isEntryAnimated,
   getIntervalEndDate,
   getBoundsForCustomZeroPosition,
+  getBoundsForMinRange,
   parseOverallFuncName,
   isOverallState,
   getObjectAttr,
@@ -2489,7 +2490,7 @@ export default class MiniGraphCard extends LitElement {
    * @param {boolean} isSoftLowerBound "Soft" flag for user-defined min boundary
    * @param {boolean} isSoftUpperBound "Soft" flag for user-defined max boundary
    * @param {Array<number>} fallback Default boundaries if series is empty
-   * @param {number} minRange Constraint to define a minimal range
+   * @param {number|undefined} minRange Constraint to define a minimal range
    * @returns {Array<number>} Calculated boundaries
    */
   getBoundaries(
@@ -2509,31 +2510,14 @@ export default class MiniGraphCard extends LitElement {
 
     // re-calculate boundaries using a defined constraint
     if (minRange) {
-      const currentRange = Math.abs(boundary[0] - boundary[1]);
-      const diff = parseFloat(minRange) - currentRange;
-
-      if (diff > 0) {
-        const weights = [
-          lowerBound !== undefined && !isSoftLowerBound || upperBound === undefined
-            ? 0
-            : 1,
-          upperBound !== undefined && !isSoftUpperBound || lowerBound === undefined
-            ? 0
-            : 1,
-        ];
-        const sum = weights[0] + weights[1];
-        if (sum > 0) {
-          boundary = [
-            boundary[0] - diff * weights[0] / sum,
-            boundary[1] + diff * weights[1] / sum,
-          ];
-        } else {
-          boundary = [
-            boundary[0] - diff / 2,
-            boundary[1] + diff / 2,
-          ];
-        }
-      }
+      boundary = getBoundsForMinRange(
+        boundary,
+        lowerBound,
+        upperBound,
+        isSoftLowerBound,
+        isSoftUpperBound,
+        minRange,
+      );
     }
 
     return boundary;
