@@ -128,7 +128,7 @@ export default class Graph {
    * Update the graph data: group history into time buckets,
    * calculate coordinates, define new value boundaries
    * @param {Date} endTime Current interval's end time
-   * @param {Array} [history] Array of historical data
+   * @param {Array<object>} [history=undefined] Array of historical data
    * @returns {void}
    */
   update(endTime, history = undefined) {
@@ -161,8 +161,7 @@ export default class Graph {
     }
 
     // define new value boundaries
-    this.min = Math.min(...this.coords.map(item => Number(item[V])));
-    this.max = Math.max(...this.coords.map(item => Number(item[V])));
+    ({ min: this.min, max: this.max } = this._calcBounds());
   }
 
   /**
@@ -446,9 +445,26 @@ export default class Graph {
    * @returns {number|undefined} "Overall" value
    */
   _calcOverall() {
-    const numberHistStates = this._history.map(item => parseFloat(item.state));
-    return numberHistStates.length > 0
-      ? this._overallAggregateFunc(numberHistStates)
+    return this._history.length > 0
+      ? this._overallAggregateFunc(this._history)
       : undefined;
+  }
+
+  /**
+   * Calculate min/max bounds based on "coords" array
+   * @returns {{min: number, max: number}} Min/max bounds (can be NaN for empty or NaN coords)
+   */
+  _calcBounds() {
+    let max = NaN;
+    let min = NaN;
+    for (let i = 0; i < this.coords.length; i += 1) {
+      const val = this.coords[i][V];
+      if (!Number.isNaN(val)) {
+        // process only numeric values
+        if (Number.isNaN(max) || val > max) max = val;
+        if (Number.isNaN(min) || val < min) min = val;
+      }
+    }
+    return { max, min };
   }
 }

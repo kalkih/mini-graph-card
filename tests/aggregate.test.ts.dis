@@ -1,44 +1,133 @@
 /**
- * Tests for aggregation functions.
+ * Tests for getExtrema() & getAvg functions.
  *
  * The file is disabled (renamed to *.dis) & thus is not used during a build process;
  * remove the "dis" extension to use it locally in your VSCode devcontainer.
  */
 
 import { expect, describe, it } from 'vitest';
-import { aggregateFuncMap } from '../src/aggregate';
-
-const ITEMS: number[] = [22.5,-10.5,0,100,45.2,-3.14,7,7,15.8,-88,50];
-
-type AggregateKey = keyof typeof aggregateFuncMap;
-
-const EXPECTED: Record<AggregateKey, number> = {
-  avg: 13.26,
-  median: 7,
-  max: 100,
-  min: -88,
-  sum: 145.86,
-  first: 22.5,
-  last: 50,
-  delta: 188,
-  diff: 27.5,
-};
-
-const FUNCS = Object.keys(aggregateFuncMap) as AggregateKey[];
+import { aggregateFuncMap, getExtrema, getAvg } from '../src/aggregate';
+import {
+  HISTORY_NUMERIC,
+  HISTORY_JUNK,
+  HISTORY_ALL_NUMERIC,
+  AGGREGATED_EXPECTED,
+  AGGREGATED_EXPECTED_JUNK
+} from './common/history';
+import type { HistoryItemType } from './common/history';
+import { AGGREGATE_FUNCS } from './types/aggregate';
 
 describe('aggregate functions', () => {
-  for (let funcIndex = 0; funcIndex < FUNCS.length; funcIndex += 1) {
-    const funcName = FUNCS[funcIndex];
-    const aggregateFunc = aggregateFuncMap[funcName];
-    const expected = EXPECTED[funcName];
+  describe('empty array', () => {
+    for (let funcIndex = 0; funcIndex < AGGREGATE_FUNCS.length; funcIndex += 1) {
+      const funcName = AGGREGATE_FUNCS[funcIndex];
+      const aggregateFunc = aggregateFuncMap[funcName];
+      it(`${funcName}`, () => {
+        const result = aggregateFunc([]);
+        expect(Number.isNaN(result)).toBe(true);
+      });
+    }
+  });
 
-    it(`${funcName}`, () => {
-      const result = aggregateFunc(ITEMS);
-      if (['max', 'min', 'last', 'first'].includes(funcName)) {
-        expect(result).toEqual(expected);
-      } else {
-        expect(result).toBeCloseTo(expected, 6);
-      }
+  describe('junk array', () => {
+    for (let funcIndex = 0; funcIndex < AGGREGATE_FUNCS.length; funcIndex += 1) {
+      const funcName = AGGREGATE_FUNCS[funcIndex];
+      const aggregateFunc = aggregateFuncMap[funcName];
+      it(`${funcName}`, () => {
+        const result = aggregateFunc(HISTORY_JUNK);
+        expect(Number.isNaN(result)).toBe(true);
+      });
+    }
+  });
+
+  describe('filled array (no junk)', () => {
+    for (let funcIndex = 0; funcIndex < AGGREGATE_FUNCS.length; funcIndex += 1) {
+      const funcName = AGGREGATE_FUNCS[funcIndex];
+      const aggregateFunc = aggregateFuncMap[funcName];
+      const expected = AGGREGATED_EXPECTED[funcName];
+      it(`${funcName}`, () => {
+        const result = aggregateFunc(HISTORY_NUMERIC);
+        if (['max', 'min', 'last', 'first'].includes(funcName)) {
+          expect(result).toEqual(expected);
+        } else {
+          expect(result).toBeCloseTo(expected, 6);
+        }
+      });
+    }
+  });
+
+  describe('filled array (with junk)', () => {
+    for (let funcIndex = 0; funcIndex < AGGREGATE_FUNCS.length; funcIndex += 1) {
+      const funcName = AGGREGATE_FUNCS[funcIndex];
+      const aggregateFunc = aggregateFuncMap[funcName];
+      const expected = AGGREGATED_EXPECTED_JUNK[funcName];
+      it(`${funcName}`, () => {
+        const result = aggregateFunc(HISTORY_ALL_NUMERIC);
+        if (['max', 'min', 'last', 'first'].includes(funcName)) {
+          if (!Number.isNaN(expected)) {
+            expect(result).toEqual(expected);
+          } else {
+            expect(Number.isNaN(result)).toBe(true);
+          }
+        } else {
+          if (!Number.isNaN(expected)) {
+            expect(result).toBeCloseTo(expected, 6);
+          } else {
+            expect(Number.isNaN(result)).toBe(true);
+          }
+        }
+      });
+    }
+  });
+});
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+describe(`getExtrema()`, () => {
+  for (let extremaTypeIndex = 0; extremaTypeIndex < 2; extremaTypeIndex += 1) {
+    const extremaType = extremaTypeIndex === 0
+      ? 'min'
+      : 'max';
+    describe(`${extremaType}`, () => {
+      it('empty array', () => {
+        const result: HistoryItemType = getExtrema([], extremaType) as HistoryItemType;
+        expect(result).toEqual({});
+        expect(result.state).toBeUndefined();
+      });
+
+      it('junk array', () => {
+        const result: HistoryItemType = getExtrema(HISTORY_JUNK, extremaType) as HistoryItemType;
+        expect(result).toEqual({});
+        expect(result.state).toBeUndefined();
+      });
+
+      it('filled array', () => {
+        const expected = extremaTypeIndex === 0
+          ? AGGREGATED_EXPECTED.min
+          : AGGREGATED_EXPECTED.max;
+        const result: HistoryItemType = getExtrema(HISTORY_ALL_NUMERIC, extremaType) as HistoryItemType;
+        expect(parseFloat(result.state)).toBeCloseTo(expected, 6);
+      });
     });
   }
+});
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+describe('getAvg()', () => {
+  it('empty array', () => {
+    const result = getAvg([]);
+    expect(Number.isNaN(result)).toBe(true);
+  });
+
+  it('junk array', () => {
+    const result = getAvg(HISTORY_JUNK);
+    expect(Number.isNaN(result)).toBe(true);
+  });
+
+  it('filled array', () => {
+    const expected = AGGREGATED_EXPECTED.avg;
+    const result = getAvg(HISTORY_ALL_NUMERIC);
+    expect(result).toBeCloseTo(expected, 6);
+  });
 });

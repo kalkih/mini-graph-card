@@ -1,0 +1,95 @@
+/**
+ * Tests for Graph._calcBounds() method.
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it, beforeEach } from 'vitest';
+import Graph from '../../src/graph';
+import { GRAPH_SETTINGS } from '../common/graph';
+
+describe("Graph._calcBounds()", () => {
+  let graph: any;
+
+  beforeEach(() => {
+    graph = new Graph({
+      width: GRAPH_SETTINGS.width,
+      height: GRAPH_SETTINGS.height,
+      margin: GRAPH_SETTINGS.margin,
+    });
+    graph.coords = [];
+  });
+
+  it("Coords empty", () => {
+      graph.coords = [];
+      const bounds = graph._calcBounds();
+      expect(Number.isNaN(bounds.min)).toBe(true);
+      expect(Number.isNaN(bounds.max)).toBe(true);
+  });
+
+  it("Coords with numbers only", () => {
+      graph.coords = [
+      [0, 0, -10.5],
+      [0, 0, 0.0],
+      [0, 0, -88.0],
+      [0, 0, 50.0],
+      [0, 0, -3.14],
+      ];
+      const bounds = graph._calcBounds();
+      expect(bounds.min).toEqual(-88.0);
+      expect(bounds.max).toEqual(50.0);
+  });
+
+  it("Coords with NaNs", () => {
+    graph.coords = [
+      [0, 0, -10.5],
+      [0, 0, 0.0],
+      [0, 0, -88.0],
+      [0, 0, NaN],
+      [0, 0, -3.14],
+    ];
+    const bounds = graph._calcBounds();
+    expect(bounds.min).toEqual(-88.0);
+    expect(bounds.max).toEqual(0.0);
+  });
+
+  it("Coords with all NaNs, except one value (negative)", () => {
+    graph.coords = [
+      [0, 0, NaN],
+      [0, 0, NaN],
+      [0, 0, -3.14],
+      [0, 0, NaN],
+      [0, 0, NaN],
+    ];
+    const bounds = graph._calcBounds();
+    expect(bounds.min).toEqual(-3.14);
+    expect(bounds.max).toEqual(-3.14);
+  });
+
+  it("Coords with all NaNs, except one value (positive)", () => {
+    graph.coords = [
+      [0, 0, NaN],
+      [0, 0, 100.3],
+      [0, 0, NaN],
+      [0, 0, NaN],
+      [0, 0, NaN],
+    ];
+    const bounds = graph._calcBounds();
+    expect(bounds.min).toEqual(100.3);
+    expect(bounds.max).toEqual(100.3);
+  });
+
+  it("Coords with all NaNs", () => {
+    graph.coords = [
+      [0, 0, NaN],
+      [0, 0, NaN],
+      [0, 0, NaN],
+      [0, 0, NaN],
+      [0, 0, NaN],
+    ];
+    const bounds = graph._calcBounds();
+    expect(Number.isNaN(bounds.min)).toBe(true);
+    expect(Number.isNaN(bounds.max)).toBe(true);
+  });
+});

@@ -8,29 +8,22 @@
 import { expect, describe, it, beforeEach } from 'vitest';
 import Graph from '../../src/graph';
 import { aggregateFuncMap } from '../../src/aggregate';
-import { GRAPH_SETTINGS } from './graph';
+import { GRAPH_SETTINGS } from '../common/graph';
+import {
+  HISTORY_NUMERIC,
+  HISTORY_JUNK,
+  HISTORY_ALL_NUMERIC,
+  AGGREGATED_EXPECTED,
+  AGGREGATED_EXPECTED_JUNK,
+} from '../common/history';
+import type { AggregateKey } from '../types/aggregate';
+import { AGGREGATE_FUNCS } from '../types/aggregate';
 
-type AggregateKey = keyof typeof aggregateFuncMap;
-
-const RESULT_AVG = 5.1;
-
-const EXPECTED: Record<AggregateKey, number> = {
-  avg: RESULT_AVG,
-  median: 15.15,
-  min: -50.3,
-  max: 40.4,
-  sum: 20.4,
-  first: 10.1,
-  last: 40.4,
-  delta: 90.7,
-  diff: 30.3,
-};
-
-const FUNCS = Object.keys(aggregateFuncMap) as AggregateKey[];
+const RESULT_AVG = AGGREGATED_EXPECTED.avg;
 
 describe("Graph._calcOverall()", () => {
   let graph: any;
-  const setAggregateFunc = (func?: any, funcOverall?: any) => {
+  const setAggregateFunc = (func?: string, funcOverall?: string) => {
     graph._aggregateFuncName = func;
     graph._calcPoint = aggregateFuncMap[func as AggregateKey] || aggregateFuncMap['avg'];
 
@@ -44,92 +37,139 @@ describe("Graph._calcOverall()", () => {
       height: GRAPH_SETTINGS.height,
       margin: GRAPH_SETTINGS.margin,
     });
-    graph._history = [{ state: "10.1" }, { state: "20.2" }, { state: "-50.3" }, { state: "40.4" }];
   });
 
-  it("empty history", () => {
-    graph._history = [];
-    const result = graph._calcOverall();
-    expect(result).toBeUndefined();
-  });
+  describe("history with numbers only, default aggregations", () => {
+    beforeEach(() => {
+      graph._history = HISTORY_NUMERIC;
+    });
 
-  it("default aggregateFunc", () => {
-    const result = graph._calcOverall();
-    expect(result).toEqual(RESULT_AVG);
-  });
+    it("empty history", () => {
+      graph._history = [];
+      const result = graph._calcOverall();
+      expect(result).toBeUndefined();
+    });
 
-  it("invalid aggregateFunc", () => {
-    setAggregateFunc('xxx');
-    const result = graph._calcOverall();
-    expect(result).toEqual(RESULT_AVG);
-  });
+    it("history with NaN only", () => {
+      graph._history = HISTORY_JUNK;
+      const result = graph._calcOverall();
+      expect(Number.isNaN(result)).toBe(true);
+    });
 
-  describe("use aggregateFuncName if overallAggregateFuncName is not defined", () => {
-    for (let funcIndex = 0; funcIndex < FUNCS.length; funcIndex += 1) {
-      const funcName = FUNCS[funcIndex];
-      const expected = EXPECTED[funcName];
+    it("default aggregateFunc", () => {
+      const result = graph._calcOverall();
+      expect(result).toBeCloseTo(RESULT_AVG, 6);
+    });
 
-      it(`common ${funcName}, overall undefined`, () => {
-        setAggregateFunc(funcName);
-        // console.log(graph);
-        const result = graph._calcOverall();
-        if (['max', 'min', 'last', 'first'].includes(funcName)) {
-          expect(result).toEqual(expected);
-        } else {
-          expect(result).toBeCloseTo(expected, 6);
-        }
-        expect(graph._aggregateFuncName).toEqual(funcName);
-        expect(graph._calcPoint).toEqual(aggregateFuncMap[funcName]);
-        expect(graph._overallAggregateFuncName).toBeUndefined();
-        expect(graph._overallAggregateFunc).toEqual(aggregateFuncMap[funcName]);
+    it("invalid aggregateFunc", () => {
+      setAggregateFunc('xxx');
+      const result = graph._calcOverall();
+      expect(result).toBeCloseTo(RESULT_AVG, 6);
+    });
+
+    describe("use aggregateFuncName if overallAggregateFuncName is not defined", () => {
+      beforeEach(() => {
+        graph._history = HISTORY_ALL_NUMERIC;
       });
-    }
-  });
 
-  describe("use overallAggregateFuncName if defined, aggregateFuncName is default", () => {
-    for (let overallFuncIndex = 0; overallFuncIndex < FUNCS.length; overallFuncIndex += 1) {
-      const overallFuncName = FUNCS[overallFuncIndex];
-      const expected = EXPECTED[overallFuncName];
+      for (let funcIndex = 0; funcIndex < AGGREGATE_FUNCS.length; funcIndex += 1) {
+        const funcName = AGGREGATE_FUNCS[funcIndex];
+        const expected = AGGREGATED_EXPECTED_JUNK[funcName];
 
-      it(`common undefined, overall ${overallFuncName}`, () => {
-        setAggregateFunc(undefined, overallFuncName);
-        // console.log(graph);
-        const result = graph._calcOverall();
-        if (['max', 'min', 'last', 'first'].includes(overallFuncName)) {
-          expect(result).toEqual(expected);
-        } else {
-          expect(result).toBeCloseTo(expected, 6);
-        }
-        expect(graph._aggregateFuncName).toEqual(undefined);
-        expect(graph._calcPoint).toEqual(aggregateFuncMap['avg']);
-        expect(graph._overallAggregateFuncName).toEqual(overallFuncName);
-        expect(graph._overallAggregateFunc).toEqual(aggregateFuncMap[overallFuncName]);
-      });
-    }
-  });
-
-  describe("use different aggregateFuncName & overallAggregateFuncName", () => {
-    for (let funcIndex = 0; funcIndex < FUNCS.length; funcIndex += 1) {
-      const funcName = FUNCS[funcIndex];
-      for (let overallFuncIndex = 0; overallFuncIndex < FUNCS.length; overallFuncIndex += 1) {
-        const overallFuncName = FUNCS[overallFuncIndex];
-        const expected = EXPECTED[overallFuncName];
-
-        it(`common ${funcName}, overall ${overallFuncName}`, () => {
-          setAggregateFunc(funcName, overallFuncName);
+        it(`common ${funcName}, overall undefined`, () => {
+          setAggregateFunc(funcName);
           // console.log(graph);
           const result = graph._calcOverall();
-          if (['max', 'min', 'last', 'first'].includes(overallFuncName)) {
-            expect(result).toEqual(expected);
+          if (['max', 'min', 'last', 'first'].includes(funcName)) {
+            if (!Number.isNaN(expected)) {
+              expect(result).toEqual(expected);
+            } else {
+              expect(Number.isNaN(result)).toBe(true);
+            }
           } else {
-            expect(result).toBeCloseTo(expected, 6);
+            if (!Number.isNaN(expected)) {
+              expect(result).toBeCloseTo(expected, 6);
+            } else {
+              expect(Number.isNaN(result)).toBe(true);
+            }
           }
           expect(graph._aggregateFuncName).toEqual(funcName);
           expect(graph._calcPoint).toEqual(aggregateFuncMap[funcName]);
+          expect(graph._overallAggregateFuncName).toBeUndefined();
+          expect(graph._overallAggregateFunc).toEqual(aggregateFuncMap[funcName]);
+        });
+      }
+    });
+
+    describe("use overallAggregateFuncName if defined, aggregateFuncName is default", () => {
+      beforeEach(() => {
+        graph._history = HISTORY_ALL_NUMERIC;
+      });
+
+      for (let overallFuncIndex = 0; overallFuncIndex < AGGREGATE_FUNCS.length; overallFuncIndex += 1) {
+        const overallFuncName = AGGREGATE_FUNCS[overallFuncIndex];
+        const expected = AGGREGATED_EXPECTED_JUNK[overallFuncName];
+
+        it(`common undefined, overall ${overallFuncName}`, () => {
+          setAggregateFunc(undefined, overallFuncName);
+          // console.log(graph);
+          const result = graph._calcOverall();
+          if (['max', 'min', 'last', 'first'].includes(overallFuncName)) {
+            if (!Number.isNaN(expected)) {
+              expect(result).toEqual(expected);
+            } else {
+              expect(Number.isNaN(result)).toBe(true);
+            }
+          } else {
+            if (!Number.isNaN(expected)) {
+              expect(result).toBeCloseTo(expected, 6);
+            } else {
+              expect(Number.isNaN(result)).toBe(true);
+            }
+          }
+          expect(graph._aggregateFuncName).toEqual(undefined);
+          expect(graph._calcPoint).toEqual(aggregateFuncMap['avg']);
           expect(graph._overallAggregateFuncName).toEqual(overallFuncName);
           expect(graph._overallAggregateFunc).toEqual(aggregateFuncMap[overallFuncName]);
         });
       }
-    }
+    });
+
+    describe("use different aggregateFuncName & overallAggregateFuncName", () => {
+      beforeEach(() => {
+        graph._history = HISTORY_ALL_NUMERIC;
+      });
+
+      for (let funcIndex = 0; funcIndex < AGGREGATE_FUNCS.length; funcIndex += 1) {
+        const funcName = AGGREGATE_FUNCS[funcIndex];
+        for (let overallFuncIndex = 0; overallFuncIndex < AGGREGATE_FUNCS.length; overallFuncIndex += 1) {
+          const overallFuncName = AGGREGATE_FUNCS[overallFuncIndex];
+          const expected = AGGREGATED_EXPECTED_JUNK[overallFuncName];
+
+          it(`common ${funcName}, overall ${overallFuncName}`, () => {
+            setAggregateFunc(funcName, overallFuncName);
+            // console.log(graph);
+            const result = graph._calcOverall();
+            if (['max', 'min', 'last', 'first'].includes(overallFuncName)) {
+              if (!Number.isNaN(expected)) {
+                expect(result).toEqual(expected);
+              } else {
+                expect(Number.isNaN(result)).toBe(true);
+              }
+            } else {
+              if (!Number.isNaN(expected)) {
+                expect(result).toBeCloseTo(expected, 6);
+              } else {
+                expect(Number.isNaN(result)).toBe(true);
+              }
+            }
+            expect(graph._aggregateFuncName).toEqual(funcName);
+            expect(graph._calcPoint).toEqual(aggregateFuncMap[funcName]);
+            expect(graph._overallAggregateFuncName).toEqual(overallFuncName);
+            expect(graph._overallAggregateFunc).toEqual(aggregateFuncMap[overallFuncName]);
+          });
+        }
+      }
+    });
   });
 });

@@ -18,4 +18,10 @@ export const GRAPH_OBJECTS_VALID: GraphMockType[] = [
   { min: -300, max: -100 },
 ];
 
-export const GRAPH_OBJECTS = [ ...GRAPH_OBJECTS_VALID ];
+export const GRAPH_OBJECTS_NAN: GraphMockType[] = [
+  { min: NaN, max: NaN },
+  { min: NaN, max: NaN },
+  { min: NaN, max: NaN },
+];
+
+export const GRAPH_OBJECTS = [ ...GRAPH_OBJECTS_VALID, ...GRAPH_OBJECTS_NAN ];

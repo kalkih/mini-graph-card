@@ -36,10 +36,12 @@ import {
   isOverallState,
   getObjectAttr,
   isObjectAttr,
-  convertStateByMap,
 } from './others';
 import {
-  getMin, getAvg, getMax,
+  getExtrema,
+  getAvg,
+} from './aggregate';
+import {
   getMilli,
   compress, decompress,
   getFirstDefinedItem,
@@ -51,6 +53,11 @@ import {
   computeEntityName,
   entityNamesChanged,
 } from './entityName';
+import {
+  prepareCachedHistory,
+  alignFetchedWithCurrent,
+  transformFetchedPoints,
+} from './history';
 
 const isUnavailableState = value => ['unavailable'].includes(value);
 
@@ -1933,7 +1940,7 @@ export default class MiniGraphCard extends LitElement {
         // note: no usual need to map the "unavailable" word
         if (!stateMap && !isUnavailableState(inState)) {
           log(`value [${inState}] not found in state_map: `
-            + `[${getStringifiedValue(stateMapArray)}]`); // ?? { isError: false }
+            + `[${getStringifiedValue(stateMapArray)}]`);
         }
       } else {
         // relaxed mode - state_map presumably contains particular values to be "re-labeled"
@@ -2458,20 +2465,36 @@ export default class MiniGraphCard extends LitElement {
       throw new Error(error);
     }
 
+    // Max/min values from a Graph object can be NaN - filter them out
+    const validGraphValues = series
+      .map(ele => ele[type])
+      .filter(val => !Number.isNaN(val));
+
     if (configVal === undefined) {
       // dynamic boundary depending on values
+      if (validGraphValues.length === 0) {
+        // no valid coords in Graph - use a fallback
+        return fallback;
+      }
       // take a max/min value out of ["max/min value of each Graph object"]
-      const computed = Math[type](...series.map(ele => ele[type]));
-      return isNumeric(computed) ? computed : fallback;
+      const computed = Math[type](...validGraphValues);
+      return isNumeric(computed) // just in case
+        ? computed
+        : fallback;
     }
+
     if (!isSoft) {
-      // fixed boundary
-      // take a user defined boundary
+      // fixed boundary - take a user defined boundary
       return configVal;
     }
+
     // soft boundary (respecting out of range values)
+    if (validGraphValues.length === 0) {
+      // no valid coords in Graph - take a user defined boundary
+      return configVal;
+    }
     // take a max/min value out of ["user-defined boundary", "max/min value of each Graph object"]
-    return Math[type](configVal, ...series.map(ele => ele[type]));
+    return Math[type](configVal, ...validGraphValues);
   }
 
   /**
@@ -2599,6 +2622,9 @@ export default class MiniGraphCard extends LitElement {
    */
   async updateEntity(stateObj, index, start, end) {
     const entityConfig = this.config.entities[index];
+    const entityId = entityConfig.entity;
+    const stateMapConfig = this._entityStateMap[index];
+    const isStateMapStrictMode = stateMapConfig && stateMapConfig.keep_values !== true;
     // "overall" value is shown for this entity
     const isStateOverall = (index === 0 || entityConfig.show_state)
       && isOverallState(this.config.show.state);
@@ -2607,7 +2633,7 @@ export default class MiniGraphCard extends LitElement {
       // skip static values which are not queued
       || (!stateObj && this._isStaticValue[index] && !this.updateQueue.includes(`static_value-${index}`))
       // skip entities which are not queued
-      || (stateObj && !this.updateQueue.includes(`${stateObj.entity_id}-${index}`))
+      || (stateObj && !this.updateQueue.includes(`${entityId}-${index}`))
       // do not process a history if no graph is displayed
       // unless "overall" value is displayed
       || (entityConfig.show_graph === false && !isStateOverall)
@@ -2625,53 +2651,36 @@ export default class MiniGraphCard extends LitElement {
 
     // process an entity
     // remove a corresponding entry from a queue for a processed entity
-    this.updateQueue = this.updateQueue.filter(entry => entry !== `${stateObj.entity_id}-${index}`);
+    this.updateQueue = this.updateQueue.filter(entry => entry !== `${entityId}-${index}`);
 
     let stateHistory = [];
     let fetchStart = start;
     let skipInitialState = false;
-
     // cache is converted with state_map
     let isCacheConverted = false;
 
     const history = this.config.cache
-      ? await this.getCache(`${stateObj.entity_id}_${index}`, this.config.compress)
+      ? await this.getCache(`${entityId}_${index}`, this.config.compress)
       : undefined;
     if (history && history.hours_to_show === this.config.hours_to_show) {
-      // process a cached history
-      stateHistory = history.data.map(item => ({ ...item }));
-      isCacheConverted = history.state_map_converted === true;
-
-      let currDataIndex = stateHistory.findIndex(item => new Date(item.last_changed) > start);
-      if (currDataIndex !== -1) {
-        if (currDataIndex > 0) {
-          // include previous item
-          currDataIndex -= 1;
-          // but change it's last changed time
-          stateHistory[currDataIndex].last_changed = start;
-        }
-
-        // delete everything before the found point
-        stateHistory = stateHistory.slice(currDataIndex);
-        // skip initial state when fetching recent/not-cached data
-        skipInitialState = true;
-
-        const lastFetched = new Date(history.last_fetched);
-        fetchStart = new Date(lastFetched - 1);
-      } else {
-        // there were no states which could be used in current graph so clearing
-        stateHistory = [];
-      }
+      // process a сached history
+      ({
+        history: stateHistory,
+        isCacheConverted, // cache contains a mapping
+        skipInitialState,
+        fetchStart, // reviewed "fetch start" time
+      } = prepareCachedHistory(history, start));
     }
 
     // fetch recent history
     let fetchedHistory = await this.fetchRecent(
-      stateObj.entity_id,
+      entityId,
       fetchStart,
       end,
       entityConfig.attribute ? false : skipInitialState,
       !!entityConfig.attribute,
     );
+    // console.log("hist: fetchedHistory", fetchedHistory);
 
     // just in case
     if (!fetchedHistory || fetchedHistory.length === 0 || fetchedHistory[0].length === 0) {
@@ -2679,96 +2688,31 @@ export default class MiniGraphCard extends LitElement {
     }
 
     // check if the latest point corresponds to the current state
-    // for that, take the last history item
-    let isLastItemTakenFromCache = false;
-    let lastHistoryItem;
-    if (fetchedHistory[0].length > 0) {
-      // taken from fetched history
-      lastHistoryItem = fetchedHistory[0][fetchedHistory[0].length - 1];
-    } else {
-      // taken from cache
-      isLastItemTakenFromCache = stateHistory.length > 0;
-      lastHistoryItem = isLastItemTakenFromCache
-        ? stateHistory[stateHistory.length - 1]
-        : null;
-    }
-
-    // current value of state/attribute
-    let currentValue = entityConfig.attribute
-      ? getObjectAttr(stateObj.attributes, entityConfig.attribute)
-      : stateObj.state;
-
-    // cached history may contain mapped values (indexes),
-    // to compare a current value with an index, we need to process state_map.
-    // note: stateMapConfig is null if state_map is undefined or has an empty map array
-    const stateMapConfig = this._entityStateMap[index];
-    const isStateMapStrictMode = stateMapConfig && stateMapConfig.keep_values !== true;
-    if (isLastItemTakenFromCache && isCacheConverted && isStateMapStrictMode) {
-      // need to convert before comparing
-      const mock = { state: currentValue };
-      convertStateByMap(mock, stateMapConfig);
-      currentValue = mock.state; // currentValue is an index now
-    }
-
-    // last value of state/attribute from history
-    const lastHistoryValue = lastHistoryItem
-      ? entityConfig.attribute && lastHistoryItem.attributes
-        ? getObjectAttr(lastHistoryItem.attributes, entityConfig.attribute)
-        : lastHistoryItem.state
-      : null;
-
-    // if the latest record from the history does not correspond to the current state/attribute
-    // - add the current state/attribute to the history
-    // (may happen since data in recorder may be not ready yet)
-    if (lastHistoryValue !== currentValue) {
-      fetchedHistory[0].push({
-        entity_id: stateObj.entity_id,
-        state: stateObj.state,
-        last_changed: stateObj.last_changed,
-        last_updated: stateObj.last_updated,
-        attributes: stateObj.attributes,
-      });
-    }
+    // manually add the current state if latest point & current state are different
+    alignFetchedWithCurrent(
+      fetchedHistory[0],
+      stateHistory,
+      stateObj,
+      entityConfig.attribute,
+      stateMapConfig,
+      isStateMapStrictMode,
+      isCacheConverted,
+    );
 
     if (fetchedHistory[0] && fetchedHistory[0].length > 0) {
-      /**
-       * Seems that some old HA versions could not handle properly
-       * a combination of "retrieve a history for attributes" & "skipInitialState=true".
-       * As a workaround, it was implemented a hack: pass "skipInitialState=false" when
-       * requesting a history for attributes, and then delete the 1st point ("initial state")
-       * if skipInitialState=true.
-       * In newer versions of HA (at least in 2026.8), the workaround is not required,
-       * the mentioned combination is handled properly.
-       * Yet the workaround stays for a compatibility with old HA versions.
-       */
-      if (entityConfig.attribute && skipInitialState) {
-        fetchedHistory[0].shift();
-      }
-
-      // check if we should convert states to numeric values
-      if (stateMapConfig || entityConfig.attribute) {
-        fetchedHistory[0].forEach((item) => {
-          if (entityConfig.attribute) {
-            // eslint-disable-next-line no-param-reassign
-            item.state = getObjectAttr(item.attributes, entityConfig.attribute);
-            // eslint-disable-next-line no-param-reassign
-            delete item.attributes;
-          }
-          if (stateMapConfig && isStateMapStrictMode) {
-            convertStateByMap(item, stateMapConfig);
-          }
-        });
-      }
-
-      const processedPoints = fetchedHistory[0]
-        .filter(item => !Number.isNaN(parseFloat(item.state)));
-      const formattedPoints = processedPoints.map(item => ({
-        last_changed: entityConfig.attribute ? item.last_updated : item.last_changed,
-        state: item.state,
-      }));
+      // transform a fetched history to an array of valid values
+      const formattedPoints = transformFetchedPoints(
+        fetchedHistory[0],
+        entityConfig.attribute,
+        stateMapConfig,
+        isStateMapStrictMode,
+        skipInitialState,
+      );
+      // join with a cached history
       stateHistory = [...stateHistory, ...formattedPoints];
 
       if (this.config.cache) {
+        // save a total history in a cache
         const data = {
           hours_to_show: this.config.hours_to_show,
           last_fetched: new Date(),
@@ -2780,7 +2724,7 @@ export default class MiniGraphCard extends LitElement {
         }
         this
           .setCache(
-            `${stateObj.entity_id}_${index}`,
+            `${entityId}_${index}`,
             data,
             this.config.compress,
           )
@@ -2793,7 +2737,7 @@ export default class MiniGraphCard extends LitElement {
 
     if (stateHistory.length === 0) return; // no history - nothing to pass to Graph
 
-    if (this.entity[0] && stateObj.entity_id === this.entity[0].entity_id) {
+    if (index === 0) {
       this.updateExtrema(stateHistory);
     }
 
@@ -2818,18 +2762,21 @@ export default class MiniGraphCard extends LitElement {
 
   updateExtrema(history) {
     const { extrema, average } = this.config.show;
+    const avg = average ? getAvg(history) : NaN;
     this.abs = [
       ...(extrema ? [{
         type: 'min',
-        ...getMin(history, 'state'),
+        ...getExtrema(history, 'min'),
       }] : []),
       ...(average ? [{
         type: 'avg',
-        state: getAvg(history, 'state'),
+        state: Number.isNaN(avg)
+          ? undefined
+          : avg,
       }] : []),
       ...(extrema ? [{
         type: 'max',
-        ...getMax(history, 'state'),
+        ...getExtrema(history, 'max'),
       }] : []),
     ];
   }
