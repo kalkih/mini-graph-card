@@ -2465,20 +2465,36 @@ export default class MiniGraphCard extends LitElement {
       throw new Error(error);
     }
 
+    // Max/min values from a Graph object can be NaN - filter them out
+    const validGraphValues = series
+      .map(ele => ele[type])
+      .filter(val => !Number.isNaN(val));
+
     if (configVal === undefined) {
       // dynamic boundary depending on values
+      if (validGraphValues.length === 0) {
+        // no valid coords in Graph - use a fallback
+        return fallback;
+      }
       // take a max/min value out of ["max/min value of each Graph object"]
-      const computed = Math[type](...series.map(ele => ele[type]));
-      return isNumeric(computed) ? computed : fallback;
+      const computed = Math[type](...validGraphValues);
+      return isNumeric(computed) // just in case
+        ? computed
+        : fallback;
     }
+
     if (!isSoft) {
-      // fixed boundary
-      // take a user defined boundary
+      // fixed boundary - take a user defined boundary
       return configVal;
     }
+
     // soft boundary (respecting out of range values)
+    if (validGraphValues.length === 0) {
+      // no valid coords in Graph - take a user defined boundary
+      return configVal;
+    }
     // take a max/min value out of ["user-defined boundary", "max/min value of each Graph object"]
-    return Math[type](configVal, ...series.map(ele => ele[type]));
+    return Math[type](configVal, ...validGraphValues);
   }
 
   /**
