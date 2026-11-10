@@ -24,7 +24,7 @@ describe("MiniGraphCard::getBoundaries()", () => {
 
   for (let arrayIndex = 0; arrayIndex < 2; arrayIndex += 1) {
     // 0 - testing empty array,
-    // 1 - testing 'valid data' // ????????????????????? исправь описание
+    // 1 - testing 'valid data'
     const arrayDescr = arrayIndex === 0
       ? 'empty array'
       : 'valid data';
