@@ -1,0 +1,152 @@
+/**
+ * Tests for MiniGraphCard::getBoundaries().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+// @vitest-environment jsdom
+import { expect, describe, it, beforeEach } from 'vitest';
+import MiniGraphCard from '../../src/main';
+import { GRAPH_OBJECTS } from '../common/graph';
+import type { BoundsArrayType } from '../types/boundsType';
+
+const BOUNDS_USER_DEFINED: BoundsArrayType = [100, 110];
+const FALLBACK: BoundsArrayType = [90, 200];
+const MIN_RANGE: number = 0; // minRange is checked in another tests
+
+describe("MiniGraphCard::getBoundaries()", () => {
+  let card: MiniGraphCard;
+
+  beforeEach(() => {
+    card = new MiniGraphCard();
+  });
+
+  for (let arrayIndex = 0; arrayIndex < 2; arrayIndex += 1) {
+    // 0 - testing empty array,
+    // 1 - testing 'valid data' // ????????????????????? исправь описание
+    const arrayDescr = arrayIndex === 0
+      ? 'empty array'
+      : 'valid data';
+
+    describe(arrayDescr, () => {
+      for (let lowerConfigValProvidedIndex = 0; lowerConfigValProvidedIndex < 2; lowerConfigValProvidedIndex += 1) {
+        // 0 - lower config value is not provided, 1 - is provided
+        const lowerConfigValDescr = lowerConfigValProvidedIndex === 0
+          ? 'lower configVal undefined'
+          : 'lower configVal defined';
+
+        describe(lowerConfigValDescr, () => {
+          for (let minRangeIndex = 0; minRangeIndex < 2; minRangeIndex += 1) {
+            // 0 - minRange = 0, 1 - minRange = 10
+            const minRange = minRangeIndex === 0
+              ? MIN_RANGE
+              : 10;
+
+            describe(`minRange = ${minRange}`, () => {
+              for (let upperConfigValProvidedIndex = 0; upperConfigValProvidedIndex < 2; upperConfigValProvidedIndex += 1) {
+                // 0 - upper config value is not provided, 1 - is provided
+                const upperConfigValDescr = upperConfigValProvidedIndex === 0
+                  ? 'upper configVal undefined'
+                  : 'upper configVal defined';
+
+                describe(upperConfigValDescr, () => {
+                  for (let isSoftLowerIndex = 0; isSoftLowerIndex < 2; isSoftLowerIndex += 1) {
+                    // 0 - not soft, 1 - soft
+                    const isSoftLower = !(isSoftLowerIndex === 0);
+
+                    describe(`isSoftLower = ${isSoftLower}`, () => {
+                      for (let isSoftUpperIndex = 0; isSoftUpperIndex < 2; isSoftUpperIndex += 1) {
+                        // 0 - not soft, 1 - soft
+                        const isSoftUpper = !(isSoftUpperIndex === 0);
+
+                        describe(`isSoftUpper = ${isSoftUpper}`, () => {
+
+                          for (
+                            let variantIndex = 0;
+                            variantIndex < 1
+                              || (variantIndex < 7 && arrayIndex === 1
+                                && lowerConfigValProvidedIndex === 1 && upperConfigValProvidedIndex === 1);
+                            variantIndex += 1
+                          ) {
+                            // 0 - user-defined lowerConfigVal & upperConfigVal - untouched
+                            // 1 - user-defined lowerConfigVal < real lowerBound (-300)
+                            // 2 - user-defined lowerConfigVal = real lowerBound (-300)
+                            // 3 - user-defined lowerConfigVal > real lowerBound (-300)
+                            // 4 - user-defined upperConfigVal > real upperBound (150)
+                            // 5 - user-defined upperConfigVal = real upperBound (150)
+                            // 6 - user-defined upperConfigVal < real upperBound (150)
+
+                            const lowerConfigVal = lowerConfigValProvidedIndex === 1
+                              ? variantIndex === 0
+                                ? BOUNDS_USER_DEFINED[0]
+                                : variantIndex === 1
+                                  ? -300.1
+                                  : variantIndex === 2
+                                    ? -300
+                                    : variantIndex === 3
+                                      ? -299.9
+                                      : -300
+                              : undefined;
+                            const upperConfigVal = upperConfigValProvidedIndex === 1
+                              ? variantIndex === 0
+                                ? BOUNDS_USER_DEFINED[1]
+                                : variantIndex === 4
+                                  ? 150.1
+                                  : variantIndex === 5
+                                    ? 150
+                                    : variantIndex === 6
+                                      ? 149.9
+                                      : 150
+                              : undefined;
+                            const configVal = [lowerConfigVal, upperConfigVal];
+
+                            it(`lowerConfigVal ${lowerConfigVal}, upperConfigVal ${upperConfigVal}`, () => {
+                              const series = arrayIndex === 0
+                                ? []
+                                : structuredClone(GRAPH_OBJECTS);
+
+                              const result = card.getBoundaries(
+                                series,
+                                configVal[0],
+                                configVal[1],
+                                isSoftLower,
+                                isSoftUpper,
+                                [...FALLBACK],
+                                minRange,
+                              );
+                              const expectedLower = lowerConfigValProvidedIndex === 1
+                                ? arrayIndex !== 1
+                                  ? configVal[0]
+                                  : isSoftLower
+                                    ? Math.min(-300, configVal[0]!)
+                                    : configVal[0]!
+                                : arrayIndex !== 1
+                                  ? FALLBACK[0]
+                                  : -300;
+                              const expectedUpper = upperConfigValProvidedIndex === 1
+                                ? arrayIndex !== 1
+                                  ? configVal[1]
+                                  : isSoftUpper
+                                    ? Math.max(150, configVal[1]!)
+                                    : configVal[1]!
+                                : arrayIndex !== 1
+                                  ? FALLBACK[1]
+                                  : 150;
+                              expect(result[0]).toEqual(expectedLower!);
+                              expect(result[1]).toEqual(expectedUpper!);
+                            });
+                          }
+                        });
+                      }
+                    });
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+  }
+});
