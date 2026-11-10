@@ -1,0 +1,122 @@
+/**
+ * Tests for getBoundsForMinRange().
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it } from 'vitest';
+import { getBoundsForMinRange } from '../src/others';
+import type { BoundsArrayType } from './types/boundsType';
+
+const BOUNDARY: BoundsArrayType = [100, 110];
+const BOUNDARY_DIFF: number = BOUNDARY[1] - BOUNDARY[0];
+
+const BOUNDS_SYMMETRIC = (diff: number): BoundsArrayType => [BOUNDARY[0] - diff/2, BOUNDARY[1] + diff/2];
+const BOUNDS_LOWER_SHIFTED = (diff: number): BoundsArrayType => [BOUNDARY[0] - diff, BOUNDARY[1]];
+const BOUNDS_UPPER_SHIFTED = (diff: number): BoundsArrayType => [BOUNDARY[0], BOUNDARY[1] + diff];
+
+interface VariantType {
+  minRange?: number;
+};
+
+const VARIANTS: VariantType[] = [
+  { }, // undefined
+  { minRange: 0    },
+  { minRange: 9.9  }, // less than 110-100
+  { minRange: 10   }, // equal to 110-100
+  { minRange: 10.1 }, // more than 110-100
+];
+
+describe("getBoundsForMinRange", () => {
+  for (let lowerConfigValProvidedIndex = 0; lowerConfigValProvidedIndex < 2; lowerConfigValProvidedIndex += 1) {
+    // 0 - lower config value is not provided, 1 - is provided
+    const lowerConfigValDescr = lowerConfigValProvidedIndex === 0
+      ? 'lower configVal undefined'
+      : 'lower configVal defined';
+
+    describe(lowerConfigValDescr, () => {
+      for (let upperConfigValProvidedIndex = 0; upperConfigValProvidedIndex < 2; upperConfigValProvidedIndex += 1) {
+        // 0 - upper config value is not provided, 1 - is provided
+        const upperConfigValDescr = upperConfigValProvidedIndex === 0
+          ? 'upper configVal undefined'
+          : 'upper configVal defined';
+
+        describe(upperConfigValDescr, () => {
+          for (let isSoftLowerIndex = 0; isSoftLowerIndex < 2; isSoftLowerIndex += 1) {
+            // 0 - not soft, 1 - soft
+            const isSoftLower = !(isSoftLowerIndex === 0);
+
+            describe(`isSoftLower = ${isSoftLower}`, () => {
+              for (let isSoftUpperIndex = 0; isSoftUpperIndex < 2; isSoftUpperIndex += 1) {
+                // 0 - not soft, 1 - soft
+                const isSoftUpper = !(isSoftUpperIndex === 0);
+
+                describe(`isSoftUpper = ${isSoftUpper}`, () => {
+                  VARIANTS.forEach((variant) => {
+                    let descr = variant.minRange === undefined || variant.minRange === 0
+                      ? 'not accounted'
+                      : variant.minRange < BOUNDARY_DIFF
+                        ? '< max-min'
+                        : variant.minRange === BOUNDARY_DIFF
+                          ? '= max-min'
+                          : '> max-min';
+                    descr = `minRange = ${variant.minRange} (${descr})`;
+
+                    it(descr, () => {
+                      const lowerConfigVal = lowerConfigValProvidedIndex === 1
+                        ? BOUNDARY[0]
+                        : undefined;
+                      const upperConfigVal = upperConfigValProvidedIndex === 1
+                        ? BOUNDARY[1]
+                        : undefined;
+                      const result = getBoundsForMinRange(
+                        [...BOUNDARY],
+                        lowerConfigVal,
+                        upperConfigVal,
+                        isSoftLower,
+                        isSoftUpper,
+                        variant.minRange,
+                      );
+                      const diff = variant.minRange !== undefined
+                        ? variant.minRange - BOUNDARY_DIFF
+                        : -1;
+                      const expected: BoundsArrayType = variant.minRange === 0 || diff <= 0
+                        ? [...BOUNDARY]
+                        : lowerConfigVal === undefined && upperConfigVal === undefined
+                          ? BOUNDS_SYMMETRIC(diff)
+                          : lowerConfigVal === undefined
+                            && upperConfigVal !== undefined && !isSoftUpper
+                            ? BOUNDS_LOWER_SHIFTED(diff)
+                            : lowerConfigVal === undefined
+                              && upperConfigVal !== undefined && isSoftUpper
+                              ? BOUNDS_SYMMETRIC(diff)
+                              : lowerConfigVal !== undefined && !isSoftLower
+                                && upperConfigVal === undefined
+                                ? BOUNDS_UPPER_SHIFTED(diff)
+                                : lowerConfigVal !== undefined && isSoftLower
+                                  && upperConfigVal === undefined
+                                  ? BOUNDS_SYMMETRIC(diff)
+                                  : lowerConfigVal !== undefined && !isSoftLower
+                                    && upperConfigVal !== undefined && !isSoftUpper
+                                    ? BOUNDS_SYMMETRIC(diff)
+                                    : lowerConfigVal !== undefined && !isSoftLower
+                                      && upperConfigVal !== undefined && isSoftUpper
+                                      ? BOUNDS_UPPER_SHIFTED(diff)
+                                      : lowerConfigVal !== undefined && isSoftLower
+                                        && upperConfigVal !== undefined && !isSoftUpper
+                                        ? BOUNDS_LOWER_SHIFTED(diff)
+                                        : BOUNDS_SYMMETRIC(diff);
+                      expect(result[0]).toBeCloseTo(expected[0], 6);
+                      expect(result[1]).toBeCloseTo(expected[1], 6);
+                    });
+                  });
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+  }
+});

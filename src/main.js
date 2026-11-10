@@ -31,6 +31,7 @@ import {
   isEntryAnimated,
   getIntervalEndDate,
   getBoundsForCustomZeroPosition,
+  getBoundsForMinRange,
   parseOverallFuncName,
   isOverallState,
   getObjectAttr,
@@ -2502,34 +2503,14 @@ export default class MiniGraphCard extends LitElement {
 
     // re-calculate boundaries using a defined constraint
     if (minRange) {
-      const currentRange = Math.abs(boundary[0] - boundary[1]);
-      const diff = parseFloat(minRange) - currentRange;
-
-      if (diff > 0) {
-        // if (minRange <= range), then boundaries are NOT recalculated
-        const weights = [
-          lowerBound !== undefined && !isSoftLowerBound
-            ? 0 // fixed bound
-            : 1,
-          upperBound !== undefined && !isSoftUpperBound
-            ? 0 // fixed bound
-            : 1,
-        ];
-        const sum = weights[0] + weights[1];
-        if (sum > 0) {
-          // move each bound according to a weight
-          boundary = [
-            boundary[0] - diff * weights[0] / sum,
-            boundary[1] + diff * weights[1] / sum,
-          ];
-        } else {
-          // increase a range symmetrically (if both bounds are fixed)
-          boundary = [
-            boundary[0] - diff / 2,
-            boundary[1] + diff / 2,
-          ];
-        }
-      }
+      boundary = getBoundsForMinRange(
+        boundary,
+        lowerBound,
+        upperBound,
+        isSoftLowerBound,
+        isSoftUpperBound,
+        minRange,
+      );
     }
 
     return boundary;
