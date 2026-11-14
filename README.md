@@ -1,7 +1,9 @@
 # Lovelace Mini Graph Card
-A minimalistic and customizable graph card for [Home Assistant](https://github.com/home-assistant/home-assistant) Lovelace UI.
+A minimalistic and customizable graph card for Home Assistant Lovelace UI.
 
-The card works with entities from within the **sensor** & other domains (includind non-numeric) and displays the sensors current state as well as a line graph representation of the history.
+The card works with entities from the **sensor** & other domains (including non-numeric **binary_sensor**) and displays the sensors' current state as well as a line graph representation of the history or a bar graph.
+
+The card is an agile and lightweight solution because it does not use external libraries to draw graphs. The only external dependencies are [lz-string](https://github.com) (compression algorithm used for cached history) & [d3-interpolate](https://github.com) (interpolation method for blending between two colors).
 
 ![Preview](https://user-images.githubusercontent.com/457678/52977264-edf34980-33cc-11e9-903b-cee43b307ed8.png)
 
