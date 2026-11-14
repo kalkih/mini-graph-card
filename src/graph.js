@@ -14,6 +14,26 @@ import {
 import { aggregateFuncMap } from './aggregate';
 
 export default class Graph {
+  /**
+   * Constructor of Graph class
+   * @param {{
+   * graphType?: string,
+   * width?: number,
+   * height?: number,
+   * margin?: [number, number],
+   * hours_to_show?: number,
+   * points_per_hour?: number,
+   * aggregateFuncName?: string,
+   * calculateOverall?: boolean,
+   * overallAggregateFuncName?: string,
+   * smoothing?: boolean,
+   * logarithmic?: boolean,
+   * bar_spacing?: number,
+   * bar_spacing_group?: number,
+   * total_bars_in_group?: number,
+   * baseline?: number,
+   * invert?: boolean }} options Graph configuration options
+   */
   constructor({
     graphType = 'line',
     width = DEFAULT_GRAPH_WIDTH,
