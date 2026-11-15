@@ -1,4 +1,4 @@
-import type { HistoryItemType } from './history';
+import type { HistoryItemType } from '../types/historyItemType';
 
 /**
  * Sort history items by a date.
