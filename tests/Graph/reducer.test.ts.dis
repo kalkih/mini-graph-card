@@ -1,0 +1,310 @@
+/**
+ * Tests for Graph::_reducer() method.
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it, beforeEach } from 'vitest';
+import Graph from '../../src/graph';
+import { ONE_HOUR } from '../../src/const';
+import { HistoryItemType } from '../common/history';
+import { sortHistoryByDate } from '../common/utils';
+
+const END_TIME = new Date('2026-01-01T12:00:00Z').getTime();
+const HOURS_TO_SHOW = 4;
+const POINTS_PER_HOUR = 2;
+
+const GET_TIME_WITH_OFFSET = (
+  offsetFromEnd: number,   // offset in ms
+) => new Date(END_TIME + offsetFromEnd).toISOString();
+
+const ADD_ITEM = (
+  state: number,
+  offsetFromEnd: number,  // offset in ms
+): HistoryItemType => ({
+  state,
+  last_changed: GET_TIME_WITH_OFFSET(offsetFromEnd),
+});
+
+const ADD_ITEMS_BEFORE = (history: HistoryItemType[]): HistoryItemType[] => {
+  history.push(ADD_ITEM(123, -4.5 * ONE_HOUR));
+  history.push(ADD_ITEM(456, -5 * ONE_HOUR));
+  history.push(ADD_ITEM(789, -5.5 * ONE_HOUR));
+  return history;
+};
+
+describe("Graph::_reducer()", () => {
+  let graph: any;
+  let history: HistoryItemType[] = [];
+  let buckets: HistoryItemType[][] = [[]];
+
+
+  beforeEach(() => {
+    graph = new Graph({
+      hours_to_show: HOURS_TO_SHOW,
+      points_per_hour: POINTS_PER_HOUR,
+    });
+    graph._endTime = END_TIME;
+    history = [];
+  });
+
+  it("empty history", () => {
+    buckets = history.reduce((res, item) => graph._reducer(res, item), []);
+    expect(buckets).toEqual([]);
+    expect(buckets.length).toEqual(0);
+  });
+
+  it("3 points before the interval", () => {
+    history = ADD_ITEMS_BEFORE(history);
+    buckets = sortHistoryByDate(history).reduce((res, item) => graph._reducer(res, item), []);
+    expect(buckets).toEqual([[{ state: 123, last_changed: GET_TIME_WITH_OFFSET(-4.5 * ONE_HOUR) }]]);
+    expect(buckets.length).toEqual(1);
+  });
+
+  it("3 points before the period, 1 point at the beginning", () => {
+    history = ADD_ITEMS_BEFORE(history);
+    history.push(ADD_ITEM(888, -4 * ONE_HOUR));
+    buckets = sortHistoryByDate(history).reduce((res, item) => graph._reducer(res, item), []);
+    ///
+    expect(buckets).toEqual([[{ state: 888, last_changed: GET_TIME_WITH_OFFSET(-4 * ONE_HOUR) }]]);
+    ///
+    expect(buckets.length).toEqual(1);
+    ///
+    expect(buckets[0].length).toEqual(1);
+  });
+
+  it("3 points before the period, 1 point at the beginning shifted by 1 sec", () => {
+    history = ADD_ITEMS_BEFORE(history);
+    history.push(ADD_ITEM(8881, -4 * ONE_HOUR + 1000));
+    buckets = sortHistoryByDate(history).reduce((res, item) => graph._reducer(res, item), []);
+    ///
+    expect(buckets).toEqual([
+      [
+        { state: 123, last_changed: GET_TIME_WITH_OFFSET(-4.5 * ONE_HOUR) },
+        { state: 8881, last_changed: GET_TIME_WITH_OFFSET(-4 * ONE_HOUR + 1000) },
+      ]
+    ]);
+    ///
+    expect(buckets.length).toEqual(1);
+    ///
+    expect(buckets[0].length).toEqual(2);
+  });
+
+  it("3 points before the period, 1 point at the beginning shifted by 30 min, 2 points shifted by 30 min", () => {
+    history = ADD_ITEMS_BEFORE(history);
+    history.push(ADD_ITEM(8881, -4 * ONE_HOUR + 1000));
+    history.push(ADD_ITEM(777, -3.5 * ONE_HOUR));
+    history.push(ADD_ITEM(666, -3.5 * ONE_HOUR + 1000));
+    buckets = sortHistoryByDate(history).reduce((res, item) => graph._reducer(res, item), []);
+    ///
+    expect(buckets).toEqual([
+      [
+        { state: 123, last_changed: GET_TIME_WITH_OFFSET(-4.5 * ONE_HOUR) },
+        { state: 8881, last_changed: GET_TIME_WITH_OFFSET(-4 * ONE_HOUR + 1000) },
+      ],
+      [
+        { state: 777, last_changed: GET_TIME_WITH_OFFSET(-3.5 * ONE_HOUR) },
+        { state: 666, last_changed: GET_TIME_WITH_OFFSET(-3.5 * ONE_HOUR + 1000) },
+      ]
+    ]);
+    ///
+    expect(buckets.length).toEqual(2);
+    ///
+    expect(buckets[0].length).toEqual(2);
+    expect(buckets[1].length).toEqual(2);
+  });
+
+  it("3 points before the period, 1 point at the end (-1ms)", () => {
+    history = ADD_ITEMS_BEFORE(history);
+    history.push(ADD_ITEM(111, -1));
+    buckets = sortHistoryByDate(history).reduce((res, item) => graph._reducer(res, item), []);
+    ///
+    expect(buckets[0]).toEqual([{ state: 123, last_changed: GET_TIME_WITH_OFFSET(-4.5 * ONE_HOUR) }]);
+    expect(buckets[7]).toEqual([{ state: 111, last_changed: GET_TIME_WITH_OFFSET(-1) }]);
+    ///
+    expect(buckets.length).toEqual(8);
+    ///
+    expect(buckets[0].length).toEqual(1);
+    expect(buckets[1]).toBeUndefined();
+    expect(buckets[2]).toBeUndefined();
+    expect(buckets[3]).toBeUndefined();
+    expect(buckets[4]).toBeUndefined();
+    expect(buckets[5]).toBeUndefined();
+    expect(buckets[6]).toBeUndefined();
+    expect(buckets[7].length).toEqual(1);
+  });
+
+  it("3 points before the period, 1 point at the end (-1ms), + buckets with NaNs ", () => {
+    history = ADD_ITEMS_BEFORE(history);
+    history.push(ADD_ITEM(111, -1));
+    history.push(ADD_ITEM(NaN, -1 * ONE_HOUR));
+    history.push(ADD_ITEM(NaN, -1.5 * ONE_HOUR));
+    history.push(ADD_ITEM(NaN, -3.5 * ONE_HOUR));
+    buckets = sortHistoryByDate(history).reduce((res, item) => graph._reducer(res, item), []);
+    ////
+    expect(buckets[0]).toEqual([{ state: 123, last_changed: GET_TIME_WITH_OFFSET(-4.5 * ONE_HOUR) }]);
+    //
+    expect(Number.isNaN(buckets[1][0].state)).toBe(true);
+    expect(buckets[1][0].last_changed).toEqual(GET_TIME_WITH_OFFSET(-3.5 * ONE_HOUR));
+    //
+    expect(Number.isNaN(buckets[5][0].state)).toBe(true);
+    expect(buckets[5][0].last_changed).toEqual(GET_TIME_WITH_OFFSET(-1.5 * ONE_HOUR));
+    //
+    expect(Number.isNaN(buckets[6][0].state)).toBe(true);
+    expect(buckets[6][0].last_changed).toEqual(GET_TIME_WITH_OFFSET(-1 * ONE_HOUR));
+    //
+    expect(buckets[7]).toEqual([{ state: 111, last_changed: GET_TIME_WITH_OFFSET(-1) }]);
+    ////
+    expect(buckets.length).toEqual(8);
+    ////
+    expect(buckets[0].length).toEqual(1);
+    expect(buckets[1].length).toEqual(1);
+    expect(buckets[2]).toBeUndefined();
+    expect(buckets[3]).toBeUndefined();
+    expect(buckets[4]).toBeUndefined();
+    expect(buckets[5].length).toEqual(1);
+    expect(buckets[6].length).toEqual(1);
+    expect(buckets[7].length).toEqual(1);
+  });
+
+  it("3 points before the period, 1 point at the end (-1ms), + buckets with NaNs & numbers", () => {
+    history = ADD_ITEMS_BEFORE(history);
+    history.push(ADD_ITEM(111, -1));
+    history.push(ADD_ITEM(NaN, -1 * ONE_HOUR));
+    history.push(ADD_ITEM(222, -1 * ONE_HOUR + 1));
+    history.push(ADD_ITEM(NaN, -1.5 * ONE_HOUR));
+    history.push(ADD_ITEM(NaN, -3.5 * ONE_HOUR));
+    history.push(ADD_ITEM(333, -3.5 * ONE_HOUR + 1));
+    buckets = sortHistoryByDate(history).reduce((res, item) => graph._reducer(res, item), []);
+    ////
+    expect(buckets[0]).toEqual([{ state: 123, last_changed: GET_TIME_WITH_OFFSET(-4.5 * ONE_HOUR) }]);
+    //
+    expect(Number.isNaN(buckets[1][0].state)).toBe(true);
+    expect(buckets[1][0].last_changed).toEqual(GET_TIME_WITH_OFFSET(-3.5 * ONE_HOUR));
+    //
+    expect(buckets[1][1]).toEqual({ state: 333, last_changed: GET_TIME_WITH_OFFSET(-3.5 * ONE_HOUR + 1) });
+    //
+    expect(Number.isNaN(buckets[5][0].state)).toBe(true);
+    expect(buckets[5][0].last_changed).toEqual(GET_TIME_WITH_OFFSET(-1.5 * ONE_HOUR));
+    //
+    expect(Number.isNaN(buckets[6][0].state)).toBe(true);
+    expect(buckets[6][0].last_changed).toEqual(GET_TIME_WITH_OFFSET(-1 * ONE_HOUR));
+    //
+    expect(buckets[6][1]).toEqual({ state: 222, last_changed: GET_TIME_WITH_OFFSET(-1 * ONE_HOUR + 1) });
+    //
+    expect(buckets[7]).toEqual([{ state: 111, last_changed: GET_TIME_WITH_OFFSET(-1) }]);
+    ////
+    expect(buckets.length).toEqual(8);
+    ////
+    expect(buckets[0].length).toEqual(1);
+    expect(buckets[1].length).toEqual(2);
+    expect(buckets[2]).toBeUndefined();
+    expect(buckets[3]).toBeUndefined();
+    expect(buckets[4]).toBeUndefined();
+    expect(buckets[5].length).toEqual(1);
+    expect(buckets[6].length).toEqual(2);
+    expect(buckets[7].length).toEqual(1);
+  });
+
+  it("1 point at the end (-1ms)", () => {
+    history.push(ADD_ITEM(111, -1));
+    buckets = sortHistoryByDate(history).reduce((res, item) => graph._reducer(res, item), []);
+    ///
+    expect(buckets[7]).toEqual([{ state: 111, last_changed: GET_TIME_WITH_OFFSET(-1) }]);
+    ///
+    expect(buckets.length).toEqual(8);
+    ///
+    expect(buckets[0]).toBeUndefined();
+    expect(buckets[1]).toBeUndefined();
+    expect(buckets[2]).toBeUndefined();
+    expect(buckets[3]).toBeUndefined();
+    expect(buckets[4]).toBeUndefined();
+    expect(buckets[5]).toBeUndefined();
+    expect(buckets[6]).toBeUndefined();
+    expect(buckets[7].length).toEqual(1);
+  });
+
+  it("1 point at the end (exact)", () => {
+    history.push(ADD_ITEM(110, 0));
+    buckets = sortHistoryByDate(history).reduce((res, item) => graph._reducer(res, item), []);
+    ///
+    expect(buckets[7]).toEqual([{ state: 110, last_changed: GET_TIME_WITH_OFFSET(0) }]);
+    ///
+    expect(buckets.length).toEqual(8);
+    ///
+    expect(buckets[0]).toBeUndefined();
+    expect(buckets[1]).toBeUndefined();
+    expect(buckets[2]).toBeUndefined();
+    expect(buckets[3]).toBeUndefined();
+    expect(buckets[4]).toBeUndefined();
+    expect(buckets[5]).toBeUndefined();
+    expect(buckets[6]).toBeUndefined();
+    expect(buckets[7].length).toEqual(1);
+  });
+
+  it("1 point at the end (+1000ms, future)", () => {
+    history.push(ADD_ITEM(1111, 1000));
+    buckets = sortHistoryByDate(history).reduce((res, item) => graph._reducer(res, item), []);
+    ///
+    expect(buckets[7]).toEqual([{ state: 1111, last_changed: GET_TIME_WITH_OFFSET(1000) }]);
+    ///
+    expect(buckets.length).toEqual(8);
+    ///
+    expect(buckets[0]).toBeUndefined();
+    expect(buckets[1]).toBeUndefined();
+    expect(buckets[2]).toBeUndefined();
+    expect(buckets[3]).toBeUndefined();
+    expect(buckets[4]).toBeUndefined();
+    expect(buckets[5]).toBeUndefined();
+    expect(buckets[6]).toBeUndefined();
+    expect(buckets[7].length).toEqual(1);
+  });
+
+  it("NaN before the period, 1 point at the end (exact)", () => {
+    history.push(ADD_ITEM(110, 0));
+    history.push(ADD_ITEM(NaN, -4.5 * ONE_HOUR));
+    buckets = sortHistoryByDate(history).reduce((res, item) => graph._reducer(res, item), []);
+    ////
+    expect(Number.isNaN(buckets[0][0].state)).toBe(true);
+    expect(buckets[0][0].last_changed).toEqual(GET_TIME_WITH_OFFSET(-4.5 * ONE_HOUR));
+    //
+    expect(buckets[7]).toEqual([{ state: 110, last_changed: GET_TIME_WITH_OFFSET(0) }]);
+    ////
+    expect(buckets.length).toEqual(8);
+    ////
+    expect(buckets[0].length).toEqual(1);
+    expect(buckets[1]).toBeUndefined();
+    expect(buckets[2]).toBeUndefined();
+    expect(buckets[3]).toBeUndefined();
+    expect(buckets[4]).toBeUndefined();
+    expect(buckets[5]).toBeUndefined();
+    expect(buckets[6]).toBeUndefined();
+    expect(buckets[7].length).toEqual(1);
+  });
+
+  it("NaN before the period", () => {
+    history.push(ADD_ITEM(NaN, -4.5 * ONE_HOUR));
+    buckets = sortHistoryByDate(history).reduce((res, item) => graph._reducer(res, item), []);
+    ////
+    expect(Number.isNaN(buckets[0][0].state)).toBe(true);
+    expect(buckets[0][0].last_changed).toEqual(GET_TIME_WITH_OFFSET(-4.5 * ONE_HOUR));
+    ////
+    expect(buckets.length).toEqual(1);
+    expect(buckets[0].length).toEqual(1);
+  });
+
+  it("NaN before the period, 1 point at the beginning shifted by 1 sec", () => {
+    history.push(ADD_ITEM(NaN, -4.5 * ONE_HOUR));
+    history.push(ADD_ITEM(8881, -4 * ONE_HOUR + 1000));
+    buckets = sortHistoryByDate(history).reduce((res, item) => graph._reducer(res, item), []);
+    ////
+    expect(Number.isNaN(buckets[0][0].state)).toBe(true);
+    expect(buckets[0][0].last_changed).toEqual(GET_TIME_WITH_OFFSET(-4.5 * ONE_HOUR));
+    //
+    expect(buckets[0][1]).toEqual({ state: 8881, last_changed: GET_TIME_WITH_OFFSET(-4 * ONE_HOUR + 1000) });
+    ////
+    expect(buckets.length).toEqual(1);
+    expect(buckets[0].length).toEqual(2);
+  });
+});
