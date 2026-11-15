@@ -1,0 +1,145 @@
+/**
+ * Tests for constructor of Graph class.
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it } from 'vitest';
+import Graph from '../../src/graph';
+import {
+  DEFAULT_GRAPH_WIDTH, DEFAULT_GRAPH_HEIGHT,
+  DEFAULT_LINE_WIDTH,
+  DEFAULT_BAR_SPACING
+} from '../../src/const';
+import { aggregateFuncMap } from '../../src/aggregate';
+
+describe("Graph()", () => {
+  let graph: any;
+
+  it("default arguments", () => {
+    graph = new Graph({});
+    expect(graph._graphType).toEqual('line');
+    expect(graph._margin.length).toEqual(2);
+    expect(graph._margin[0]).toEqual(DEFAULT_LINE_WIDTH);
+    expect(graph._margin[1]).toEqual(DEFAULT_LINE_WIDTH);
+
+    expect(graph._width).toBeCloseTo(DEFAULT_GRAPH_WIDTH - graph._margin[0] * 2, 6);
+    expect(graph._height).toBeCloseTo(DEFAULT_GRAPH_HEIGHT - graph._margin[1] * 4, 6);
+
+    expect(graph._min).toEqual(0);
+    expect(graph._max).toEqual(0);
+    expect(graph.min).toEqual(0);
+    expect(graph.max).toEqual(0);
+
+    expect(graph._hours_to_show).toEqual(24);
+    expect(graph._points_per_hour).toEqual(1);
+
+    expect(graph._aggregateFuncName).toEqual('avg');
+    expect(graph._calcPoint).toEqual(aggregateFuncMap.avg);
+    expect(graph._calculateOverall).toBe(false);
+    expect(graph._overallAggregateFuncName).toBeUndefined();
+    expect(graph._overall).toBeUndefined();
+    expect(graph.overall).toBeUndefined();
+
+    expect(graph._smoothing).toBe(true);
+    expect(graph._logarithmic).toBe(false);
+    expect(graph._bar_spacing).toEqual(DEFAULT_BAR_SPACING);
+    expect(graph._bar_spacing_group).toEqual(DEFAULT_BAR_SPACING);
+    expect(graph._total_bars_in_group).toEqual(1);
+    expect(graph._baseline).toBeUndefined();
+    expect(graph._invert).toBe(false);
+
+    expect(graph._history).toBeUndefined();
+    expect(graph.coords).toEqual([]);
+  });
+
+  it("custom arguments", () => {
+    graph = new Graph({
+      graphType: 'bar',
+      margin: [3, 4],
+      width: 450,
+      height: 200,
+      hours_to_show: 0.08333,
+      points_per_hour: 2,
+      aggregateFuncName: 'last',
+      calculateOverall: true,
+      overallAggregateFuncName: 'median',
+
+      smoothing: false,
+      logarithmic: true,
+      bar_spacing: 2,
+      bar_spacing_group: 8,
+      total_bars_in_group: 3,
+      baseline: 21,
+      invert: true,
+    });
+    expect(graph._graphType).toEqual('bar');
+    expect(graph._margin.length).toEqual(2);
+    expect(graph._margin[0]).toEqual(3);
+    expect(graph._margin[1]).toEqual(4);
+
+    expect(graph._width).toBeCloseTo(444, 6);
+    expect(graph._height).toBeCloseTo(184, 6);
+
+    expect(graph._min).toEqual(0);
+    expect(graph._max).toEqual(0);
+    expect(graph.min).toEqual(0);
+    expect(graph.max).toEqual(0);
+
+    expect(graph._hours_to_show).toBeCloseTo(0.08333, 6);
+    expect(graph._points_per_hour).toEqual(2);
+
+    expect(graph._aggregateFuncName).toEqual('last');
+    expect(graph._calcPoint).toEqual(aggregateFuncMap.last);
+    expect(graph._calculateOverall).toBe(true);
+    expect(graph._overallAggregateFuncName).toEqual('median');
+    expect(graph._overallAggregateFunc).toEqual(aggregateFuncMap.median);
+    expect(graph._overall).toBeUndefined();
+    expect(graph.overall).toBeUndefined();
+
+    expect(graph._smoothing).toBe(false);
+    expect(graph._logarithmic).toBe(true);
+    expect(graph._bar_spacing).toEqual(2);
+    expect(graph._bar_spacing_group).toEqual(8);
+    expect(graph._total_bars_in_group).toEqual(3);
+    expect(graph._baseline).toEqual(21);
+    expect(graph._invert).toBe(true);
+
+    expect(graph._history).toBeUndefined();
+    expect(graph.coords).toEqual([]);
+  });
+
+  it("invalid aggregate func", () => {
+    graph = new Graph({
+      aggregateFuncName: 'lasttt',
+      overallAggregateFuncName: 'mediann',
+    });
+    expect(graph._aggregateFuncName).toEqual('lasttt');
+    expect(graph._calcPoint).toEqual(aggregateFuncMap.avg);
+    expect(graph._overallAggregateFuncName).toEqual('mediann');
+    expect(graph._overallAggregateFunc).toEqual(aggregateFuncMap.avg);
+  });
+
+  it("overall aggregate func undefined, fallback to the basic aggregate func", () => {
+    graph = new Graph({
+      aggregateFuncName: 'last',
+    });
+    expect(graph._aggregateFuncName).toEqual('last');
+    expect(graph._calcPoint).toEqual(aggregateFuncMap.last);
+    expect(graph._overallAggregateFuncName).toBeUndefined();
+    expect(graph._overallAggregateFunc).toEqual(aggregateFuncMap.last);
+  });
+
+
+  it("invalid overall aggregate func, fallback to the basic aggregate func", () => {
+    graph = new Graph({
+      aggregateFuncName: 'median',
+      overallAggregateFuncName: 'firsttt',
+    });
+    expect(graph._aggregateFuncName).toEqual('median');
+    expect(graph._calcPoint).toEqual(aggregateFuncMap.median);
+    expect(graph._overallAggregateFuncName).toEqual('firsttt');
+    expect(graph._overallAggregateFunc).toEqual(aggregateFuncMap.median);
+  });
+});
