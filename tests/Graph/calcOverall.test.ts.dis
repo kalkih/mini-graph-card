@@ -1,5 +1,5 @@
 /**
- * Tests for Graph._calcOverall() method.
+ * Tests for Graph::_calcOverall() method.
  *
  * The file is disabled (renamed to *.dis) & thus is not used during a build process;
  * remove the "dis" extension to use it locally in your VSCode devcontainer.
@@ -21,7 +21,7 @@ import { AGGREGATE_FUNCS } from '../types/aggregate';
 
 const RESULT_AVG = AGGREGATED_EXPECTED.avg;
 
-describe("Graph._calcOverall()", () => {
+describe("Graph::_calcOverall()", () => {
   let graph: any;
   const setAggregateFunc = (func?: string, funcOverall?: string) => {
     graph._aggregateFuncName = func;
