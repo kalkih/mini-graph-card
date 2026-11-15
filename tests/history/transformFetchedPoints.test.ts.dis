@@ -7,7 +7,7 @@
 
 import { expect, describe, it } from 'vitest';
 import { transformFetchedPoints } from '../../src/history';
-import type { HistoryItemType } from '../common/history';
+import type { HistoryItemType } from '../types/historyItemType';
 import {
   HISTORY_JUNK,
   HISTORY_ALL_NUMERIC,
