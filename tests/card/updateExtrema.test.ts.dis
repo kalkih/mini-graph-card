@@ -9,9 +9,8 @@
 import { expect, describe, it, beforeEach } from 'vitest';
 import MiniGraphCard from '../../src/main';
 import { HISTORY_JUNK, HISTORY_ALL_NUMERIC } from '../common/history';
-import type { HistoryItemType } from '../common/history';
+import type { HistoryItemType } from '../types/historyItemType';
 import type { ConfigType } from '../types/configType';
-
 
 type AbsTypeType =
     | 'min'
