@@ -8,6 +8,7 @@
 import { expect, describe, it, beforeEach } from 'vitest';
 import Graph from '../../src/graph';
 import { GRAPH_SETTINGS } from '../common/graph';
+import type { CoordsType } from '../types/coordsType';
 
 describe("Graph::_calcBounds()", () => {
   let graph: any;
@@ -18,11 +19,11 @@ describe("Graph::_calcBounds()", () => {
       height: GRAPH_SETTINGS.height,
       margin: GRAPH_SETTINGS.margin,
     });
-    graph.coords = [];
+    graph.coords = [] as CoordsType[];
   });
 
   it("Coords empty", () => {
-      graph.coords = [];
+      graph.coords = [] as CoordsType[];
       const bounds = graph._calcBounds();
       expect(Number.isNaN(bounds.min)).toBe(true);
       expect(Number.isNaN(bounds.max)).toBe(true);
@@ -35,7 +36,7 @@ describe("Graph::_calcBounds()", () => {
       [0, 0, -88.0],
       [0, 0, 50.0],
       [0, 0, -3.14],
-      ];
+      ] as CoordsType[];
       const bounds = graph._calcBounds();
       expect(bounds.min).toEqual(-88.0);
       expect(bounds.max).toEqual(50.0);
@@ -48,7 +49,7 @@ describe("Graph::_calcBounds()", () => {
       [0, 0, -88.0],
       [0, 0, NaN],
       [0, 0, -3.14],
-    ];
+    ] as CoordsType[];
     const bounds = graph._calcBounds();
     expect(bounds.min).toEqual(-88.0);
     expect(bounds.max).toEqual(0.0);
@@ -61,7 +62,7 @@ describe("Graph::_calcBounds()", () => {
       [0, 0, -3.14],
       [0, 0, NaN],
       [0, 0, NaN],
-    ];
+    ] as CoordsType[];
     const bounds = graph._calcBounds();
     expect(bounds.min).toEqual(-3.14);
     expect(bounds.max).toEqual(-3.14);
@@ -74,7 +75,7 @@ describe("Graph::_calcBounds()", () => {
       [0, 0, NaN],
       [0, 0, NaN],
       [0, 0, NaN],
-    ];
+    ] as CoordsType[];
     const bounds = graph._calcBounds();
     expect(bounds.min).toEqual(100.3);
     expect(bounds.max).toEqual(100.3);
@@ -87,7 +88,7 @@ describe("Graph::_calcBounds()", () => {
       [0, 0, NaN],
       [0, 0, NaN],
       [0, 0, NaN],
-    ];
+    ] as CoordsType[];
     const bounds = graph._calcBounds();
     expect(Number.isNaN(bounds.min)).toBe(true);
     expect(Number.isNaN(bounds.max)).toBe(true);
