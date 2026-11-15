@@ -1,7 +1,7 @@
 import type { BoundsType } from '../types/boundsType';
 
 export const GRAPH_SETTINGS = {
-  margin: [5, 5],
+  margin: [5, 5] as [number, number],
   width: 300,
   height: 100,
 };
