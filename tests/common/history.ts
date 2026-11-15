@@ -1,14 +1,6 @@
 import type { AggregateKey } from '../types/aggregate';
-import type { AttributeType } from '../types/stateObjType';
 import { sortHistoryByDate } from './utils';
-
-export interface HistoryItemType {
-  entity_id?: string;
-  state: string | any;
-  last_changed?: string;
-  last_updated?: string;
-  attributes?: AttributeType;
-};
+import type { HistoryItemType } from '../types/historyItemType';
 
 // history array (number only)
 export const HISTORY_NUMERIC: HistoryItemType[] = sortHistoryByDate([
