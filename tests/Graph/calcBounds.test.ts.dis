@@ -19,27 +19,26 @@ describe("Graph::_calcBounds()", () => {
       height: GRAPH_SETTINGS.height,
       margin: GRAPH_SETTINGS.margin,
     });
-    graph.coords = [] as CoordsType[];
   });
 
   it("Coords empty", () => {
-      graph.coords = [] as CoordsType[];
-      const bounds = graph._calcBounds();
-      expect(Number.isNaN(bounds.min)).toBe(true);
-      expect(Number.isNaN(bounds.max)).toBe(true);
+    graph.coords = [] as CoordsType[];
+    const bounds = graph._calcBounds();
+    expect(Number.isNaN(bounds.min)).toBe(true);
+    expect(Number.isNaN(bounds.max)).toBe(true);
   });
 
   it("Coords with numbers only", () => {
-      graph.coords = [
+    graph.coords = [
       [0, 0, -10.5],
       [0, 0, 0.0],
       [0, 0, -88.0],
       [0, 0, 50.0],
       [0, 0, -3.14],
-      ] as CoordsType[];
-      const bounds = graph._calcBounds();
-      expect(bounds.min).toEqual(-88.0);
-      expect(bounds.max).toEqual(50.0);
+    ] as CoordsType[];
+    const bounds = graph._calcBounds();
+    expect(bounds.min).toEqual(-88.0);
+    expect(bounds.max).toEqual(50.0);
   });
 
   it("Coords with NaNs", () => {
