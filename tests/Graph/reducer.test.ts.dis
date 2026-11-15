@@ -8,7 +8,7 @@
 import { expect, describe, it, beforeEach } from 'vitest';
 import Graph from '../../src/graph';
 import { ONE_HOUR } from '../../src/const';
-import { HistoryItemType } from '../common/history';
+import { HistoryItemType } from '../types/historyItemType';
 import { sortHistoryByDate } from '../common/utils';
 
 const END_TIME = new Date('2026-01-01T12:00:00Z').getTime();
