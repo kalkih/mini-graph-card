@@ -13,7 +13,7 @@ import {
   STATE_MAP_NUMERIC_STRICT,
   STATE_MAP_STRINGS_STRICT,
 } from '../common/stateMap';
-import type { HistoryItemType } from '../common/history';
+import type { HistoryItemType } from '../types/historyItemType';
 import { sortHistoryByDate } from '../common/utils';
 
 const DATA_NUMERIC_CACHED: HistoryItemType[] = [
