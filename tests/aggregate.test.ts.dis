@@ -14,7 +14,7 @@ import {
   AGGREGATED_EXPECTED,
   AGGREGATED_EXPECTED_JUNK
 } from './common/history';
-import type { HistoryItemType } from './common/history';
+import type { HistoryItemType } from './types/historyItemType';
 import { AGGREGATE_FUNCS } from './types/aggregate';
 
 describe('aggregate functions', () => {
