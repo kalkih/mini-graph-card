@@ -214,41 +214,52 @@ export default class Graph {
   }
 
   /**
-   * Сalculate coordinates (X, Y = 0, aggregated Value)
-   * @param {Array} history Array of grouped time buckets
+   * Calculate coordinates (X, Y = 0, aggregated Value)
+   * @param {Array<Array<Object>|undefined>} buckets Array of grouped time buckets
    * @returns {Array<Array<number>>} Array of [X, Y, Value] coordinates
    */
-  _calcPoints(history) {
-    let xRatio = this._width / history.length;
+  _calcPoints(buckets) {
+    let xRatio = this._width / buckets.length;
     xRatio = Number.isFinite(xRatio) ? xRatio : this._width; // prevent "divide by 0"
 
     const coords = [];
-    let lastValue = 0;
+    let lastValue = NaN;
     let x;
 
-    for (let i = 0; i <= history.length; i += 1) {
+    for (let i = 0; i <= buckets.length; i += 1) {
       x = xRatio * i + this._margin[X];
+      let currentPointValue;
 
       if (i === 0) {
         // left border
-        const firstBucket = history[0];
+        const firstBucket = buckets[0];
         if (firstBucket && firstBucket[0]) {
-          const zeroStartFuncs = ['sum', 'delta', 'diff'];
-          if (zeroStartFuncs.includes(this._aggregateFuncName)) {
-            lastValue = 0;
+          // state - either a number or NaN
+          const firstValue = firstBucket[0].state;
+          if (!Number.isNaN(firstValue)) {
+            const zeroStartFuncs = ['sum', 'delta', 'diff'];
+            if (zeroStartFuncs.includes(this._aggregateFuncName)) {
+              lastValue = 0;
+            } else {
+              lastValue = firstValue;
+            }
           } else {
-            lastValue = parseFloat(firstBucket[0].state);
+            lastValue = NaN;
           }
         }
-        coords.push([x, 0, lastValue]);
+        currentPointValue = lastValue;
       } else {
-        const bucket = history[i - 1];
+        const bucket = buckets[i - 1];
         if (bucket && bucket.length > 0) {
-          const numberBucket = bucket.map(item => parseFloat(item.state));
-          lastValue = this._calcPoint(numberBucket);
+          // calc aggregated value
+          lastValue = this._calcPoint(bucket);
+          currentPointValue = lastValue;
+        } else {
+          // no points in this bucket, use prev. point
+          currentPointValue = lastValue;
         }
-        coords.push([x, 0, lastValue]);
       }
+      coords.push([x, 0, currentPointValue]);
     }
     return coords;
   }
