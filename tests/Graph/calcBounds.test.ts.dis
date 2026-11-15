@@ -1,5 +1,5 @@
 /**
- * Tests for Graph._calcBounds() method.
+ * Tests for Graph::_calcBounds() method.
  *
  * The file is disabled (renamed to *.dis) & thus is not used during a build process;
  * remove the "dis" extension to use it locally in your VSCode devcontainer.
@@ -9,7 +9,7 @@ import { expect, describe, it, beforeEach } from 'vitest';
 import Graph from '../../src/graph';
 import { GRAPH_SETTINGS } from '../common/graph';
 
-describe("Graph._calcBounds()", () => {
+describe("Graph::_calcBounds()", () => {
   let graph: any;
 
   beforeEach(() => {
