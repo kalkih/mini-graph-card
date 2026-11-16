@@ -272,17 +272,34 @@ export default class Graph {
    */
   calcY(coords) {
     // account for logarithmic graph
-    const max = this._logarithmic ? getLog10(this.max) : this.max;
-    const min = this._logarithmic ? getLog10(this.min) : this.min;
+    const max = !Number.isNaN(this.max)
+      ? this._logarithmic
+        ? getLog10(this.max)
+        : this.max
+      : NaN;
+    const min = !Number.isNaN(this.min)
+      ? this._logarithmic
+        ? getLog10(this.min)
+        : this.min
+      : NaN;
+
+    if (Number.isNaN(max) || Number.isNaN(min)) {
+      return coords.map((coord) => [coord[X], NaN, coord[V]]);
+    }
 
     const delta = Math.abs(max - min);
     let yRatio;
     if (max === min || delta < Number.EPSILON) {
-      yRatio = 1; // anyway, a whole "((val - min) / yRatio)" part would be 0
+      yRatio = 1;
     } else {
       yRatio = delta / this._height;
     }
+
     const coords2 = coords.map((coord) => {
+      if (Number.isNaN(coord[V])) {
+        return [coord[X], NaN, NaN];
+      }
+
       const val = this._logarithmic ? getLog10(coord[V]) : coord[V];
       let coordY;
       if (this._invert) {
