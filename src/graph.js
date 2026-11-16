@@ -54,7 +54,7 @@ export default class Graph {
   }) {
     this._graphType = graphType;
     this._history = undefined;
-    this.coords = [];
+    this._coords = [];
     this._width = width - margin[X] * 2;
     this._height = height - margin[Y] * 4;
     this._margin = margin;
@@ -173,11 +173,11 @@ export default class Graph {
     histGroups.length = requiredNumOfPoints;
 
     // calculate coordinates
-    this.coords = this._calcPoints(histGroups);
+    this._coords = this._calcPoints(histGroups);
 
     // reduce for bars
     if (this._graphType === 'bar') {
-      this.coords = this.coords.slice(1);
+      this._coords = this._coords.slice(1);
     }
 
     // define new value boundaries
@@ -264,8 +264,18 @@ export default class Graph {
     return coords;
   }
 
+  get hasCoords() { return this._coords.length > 0; }
+
   /**
-   * Recalculates a point's coords based on min & max thresholds
+   * Calculate and store Y coordinates for all points
+   * @returns {void}
+   */
+  updateCoords() {
+    this._coords = this.calcY(this._coords);
+  }
+
+  /**
+   * Recalculate a point's coords based on min & max thresholds
    * @param {Array<Array<number>>} coords Array of X, Y, Value
    * @returns {Array<Array<number>>} Array of X, Y, Value,
    * where Y - recalculated based on min/max thresholds
@@ -318,9 +328,8 @@ export default class Graph {
    * @returns {Array<Array<number>>} Array of points [X, Y, Value, index]
    */
   getPoints() {
-    const coords = this.calcY(this.coords); // set Y coord
     if (this._smoothing) {
-      const [first, ...rest] = coords;
+      const [first, ...rest] = this._coords;
       let last = first;
       return rest.map((point, i) => {
         const Z = this._midPoint(last[X], last[Y], point[X], point[Y]);
@@ -329,7 +338,7 @@ export default class Graph {
         return [Z[X], Z[Y], sum, i + 1];
       });
     } else {
-      return coords.map((point, i) => [point[X], point[Y], point[V], i]);
+      return this._coords.map((point, i) => [point[X], point[Y], point[V], i]);
     }
   }
 
@@ -338,14 +347,13 @@ export default class Graph {
    * @returns {string} SVG path
    */
   getPath() {
-    const coords = this.calcY(this.coords); // set Y coord
-
-    let next; let Z;
+    let next;
+    let Z;
     let path = '';
-    let last = coords[0];
+    let last = this._coords[0];
     path += `M${last[X]},${last[Y]}`; // move to 1st point
 
-    coords.forEach((point) => {
+    this._coords.forEach((point) => {
       next = point;
       Z = this._smoothing
         ? this._midPoint(last[X], last[Y], next[X], next[Y])
@@ -360,7 +368,7 @@ export default class Graph {
   }
 
   /**
-   * Returns a gradient used to set a gradiented color for a line & fill
+   * Return a gradient used to set a gradiented color for a line & fill
    * @param {Array<Object>} thresholds color_thresholds array
    * @returns {Array<Object>} Gradient
    */
@@ -415,7 +423,7 @@ export default class Graph {
     let fill = path;
     // note that currently this._margin[X] = 0 when fill is defined
     fill += ` L ${this._width + this._margin[X]}, ${height}`;
-    fill += ` L ${this.coords[0][X]}, ${height} z`;
+    fill += ` L ${this._coords[0][X]}, ${height} z`;
     return fill;
   }
 
@@ -423,17 +431,22 @@ export default class Graph {
    * Get bars for an entity
    * @param {number} position Index of a bar (0,1,..)
    * (i.e. index of an entity with a shown bar graph)
-   * @returns {Array<Object>} Bars for an entity to be shown at a `position` index
+   * @returns {{width: number, items: Array<Object>}} Bars for an entity
+   * to be shown at a `position` index
    */
   getBars(position) {
     const spacing = this._bar_spacing;
     const spacing_group = this._bar_spacing_group;
     const total = this._total_bars_in_group;
 
-    const coords = this.calcY(this.coords); // set Y coord
-
     // number of measures
-    const total_groups = coords.length;
+    const total_groups = this._coords.length;
+    if (total_groups === 0) { // safety guard
+      return {
+        width: 0,
+        items: [],
+      };
+    }
 
     // width of a group of bars
     const group_width = (this._width - spacing_group * (total_groups - 1))
@@ -453,7 +466,7 @@ export default class Graph {
 
     const { baselineY } = this;
 
-    const items = coords.map((coord, i) => {
+    const items = this._coords.map((coord, i) => {
       let y;
       const realY = coord[Y];
       if (realY <= baselineY) {
@@ -505,8 +518,8 @@ export default class Graph {
   _calcBounds() {
     let max = NaN;
     let min = NaN;
-    for (let i = 0; i < this.coords.length; i += 1) {
-      const val = this.coords[i][V];
+    for (let i = 0; i < this._coords.length; i += 1) {
+      const val = this._coords[i][V];
       if (!Number.isNaN(val)) {
         // process only numeric values
         if (Number.isNaN(max) || val > max) max = val;

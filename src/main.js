@@ -2405,7 +2405,7 @@ export default class MiniGraphCard extends LitElement {
       this.entity.forEach((stateObj, i) => {
         const entityConfig = config.entities[i];
         if ((!stateObj && !this._isStaticValue[i]) // static line
-          || this.Graph[i].coords.length === 0 // Graph coords are empty
+          || !this.Graph[i].hasCoords // Graph coords are empty
           // displaying of a graph is off
           || entityConfig.show_graph === false) {
           return;
@@ -2416,6 +2416,9 @@ export default class MiniGraphCard extends LitElement {
           ? this.boundSecondary
           : this.bound;
         [this.Graph[i].min, this.Graph[i].max] = [bound[0], bound[1]];
+
+        // calculate Y coordinates
+        this.Graph[i].updateCoords();
 
         if (this._isBarGraph[i]) {
           // bar graph
