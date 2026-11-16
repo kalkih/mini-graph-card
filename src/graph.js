@@ -284,7 +284,7 @@ export default class Graph {
       : NaN;
 
     if (Number.isNaN(max) || Number.isNaN(min)) {
-      return coords.map((coord) => [coord[X], NaN, coord[V]]);
+      return coords.map(coord => [coord[X], NaN, coord[V]]);
     }
 
     const delta = Math.abs(max - min);
