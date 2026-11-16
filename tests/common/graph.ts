@@ -3,7 +3,7 @@ import type { BoundsType } from '../types/boundsType';
 export const GRAPH_SETTINGS = {
   margin: [5, 5] as [number, number],
   width: 300,
-  height: 100,
+  height: 120, // 100 + 5*4 (resulting graph._height = 100)
 };
 
 interface GraphMockType extends BoundsType {
