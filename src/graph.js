@@ -54,7 +54,7 @@ export default class Graph {
   }) {
     this._graphType = graphType;
     this._history = undefined;
-    this.coords = [];
+    this._coords = [];
     this._width = width - margin[X] * 2;
     this._height = height - margin[Y] * 4;
     this._margin = margin;
@@ -148,7 +148,7 @@ export default class Graph {
    * Update the graph data: group history into time buckets,
    * calculate coordinates, define new value boundaries
    * @param {Date} endTime Current interval's end time
-   * @param {Array} [history] Array of historical data
+   * @param {Array<object>} [history=undefined] Array of historical data
    * @returns {void}
    */
   update(endTime, history = undefined) {
@@ -173,16 +173,16 @@ export default class Graph {
     histGroups.length = requiredNumOfPoints;
 
     // calculate coordinates
-    this.coords = this._calcPoints(histGroups);
+    this._coords = this._calcPoints(histGroups);
 
     // reduce for bars
     if (this._graphType === 'bar') {
-      this.coords = this.coords.slice(1);
+      this._coords = this._coords.slice(1);
     }
 
     // define new value boundaries
-    this.min = Math.min(...this.coords.map(item => Number(item[V])));
-    this.max = Math.max(...this.coords.map(item => Number(item[V])));
+    this.min = Math.min(...this._coords.map(item => Number(item[V])));
+    this.max = Math.max(...this._coords.map(item => Number(item[V])));
   }
 
   /**
@@ -215,24 +215,24 @@ export default class Graph {
   }
 
   /**
-   * Сalculate coordinates (X, Y = 0, aggregated Value)
-   * @param {Array} history Array of grouped time buckets
+   * Calculate coordinates (X, Y = 0, aggregated Value)
+   * @param {Array<Array<Object>|undefined>} buckets Array of grouped time buckets
    * @returns {Array<Array<number>>} Array of [X, Y, Value] coordinates
    */
-  _calcPoints(history) {
-    let xRatio = this._width / history.length;
+  _calcPoints(buckets) {
+    let xRatio = this._width / buckets.length;
     xRatio = Number.isFinite(xRatio) ? xRatio : this._width; // prevent "divide by 0"
 
     const coords = [];
     let lastValue = 0;
     let x;
 
-    for (let i = 0; i <= history.length; i += 1) {
+    for (let i = 0; i <= buckets.length; i += 1) {
       x = xRatio * i + this._margin[X];
 
       if (i === 0) {
         // left border
-        const firstBucket = history[0];
+        const firstBucket = buckets[0];
         if (firstBucket && firstBucket[0]) {
           const zeroStartFuncs = ['sum', 'delta', 'diff'];
           if (zeroStartFuncs.includes(this._aggregateFuncName)) {
@@ -243,7 +243,7 @@ export default class Graph {
         }
         coords.push([x, 0, lastValue]);
       } else {
-        const bucket = history[i - 1];
+        const bucket = buckets[i - 1];
         if (bucket && bucket.length > 0) {
           const numberBucket = bucket.map(item => parseFloat(item.state));
           lastValue = this._calcPoint(numberBucket);
@@ -254,21 +254,35 @@ export default class Graph {
     return coords;
   }
 
+  get hasCoords() { return this._coords.length > 0; }
+
   /**
-   * Recalculates a point's coords based on min & max thresholds
+   * Calculate and store Y coordinates for all points
+   * @returns {void}
+   */
+  updateCoords() {
+    this._coords = this.calcY(this._coords);
+  }
+
+  /**
+   * Recalculate a point's coords based on min & max thresholds
    * @param {Array<Array<number>>} coords Array of X, Y, Value
    * @returns {Array<Array<number>>} Array of X, Y, Value,
    * where Y - recalculated based on min/max thresholds
    */
   calcY(coords) {
     // account for logarithmic graph
-    const max = this._logarithmic ? getLog10(this.max) : this.max;
-    const min = this._logarithmic ? getLog10(this.min) : this.min;
+    const max = this._logarithmic
+      ? getLog10(this.max)
+      : this.max;
+    const min = this._logarithmic
+      ? getLog10(this.min)
+      : this.min;
 
     const delta = Math.abs(max - min);
     let yRatio;
     if (max === min || delta < Number.EPSILON) {
-      yRatio = 1; // anyway, a whole "((val - min) / yRatio)" part would be 0
+      yRatio = 1;
     } else {
       yRatio = delta / this._height;
     }
@@ -291,9 +305,8 @@ export default class Graph {
    * @returns {Array<Array<number>>} Array of points [X, Y, Value, index]
    */
   getPoints() {
-    const coords = this.calcY(this.coords); // set Y coord
     if (this._smoothing) {
-      const [first, ...rest] = coords;
+      const [first, ...rest] = this._coords;
       let last = first;
       return rest.map((point, i) => {
         const Z = this._midPoint(last[X], last[Y], point[X], point[Y]);
@@ -302,7 +315,7 @@ export default class Graph {
         return [Z[X], Z[Y], sum, i + 1];
       });
     } else {
-      return coords.map((point, i) => [point[X], point[Y], point[V], i]);
+      return this._coords.map((point, i) => [point[X], point[Y], point[V], i]);
     }
   }
 
@@ -311,14 +324,13 @@ export default class Graph {
    * @returns {string} SVG path
    */
   getPath() {
-    const coords = this.calcY(this.coords); // set Y coord
-
-    let next; let Z;
+    let next;
+    let Z;
     let path = '';
-    let last = coords[0];
+    let last = this._coords[0];
     path += `M${last[X]},${last[Y]}`; // move to 1st point
 
-    coords.forEach((point) => {
+    this._coords.forEach((point) => {
       next = point;
       Z = this._smoothing
         ? this._midPoint(last[X], last[Y], next[X], next[Y])
@@ -333,7 +345,7 @@ export default class Graph {
   }
 
   /**
-   * Returns a gradient used to set a gradiented color for a line & fill
+   * Return a gradient used to set a gradiented color for a line & fill
    * @param {Array<Object>} thresholds color_thresholds array
    * @returns {Array<Object>} Gradient
    */
@@ -388,7 +400,7 @@ export default class Graph {
     let fill = path;
     // note that currently this._margin[X] = 0 when fill is defined
     fill += ` L ${this._width + this._margin[X]}, ${height}`;
-    fill += ` L ${this.coords[0][X]}, ${height} z`;
+    fill += ` L ${this._coords[0][X]}, ${height} z`;
     return fill;
   }
 
@@ -396,17 +408,22 @@ export default class Graph {
    * Get bars for an entity
    * @param {number} position Index of a bar (0,1,..)
    * (i.e. index of an entity with a shown bar graph)
-   * @returns {Array<Object>} Bars for an entity to be shown at a `position` index
+   * @returns {{width: number, items: Array<Object>}} Bars for an entity
+   * to be shown at a `position` index
    */
   getBars(position) {
     const spacing = this._bar_spacing;
     const spacing_group = this._bar_spacing_group;
     const total = this._total_bars_in_group;
 
-    const coords = this.calcY(this.coords); // set Y coord
-
     // number of measures
-    const total_groups = coords.length;
+    const total_groups = this._coords.length;
+    if (total_groups === 0) { // safety guard
+      return {
+        width: 0,
+        items: [],
+      };
+    }
 
     // width of a group of bars
     const group_width = (this._width - spacing_group * (total_groups - 1))
@@ -426,7 +443,7 @@ export default class Graph {
 
     const { baselineY } = this;
 
-    const items = coords.map((coord, i) => {
+    const items = this._coords.map((coord, i) => {
       let y;
       const realY = coord[Y];
       if (realY <= baselineY) {
