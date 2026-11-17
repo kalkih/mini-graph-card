@@ -9,7 +9,7 @@ import {
  * - define a "fetch start" time for a forthcoming fetching data from HA server;
  * - define other important properties (isCacheConverted, skipInitialState)
  * for a forthcoming fetching data from HA server.
- * @param {object} historyObj Cached history object
+ * @param {object} cachedHistoryObj Cached history object
  * @param {Date} start Starting time of interval
  * @returns {{
  *   history: Array<object>,
@@ -18,13 +18,13 @@ import {
  *   fetchStart: Date,
  * }} Processed history data properties
  */
-const prepareCachedHistory = (historyObj, start) => {
+const prepareCachedHistory = (cachedHistoryObj, start) => {
   let isCacheConverted = false;
   let skipInitialState = false;
   let fetchStart = start;
 
-  // making a local copy of cached history array
-  let history = historyObj.data.map(item => ({
+  // making a local copy of cached history array with a state conversion
+  let history = cachedHistoryObj.data.map(item => ({
     ...item,
     // checking just in case (if a history array was made by a prev version of m-g-c)
     state: (item.state === null // including converted NaNs
@@ -49,11 +49,11 @@ const prepareCachedHistory = (historyObj, start) => {
     // skip initial state when fetching recent/not-cached data
     skipInitialState = true;
 
-    const lastFetched = new Date(historyObj.last_fetched);
+    const lastFetched = new Date(cachedHistoryObj.last_fetched);
     fetchStart = new Date(lastFetched - 1); // make it a bit earlier
 
     // does cached history array contain mapped data (indexes)?
-    isCacheConverted = historyObj.state_map_converted === true;
+    isCacheConverted = cachedHistoryObj.state_map_converted === true;
   } else {
     // there were no states which could be used in current graph so clearing
     history = [];
