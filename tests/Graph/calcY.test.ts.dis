@@ -65,6 +65,7 @@ const CHECK_V_COORD = (
 
 describe("Graph::calcY()", () => {
   let graph: any;
+  let coords: CoordsType[];
 
   beforeEach(() => {
     graph = new Graph({
@@ -75,9 +76,7 @@ describe("Graph::calcY()", () => {
   });
 
   for (let logarithmicIndex = 0; logarithmicIndex < 2; logarithmicIndex += 1) {
-    const logarithmic = logarithmicIndex === 0
-      ? false
-      : true;
+    const logarithmic = !(logarithmicIndex === 0);
 
     describe(`logarithmic = ${logarithmic}`, () => {
       beforeEach(() => {
@@ -85,9 +84,7 @@ describe("Graph::calcY()", () => {
       });
 
       for (let invertIndex = 0; invertIndex < 2; invertIndex += 1) {
-        const invert = invertIndex === 0
-          ? false
-          : true;
+        const invert = !(invertIndex === 0);
 
         describe(`invert = ${invert}`, () => {
           beforeEach(() => {
@@ -106,14 +103,14 @@ describe("Graph::calcY()", () => {
               beforeEach(() => {
                 if (dataTypeIndex === 0) {
                   if (!logarithmic) {
-                    graph.coords = GRAPH_COORDS_NUMERIC;
+                    coords = GRAPH_COORDS_NUMERIC;
                   } else {
-                    graph.coords = GRAPH_COORDS_NUMERIC_LOG;
+                    coords = GRAPH_COORDS_NUMERIC_LOG;
                   }
                 } else if (dataTypeIndex === 1) {
-                  graph.coords = GRAPH_COORDS_NAN;
+                  coords = GRAPH_COORDS_NAN;
                 } else {
-                  graph.coords = [];
+                  coords = [];
                 }
               });
 
@@ -121,12 +118,12 @@ describe("Graph::calcY()", () => {
                 graph._min = !logarithmic ? MIN : MIN_LOG;
                 graph._max = !logarithmic ? MAX : MAX_LOG;
                 ////////
-                const result: CoordsType[] = graph.calcY(graph.coords);
+                const result: CoordsType[] = graph.calcY(coords);
                 ////////
-                CHECK_COORDS_LENGTHS(graph.coords, result);
+                CHECK_COORDS_LENGTHS(coords, result);
                 if (dataTypeIndex !== 2) {
                   CHECK_X_COORD(result);
-                  CHECK_V_COORD(graph.coords, result);
+                  CHECK_V_COORD(coords, result);
                   ///
                   if (dataTypeIndex === 0) {
                     for (let i = 0; i < result.length; i += 1) {
@@ -148,12 +145,12 @@ describe("Graph::calcY()", () => {
                 graph._min = !logarithmic ? MIN : MIN_LOG;
                 graph._max = graph._min;
                 ////////
-                const result: CoordsType[] = graph.calcY(graph.coords);
+                const result: CoordsType[] = graph.calcY(coords);
                 ////////
-                CHECK_COORDS_LENGTHS(graph.coords, result);
+                CHECK_COORDS_LENGTHS(coords, result);
                 if (dataTypeIndex !== 2) {
                   CHECK_X_COORD(result);
-                  CHECK_V_COORD(graph.coords, result);
+                  CHECK_V_COORD(coords, result);
                   ///
                   if (dataTypeIndex === 0) {
                     if (!invert) {
@@ -199,12 +196,12 @@ describe("Graph::calcY()", () => {
                     ? NaN
                     : !logarithmic ? MAX : MAX_LOG;
                   ////////
-                  const result: CoordsType[] = graph.calcY(graph.coords);
+                  const result: CoordsType[] = graph.calcY(coords);
                   ////////
-                  CHECK_COORDS_LENGTHS(graph.coords, result);
+                  CHECK_COORDS_LENGTHS(coords, result);
                   if (dataTypeIndex !== 2) {
                     CHECK_X_COORD(result);
-                    CHECK_V_COORD(graph.coords, result);
+                    CHECK_V_COORD(coords, result);
                     ///
                     for (let i = 0; i < result.length; i += 1) {
                       expect(Number.isNaN(result[i][Y])).toBe(true);
