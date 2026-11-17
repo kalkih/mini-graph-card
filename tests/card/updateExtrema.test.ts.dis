@@ -23,6 +23,8 @@ interface AbsType extends HistoryItemType {
 
 const findType = (items: AbsType[], type: AbsTypeType) => items.find((i) => i.type === type);
 
+const VARIANTS: (string|boolean)[] = [ true, 'above', 'below'];
+
 describe("MiniGraphCard::updateExtrema()", () => {
   let card: MiniGraphCard;
 
@@ -34,50 +36,83 @@ describe("MiniGraphCard::updateExtrema()", () => {
     };
   });
 
-  it('show.extrema/avg undefined', () => {
+  it('show.extrema/average undefined', () => {
     card.updateExtrema(HISTORY_ALL_NUMERIC);
     expect(card.abs.length).toEqual(0);
   });
 
-  it('show.extrema/avg false', () => {
+  it('show.extrema/average false', () => {
     (card.config as ConfigType).show!.extrema = false;
     (card.config as ConfigType).show!.average = false;
     card.updateExtrema(HISTORY_ALL_NUMERIC);
     expect(card.abs.length).toEqual(0);
   });
 
-  it('show.extrema = true', () => {
-    (card.config as ConfigType).show!.extrema = true;
-    card.updateExtrema(HISTORY_ALL_NUMERIC);
-    expect(card.abs.length).toEqual(2);
-    const min = findType(card.abs, 'min');
-    expect(min).toBeDefined();
-    expect(parseFloat(min?.state)).toEqual(-88);
-    const max = findType(card.abs, 'max');
-    expect(max).toBeDefined();
-    expect(parseFloat(max?.state)).toEqual(100);
-    expect(findType(card.abs, 'avg')).toBeUndefined();
+  describe('show.extrema != false', () => {
+    for (let extremaIndex = 0; extremaIndex < VARIANTS.length; extremaIndex += 1) {
+      // 0 - true, 1 - above, 2 - below
+      const variant = VARIANTS[extremaIndex];
+      it(`show.extrema = ${variant}`, () => {
+        (card.config as ConfigType).show!.extrema = variant;
+        card.updateExtrema(HISTORY_ALL_NUMERIC);
+        expect(card.abs.length).toEqual(2);
+        const min = findType(card.abs, 'min');
+        expect(min).toBeDefined();
+        expect(parseFloat(min!.state)).toEqual(-88);
+        expect(min!.last_changed).toBeDefined();
+        const max = findType(card.abs, 'max');
+        expect(max).toBeDefined();
+        expect(parseFloat(max!.state)).toEqual(100);
+        expect(max!.last_changed).toBeDefined();
+        expect(findType(card.abs, 'avg')).toBeUndefined();
+      });
+    }
   });
 
-  it('show.average = true', () => {
-    (card.config as ConfigType).show!.average = true;
-    card.updateExtrema(HISTORY_ALL_NUMERIC);
-    expect(card.abs.length).toEqual(1);
-    const avg = findType(card.abs, 'avg');
-    expect(avg).toBeDefined();
-    expect(parseFloat(avg?.state)).toBeCloseTo(13.26, 6);
-    expect(findType(card.abs, 'min')).toBeUndefined();
-    expect(findType(card.abs, 'max')).toBeUndefined();
+  describe('show.average != false', () => {
+    for (let averageIndex = 0; averageIndex < VARIANTS.length; averageIndex += 1) {
+      // 0 - true, 1 - above, 2 - below
+      const variant = VARIANTS[averageIndex];
+      it(`show.average = ${variant}`, () => {
+        (card.config as ConfigType).show!.average = variant;
+        card.updateExtrema(HISTORY_ALL_NUMERIC);
+        expect(card.abs.length).toEqual(1);
+        const avg = findType(card.abs, 'avg');
+        expect(avg).toBeDefined();
+        expect(parseFloat(avg!.state)).toBeCloseTo(13.26, 6);
+        expect(findType(card.abs, 'min')).toBeUndefined();
+        expect(findType(card.abs, 'max')).toBeUndefined();
+      });
+    }
   });
 
-  it('show.average = true, histoty only contains NaNs', () => {
-    (card.config as ConfigType).show!.average = true;
-    card.updateExtrema(HISTORY_JUNK);
-    expect(card.abs.length).toEqual(1);
-    const avg = findType(card.abs, 'avg');
-    expect(avg).toBeDefined();
-    expect(avg!.state).toBeUndefined();
-    expect(findType(card.abs, 'min')).toBeUndefined();
-    expect(findType(card.abs, 'max')).toBeUndefined();
-  });
+  for (let badHistoryIndex = 0; badHistoryIndex < 2; badHistoryIndex += 1) {
+    // 0 - history contains junk, 1 - history is empty
+    const badHistory = badHistoryIndex === 0
+      ? HISTORY_JUNK
+      : [];
+    const badHistoryDescr = badHistoryIndex === 0
+      ? 'history contains junk'
+      : 'history is empty';
+    it(`show.extrema/average = true, ${badHistoryDescr}`, () => {
+      (card.config as ConfigType).show!.extrema = true;
+      (card.config as ConfigType).show!.average = true;
+      card.updateExtrema(badHistory);
+      ////
+      expect(card.abs.length).toEqual(3);
+      ////
+      const avg = findType(card.abs, 'avg');
+      expect(avg).toBeDefined();
+      expect(avg!.state).toBeNull();
+      ////
+      const minObj = findType(card.abs, 'min');
+      const maxObj = findType(card.abs, 'max');
+      expect(minObj).toBeDefined();
+      expect(maxObj).toBeDefined();
+      expect(minObj!.state).toBeNull();
+      expect(maxObj!.state).toBeNull();
+      expect(minObj!.last_changed).toBeNull();
+      expect(maxObj!.last_changed).toBeNull();
+    });
+  }
 });
