@@ -9,6 +9,7 @@ const DEFAULT_HOURS_TO_SHOW = 24;
 const DEFAULT_POINTS_PER_HOUR = 0.5;
 const DEFAULT_STATIC_VALUE_LABEL_OFFSET = 20; // in %
 const NBSP = '\u00A0';
+const LONG_DASH = '\u2014';
 const DEFAULT_COLORS = [
   'var(--accent-color)',
   '#3498db',
@@ -54,6 +55,7 @@ export {
   DEFAULT_POINTS_PER_HOUR,
   DEFAULT_STATIC_VALUE_LABEL_OFFSET,
   NBSP,
+  LONG_DASH,
   DEFAULT_COLORS,
   DEFAULT_SHOW,
   X,
