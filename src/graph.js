@@ -187,7 +187,7 @@ export default class Graph {
   /**
    * Group historical data into time buckets based on their age
    * @param {Array} res Array of time buckets being populated
-   * @param {Object} item Current history item
+   * @param {object} item Current history item
    * @returns {Array} Updated array of grouped time buckets
    */
   _reducer(res, item) {
@@ -215,7 +215,7 @@ export default class Graph {
 
   /**
    * Calculate coordinates (X, Y = 0, aggregated Value)
-   * @param {Array<Array<Object>|undefined>} buckets Array of grouped time buckets
+   * @param {Array<Array<object>|undefined>} buckets Array of grouped time buckets
    * @returns {Array<Array<number>>} Array of [X, Y, Value] coordinates
    */
   _calcPoints(buckets) {
@@ -369,8 +369,8 @@ export default class Graph {
 
   /**
    * Return a gradient used to set a gradiented color for a line & fill
-   * @param {Array<Object>} thresholds color_thresholds array
-   * @returns {Array<Object>} Gradient
+   * @param {Array<object>} thresholds color_thresholds array
+   * @returns {Array<object>} Gradient
    */
   computeGradient(thresholds) {
     const scale = this._logarithmic
@@ -431,7 +431,7 @@ export default class Graph {
    * Get bars for an entity
    * @param {number} position Index of a bar (0,1,..)
    * (i.e. index of an entity with a shown bar graph)
-   * @returns {{width: number, items: Array<Object>}} Bars for an entity
+   * @returns {{width: number, items: Array<object>}} Bars for an entity
    * to be shown at a `position` index
    */
   getBars(position) {
