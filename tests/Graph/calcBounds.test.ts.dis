@@ -22,14 +22,14 @@ describe("Graph::_calcBounds()", () => {
   });
 
   it("Coords empty", () => {
-    graph.coords = [] as CoordsType[];
+    graph._coords = [] as CoordsType[];
     const bounds = graph._calcBounds();
     expect(Number.isNaN(bounds.min)).toBe(true);
     expect(Number.isNaN(bounds.max)).toBe(true);
   });
 
   it("Coords with numbers only", () => {
-    graph.coords = [
+    graph._coords = [
       [0, 0, -10.5],
       [0, 0, 0.0],
       [0, 0, -88.0],
@@ -42,7 +42,7 @@ describe("Graph::_calcBounds()", () => {
   });
 
   it("Coords with NaNs", () => {
-    graph.coords = [
+    graph._coords = [
       [0, 0, -10.5],
       [0, 0, 0.0],
       [0, 0, -88.0],
@@ -55,7 +55,7 @@ describe("Graph::_calcBounds()", () => {
   });
 
   it("Coords with all NaNs, except one value (negative)", () => {
-    graph.coords = [
+    graph._coords = [
       [0, 0, NaN],
       [0, 0, NaN],
       [0, 0, -3.14],
@@ -68,7 +68,7 @@ describe("Graph::_calcBounds()", () => {
   });
 
   it("Coords with all NaNs, except one value (positive)", () => {
-    graph.coords = [
+    graph._coords = [
       [0, 0, NaN],
       [0, 0, 100.3],
       [0, 0, NaN],
@@ -81,7 +81,7 @@ describe("Graph::_calcBounds()", () => {
   });
 
   it("Coords with all NaNs", () => {
-    graph.coords = [
+    graph._coords = [
       [0, 0, NaN],
       [0, 0, NaN],
       [0, 0, NaN],
