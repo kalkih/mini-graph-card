@@ -14,44 +14,53 @@ import {
 } from '../../src/const';
 import { aggregateFuncMap } from '../../src/aggregate';
 
+const CHECK_DEFAULT = (graph: Graph) => {
+  expect(graph._graphType).toEqual('line');
+  expect(graph._margin.length).toEqual(2);
+  expect(graph._margin[0]).toEqual(DEFAULT_LINE_WIDTH);
+  expect(graph._margin[1]).toEqual(DEFAULT_LINE_WIDTH);
+
+  expect(graph._width).toBeCloseTo(DEFAULT_GRAPH_WIDTH - graph._margin[0] * 2, 6);
+  expect(graph._height).toBeCloseTo(DEFAULT_GRAPH_HEIGHT - graph._margin[1] * 4, 6);
+
+  expect(graph._min).toEqual(0);
+  expect(graph._max).toEqual(0);
+  expect(graph.min).toEqual(0);
+  expect(graph.max).toEqual(0);
+
+  expect(graph._hours_to_show).toEqual(24);
+  expect(graph._points_per_hour).toEqual(1);
+
+  expect(graph._aggregateFuncName).toEqual('avg');
+  expect(graph._calcPoint).toEqual(aggregateFuncMap.avg);
+  expect(graph._calculateOverall).toBe(false);
+  expect(graph._overallAggregateFuncName).toBeUndefined();
+  expect(graph._overall).toBeUndefined();
+  expect(graph.overall).toBeUndefined();
+
+  expect(graph._smoothing).toBe(true);
+  expect(graph._logarithmic).toBe(false);
+  expect(graph._bar_spacing).toEqual(DEFAULT_BAR_SPACING);
+  expect(graph._bar_spacing_group).toEqual(DEFAULT_BAR_SPACING);
+  expect(graph._total_bars_in_group).toEqual(1);
+  expect(graph._baseline).toBeUndefined();
+  expect(graph._invert).toBe(false);
+
+  expect(graph._history).toBeUndefined();
+  expect(graph._coords).toEqual([]);
+};
+
 describe("Graph()", () => {
   let graph: any;
 
   it("default arguments", () => {
+    graph = new Graph();
+    CHECK_DEFAULT(graph);
+  });
+
+  it("default arguments (empty {})", () => {
     graph = new Graph({});
-    expect(graph._graphType).toEqual('line');
-    expect(graph._margin.length).toEqual(2);
-    expect(graph._margin[0]).toEqual(DEFAULT_LINE_WIDTH);
-    expect(graph._margin[1]).toEqual(DEFAULT_LINE_WIDTH);
-
-    expect(graph._width).toBeCloseTo(DEFAULT_GRAPH_WIDTH - graph._margin[0] * 2, 6);
-    expect(graph._height).toBeCloseTo(DEFAULT_GRAPH_HEIGHT - graph._margin[1] * 4, 6);
-
-    expect(graph._min).toEqual(0);
-    expect(graph._max).toEqual(0);
-    expect(graph.min).toEqual(0);
-    expect(graph.max).toEqual(0);
-
-    expect(graph._hours_to_show).toEqual(24);
-    expect(graph._points_per_hour).toEqual(1);
-
-    expect(graph._aggregateFuncName).toEqual('avg');
-    expect(graph._calcPoint).toEqual(aggregateFuncMap.avg);
-    expect(graph._calculateOverall).toBe(false);
-    expect(graph._overallAggregateFuncName).toBeUndefined();
-    expect(graph._overall).toBeUndefined();
-    expect(graph.overall).toBeUndefined();
-
-    expect(graph._smoothing).toBe(true);
-    expect(graph._logarithmic).toBe(false);
-    expect(graph._bar_spacing).toEqual(DEFAULT_BAR_SPACING);
-    expect(graph._bar_spacing_group).toEqual(DEFAULT_BAR_SPACING);
-    expect(graph._total_bars_in_group).toEqual(1);
-    expect(graph._baseline).toBeUndefined();
-    expect(graph._invert).toBe(false);
-
-    expect(graph._history).toBeUndefined();
-    expect(graph.coords).toEqual([]);
+    CHECK_DEFAULT(graph);
   });
 
   it("custom arguments", () => {
@@ -107,7 +116,7 @@ describe("Graph()", () => {
     expect(graph._invert).toBe(true);
 
     expect(graph._history).toBeUndefined();
-    expect(graph.coords).toEqual([]);
+    expect(graph._coords).toEqual([]);
   });
 
   it("invalid aggregate func", () => {

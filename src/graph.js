@@ -51,7 +51,7 @@ export default class Graph {
     total_bars_in_group = 1, // number of bars (i.e. number of entities with a shown bar graph)
     baseline = undefined,
     invert = false,
-  }) {
+  } = {}) {
     this._graphType = graphType;
     this._history = undefined;
     this._coords = [];
