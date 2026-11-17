@@ -5,7 +5,7 @@
  * remove the "dis" extension to use it locally in your VSCode devcontainer.
  */
 
-import { expect, describe, it } from 'vitest';
+import { expect, describe, it, beforeEach } from 'vitest';
 import { prepareCachedHistory } from '../../src/history';
 import type { HistoryItemType } from '../types/historyItemType';
 import {
@@ -14,7 +14,7 @@ import {
 } from '../common/history';
 import { sortHistoryByDate } from '../common/utils';
 
-const FIXED_START = new Date("2026-11-01T10:00:00.000Z");
+const FIXED_START_EARLIER = new Date("2026-11-01T09:59:00.000Z");
 const FIXED_START_LATE = new Date("2026-11-01T13:00:00.000Z");
 const FIXED_START_MIDDLE = new Date("2026-11-01T10:09:00.000Z");
 
@@ -28,127 +28,193 @@ const DATA: HistoryItemType[] = [
 ];
 
 const DATA_JUNK: HistoryItemType[] = [
-  { state: undefined, last_changed: "2026-11-01T10:01:00.000Z" },
-  { state: NaN, last_changed: "2026-11-01T10:06:00.000Z" },
+  { state: undefined,     last_changed: "2026-11-01T10:01:00.000Z" },
+  { state: null,           last_changed: "2026-11-01T10:06:00.000Z" },
   { state: "unavailable", last_changed: "2026-11-01T10:11:00.000Z" },
-  { state: "unknown", last_changed: "2026-11-01T10:16:00.000Z" },
+  { state: "unavailable", last_changed: "2026-11-01T10:11:01.000Z" },
+  { state: "unknown",     last_changed: "2026-11-01T10:16:00.000Z" },
 ];
 
+const GET_DATA_TYPE_DESCR = (
+  index: number,
+): {
+  descr: string,
+  data: HistoryItemType[],
+} => {
+  let descr: string;
+  let data: HistoryItemType[];
+  switch (index) {
+    case 0:
+      descr = 'data empty';
+      data = [];
+      break;
+    case 1:
+      descr = 'data = valid values';
+      data = sortHistoryByDate(DATA);
+      break;
+    case 2:
+      descr = 'data = valid values + wrong values';
+      data = sortHistoryByDate([...DATA, ...DATA_JUNK]);
+      break;
+    default:
+      descr = 'data = wrong values';
+      data = sortHistoryByDate(DATA_JUNK);
+      break;
+  }
+  return { descr, data };
+};
+
+const GET_START_DESCR = (
+  index: number,
+): {
+  descr: string,
+  start: Date,
+} => {
+  let descr: string;
+  let start: Date;
+  switch (index) {
+    case 0:
+      descr = 'earlier';
+      start = FIXED_START_EARLIER;
+      break;
+    case 1:
+      descr = 'middle';
+      start = FIXED_START_MIDDLE;
+      break;
+    default:
+      descr = 'later';
+      start = FIXED_START_LATE;
+      break;
+  }
+  return { descr, start };
+};
+
+interface CachedHistoryObjType {
+  state_map_converted?: boolean;
+  last_fetched?: Date;
+  data?: HistoryItemType[];
+};
+
 describe('prepareCachedHistory()', () => {
-  let historyObj = {};
+  let historyObj: CachedHistoryObjType;
 
-  it('Cached history is empty', () => {
+  beforeEach(() => {
     historyObj = {
-      state_map_converted: true,
       last_fetched: LAST_FETCHED,
-      data: [],
     };
-    const result = prepareCachedHistory(historyObj, FIXED_START);
-    expect(result.history.length === 0).toBe(true);
-    //////////////
-    expect(result.isCacheConverted).toBe(false);
-    expect(result.skipInitialState).toBe(false);
-    expect(result.fetchStart).toEqual(FIXED_START);
   });
 
-  ////////////////////////////////////////////////////////////////////
+  for (let dataTypeIndex = 0; dataTypeIndex < 4; dataTypeIndex += 1) {
+    // data: 0 - empty, 1 - valid data, 2 - valid + wrong, 3 - wrong
+    const {descr: dataTypeDescr, data } = GET_DATA_TYPE_DESCR(dataTypeIndex);
+    describe(dataTypeDescr, () => {
+      beforeEach(() => {
+        historyObj.data = structuredClone(data);
+      });
 
-  it('"Start" point is not found', () => {
-    historyObj = {
-      state_map_converted: true,
-      last_fetched: LAST_FETCHED,
-      data: DATA,
-    };
-    const result = prepareCachedHistory(historyObj, FIXED_START_LATE);
-    expect(result.history.length === 0).toBe(true);
-    //////////////
-    expect(result.isCacheConverted).toBe(false);
-    expect(result.skipInitialState).toBe(false);
-    expect(result.fetchStart).toEqual(FIXED_START_LATE);
-  });
+      for (let stateMapConvertedIndex = 0; stateMapConvertedIndex < 2; stateMapConvertedIndex += 1) {
+        // state_map_converted: 0 - false, 1- true
+        const stateMapConverted = !(stateMapConvertedIndex === 0);
+        describe(`state_map_converted = ${stateMapConverted}`, () => {
+          beforeEach(() => {
+            historyObj.state_map_converted = stateMapConverted;
+          });
 
-  ////////////////////////////////////////////////////////////////////
-
-  it('"Start" point is found', () => {
-    historyObj = {
-      state_map_converted: true,
-      last_fetched: LAST_FETCHED,
-      data: DATA,
-    };
-    const result = prepareCachedHistory(historyObj, FIXED_START);
-    expect(result.history.length).toEqual(4);
-    expect(getNumbersCountInHistory(result.history as HistoryItemType[])).toEqual(4);
-    //////////////
-    expect(result.isCacheConverted).toBe(true);
-    expect(result.skipInitialState).toBe(true);
-    //////////////
-    const fetchStart: Date = new Date((new Date(LAST_FETCHED)).getTime() - 1);
-    expect(result.fetchStart).toEqual(fetchStart);
-  });
-
-  ////////////////////////////////////////////////////////////////////
-
-  it('"Start" point is found, isCacheConverted=false', () => {
-    historyObj = {
-      state_map_converted: false,
-      last_fetched: LAST_FETCHED,
-      data: DATA,
-    };
-    const result = prepareCachedHistory(historyObj, FIXED_START);
-    expect(result.history.length).toEqual(4);
-    expect(getNumbersCountInHistory(result.history as HistoryItemType[])).toEqual(4);
-    //////////////
-    expect(result.isCacheConverted).toBe(false);
-    expect(result.skipInitialState).toBe(true);
-    //////////////
-    const fetchStart: Date = new Date((new Date(LAST_FETCHED)).getTime() - 1);
-    expect(result.fetchStart).toEqual(fetchStart);
-  });
-
-  ////////////////////////////////////////////////////////////////////
-  it('Converting "bad" values to NaN', () => {
-    const arr = sortHistoryByDate([...DATA, ...DATA_JUNK]);
-    historyObj = {
-      state_map_converted: true,
-      last_fetched: LAST_FETCHED,
-      data: arr,
-    };
-    const result = prepareCachedHistory(historyObj, FIXED_START);
-    expect(result.history.length).toEqual(8);
-    expect(getNumbersCountInHistory(result.history as HistoryItemType[])).toEqual(4);
-    expect(getNansCountInHistory(result.history as HistoryItemType[])).toEqual(4);
-    //////////////
-    expect((result.history[0] as HistoryItemType).state).toEqual("50.0");
-    expect((result.history[0] as HistoryItemType).last_changed).toEqual(FIXED_START);
-    //////////////
-    expect(result.isCacheConverted).toBe(true);
-    expect(result.skipInitialState).toBe(true);
-    //////////////
-    const fetchStart: Date = new Date((new Date(LAST_FETCHED)).getTime() - 1);
-    expect(result.fetchStart).toEqual(fetchStart);
-  });
-
-  ////////////////////////////////////////////////////////////////////
-
-  it('"Start" point is in a middle', () => {
-    const arr = sortHistoryByDate([...DATA, ...DATA_JUNK]);
-    historyObj = {
-      state_map_converted: true,
-      last_fetched: LAST_FETCHED,
-      data: arr,
-    };
-    const result = prepareCachedHistory(historyObj, FIXED_START_MIDDLE);
-    expect(result.history.length).toEqual(5);
-    expect(getNumbersCountInHistory(result.history as HistoryItemType[])).toEqual(2);
-    expect(getNansCountInHistory(result.history as HistoryItemType[])).toEqual(3);
-    //////////////
-    expect(Number.isNaN((result.history[0] as HistoryItemType).state)).toBe(true);
-    expect((result.history[0] as HistoryItemType).last_changed).toEqual(FIXED_START_MIDDLE);
-    //////////////
-    expect(result.isCacheConverted).toBe(true);
-    expect(result.skipInitialState).toBe(true);
-    //////////////
-    const fetchStart: Date = new Date((new Date(LAST_FETCHED)).getTime() - 1);
-    expect(result.fetchStart).toEqual(fetchStart);
-  });
+          for (let startIndex = 0; startIndex < 3; startIndex += 1) {
+            // fixed start: 0 - early, 1- middle, 2 - late
+            const { descr: startDescr, start } = GET_START_DESCR(startIndex);
+            it(`start = ${startDescr}`, () => {
+              const result = prepareCachedHistory(historyObj, start);
+              //////////////////
+              if (startIndex !== 2) { // earlier or in middle
+                if (dataTypeIndex === 0) { // empty data
+                  expect(result.history.length).toEqual(0);
+                  expect(result.isCacheConverted).toEqual(false);
+                  expect(result.skipInitialState).toEqual(false);
+                  expect(result.fetchStart).toEqual(start);
+                } else { // not empty data
+                  // check flags
+                  expect(result.isCacheConverted).toEqual(stateMapConverted);
+                  expect(result.skipInitialState).toEqual(true);
+                  /////////
+                  // check data length
+                  let expectedLength;
+                  if (startIndex === 0) { // earlier
+                    expectedLength = dataTypeIndex === 1
+                      ? DATA.length // valid data
+                      : dataTypeIndex === 2
+                        ? (DATA.length + DATA_JUNK.length) // valid + wrong
+                        : DATA_JUNK.length; // wrong
+                  } else { // in middle
+                    expectedLength = dataTypeIndex === 1
+                      ? 3 // valid data
+                      : dataTypeIndex === 2
+                        ? 6 // valid + wrong
+                        : 4; // wrong
+                  }
+                  expect(result.history.length).toEqual(expectedLength);
+                  /////////
+                  // check count of numbers & NaNs
+                  let expectedNumbersCount;
+                  let expectedNansCount;
+                  if (startIndex === 0) { // earlier
+                    expectedNumbersCount = dataTypeIndex === 1
+                      ? DATA.length // valid data
+                      : dataTypeIndex === 2
+                        ? DATA.length // valid + wrong
+                        : 0; // wrong
+                    expectedNansCount = dataTypeIndex === 1
+                      ? 0 // valid data
+                      : dataTypeIndex === 2
+                        ? DATA_JUNK.length // valid + wrong
+                        : DATA_JUNK.length; // wrong
+                  } else { // in middle
+                    expectedNumbersCount = dataTypeIndex === 1
+                      ? 3 // valid data
+                      : dataTypeIndex === 2
+                        ? 2 // valid + wrong
+                        : 0; // wrong
+                    expectedNansCount = dataTypeIndex === 1
+                      ? 0 // valid data
+                      : dataTypeIndex === 2
+                        ? 4 // valid + wrong
+                        : 4; // wrong
+                  }
+                  expect(getNumbersCountInHistory(result.history as HistoryItemType[])).toEqual(expectedNumbersCount);
+                  expect(getNansCountInHistory(result.history as HistoryItemType[])).toEqual(expectedNansCount);
+                  /////////
+                  // check lastFetched
+                  const expectedFetchStart: Date = new Date(LAST_FETCHED.getTime() - 1);
+                  expect(result.fetchStart).toEqual(expectedFetchStart);
+                  /////////
+                  // check 0th item
+                  const expectedState: string|number = startIndex === 0
+                    ? dataTypeIndex === 1 // earlier
+                      ? '50.0' // valid data
+                      : dataTypeIndex === 2
+                        ? '50.0' // valid + wrong
+                        : NaN // wrong
+                    : dataTypeIndex === 1 // in middle
+                      ? '60.0' // valid data
+                      : dataTypeIndex === 2
+                        ? NaN // valid + wrong
+                        : NaN; // wrong
+                  const expectedLastChanged = startIndex === 0
+                    ? new Date(data[0].last_changed!) // earlier
+                    : start; // in middle
+                  expect((result.history[0] as HistoryItemType).state).toEqual(expectedState);
+                  expect(new Date((result.history[0] as HistoryItemType).last_changed!)).toEqual(expectedLastChanged);
+                }
+              } else { // later
+                expect(result.history.length).toEqual(0);
+                expect(result.isCacheConverted).toEqual(false);
+                expect(result.skipInitialState).toEqual(false);
+                expect(result.fetchStart).toEqual(start);
+              }
+            });
+          }
+        });
+      }
+    });
+  }
 });
