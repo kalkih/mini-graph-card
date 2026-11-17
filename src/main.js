@@ -2455,7 +2455,7 @@ export default class MiniGraphCard extends LitElement {
   /**
    * Calculate a boundary
    * @param {'min'|'max'} type Type of boundary
-   * @param {Array<Object>} series Array of Graph objects
+   * @param {Array<object>} series Array of Graph objects
    * @param {number|undefined} configVal User-defined boundary (clean number)
    * @param {boolean} isSoft True if the boundary is soft, false otherwise
    * @param {number} fallback Default boundary if series is empty
@@ -2502,7 +2502,7 @@ export default class MiniGraphCard extends LitElement {
 
   /**
    * Calculate boundaries for a particular Y-axis
-   * @param {Array<Object>} series Array of Graph objects
+   * @param {Array<object>} series Array of Graph objects
    * associated with a particular Y-axis
    * @param {number|undefined} lowerBound User-defined min boundary (clean number)
    * @param {number|undefined} upperBound User-defined max boundary (clean number)
