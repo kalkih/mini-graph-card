@@ -2663,8 +2663,7 @@ export default class MiniGraphCard extends LitElement {
     let stateHistory = [];
     let fetchStart = start;
     let skipInitialState = false;
-    // cache is converted with state_map
-    let isCacheConverted = false;
+    let isCacheConverted = false; // is cache converted with state_map
 
     const history = this.config.cache
       ? await this.getCache(`${entityId}_${index}`, this.config.compress)
@@ -2673,7 +2672,7 @@ export default class MiniGraphCard extends LitElement {
       // process a сached history
       ({
         history: stateHistory,
-        isCacheConverted, // cache contains a mapping
+        isCacheConverted, // is cache converted with state_map
         skipInitialState,
         fetchStart, // reviewed "fetch start" time
       } = prepareCachedHistory(history, start));
@@ -2722,7 +2721,7 @@ export default class MiniGraphCard extends LitElement {
         // save a total history in a cache
         const data = {
           hours_to_show: this.config.hours_to_show,
-          last_fetched: new Date(),
+          last_fetched: new Date(), // current date
           data: stateHistory,
           version,
         };
