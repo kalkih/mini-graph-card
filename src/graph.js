@@ -108,20 +108,23 @@ export default class Graph {
     if (this._baseline !== undefined) {
       // calculate Y coord
       const [baselineCoord] = this.calcY([[0, 0, this._baseline]]);
-      [, baselineY] = baselineCoord;
+      const [, calculatedBaselineY] = baselineCoord;
+      if (!Number.isNaN(calculatedBaselineY)) {
+        baselineY = calculatedBaselineY;
 
-      // if the baseline is inside a top "margins area"
-      // - then shift the baseline to the top edge (0)
-      const gridTop = this._margin[Y] * 2;
-      if (baselineY <= gridTop) {
-        baselineY = absoluteTop;
-      }
+        // if the baseline is inside a top "margins area"
+        // - then shift the baseline to the top edge (0)
+        const gridTop = this._margin[Y] * 2;
+        if (baselineY <= gridTop) {
+          baselineY = absoluteTop;
+        }
 
-      // if the baseline is inside a bottom "margins area"
-      // - then shift the baseline to the bottom edge
-      const gridBottom = this._height + this._margin[Y] * 2;
-      if (baselineY >= gridBottom) {
-        baselineY = absoluteBottom;
+        // if the baseline is inside a bottom "margins area"
+        // - then shift the baseline to the bottom edge
+        const gridBottom = this._height + this._margin[Y] * 2;
+        if (baselineY >= gridBottom) {
+          baselineY = absoluteBottom;
+        }
       }
     }
 
