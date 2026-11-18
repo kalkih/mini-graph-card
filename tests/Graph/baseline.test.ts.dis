@@ -1,0 +1,133 @@
+/**
+ * Tests for Graph::baselineY getter, Graph::baselineRatio getter.
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it, beforeEach } from 'vitest';
+import Graph from '../../src/graph';
+import { Y } from '../../src/const';
+import { GRAPH_SETTINGS } from '../common/graph';
+
+const Y_TOP = 0;
+const Y_BOTTOM = (graph: Graph) => graph._height + 4 * graph._margin[Y];
+const Y_MIDDLE = (graph: Graph) => Y_BOTTOM(graph) / 2;
+
+const MAX = 150;
+const MIN = -50;
+
+describe("Graph::baselineY, Graph::baselineRatio", () => {
+  let graph: any;
+
+  beforeEach(() => {
+    graph = new Graph({
+      width: GRAPH_SETTINGS.width,
+      height: GRAPH_SETTINGS.height,
+      margin: GRAPH_SETTINGS.margin,
+    });
+  });
+
+  for (let boundsIndex = 0; boundsIndex < 6; boundsIndex += 1) {
+    // 0 - max & min = numbers,
+    // 1 - max = NaN, 2 - min = NaN, 3 - max & min = NaN
+    // 4 - min = max = minimal, 5 - min = max = maximal
+    let min; let max;
+    switch (boundsIndex) {
+      case 0:  min = MIN; max = MAX; break;
+      case 1:  min = MIN; max = NaN; break;
+      case 2:  min = NaN; max = MAX; break;
+      case 3:  min = NaN; max = NaN; break;
+      case 4:  min = MIN; max = MIN; break;
+      default: min = MAX; max = MAX; break;
+    }
+    describe(`min = ${min}, max = ${max}`, () => {
+      beforeEach(() => {
+        graph._min = min;
+        graph._max = max;
+      });
+
+      for (let baselineIndex = 0; baselineIndex < 6; baselineIndex += 1) {
+        // baseline: 0 - undefined, 1 - lowest, 2 - 50%, 3 - highest, 4 - <lowest, 5 - >highest
+        const baselines = [undefined, -50, 50, 150, -100, 190];
+        const baselineDescrs = ['undefined', 'lowest', '50%', 'highest', '<lowest', '>highest'];
+        const baseline = baselines[baselineIndex];
+        const baselineDescr = baselineDescrs[baselineIndex];
+        describe(`baseline = ${baselineDescr}`, () => {
+          beforeEach(() => {
+            graph._baseline = baseline;
+          });
+
+          for (let invertIndex = 0; invertIndex < 2; invertIndex += 1) {
+            // 0 - not inverted, 1 - inverted
+            const invert = !(invertIndex === 0);
+            it(`invert = ${invert}`, () => {
+              graph._invert = invert;
+              const resultBaselineY = graph.baselineY;
+              const expectedBaselineY = boundsIndex === 0
+                ? !invert
+                  ? // not inverted
+                  [0, 1, 4].includes(baselineIndex)
+                    ? Y_BOTTOM(graph)
+                    : baselineIndex === 2
+                      ? Y_MIDDLE(graph) // baseline = 50%
+                      : Y_TOP // baseline = highest, >highest
+                  : // inverted
+                  [0, 1, 4].includes(baselineIndex)
+                    ? Y_TOP
+                    : baselineIndex === 2
+                      ? Y_MIDDLE(graph) // baseline = 50%
+                      : Y_BOTTOM(graph) // baseline = highest, >highest
+                : [1, 2, 3].includes(boundsIndex)
+                  ? // tests with NaN
+                  !invert
+                    ? Y_BOTTOM(graph)
+                    : Y_TOP
+                  : // tests wth min=max
+                  !invert
+                    ? // not inverted
+                    boundsIndex === 4
+                      ? // min=max=lowest
+                      [0, 1, 4].includes(baselineIndex)
+                        ? Y_BOTTOM(graph)
+                        : baselineIndex === 2
+                          ? Y_TOP // baseline = 50%
+                          : Y_TOP // baseline = highest, >highest
+                      : // min=max=highest
+                      [0, 1, 4].includes(baselineIndex)
+                        ? Y_BOTTOM(graph)
+                        : baselineIndex === 2
+                          ? Y_BOTTOM(graph) // baseline = 50%
+                          : baselineIndex === 3
+                            ? Y_BOTTOM(graph) // baseline = highest
+                            : 70 // baseline > highest
+                    : // inverted
+                    boundsIndex === 4
+                      ? // min=max=lowest
+                      [0, 1, 4].includes(baselineIndex)
+                        ? Y_TOP
+                        : baselineIndex === 2
+                          ? Y_BOTTOM(graph) // baseline = 50%
+                          : Y_BOTTOM(graph) // baseline = highest, >highest
+                      : // min=max=highest
+                      [0, 1, 4].includes(baselineIndex)
+                        ? Y_TOP
+                        : baselineIndex === 2
+                          ? Y_TOP // baseline = 50%
+                          : baselineIndex === 3
+                            ? Y_TOP // baseline = highest
+                            : 50; // baseline > highest
+              expect(resultBaselineY).toEqual(expectedBaselineY);
+              ////
+              const resultBaselineRatio = graph.baselineRatio;
+              const expectedBaselineRatio = baselineIndex === 0
+                ? undefined
+                : expectedBaselineY / (graph._height + graph._margin[Y] * 4);
+              expect(resultBaselineRatio).toEqual(expectedBaselineRatio);
+            });
+          }
+        });
+      }
+    });
+  }
+});
