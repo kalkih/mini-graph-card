@@ -279,8 +279,8 @@ export default class Graph {
 
   /**
    * Recalculate a point's coords based on min & max thresholds
-   * @param {Array<Array<number>>} coords Array of X, Y, Value
-   * @returns {Array<Array<number>>} Array of X, Y, Value,
+   * @param {Array<Array<number>>} coords Array of [X, Y, Value]
+   * @returns {Array<Array<number>>} Array of [X, Y, Value],
    * where Y - recalculated based on min/max thresholds
    */
   calcY(coords) {
@@ -297,7 +297,7 @@ export default class Graph {
       : NaN;
 
     if (Number.isNaN(max) || Number.isNaN(min)) {
-      return coords.map(coord => [coord[X], NaN, coord[V]]);
+      return coords.map((coord) => [coord[X], NaN, coord[V]]);
     }
 
     const delta = Math.abs(max - min);
@@ -308,7 +308,7 @@ export default class Graph {
       yRatio = delta / this._height;
     }
 
-    const coords2 = coords.map((coord) => {
+    return coords.map((coord) => {
       if (Number.isNaN(coord[V])) {
         return [coord[X], NaN, NaN];
       }
@@ -322,8 +322,6 @@ export default class Graph {
       }
       return [coord[X], coordY, coord[V]];
     });
-
-    return coords2;
   }
 
   /**
