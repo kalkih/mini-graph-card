@@ -22,7 +22,7 @@ import {
   DEFAULT_GRAPH_HEIGHT,
   DEFAULT_GRAPH_WIDTH,
   DEFAULT_LINE_WIDTH,
-  NBSP,
+  NBSP, LONG_DASH,
 } from './const';
 import {
   fallbackUndefinedNull,
@@ -1670,18 +1670,22 @@ export default class MiniGraphCard extends LitElement {
           <div class="info__item">
             <span class="info__item__type">${entry.type}</span>
             <span class="info__item__value">
-              ${this.computeStateWithUom(entry.state, { index: 0, origin: 'info' }, hideUnit)}
+              ${entry.state === null
+                ? LONG_DASH
+                : this.computeStateWithUom(entry.state, { index: 0, origin: 'info' }, hideUnit)}
             </span>
             <span class="info__item__time">
               ${entry.type !== 'avg'
-                ? formatDateTime(
-                    new Date(entry.last_changed),
-                    this.config,
-                    this.datetimeFormatFromCfgParsed,
-                    this._datetimeFormatDateOptions,
-                    this._datetimeFormatTimeOptions,
-                    this._hass,
-                  )
+                ? entry.last_changed === null
+                  ? LONG_DASH
+                  : formatDateTime(
+                      new Date(entry.last_changed),
+                      this.config,
+                      this.datetimeFormatFromCfgParsed,
+                      this._datetimeFormatDateOptions,
+                      this._datetimeFormatTimeOptions,
+                      this._hass,
+                    )
                 : ''}
             </span>
           </div>
