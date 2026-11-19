@@ -410,7 +410,7 @@ export default class Graph {
         color = interpolateRGB(arr[index - 1].color, stop.color, factor);
       }
       let offset;
-      if (scale <= 0) {
+      if (Number.isNaN(scale) || scale <= 0) {
         offset = 0;
       } else {
         // limit stopValue within max/min
