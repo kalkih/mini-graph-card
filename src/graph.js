@@ -329,18 +329,40 @@ export default class Graph {
    * @returns {Array<Array<number>>} Array of points [X, Y, Value, index]
    */
   getPoints() {
-    if (this._smoothing) {
-      const [first, ...rest] = this._coords;
-      let last = first;
-      return rest.map((point, i) => {
-        const Z = this._midPoint(last[X], last[Y], point[X], point[Y]);
-        const sum = (last[V] + point[V]) / 2; // 2-points smoothing
-        last = point;
-        return [Z[X], Z[Y], sum, i + 1];
-      });
-    } else {
-      return this._coords.map((point, i) => [point[X], point[Y], point[V], i]);
+    if (!this.hasCoords) return []; // safety guard
+
+    const points = [];
+    const is2pointsSmoothing = this._smoothing && this._smoothing !== 'bezierc';
+    const len = this._coords.length;
+
+    for (let i = 0; i < len; i += 1) {
+      const point = this._coords[i];
+      if (!Number.isNaN(point[Y])) {
+        if (is2pointsSmoothing) {
+          const prev = i > 0
+            ? this._coords[i - 1]
+            : null;
+          const next = i < len - 1
+            ? this._coords[i + 1]
+            : null;
+          const hasValidPrev = prev && !Number.isNaN(prev[Y]);
+          const hasValidNext = next && !Number.isNaN(next[Y]);
+
+          if (hasValidPrev) {
+            const Z = this._midPoint(prev[X], prev[Y], point[X], point[Y]);
+            const sum = (prev[V] + point[V]) / 2;
+            points.push([Z[X], Z[Y], sum, i]);
+          } else if (!hasValidNext) {
+            // single point between two gaps
+            points.push([point[X], point[Y], point[V], i]);
+          }
+        } else {
+          points.push([point[X], point[Y], point[V], i]);
+        }
+      }
     }
+
+    return points;
   }
 
   /**
