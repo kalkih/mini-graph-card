@@ -1,9 +1,9 @@
 import type { BoundsType } from '../types/boundsType';
 
 export const GRAPH_SETTINGS = {
-  margin: [5, 5],
+  margin: [5, 5] as [number, number],
   width: 300,
-  height: 100,
+  height: 120, // 100 + 5*4 (resulting graph._height = 100)
 };
 
 interface GraphMockType extends BoundsType {
@@ -18,4 +18,10 @@ export const GRAPH_OBJECTS_VALID: GraphMockType[] = [
   { min: -300, max: -100 },
 ];
 
-export const GRAPH_OBJECTS = [ ...GRAPH_OBJECTS_VALID ];
+export const GRAPH_OBJECTS_NAN: GraphMockType[] = [
+  { min: NaN, max: NaN },
+  { min: NaN, max: NaN },
+  { min: NaN, max: NaN },
+];
+
+export const GRAPH_OBJECTS = [ ...GRAPH_OBJECTS_VALID, ...GRAPH_OBJECTS_NAN ];

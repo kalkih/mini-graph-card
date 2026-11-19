@@ -8,7 +8,7 @@
 // @vitest-environment jsdom
 import { expect, describe, it, beforeEach } from 'vitest';
 import MiniGraphCard from '../../src/main';
-import { GRAPH_OBJECTS } from '../common/graph';
+import { GRAPH_OBJECTS_NAN, GRAPH_OBJECTS } from '../common/graph';
 import type { BoundsArrayType } from '../types/boundsType';
 
 const BOUNDS_USER_DEFINED: BoundsArrayType = [100, 110];
@@ -22,12 +22,15 @@ describe("MiniGraphCard::getBoundaries()", () => {
     card = new MiniGraphCard();
   });
 
-  for (let arrayIndex = 0; arrayIndex < 2; arrayIndex += 1) {
+  for (let arrayIndex = 0; arrayIndex < 3; arrayIndex += 1) {
     // 0 - testing empty array,
-    // 1 - testing 'valid data'
+    // 1 - testing 'valid data + NaNs'
+    // 2 - testing 'NaNs only',
     const arrayDescr = arrayIndex === 0
       ? 'empty array'
-      : 'valid data';
+      : arrayIndex === 1
+        ? 'valid data + NaNs'
+        : 'NaNs only';
 
     describe(arrayDescr, () => {
       for (let lowerConfigValProvidedIndex = 0; lowerConfigValProvidedIndex < 2; lowerConfigValProvidedIndex += 1) {
@@ -104,7 +107,9 @@ describe("MiniGraphCard::getBoundaries()", () => {
                             it(`lowerConfigVal ${lowerConfigVal}, upperConfigVal ${upperConfigVal}`, () => {
                               const series = arrayIndex === 0
                                 ? []
-                                : structuredClone(GRAPH_OBJECTS);
+                                : arrayIndex === 1
+                                  ? structuredClone(GRAPH_OBJECTS)
+                                  : structuredClone(GRAPH_OBJECTS_NAN);
 
                               const result = card.getBoundaries(
                                 series,
