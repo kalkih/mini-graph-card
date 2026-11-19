@@ -458,18 +458,19 @@ export default class Graph {
    * to be shown at a `position` index
    */
   getBars(position) {
+    if (!this.hasCoords) { // safety guard
+      return {
+        width: 0,
+        items: [],
+      };
+    }
+
     const spacing = this._bar_spacing;
     const spacing_group = this._bar_spacing_group;
     const total = this._total_bars_in_group;
 
     // number of measures
     const total_groups = this._coords.length;
-    if (total_groups === 0) { // safety guard
-      return {
-        width: 0,
-        items: [],
-      };
-    }
 
     // width of a group of bars
     const group_width = (this._width - spacing_group * (total_groups - 1))
@@ -491,13 +492,19 @@ export default class Graph {
 
     const items = this._coords.map((coord, i) => {
       let y;
+      let height;
       const realY = coord[Y];
-      if (realY <= baselineY) {
-        y = realY;
+      if (!Number.isNaN(realY)) {
+        if (realY <= baselineY) {
+          y = realY;
+        } else {
+          y = baselineY;
+        }
+        height = Math.abs(baselineY - realY);
       } else {
         y = baselineY;
+        height = 0;
       }
-      const height = Math.abs(baselineY - realY);
 
       const x = this._margin[X]
         + (group_width + spacing_group) * i
