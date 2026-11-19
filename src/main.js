@@ -1345,6 +1345,9 @@ export default class MiniGraphCard extends LitElement {
     barStyle += 'stroke-opacity: var(--mcg-bar-seam-opacity, 0.3);';
 
     const renderedItems = items.map((bar, i) => {
+      if (Number.isNaN(bar.value)) {
+        return svg``;
+      }
       const color = this.computeColor(bar.value, index);
       return svg`
         <rect class='bar' x=${bar.x} y=${bar.y}
