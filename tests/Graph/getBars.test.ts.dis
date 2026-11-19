@@ -1,0 +1,198 @@
+/**
+ * Tests for Graph::getBars() method.
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it, beforeEach } from 'vitest';
+import Graph from '../../src/graph';
+import { Y } from '../../src/const';
+import { GRAPH_SETTINGS } from '../common/graph';
+
+const VALUES: Array<number> = [30, -35, 0, NaN];
+
+describe('Graph::getBars()', () => {
+  let graph: any;
+  const getFullHeight = (y: number, invert: boolean): number => {
+    return !invert
+      ? graph._height + 4 * graph._margin[Y] - y
+      : y;
+  };
+
+  beforeEach(() => {
+    graph = new Graph({
+      width: GRAPH_SETTINGS.width, // _width = 300 - 5*2 = 290
+      height: GRAPH_SETTINGS.height, // _height = 120 - 5*4 = 100
+      margin: GRAPH_SETTINGS.margin, // [5, 5]
+    });
+  });
+
+  it('empty _coords', () => {
+    graph._coords = [];
+    const result = graph.getBars(0);
+    expect(result).toEqual({ width: 0, items: [] });
+  });
+
+  describe('Check X & width', () => {
+    beforeEach(() => {
+      graph._bar_spacing_group = 8;
+      graph._total_bars_in_group = 2;
+      graph._coords = [ // X coord is not accounted
+        [0, 30, VALUES[0]],
+        [0, 95, VALUES[1]],
+        [0, 60, VALUES[2]],
+        [0, NaN, VALUES[3]],
+      ];
+    });
+
+    it('normal bars', () => {
+      graph._bar_spacing = 3;
+      const expectedGroupWidth = (290 - graph._bar_spacing_group * 3) / 4;
+      const expectedBarWidth = (expectedGroupWidth - graph._bar_spacing) / 2;
+      ///
+      const resultPos0 = graph.getBars(0);
+      const resultPos1 = graph.getBars(1);
+      ///
+      expect(resultPos0.width).toBeCloseTo(expectedBarWidth, 6);
+      expect(resultPos1.width).toBeCloseTo(expectedBarWidth, 6);
+      ///
+      expect(resultPos0.items[0].x).toBeCloseTo(5, 6);
+      expect(resultPos0.items[1].x).toBeCloseTo(79.5, 6);
+      expect(resultPos0.items[2].x).toBeCloseTo(154, 6);
+      expect(resultPos0.items[3].x).toBeCloseTo(228.5, 6);
+      ///
+      expect(resultPos1.items[0].x).toBeCloseTo(39.75, 6);
+      expect(resultPos1.items[1].x).toBeCloseTo(114.25, 6);
+      expect(resultPos1.items[2].x).toBeCloseTo(188.75, 6);
+      expect(resultPos1.items[3].x).toBeCloseTo(263.25, 6);
+    });
+
+    it('overlapped bars', () => {
+      graph._bar_spacing = -1;
+      const expectedGroupWidth = (290 - graph._bar_spacing_group * 3) / 4;
+      ///
+      const resultPos0 = graph.getBars(0);
+      const resultPos1 = graph.getBars(1);
+      ///
+      expect(resultPos0.width).toBeCloseTo(expectedGroupWidth, 6);
+      expect(resultPos1.width).toBeCloseTo(expectedGroupWidth, 6);
+      ///
+      const expectedX: Array<number> = [5, 79.5, 154, 228.5];
+      expect(resultPos0.items[0].x).toBeCloseTo(expectedX[0], 6);
+      expect(resultPos0.items[1].x).toBeCloseTo(expectedX[1], 6);
+      expect(resultPos0.items[2].x).toBeCloseTo(expectedX[2], 6);
+      expect(resultPos0.items[3].x).toBeCloseTo(expectedX[3], 6);
+      ///
+      expect(resultPos1.items[0].x).toBeCloseTo(expectedX[0], 6);
+      expect(resultPos1.items[1].x).toBeCloseTo(expectedX[1], 6);
+      expect(resultPos1.items[2].x).toBeCloseTo(expectedX[2], 6);
+      expect(resultPos1.items[3].x).toBeCloseTo(expectedX[3], 6);
+    });
+
+    it('too large spacing', () => {
+      graph._bar_spacing = 500;
+      const res = graph.getBars(0);
+      expect(res.width).toEqual(1);
+    });
+  });
+
+  describe('Check Y & height', () => {
+    beforeEach(() => {
+      graph._bar_spacing = 0;
+      graph._bar_spacing_group = 0;
+      graph._total_bars_in_group = 1;
+      graph._min = -50;
+      graph._max = 50;
+    });
+
+    for (let invertIndex = 0; invertIndex< 2; invertIndex += 1) {
+      // invert: 0 - false, 1 - true
+      const invert = !(invertIndex === 0);
+
+      describe(`invert = ${invert}`, () => {
+        beforeEach(() => {
+          graph._invert = invert;
+          const y: Array<number> = !invert
+            ? [30, 95, 60, NaN]
+            : [90, 25, 60, NaN];
+          graph._coords = [ // X coord is not accounted
+            [0, y[0], VALUES[0]],
+            [0, y[1], VALUES[1]],
+            [0, y[2], VALUES[2]],
+            [0, y[3], VALUES[3]],
+          ];
+        });
+
+        for (let baselineIndex = 0; baselineIndex < 3; baselineIndex += 1) {
+          // baseline: 0 - undefined, 1 - "0", 2 - "25"
+          const baseline = baselineIndex === 0
+            ? undefined
+            : baselineIndex === 1
+              ? 0
+              : 25;
+          const baselineY = baselineIndex === 0
+            ? !invert ? 120 : 0
+            : baselineIndex === 1
+              ? 60 // in the middle
+              : !invert ? 35 : 85;
+
+          it(`baseline = ${baseline}`, () => {
+            graph._baseline = baseline;
+            const res = graph.getBars(0);
+            const expected = baselineIndex === 0
+              ? // baseline=undefined
+                !invert
+                  ? [
+                      { y: graph._coords[0][Y], height: getFullHeight(graph._coords[0][Y], invert) },
+                      { y: graph._coords[1][Y], height: getFullHeight(graph._coords[1][Y], invert) },
+                      { y: graph._coords[2][Y], height: getFullHeight(graph._coords[2][Y], invert) },
+                      { y: baselineY,           height: 0 },
+                    ]
+                  : [
+                      { y: baselineY, height: getFullHeight(graph._coords[0][Y], invert) },
+                      { y: baselineY, height: getFullHeight(graph._coords[1][Y], invert) },
+                      { y: baselineY, height: getFullHeight(graph._coords[2][Y], invert) },
+                      { y: baselineY, height: 0 },
+                    ]
+              : baselineIndex === 1
+                  ? // baseline=0
+                    !invert
+                      ? [
+                          { y: graph._coords[0][Y], height: getFullHeight(graph._coords[0][Y], invert) - baselineY },
+                          { y: baselineY,           height: graph._coords[1][Y] - baselineY                        },
+                          { y: graph._coords[2][Y], height: 0 },
+                          { y: baselineY,           height: 0 },
+                        ]
+                      : [
+                          { y: baselineY,           height: getFullHeight(graph._coords[0][Y], invert) - baselineY },
+                          { y: graph._coords[1][Y], height: baselineY - graph._coords[1][Y]                        },
+                          { y: graph._coords[2][Y], height: 0 },
+                          { y: baselineY,           height: 0 },
+                        ]
+                  : // baseline=25
+                    !invert
+                      ? [
+                          { y: graph._coords[0][Y], height: baselineY - graph._coords[0][Y] },
+                          { y: baselineY,           height: graph._coords[1][Y] - baselineY },
+                          { y: baselineY,           height: graph._coords[2][Y] - baselineY },
+                          { y: baselineY,           height: 0 },
+                        ]
+                      : [
+                          { y: baselineY,           height: graph._coords[0][Y] - baselineY },
+                          { y: graph._coords[1][Y], height: baselineY - graph._coords[1][Y] },
+                          { y: graph._coords[2][Y], height: baselineY - graph._coords[2][Y] },
+                          { y: baselineY,           height: 0 },
+                        ];
+            expect(res.items).toEqual([
+              { x: 5,     y: expected[0].y, height: expected[0].height, value: VALUES[0] },
+              { x: 77.5,  y: expected[1].y, height: expected[1].height, value: VALUES[1] },
+              { x: 150,   y: expected[2].y, height: expected[2].height, value: VALUES[2] },
+              { x: 222.5, y: expected[3].y, height: expected[3].height, value: VALUES[3] },
+            ]);
+          });
+        }
+      });
+    }
+  });
+});
