@@ -332,7 +332,7 @@ export default class Graph {
     if (!this.hasCoords) return []; // safety guard
 
     const points = [];
-    const is2pointsSmoothing = this._smoothing && this._smoothing !== 'bezierc';
+    const is2pointsSmoothing = this._smoothing;
     const len = this._coords.length;
 
     for (let i = 0; i < len; i += 1) {
@@ -366,28 +366,76 @@ export default class Graph {
   }
 
   /**
-   * Get SVG path for line chart with optional smoothing
-   * @returns {string} SVG path
+   * Generate paths for line and/or fill
+   * @param {object} options Path generation options
+   * @param {boolean} options.buildLine True to build a path for line, false otherwise
+   * @param {boolean} options.buildFill True to build a path for fill, false otherwise
+   * @returns {{line: string, fill: string}} Generated paths
    */
-  getPath() {
-    let next;
-    let Z;
-    let path = '';
-    let last = this._coords[0];
-    path += `M${last[X]},${last[Y]}`; // move to 1st point
+  getLineAndFill({ buildLine, buildFill }) {
+    if (!this.hasCoords || (!buildLine && !buildFill)) {
+      return { line: '', fill: '' };
+    }
 
-    this._coords.forEach((point) => {
-      next = point;
-      Z = this._smoothing
-        ? this._midPoint(last[X], last[Y], next[X], next[Y])
-        : next;
-      path += ` ${Z[X]},${Z[Y]}`; // either a midPoint (smoothing = true) or "next"
-      // does not affect if "next" was added before, otherwise makes a quadratic curve
-      path += ` Q ${next[X]},${next[Y]}`;
-      last = next;
-    });
-    path += ` ${next[X]},${next[Y]}`; // add last point
-    return path;
+    const height = buildFill
+      ? this.baselineY
+      : 0;
+    const len = this._coords.length;
+
+    let line = '';
+    let fill = '';
+    let firstX = 0;
+    let lastPoint = null;
+    let segmentLength = 0;
+
+    // one loop for calculating both lines & fill
+    for (let i = 0; i <= len; i += 1) {
+      const currPoint = i < len
+        ? this._coords[i]
+        : null;
+      const isGap = !currPoint || Number.isNaN(currPoint[Y]); // either a NaN gap or beyond coords
+
+      if (!isGap) {
+        let step = '';
+        if (segmentLength === 0) {
+          if (buildFill) {
+            firstX = currPoint[X];
+          }
+          const cmd = (line || fill) // not equal to ''
+            ? ' M ' // add a command
+            : 'M '; // start with a command
+          step = `${cmd}${currPoint[X]},${currPoint[Y]}`;
+        } else {
+          // continue processing a current segment
+          const Z = this._smoothing
+            ? this._midPoint(lastPoint[X], lastPoint[Y], currPoint[X], currPoint[Y])
+            : currPoint;
+          step = ` ${Z[X]},${Z[Y]} Q ${currPoint[X]},${currPoint[Y]}`;
+        }
+
+        if (buildLine) line += step;
+        if (buildFill) fill += step;
+
+        lastPoint = currPoint;
+        segmentLength += 1;
+      } else if (segmentLength > 0) {
+        // either a NaN gap or beyond coords; finishing the last segment
+        const endStep = segmentLength === 1
+          ? ` L ${lastPoint[X]},${lastPoint[Y]}` // single point
+          : ` ${lastPoint[X]},${lastPoint[Y]}`; // line to last point
+
+        if (buildLine) line += endStep;
+        if (buildFill) {
+          // adding a closed line for a fill (go down, go left)
+          fill += `${endStep} L ${lastPoint[X]},${height} L ${firstX},${height} z`;
+        }
+
+        lastPoint = null;
+        segmentLength = 0;
+      }
+    }
+
+    return { line, fill };
   }
 
   /**
@@ -434,20 +482,6 @@ export default class Graph {
     return this._invert
       ? gradientStops.reverse()
       : gradientStops;
-  }
-
-  /**
-   * Get an SVG path for a fill
-   * @param {string} path SVG path for a line
-   * @returns {string} SVG path for a fill
-   */
-  getFill(path) {
-    const height = this.baselineY;
-    let fill = path;
-    // note that currently this._margin[X] = 0 when fill is defined
-    fill += ` L ${this._width + this._margin[X]}, ${height}`;
-    fill += ` L ${this._coords[0][X]}, ${height} z`;
-    return fill;
   }
 
   /**
