@@ -1,0 +1,520 @@
+/**
+ * Tests for Graph::getLineAndFill() method.
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it, beforeEach } from 'vitest';
+import Graph from '../../src/graph';
+import { GRAPH_SETTINGS } from '../common/graph';
+import type { CoordsType } from '../types/coordsType';
+
+const BASELINE_MIDDLE: number = 0;
+const BASELINE_HIGHEST: number = 100;
+const BASELINE_LOWEST: number = -100;
+
+const COORDS_X: number[] = [0, 20, 40, 60, 80, 100, 120, 140];
+
+/* expected Y coords, only for information
+const COORDS_Y_baseline_undefined_lowest: number[] = [
+  65, // -10
+  60, // 0
+  50, // 20
+  50, // 20
+  35, // 50
+  50, // 20
+  85, // -50
+  65, // -10
+];
+const COORDS_Y_baseline_undefined_lowest_invert: number[] = [
+  55, // -10
+  60, // 0
+  70, // 20
+  70, // 20
+  85, // 50
+  70, // 20
+  35, // -50
+  55, // -10
+];
+*/
+
+const COORDS_EMPTY: CoordsType[] = []; // 0
+
+const COORDS_ALL_NANS: CoordsType[] = [ // 1
+  [ COORDS_X[0], 0, NaN ],
+  [ COORDS_X[1], 0, NaN ],
+  [ COORDS_X[2], 0, NaN ],
+  [ COORDS_X[3], 0, NaN ],
+  [ COORDS_X[4], 0, NaN ],
+  [ COORDS_X[5], 0, NaN ],
+  [ COORDS_X[6], 0, NaN ],
+  [ COORDS_X[7], 0, NaN ],
+];
+
+const COORDS_ALL_VALID: CoordsType[] = [ // 2
+  [ COORDS_X[0], 0, -10 ],
+  [ COORDS_X[1], 0, 0   ],
+  [ COORDS_X[2], 0, 20  ],
+  [ COORDS_X[3], 0, 20  ],
+  [ COORDS_X[4], 0, 50  ],
+  [ COORDS_X[5], 0, 20  ],
+  [ COORDS_X[6], 0, -50 ],
+  [ COORDS_X[7], 0, -10 ],
+];
+
+const COORDS_MIXED_1: CoordsType[] = [ // 3
+  [ COORDS_X[0], 0, -10 ],
+  [ COORDS_X[1], 0, NaN ],
+  [ COORDS_X[2], 0, NaN ],
+  [ COORDS_X[3], 0, NaN ],
+  [ COORDS_X[4], 0, 50  ],
+  [ COORDS_X[5], 0, 20  ],
+  [ COORDS_X[6], 0, -50 ],
+  [ COORDS_X[7], 0, NaN ],
+];
+
+const COORDS_MIXED_2: CoordsType[] = [ // 4
+  [ COORDS_X[0], 0, NaN ],
+  [ COORDS_X[1], 0, 0   ],
+  [ COORDS_X[2], 0, NaN ],
+  [ COORDS_X[3], 0, NaN ],
+  [ COORDS_X[4], 0, 50  ],
+  [ COORDS_X[5], 0, 20  ],
+  [ COORDS_X[6], 0, NaN ],
+  [ COORDS_X[7], 0, -10 ],
+];
+
+const COORDS_MIXED_3: CoordsType[] = [ // 5
+  [ COORDS_X[0], 0, -10 ],
+  [ COORDS_X[1], 0, NaN ],
+  [ COORDS_X[2], 0, 20  ],
+  [ COORDS_X[3], 0, NaN ],
+  [ COORDS_X[4], 0, 50  ],
+  [ COORDS_X[5], 0, NaN ],
+  [ COORDS_X[6], 0, -50 ],
+  [ COORDS_X[7], 0, NaN ],
+];
+
+const COORDS_MIXED_4: CoordsType[] = [ // 6
+  [ COORDS_X[0], 0, NaN ],
+  [ COORDS_X[1], 0, 0   ],
+  [ COORDS_X[2], 0, 20  ],
+  [ COORDS_X[3], 0, NaN ],
+  [ COORDS_X[4], 0, 50  ],
+  [ COORDS_X[5], 0, 20  ],
+  [ COORDS_X[6], 0, -50 ],
+  [ COORDS_X[7], 0, NaN ],
+];
+
+describe('Graph::getLineAndFill()', () => {
+  let graph: any;
+
+  beforeEach(() => {
+    graph = new Graph({
+      width: 140, // _width = 140 - 0*2 = 140
+      height: GRAPH_SETTINGS.height, // _height = 120 - 5*4 = 100
+      margin: [0, 5],
+    });
+    graph.max = 100;
+    graph.min = -100;
+  });
+
+  for (let coordsIndex = 0; coordsIndex < 7; coordsIndex += 1) {
+    let coordsDescr;
+    switch (coordsIndex) {
+      case 0:
+        coordsDescr = 'empty';
+        break;
+      case 1:
+        coordsDescr = 'all NaNs';
+        break;
+      case 2:
+        coordsDescr = 'all valid';
+        break;
+      case 3:
+        coordsDescr = 'valid, NaN, NaN, NaN, valid, valid, valid, NaN';
+        break;
+      case 4:
+        coordsDescr = 'NaN, valid, NaN, NaN, valid, valid, NaN, valid';
+        break;
+      case 5:
+        coordsDescr = 'valid, NaN, valid, NaN, valid, NaN, valid, NaN';
+        break;
+      default:
+        coordsDescr = 'NaN, valid, valid, NaN, valid, valid, valid, NaN';
+        break;
+    }
+
+    describe(`coords = [${coordsDescr}]`, () => {
+      beforeEach(() => {
+        let coords;
+        switch (coordsIndex) {
+          case 0: coords = COORDS_EMPTY;     break;
+          case 1: coords = COORDS_ALL_NANS;  break;
+          case 2: coords = COORDS_ALL_VALID; break;
+          case 3: coords = COORDS_MIXED_1;   break;
+          case 4: coords = COORDS_MIXED_2;   break;
+          case 5: coords = COORDS_MIXED_3;   break;
+          default: coords = COORDS_MIXED_4;  break;
+        }
+        graph._coords = structuredClone(coords);
+      });
+
+      for (let invertIndex = 0; invertIndex < 3; invertIndex += 1) {
+        // invert: 0 - undefined, 1 - false, 2 - true
+        const invert = invertIndex === 0
+          ? undefined
+          : !(invertIndex === 1);
+
+        describe(`invert = ${invert}`, () => {
+          beforeEach(() => {
+            graph._invert = invert;
+          });
+
+          for (let baselineIndex = 0; baselineIndex < 4; baselineIndex+= 1) {
+            // baseline: 0 - undefined, 1 - lowest, 2 - highest, 3 - middle
+            const baseline = baselineIndex === 0
+              ? undefined
+              : baselineIndex === 1
+                ? BASELINE_LOWEST
+                : baselineIndex === 2
+                  ? BASELINE_HIGHEST
+                  : BASELINE_MIDDLE;
+
+            describe(`baseline = ${baseline}`, () => {
+              beforeEach(() => {
+                graph._baseline = baseline;
+              });
+
+              for (let smoothingIndex = 0; smoothingIndex < 3; smoothingIndex+= 1) {
+                // smoothing: 0 - undefined, 1 - false, 2 - true
+                const smoothing = smoothingIndex === 0
+                  ? undefined
+                  : !(smoothingIndex === 1);
+
+                describe(`smoothing = ${smoothing}`, () => {
+                  beforeEach(() => {
+                    graph._smoothing = smoothing;
+                  });
+
+                  it('args empty', () => {
+                    graph.updateCoords();
+                    const {line, fill} = graph.getLineAndFill({});
+                    expect(line).toEqual('');
+                    expect(fill).toEqual('');
+                  });
+
+                  describe('args not empty', () => {
+                    for (let buildLineIndex = 0; buildLineIndex < 3; buildLineIndex += 1) {
+                      // buildLine: 0 - undefined, 1 - false, 2 - true
+                      const buildLine = buildLineIndex === 0
+                        ? undefined
+                        : !(buildLineIndex === 1);
+
+                      describe(`buildLine = ${buildLine}`, () => {
+                        for (let buildFillIndex = 0; buildFillIndex < 3; buildFillIndex += 1) {
+                          // buildFill: 0 - undefined, 1 - false, 2 - true
+                          const buildFill = buildFillIndex === 0
+                            ? undefined
+                            : !(buildFillIndex === 1);
+
+                          it(`buildFill = ${buildFill}`, () => {
+                            graph.updateCoords();
+                            const {line, fill} = graph.getLineAndFill({buildLine, buildFill});
+                            ///
+                            let linePath;
+                            let fillPath;
+                            let separator = '';
+                            if (coordsIndex === 0 // empty
+                              || coordsIndex === 1 /* all NaNs */) {
+                              expect(line).toEqual('');
+                              expect(fill).toEqual('');
+                            } else {
+                              if (coordsIndex === 2) { // all valid
+                                if (!smoothing && !invert) {
+                                  linePath = 'M 0,65 20,60 Q 20,60 40,50 Q 40,50 60,50 Q 60,50 80,35 Q 80,35 100,50 Q 100,50 120,85 Q 120,85 140,65 Q 140,65 140,65';
+                                }
+                                if (!smoothing && invert) {
+                                  linePath = 'M 0,55 20,60 Q 20,60 40,70 Q 40,70 60,70 Q 60,70 80,85 Q 80,85 100,70 Q 100,70 120,35 Q 120,35 140,55 Q 140,55 140,55';
+                                }
+                                if (smoothing && !invert) {
+                                  linePath = 'M 0,65 10,62.5 Q 20,60 30,55 Q 40,50 50,50 Q 60,50 70,42.5 Q 80,35 90,42.5 Q 100,50 110,67.5 Q 120,85 130,75 Q 140,65 140,65';
+                                }
+                                if (smoothing && invert) {
+                                  linePath = 'M 0,55 10,57.5 Q 20,60 30,65 Q 40,70 50,70 Q 60,70 70,77.5 Q 80,85 90,77.5 Q 100,70 110,52.5 Q 120,35 130,45 Q 140,55 140,55';
+                                }
+                                if (buildLineIndex !== 2) {
+                                  expect(line).toEqual('');
+                                } else {
+                                  expect(line).toEqual(linePath);
+                                }
+                                //////////////
+                                if (linePath) {
+                                  separator = ' ';
+                                }
+                                if (!invert && (baseline === undefined || baseline === -100)) {
+                                  fillPath = linePath + separator + 'L 140,120 L 0,120 z';
+                                }
+                                if (invert && (baseline === undefined || baseline === -100)) {
+                                  fillPath = linePath + separator + 'L 140,0 L 0,0 z';
+                                }
+                                //
+                                if (!invert && baseline === 100) {
+                                  fillPath = linePath + separator + 'L 140,0 L 0,0 z';
+                                }
+                                if (invert && baseline === 100) {
+                                  fillPath = linePath + separator + 'L 140,120 L 0,120 z';
+                                }
+                                //
+                                if (baseline === 0) {
+                                  fillPath = linePath + separator + 'L 140,60 L 0,60 z';
+                                }
+                                if (buildFillIndex !== 2) {
+                                  fillPath = '';
+                                }
+                                expect(fill).toEqual(fillPath);
+                              } else if (coordsIndex === 3) { //////////////////////////////////////////////////////////////////
+                                if (!smoothing && !invert) {
+                                  linePath = 'M 0,65 L 0,65 M 80,35 100,50 Q 100,50 120,85 Q 120,85 120,85';
+                                }
+                                if (!smoothing && invert) {
+                                  linePath = 'M 0,55 L 0,55 M 80,85 100,70 Q 100,70 120,35 Q 120,35 120,35';
+                                }
+                                if (smoothing && !invert) {
+                                  linePath = 'M 0,65 L 0,65 M 80,35 90,42.5 Q 100,50 110,67.5 Q 120,85 120,85';
+                                }
+                                if (smoothing && invert) {
+                                  linePath = 'M 0,55 L 0,55 M 80,85 90,77.5 Q 100,70 110,52.5 Q 120,35 120,35';
+                                }
+                                if (buildLineIndex !== 2) {
+                                  linePath = '';
+                                }
+                                expect(line).toEqual(linePath);
+                                //////////////
+                                if (!smoothing && !invert && (baseline === undefined || baseline === -100)) {
+                                  fillPath = 'M 0,65 L 0,65 L 0,120 L 0,120 z M 80,35 100,50 Q 100,50 120,85 Q 120,85 120,85 L 120,120 L 80,120 z';
+                                }
+                                if (!smoothing && invert && (baseline === undefined || baseline === -100)) {
+                                  fillPath = 'M 0,55 L 0,55 L 0,0 L 0,0 z M 80,85 100,70 Q 100,70 120,35 Q 120,35 120,35 L 120,0 L 80,0 z';
+                                }
+                                ///
+                                if (smoothing && !invert && (baseline === undefined || baseline === -100)) {
+                                  fillPath = 'M 0,65 L 0,65 L 0,120 L 0,120 z M 80,35 90,42.5 Q 100,50 110,67.5 Q 120,85 120,85 L 120,120 L 80,120 z';
+                                }
+                                if (smoothing && invert && (baseline === undefined || baseline === -100)) {
+                                  fillPath = 'M 0,55 L 0,55 L 0,0 L 0,0 z M 80,85 90,77.5 Q 100,70 110,52.5 Q 120,35 120,35 L 120,0 L 80,0 z';
+                                }
+                                //////
+                                if (!smoothing && !invert && baseline === 100) {
+                                  fillPath = 'M 0,65 L 0,65 L 0,0 L 0,0 z M 80,35 100,50 Q 100,50 120,85 Q 120,85 120,85 L 120,0 L 80,0 z';
+                                }
+                                if (!smoothing && invert && baseline === 100) {
+                                  fillPath = 'M 0,55 L 0,55 L 0,120 L 0,120 z M 80,85 100,70 Q 100,70 120,35 Q 120,35 120,35 L 120,120 L 80,120 z';
+                                }
+                                ///
+                                if (smoothing && !invert && baseline === 100) {
+                                  fillPath = 'M 0,65 L 0,65 L 0,0 L 0,0 z M 80,35 90,42.5 Q 100,50 110,67.5 Q 120,85 120,85 L 120,0 L 80,0 z';
+                                }
+                                if (smoothing && invert && baseline === 100) {
+                                  fillPath = 'M 0,55 L 0,55 L 0,120 L 0,120 z M 80,85 90,77.5 Q 100,70 110,52.5 Q 120,35 120,35 L 120,120 L 80,120 z';
+                                }
+                                //////
+                                if (!smoothing && !invert && baseline === 0) {
+                                  fillPath = 'M 0,65 L 0,65 L 0,60 L 0,60 z M 80,35 100,50 Q 100,50 120,85 Q 120,85 120,85 L 120,60 L 80,60 z';
+                                }
+                                if (!smoothing && invert && baseline === 0) {
+                                  fillPath = 'M 0,55 L 0,55 L 0,60 L 0,60 z M 80,85 100,70 Q 100,70 120,35 Q 120,35 120,35 L 120,60 L 80,60 z';
+                                }
+                                ///
+                                if (smoothing && !invert && baseline === 0) {
+                                  fillPath = 'M 0,65 L 0,65 L 0,60 L 0,60 z M 80,35 90,42.5 Q 100,50 110,67.5 Q 120,85 120,85 L 120,60 L 80,60 z';
+                                }
+                                if (smoothing && invert && baseline === 0) {
+                                  fillPath = 'M 0,55 L 0,55 L 0,60 L 0,60 z M 80,85 90,77.5 Q 100,70 110,52.5 Q 120,35 120,35 L 120,60 L 80,60 z';
+                                }
+                                if (buildFillIndex !== 2) {
+                                  fillPath = '';
+                                }
+                                expect(fill).toEqual(fillPath);
+                              } else if (coordsIndex === 4) { //////////////////////////////////////////////////////////////////
+                                if (!smoothing && !invert) {
+                                  linePath = 'M 20,60 L 20,60 M 80,35 100,50 Q 100,50 100,50 M 140,65 L 140,65';
+                                }
+                                if (!smoothing && invert) {
+                                  linePath = 'M 20,60 L 20,60 M 80,85 100,70 Q 100,70 100,70 M 140,55 L 140,55';
+                                }
+                                if (smoothing && !invert) {
+                                  linePath = 'M 20,60 L 20,60 M 80,35 90,42.5 Q 100,50 100,50 M 140,65 L 140,65';
+                                }
+                                if (smoothing && invert) {
+                                  linePath = 'M 20,60 L 20,60 M 80,85 90,77.5 Q 100,70 100,70 M 140,55 L 140,55';
+                                }
+                                if (buildLineIndex !== 2) {
+                                  expect(line).toEqual('');
+                                } else {
+                                  expect(line).toEqual(linePath);
+                                }
+                                //////////////
+                                if (!smoothing && !invert && (baseline === undefined || baseline === -100)) {
+                                  fillPath = 'M 20,60 L 20,60 L 20,120 L 20,120 z M 80,35 100,50 Q 100,50 100,50 L 100,120 L 80,120 z M 140,65 L 140,65 L 140,120 L 140,120 z';
+                                }
+                                if (!smoothing && invert && (baseline === undefined || baseline === -100)) {
+                                  fillPath = 'M 20,60 L 20,60 L 20,0 L 20,0 z M 80,85 100,70 Q 100,70 100,70 L 100,0 L 80,0 z M 140,55 L 140,55 L 140,0 L 140,0 z';
+                                }
+                                ///
+                                if (smoothing && !invert && (baseline === undefined || baseline === -100)) {
+                                  fillPath = 'M 20,60 L 20,60 L 20,120 L 20,120 z M 80,35 90,42.5 Q 100,50 100,50 L 100,120 L 80,120 z M 140,65 L 140,65 L 140,120 L 140,120 z';
+                                }
+                                if (smoothing && invert && (baseline === undefined || baseline === -100)) {
+                                  fillPath = 'M 20,60 L 20,60 L 20,0 L 20,0 z M 80,85 90,77.5 Q 100,70 100,70 L 100,0 L 80,0 z M 140,55 L 140,55 L 140,0 L 140,0 z';
+                                }
+                                //////
+                                if (!smoothing && !invert && baseline === 100) {
+                                  fillPath = 'M 20,60 L 20,60 L 20,0 L 20,0 z M 80,35 100,50 Q 100,50 100,50 L 100,0 L 80,0 z M 140,65 L 140,65 L 140,0 L 140,0 z';
+                                }
+                                if (!smoothing && invert && baseline === 100) {
+                                  fillPath = 'M 20,60 L 20,60 L 20,120 L 20,120 z M 80,85 100,70 Q 100,70 100,70 L 100,120 L 80,120 z M 140,55 L 140,55 L 140,120 L 140,120 z';
+                                }
+                                ///
+                                if (smoothing && !invert && baseline === 100) {
+                                  fillPath = 'M 20,60 L 20,60 L 20,0 L 20,0 z M 80,35 90,42.5 Q 100,50 100,50 L 100,0 L 80,0 z M 140,65 L 140,65 L 140,0 L 140,0 z';
+                                }
+                                if (smoothing && invert && baseline === 100) {
+                                  fillPath = 'M 20,60 L 20,60 L 20,120 L 20,120 z M 80,85 90,77.5 Q 100,70 100,70 L 100,120 L 80,120 z M 140,55 L 140,55 L 140,120 L 140,120 z';
+                                }
+                                //////
+                                if (!smoothing && !invert && baseline === 0) {
+                                  fillPath = 'M 20,60 L 20,60 L 20,60 L 20,60 z M 80,35 100,50 Q 100,50 100,50 L 100,60 L 80,60 z M 140,65 L 140,65 L 140,60 L 140,60 z';
+                                }
+                                if (!smoothing && invert && baseline === 0) {
+                                  fillPath = 'M 20,60 L 20,60 L 20,60 L 20,60 z M 80,85 100,70 Q 100,70 100,70 L 100,60 L 80,60 z M 140,55 L 140,55 L 140,60 L 140,60 z';
+                                }
+                                ///
+                                if (smoothing && !invert && baseline === 0) {
+                                  fillPath = 'M 20,60 L 20,60 L 20,60 L 20,60 z M 80,35 90,42.5 Q 100,50 100,50 L 100,60 L 80,60 z M 140,65 L 140,65 L 140,60 L 140,60 z';
+                                }
+                                if (smoothing && invert && baseline === 0) {
+                                  fillPath = 'M 20,60 L 20,60 L 20,60 L 20,60 z M 80,85 90,77.5 Q 100,70 100,70 L 100,60 L 80,60 z M 140,55 L 140,55 L 140,60 L 140,60 z';
+                                }
+                                if (buildFillIndex !== 2) {
+                                  fillPath = '';
+                                }
+                                expect(fill).toEqual(fillPath);
+                              } else if (coordsIndex === 5) { //////////////////////////////////////////////////////////////////
+                                if (!invert) {
+                                  linePath = 'M 0,65 L 0,65 M 40,50 L 40,50 M 80,35 L 80,35 M 120,85 L 120,85';
+                                }
+                                if (invert) {
+                                  linePath = 'M 0,55 L 0,55 M 40,70 L 40,70 M 80,85 L 80,85 M 120,35 L 120,35';
+                                }
+                                if (buildLineIndex !== 2) {
+                                  expect(line).toEqual('');
+                                } else {
+                                  expect(line).toEqual(linePath);
+                                }
+                                //////////////
+                                if (!invert && (baseline === undefined || baseline === -100)) {
+                                  fillPath = 'M 0,65 L 0,65 L 0,120 L 0,120 z M 40,50 L 40,50 L 40,120 L 40,120 z M 80,35 L 80,35 L 80,120 L 80,120 z M 120,85 L 120,85 L 120,120 L 120,120 z';
+                                }
+                                if (invert && (baseline === undefined || baseline === -100)) {
+                                  fillPath = 'M 0,55 L 0,55 L 0,0 L 0,0 z M 40,70 L 40,70 L 40,0 L 40,0 z M 80,85 L 80,85 L 80,0 L 80,0 z M 120,35 L 120,35 L 120,0 L 120,0 z';
+                                }
+                                //////
+                                if (!invert && baseline === 100) {
+                                  fillPath = 'M 0,65 L 0,65 L 0,0 L 0,0 z M 40,50 L 40,50 L 40,0 L 40,0 z M 80,35 L 80,35 L 80,0 L 80,0 z M 120,85 L 120,85 L 120,0 L 120,0 z';
+                                }
+                                if (invert && baseline === 100) {
+                                  fillPath = 'M 0,55 L 0,55 L 0,120 L 0,120 z M 40,70 L 40,70 L 40,120 L 40,120 z M 80,85 L 80,85 L 80,120 L 80,120 z M 120,35 L 120,35 L 120,120 L 120,120 z';
+                                }
+                                //////
+                                if (!invert && baseline === 0) {
+                                  fillPath = 'M 0,65 L 0,65 L 0,60 L 0,60 z M 40,50 L 40,50 L 40,60 L 40,60 z M 80,35 L 80,35 L 80,60 L 80,60 z M 120,85 L 120,85 L 120,60 L 120,60 z';
+                                }
+                                if (invert && baseline === 0) {
+                                  fillPath = 'M 0,55 L 0,55 L 0,60 L 0,60 z M 40,70 L 40,70 L 40,60 L 40,60 z M 80,85 L 80,85 L 80,60 L 80,60 z M 120,35 L 120,35 L 120,60 L 120,60 z';
+                                }
+                                if (buildFillIndex !== 2) {
+                                  fillPath = '';
+                                }
+                                expect(fill).toEqual(fillPath);
+                              } else if (coordsIndex === 6) { //////////////////////////////////////////////////////////////////
+                                if (!smoothing && !invert) {
+                                  linePath = 'M 20,60 40,50 Q 40,50 40,50 M 80,35 100,50 Q 100,50 120,85 Q 120,85 120,85';
+                                }
+                                if (!smoothing && invert) {
+                                  linePath = 'M 20,60 40,70 Q 40,70 40,70 M 80,85 100,70 Q 100,70 120,35 Q 120,35 120,35';
+                                }
+                                if (smoothing && !invert) {
+                                  linePath = 'M 20,60 30,55 Q 40,50 40,50 M 80,35 90,42.5 Q 100,50 110,67.5 Q 120,85 120,85';
+                                }
+                                if (smoothing && invert) {
+                                  linePath = 'M 20,60 30,65 Q 40,70 40,70 M 80,85 90,77.5 Q 100,70 110,52.5 Q 120,35 120,35';
+                                }
+                                if (buildLineIndex !== 2) {
+                                  expect(line).toEqual('');
+                                } else {
+                                  expect(line).toEqual(linePath);
+                                }
+                                //////////////
+                                if (!smoothing && !invert && (baseline === undefined || baseline === -100)) {
+                                  fillPath = 'M 20,60 40,50 Q 40,50 40,50 L 40,120 L 20,120 z M 80,35 100,50 Q 100,50 120,85 Q 120,85 120,85 L 120,120 L 80,120 z';
+                                }
+                                if (!smoothing && invert && (baseline === undefined || baseline === -100)) {
+                                  fillPath = 'M 20,60 40,70 Q 40,70 40,70 L 40,0 L 20,0 z M 80,85 100,70 Q 100,70 120,35 Q 120,35 120,35 L 120,0 L 80,0 z';
+                                }
+                                ///
+                                if (smoothing && !invert && (baseline === undefined || baseline === -100)) {
+                                  fillPath = 'M 20,60 30,55 Q 40,50 40,50 L 40,120 L 20,120 z M 80,35 90,42.5 Q 100,50 110,67.5 Q 120,85 120,85 L 120,120 L 80,120 z';
+                                }
+                                if (smoothing && invert && (baseline === undefined || baseline === -100)) {
+                                  fillPath = 'M 20,60 30,65 Q 40,70 40,70 L 40,0 L 20,0 z M 80,85 90,77.5 Q 100,70 110,52.5 Q 120,35 120,35 L 120,0 L 80,0 z';
+                                }
+                                //////
+                                if (!smoothing && !invert && baseline === 100) {
+                                  fillPath = 'M 20,60 40,50 Q 40,50 40,50 L 40,0 L 20,0 z M 80,35 100,50 Q 100,50 120,85 Q 120,85 120,85 L 120,0 L 80,0 z';
+                                }
+                                if (!smoothing && invert && baseline === 100) {
+                                  fillPath = 'M 20,60 40,70 Q 40,70 40,70 L 40,120 L 20,120 z M 80,85 100,70 Q 100,70 120,35 Q 120,35 120,35 L 120,120 L 80,120 z';
+                                }
+                                ///
+                                if (smoothing && !invert && baseline === 100) {
+                                  fillPath = 'M 20,60 30,55 Q 40,50 40,50 L 40,0 L 20,0 z M 80,35 90,42.5 Q 100,50 110,67.5 Q 120,85 120,85 L 120,0 L 80,0 z';
+                                }
+                                if (smoothing && invert && baseline === 100) {
+                                  fillPath = 'M 20,60 30,65 Q 40,70 40,70 L 40,120 L 20,120 z M 80,85 90,77.5 Q 100,70 110,52.5 Q 120,35 120,35 L 120,120 L 80,120 z';
+                                }
+                                //////
+                                if (!smoothing && !invert && baseline === 0) {
+                                  fillPath = 'M 20,60 40,50 Q 40,50 40,50 L 40,60 L 20,60 z M 80,35 100,50 Q 100,50 120,85 Q 120,85 120,85 L 120,60 L 80,60 z';
+                                }
+                                if (!smoothing && invert && baseline === 0) {
+                                  fillPath = 'M 20,60 40,70 Q 40,70 40,70 L 40,60 L 20,60 z M 80,85 100,70 Q 100,70 120,35 Q 120,35 120,35 L 120,60 L 80,60 z';
+                                }
+                                ///
+                                if (smoothing && !invert && baseline === 0) {
+                                  fillPath = 'M 20,60 30,55 Q 40,50 40,50 L 40,60 L 20,60 z M 80,35 90,42.5 Q 100,50 110,67.5 Q 120,85 120,85 L 120,60 L 80,60 z';
+                                }
+                                if (smoothing && invert && baseline === 0) {
+                                  fillPath = 'M 20,60 30,65 Q 40,70 40,70 L 40,60 L 20,60 z M 80,85 90,77.5 Q 100,70 110,52.5 Q 120,35 120,35 L 120,60 L 80,60 z';
+                                }
+                                if (buildFillIndex !== 2) {
+                                  fillPath = '';
+                                }
+                                expect(fill).toEqual(fillPath);
+                              }
+                            }
+                          });
+                        }
+                      });
+                    }
+                  });
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+  }
+});
