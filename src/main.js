@@ -2554,10 +2554,10 @@ export default class MiniGraphCard extends LitElement {
   /**
    * Update boundaries for all Y-axes: analyze max/min values from Graph objects,
    * account user-defined lower/upper_bound values
-   * @param {object} config Config object
    * @returns {void}
    */
-  updateBounds({ config } = this) {
+  updateBounds() {
+    const { config } = this;
     // function to extract user-defined bounds
     const extract = boundObj => ([
       boundObj ? boundObj.value : undefined,
