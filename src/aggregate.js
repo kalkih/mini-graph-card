@@ -2,7 +2,7 @@
  * Find an object with the minimum or maximum numeric 'state' value.
  * @param {Array<object>} arr Array of objects
  * @param {'min'|'max'} type Type of extrema to find
- * @returns {object} Object with a minimum or maximum  numeric 'state' value,
+ * @returns {object} Object with a minimum or maximum numeric 'state' value,
  * or an empty object if the source array does not contain numeric 'state' values
  */
 const getExtrema = (arr, type) => {
@@ -30,9 +30,8 @@ const getExtrema = (arr, type) => {
 /**
  * Calculate a sum of 'state' values.
  * @param {Array<object>} arr Array of objects
- * @returns {{sum: number|undefined, count: number}|{}} Object containing a sum
- * of numeric 'state' values and a count of objects with numeric 'state' values,
- * or an empty object if the source array does not contain numeric 'state' values
+ * @returns {{sum: number|undefined, count: number}} Object containing a sum
+ * of numeric 'state' values (or undefined if none) and a count of valid items
  */
 const getSum = (arr) => {
   if (!arr || !arr.length) {
