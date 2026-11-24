@@ -2324,6 +2324,10 @@ export default class MiniGraphCard extends LitElement {
 
     // get a state/attribute value or a static_value
     const state = this.computeState(inState, context);
+    if (Number.isNaN(inState)) {
+      // do not add a unit for "NaN"
+      return state;
+    }
 
     // get a unit
     // account a possible state_map.map.hide_unit option
