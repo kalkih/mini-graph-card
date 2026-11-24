@@ -2437,13 +2437,11 @@ export default class MiniGraphCard extends LitElement {
           graphPos += 1;
         } else {
           // line graph
-          const line = this.Graph[i].getPath();
-          if (entityConfig.show_line !== false) {
-            this.line[i] = line;
-          }
-          if (config.show.fill && entityConfig.show_fill !== false) {
-            this.fill[i] = this.Graph[i].getFill(line);
-          }
+          const buildLine = entityConfig.show_line !== false;
+          const buildFill = !!(config.show.fill && entityConfig.show_fill !== false);
+          const { line, fill } = this.Graph[i].getLineAndFill({ buildLine, buildFill });
+          this.line[i] = line;
+          this.fill[i] = fill;
           if (config.show.points && entityConfig.show_points !== false) {
             this.points[i] = this.Graph[i].getPoints();
           }
