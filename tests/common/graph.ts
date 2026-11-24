@@ -2,7 +2,7 @@ import type { BoundsType } from '../types/boundsType';
 
 export const GRAPH_SETTINGS = {
   margin: [5, 5] as [number, number],
-  width: 300,
+  width: 300, // 290 + 5*2 (resulting graph._width = 290)
   height: 120, // 100 + 5*4 (resulting graph._height = 100)
 };
 
