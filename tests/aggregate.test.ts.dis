@@ -5,7 +5,7 @@
  * remove the "dis" extension to use it locally in your VSCode devcontainer.
  */
 
-import { expect, describe, it } from 'vitest';
+import { expect, describe, it, beforeEach } from 'vitest';
 import { aggregateFuncMap, getExtrema, getAvg } from '../src/aggregate';
 import {
   HISTORY_NUMERIC,
@@ -40,13 +40,13 @@ describe('aggregate functions', () => {
     }
   });
 
-  describe('filled array (no junk)', () => {
+  describe('filled array (no junk, 11 values)', () => {
     for (let funcIndex = 0; funcIndex < AGGREGATE_FUNCS.length; funcIndex += 1) {
       const funcName = AGGREGATE_FUNCS[funcIndex];
       const aggregateFunc = aggregateFuncMap[funcName];
       const expected = AGGREGATED_EXPECTED[funcName];
       it(`${funcName}`, () => {
-        const result = aggregateFunc(HISTORY_NUMERIC);
+        const result = aggregateFunc(HISTORY_NUMERIC); // 11 values
         if (['max', 'min', 'last', 'first'].includes(funcName)) {
           expect(result).toEqual(expected);
         } else {
@@ -78,6 +78,31 @@ describe('aggregate functions', () => {
         }
       });
     }
+  });
+
+  describe('array contains 1 value', () => {
+    let arr: HistoryItemType[];
+    beforeEach(() => {
+      arr = [{ state: 99 }];
+    });
+    for (let funcIndex = 0; funcIndex < AGGREGATE_FUNCS.length; funcIndex += 1) {
+      const funcName = AGGREGATE_FUNCS[funcIndex];
+      const aggregateFunc = aggregateFuncMap[funcName];
+      it(`${funcName}`, () => {
+        const result = aggregateFunc(arr);
+        const expected = funcIndex < AGGREGATE_FUNCS.length - 2
+          ? 99
+          : 0;
+        expect(result).toEqual(expected);
+      });
+    }
+  });
+
+  it('median for 12 values', () => {
+    const aggregateFunc = aggregateFuncMap['median'];
+    const arr = [...HISTORY_NUMERIC, { state: 10 }]; // 12 values
+    const result = aggregateFunc(arr);
+    expect(result).toEqual(8.5);
   });
 });
 
