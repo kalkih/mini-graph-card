@@ -40,7 +40,7 @@ const prepareCachedHistory = (cachedHistoryObj, start) => {
     if (currDataIndex > 0) {
       // include previous item
       currDataIndex -= 1;
-      // but change it's last changed time
+      // but change its last changed time
       history[currDataIndex].last_changed = start;
     }
 
