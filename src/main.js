@@ -1322,7 +1322,7 @@ export default class MiniGraphCard extends LitElement {
   * Renders bars for a particular entity/static value
   * @returns {SVGTemplateResult} SVG element
   * @param {{ width: number, items: Array<object> }} bars Bars for a particular
-  * entity/static value  
+  * entity/static value
   * @param {number} index Index of an entry in config.entities
   */
   renderSvgBars(bars, index) {
