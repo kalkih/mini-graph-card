@@ -36,11 +36,9 @@ describe('Graph::getPoints()', () => {
         [30, NaN, NaN],
       ];
     });
-    for (let smoothingIndex = 0; smoothingIndex < 3; smoothingIndex += 1) {
-      // smoothing: 0 - false, 1 - true, 2 - bezierc
-      const smoothing = smoothingIndex !== 2
-        ? !(smoothingIndex === 0)
-        : 'bezierc';
+    for (let smoothingIndex = 0; smoothingIndex < 2; smoothingIndex += 1) {
+      // smoothing: 0 - false, 1 - true
+      const smoothing = !(smoothingIndex === 0);
       it(`smoothing = ${smoothing}`, () => {
         graph._smoothing = smoothing;
         expect(graph.getPoints()).toEqual([]);
@@ -57,14 +55,12 @@ describe('Graph::getPoints()', () => {
         [30, 0,  -300],
       ];
     });
-    for (let smoothingIndex = 0; smoothingIndex < 3; smoothingIndex += 1) {
-      // smoothing: 0 - false, 1 - true, 2 - bezierc
-      const smoothing = smoothingIndex !== 2
-        ? !(smoothingIndex === 0)
-        : 'bezierc';
+    for (let smoothingIndex = 0; smoothingIndex < 2; smoothingIndex += 1) {
+      // smoothing: 0 - false, 1 - true
+      const smoothing = !(smoothingIndex === 0);
       it(`smoothing = ${smoothing}`, () => {
         graph._smoothing = smoothing;
-        const expectedPoints: PointType[] = [0, 2].includes(smoothingIndex)
+        const expectedPoints: PointType[] = smoothingIndex === 0
           ? graph._coords
             .map((point: CoordsType, index: number) => [...point, index])
           : [
@@ -109,14 +105,12 @@ describe('Graph::getPoints()', () => {
           graph._coords = structuredClone(coords);
         });
 
-        for (let smoothingIndex = 0; smoothingIndex < 3; smoothingIndex += 1) {
-          // smoothing: 0 - false, 1 - true, 2 - bezierc
-          const smoothing = smoothingIndex !== 2
-            ? !(smoothingIndex === 0)
-            : 'bezierc';
+        for (let smoothingIndex = 0; smoothingIndex < 2; smoothingIndex += 1) {
+          // smoothing: 0 - false, 1 - true
+          const smoothing = !(smoothingIndex === 0);
           it(`smoothing = ${smoothing}`, () => {
             graph._smoothing = smoothing;
-            const expectedPoints: PointType[] = [0, 2].includes(smoothingIndex)
+            const expectedPoints: PointType[] = smoothingIndex === 0
               ? graph._coords
                 .map((point: CoordsType, index: number) => [...point, index])
                 .filter((point: PointType) => !Number.isNaN(point[V]))
