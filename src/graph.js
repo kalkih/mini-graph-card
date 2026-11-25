@@ -32,7 +32,7 @@ export default class Graph {
    * bar_spacing_group?: number,
    * total_bars_in_group?: number,
    * baseline?: number,
-   * invert?: boolean }} options Graph configuration options
+   * invert?: boolean }} [options={}] Graph configuration options
    */
   constructor({
     graphType = 'line',
