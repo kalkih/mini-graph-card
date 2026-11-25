@@ -8,7 +8,7 @@ export const GRAPH_SETTINGS = {
 
 interface GraphMockType extends BoundsType {
   overall?: number;
-};
+}
 
 export const GRAPH_OBJECTS_VALID: GraphMockType[] = [
   { min: 50, max: 150 },
