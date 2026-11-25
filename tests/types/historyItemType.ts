@@ -6,4 +6,4 @@ export interface HistoryItemType {
   last_changed?: Date | string;
   last_updated?: Date | string;
   attributes?: AttributeType;
-};
+}
