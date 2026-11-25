@@ -150,7 +150,7 @@ export default class Graph {
   /**
    * Update the graph data: group history into time buckets,
    * calculate coordinates, define new value boundaries
-   * @param {Date} endTime Current interval's end time
+   * @param {number} endTime Current interval's end time (timestamp in ms)
    * @param {Array<object>} [history=undefined] Array of historical data objects
    * @returns {void}
    */
