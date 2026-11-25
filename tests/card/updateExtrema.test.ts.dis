@@ -19,7 +19,7 @@ type AbsTypeType =
 
 interface AbsType extends HistoryItemType {
   type: AbsTypeType;
-};
+}
 
 const findType = (items: AbsType[], type: AbsTypeType) => items.find((i) => i.type === type);
 
