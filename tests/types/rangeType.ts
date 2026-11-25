@@ -3,4 +3,4 @@ export interface RangeType {
   tolerance?: string|number;
   max?: string|number;
   min?: string|number;
-};
+}
