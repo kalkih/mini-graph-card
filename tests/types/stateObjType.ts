@@ -6,4 +6,4 @@ export interface stateObjType {
   last_changed: string;
   last_updated: string;
   attributes: AttributeType;
-};
+}
