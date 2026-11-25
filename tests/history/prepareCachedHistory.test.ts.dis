@@ -93,7 +93,7 @@ interface CachedHistoryObjType {
   state_map_converted?: boolean;
   last_fetched?: Date;
   data?: HistoryItemType[];
-};
+}
 
 describe('prepareCachedHistory()', () => {
   let historyObj: CachedHistoryObjType;
