@@ -17,7 +17,7 @@ export const HISTORY_NUMERIC: HistoryItemType[] = sortHistoryByDate([
   { state: 50,      last_changed: "2026-11-01T10:15:10.000Z", last_updated: "2026-11-01T10:15:11.000Z", attributes: { xyz: 17 } },
 ]);
 
-// history array (numbers only)
+// history array (strings only)
 export const HISTORY_STRINGS: HistoryItemType[] = sortHistoryByDate([
   { state: 'on',    last_changed: "2026-11-01T10:00:00.000Z", last_updated: "2026-11-01T10:00:01.000Z", attributes: { xyz: 11 } },
   { state: 'on',    last_changed: "2026-11-01T10:00:10.000Z", last_updated: "2026-11-01T10:00:11.000Z", attributes: { xyz: 11 } },
@@ -50,7 +50,7 @@ export const HISTORY_ALL_NUMERIC: HistoryItemType[] = sortHistoryByDate([
   ...HISTORY_JUNK,
 ]);
 
-// history array (numbers & junk)
+// history array (strings & junk)
 export const HISTORY_ALL_STRINGS: HistoryItemType[] = sortHistoryByDate([
   ...HISTORY_STRINGS,
   ...HISTORY_JUNK,
