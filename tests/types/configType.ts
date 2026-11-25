@@ -11,4 +11,4 @@ export interface ConfigType {
 
   // just for tests; in fact it cannot be undefined since it is defined in buildConfig()
   line_width?: number|string|null;
-};
+}
