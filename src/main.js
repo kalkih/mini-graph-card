@@ -2401,7 +2401,7 @@ export default class MiniGraphCard extends LitElement {
           // - reduce history arrays;
           // - calc coords[] data;
           // - calc max/min values
-          this.Graph[i].update(end);
+          this.Graph[i].update(end.getTime());
         }
       });
     }
