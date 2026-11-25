@@ -163,13 +163,13 @@ export default class Graph {
     // update interval end date
     this._endTime = endTime;
 
-    // calculate "overall" value
-    if (this._calculateOverall) {
-      this._overall = this._calcOverall();
-    }
-
     // group history into time buckets
     const histGroups = this._history.reduce((res, item) => this._reducer(res, item), []);
+
+    // calculate "overall" value
+    if (this._calculateOverall) {
+      this._overall = this._calcOverall(histGroups);
+    }
 
     // extend length to fill missing history
     const requiredNumOfPoints = Math.ceil(this._hours_to_show * this._points_per_hour);
@@ -567,11 +567,13 @@ export default class Graph {
   /**
    * Return "overall" value calculated for a whole period
    * using the overall aggregate function
+   * @param {Array<Array<object>>} histGroups Grouped time buckets
    * @returns {number|undefined} "Overall" value
    */
-  _calcOverall() {
-    return this._history.length > 0
-      ? this._overallAggregateFunc(this._history)
+  _calcOverall(histGroups) {
+    const history = histGroups.flat();
+    return history.length > 0
+      ? this._overallAggregateFunc(history)
       : undefined;
   }
 

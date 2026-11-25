@@ -18,11 +18,30 @@ import {
 } from '../common/history';
 import type { AggregateKey } from '../types/aggregate';
 import { AGGREGATE_FUNCS } from '../types/aggregate';
+import type { HistoryItemType } from '../types/historyItemType';
 
 const RESULT_AVG = AGGREGATED_EXPECTED.avg;
 
+const CONVERT_TO_BUCKETS = (
+  history: HistoryItemType[],
+): HistoryItemType[][] => {
+  if (!history.length) {
+    return [];
+  }
+  const mid = Math.ceil(history.length / 2);
+  const buckets: HistoryItemType[][] = [];
+  buckets[0] = history.slice(0, mid);
+  // create empty buckets[1]
+  if (mid < history.length) {
+    buckets[2] = history.slice(mid);
+  }
+  return buckets;
+};
+
 describe("Graph::_calcOverall()", () => {
   let graph: any;
+  let history: HistoryItemType[][];
+
   const setAggregateFunc = (func?: string, funcOverall?: string) => {
     graph._aggregateFuncName = func;
     graph._calcPoint = aggregateFuncMap[func as AggregateKey] || aggregateFuncMap['avg'];
@@ -40,33 +59,33 @@ describe("Graph::_calcOverall()", () => {
   });
 
   it("empty history", () => {
-    graph._history = [];
-    const result = graph._calcOverall();
+    history = [];
+    const result = graph._calcOverall(history);
     expect(result).toBeUndefined();
   });
 
   it("history with NaN only", () => {
-    graph._history = HISTORY_JUNK;
-    const result = graph._calcOverall();
+    history = CONVERT_TO_BUCKETS(HISTORY_JUNK);
+    const result = graph._calcOverall(history);
     expect(Number.isNaN(result)).toBe(true);
   });
 
   it("default aggregateFunc", () => {
-    graph._history = HISTORY_NUMERIC;
-    const result = graph._calcOverall();
+    history = CONVERT_TO_BUCKETS(HISTORY_NUMERIC);
+    const result = graph._calcOverall(history);
     expect(result).toBeCloseTo(RESULT_AVG, 6);
   });
 
   it("invalid aggregateFunc", () => {
-    graph._history = HISTORY_NUMERIC;
+    history = CONVERT_TO_BUCKETS(HISTORY_NUMERIC);
     setAggregateFunc('xxx');
-    const result = graph._calcOverall();
+    const result = graph._calcOverall(history);
     expect(result).toBeCloseTo(RESULT_AVG, 6);
   });
 
   describe("use aggregateFuncName if overallAggregateFuncName is not defined", () => {
     beforeEach(() => {
-      graph._history = HISTORY_ALL_NUMERIC;
+      history = CONVERT_TO_BUCKETS(HISTORY_ALL_NUMERIC);
     });
 
     for (let funcIndex = 0; funcIndex < AGGREGATE_FUNCS.length; funcIndex += 1) {
@@ -75,7 +94,7 @@ describe("Graph::_calcOverall()", () => {
 
       it(`common ${funcName}, overall undefined`, () => {
         setAggregateFunc(funcName);
-        const result = graph._calcOverall();
+        const result = graph._calcOverall(history);
         if (['max', 'min', 'last', 'first'].includes(funcName)) {
           if (!Number.isNaN(expected)) {
             expect(result).toEqual(expected);
@@ -99,7 +118,7 @@ describe("Graph::_calcOverall()", () => {
 
   describe("use aggregateFuncName if overallAggregateFuncName is invalid", () => {
     beforeEach(() => {
-      graph._history = HISTORY_ALL_NUMERIC;
+      history = CONVERT_TO_BUCKETS(HISTORY_ALL_NUMERIC);
     });
 
     for (let funcIndex = 0; funcIndex < AGGREGATE_FUNCS.length; funcIndex += 1) {
@@ -109,7 +128,7 @@ describe("Graph::_calcOverall()", () => {
 
       it(`common ${funcName}, overall invalid (${overallFuncName})`, () => {
         setAggregateFunc(funcName, overallFuncName);
-        const result = graph._calcOverall();
+        const result = graph._calcOverall(history);
         if (['max', 'min', 'last', 'first'].includes(funcName)) {
           if (!Number.isNaN(expected)) {
             expect(result).toEqual(expected);
@@ -133,7 +152,7 @@ describe("Graph::_calcOverall()", () => {
 
   describe("use overallAggregateFuncName if defined, aggregateFuncName is default", () => {
     beforeEach(() => {
-      graph._history = HISTORY_ALL_NUMERIC;
+      history = CONVERT_TO_BUCKETS(HISTORY_ALL_NUMERIC);
     });
 
     for (let overallFuncIndex = 0; overallFuncIndex < AGGREGATE_FUNCS.length; overallFuncIndex += 1) {
@@ -142,7 +161,7 @@ describe("Graph::_calcOverall()", () => {
 
       it(`common undefined, overall ${overallFuncName}`, () => {
         setAggregateFunc(undefined, overallFuncName);
-        const result = graph._calcOverall();
+        const result = graph._calcOverall(history);
         if (['max', 'min', 'last', 'first'].includes(overallFuncName)) {
           if (!Number.isNaN(expected)) {
             expect(result).toEqual(expected);
@@ -166,7 +185,7 @@ describe("Graph::_calcOverall()", () => {
 
   describe("use different aggregateFuncName & overallAggregateFuncName", () => {
     beforeEach(() => {
-      graph._history = HISTORY_ALL_NUMERIC;
+      history = CONVERT_TO_BUCKETS(HISTORY_ALL_NUMERIC);
     });
 
     for (let funcIndex = 0; funcIndex < AGGREGATE_FUNCS.length; funcIndex += 1) {
@@ -177,7 +196,7 @@ describe("Graph::_calcOverall()", () => {
 
         it(`common ${funcName}, overall ${overallFuncName}`, () => {
           setAggregateFunc(funcName, overallFuncName);
-          const result = graph._calcOverall();
+          const result = graph._calcOverall(history);
           if (['max', 'min', 'last', 'first'].includes(overallFuncName)) {
             if (!Number.isNaN(expected)) {
               expect(result).toEqual(expected);
