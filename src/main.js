@@ -2771,6 +2771,11 @@ export default class MiniGraphCard extends LitElement {
     return this._hass.callApi('GET', url);
   }
 
+  /**
+   * Update extrema (min, max) and average values based on state history
+   * @param {Array<object>} history Array of historical data objects
+   * @returns {void}
+   */
   updateExtrema(history) {
     const { extrema, average } = this.config.show;
     const avg = average ? getAvg(history) : NaN;
