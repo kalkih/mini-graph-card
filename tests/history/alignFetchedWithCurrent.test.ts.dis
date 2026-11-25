@@ -69,15 +69,6 @@ const CACHED_HISTORY_STRINGS: HistoryItemType[] = DATA_ALL_STRINGS_CACHED;
 const FETCHED_HISTORY_NUMERIC: HistoryItemType[] = DATA_ALL_NUMERIC_FETCHED;
 const FETCHED_HISTORY_STRINGS: HistoryItemType[] = DATA_ALL_STRINGS_FETCHED;
 
-const STATE_OBJ_COMMON = {
-  last_changed: "2026-11-01T12:00:00.000Z",
-  last_updated: "2026-11-01T12:01:00.000Z",
-  attributes: {
-    abc: 456,
-    status: 'on',
-  },
-};
-
 const getStateObj = (
   typeOfDataIndex: number,
   entityStatusIndex: number,
@@ -122,15 +113,12 @@ describe('alignFetchedWithCurrent()', () => {
               ? { ...STATE_MAP_NUMERIC_RELAXED }
               : { ...STATE_MAP_NUMERIC_STRICT }
             : { ...STATE_MAP_STRINGS_STRICT };
-        const isStateMapStrictMode = stateMapIndex === 2
-          ? true
-          : false;
+        const isStateMapStrictMode = stateMapIndex === 2;
         const stateMapDescr = stateMapIndex === 0
           ? 'no state_map'
           : stateMapIndex === 1
             ? 'state_map relaxed'
             : 'state_map strict';
-        const isStrictStateMap = stateMapIndex === 2;
 
         describe(stateMapDescr, () => {
           for (let isCacheConvertedIndex = 0; isCacheConvertedIndex < 2; isCacheConvertedIndex += 1) {
@@ -151,7 +139,7 @@ describe('alignFetchedWithCurrent()', () => {
                   for (let entityStatusIndex = 0; entityStatusIndex < 2 /* 3 */; entityStatusIndex += 1) {
                     // 0 - state/attribute is normal,
                     // 1 - state=unavailable, attribute=undefined,
-                    // 2 - stateObj=undefined /// ?????? not implemented yet
+                    // 2 - stateObj=undefined // TODO
                     const entityStatusDescr = entityStatusIndex === 0
                       ? 'normal value'
                       : entityStatusIndex === 1
@@ -237,7 +225,7 @@ describe('alignFetchedWithCurrent()', () => {
                                             last_changed: refStateObj.last_changed,
                                           }]];
                                         }
-                                      } else /* if (entityStatusIndex === 1) */ { // ?????
+                                      } else /* if (entityStatusIndex === 1) */ { // TODO
                                         cachedHistory = [...cachedHistory, ...[{
                                           state: NaN, // for state=unavaialble, attr=undefined
                                           last_changed: refStateObj.last_changed,
@@ -262,10 +250,10 @@ describe('alignFetchedWithCurrent()', () => {
                                   expect(fetchedPointsNewSize).toEqual(addCurrentIndex === 0
                                     ? 1
                                     : lastValueIsMappedIndex === 0
-                                      ? isStrictStateMap && isCacheConverted
+                                      ? isStateMapStrictMode && isCacheConverted
                                         ? 1 // last historical value (which is a raw value) is not same as a mapped current value
                                         : 0
-                                      : isStrictStateMap && isCacheConverted
+                                      : isStateMapStrictMode && isCacheConverted
                                         ? entityStatusIndex === 1 && addCurrentIndex === 1 && lastValueIsMappedIndex === 1
                                           ? 1 // last historical value = NaN
                                           : 0 // last historical value (which is an index) = mapped current value
