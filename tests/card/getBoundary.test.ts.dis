@@ -36,16 +36,20 @@ describe("MiniGraphCard::getBoundary()", () => {
             const isSoft = !(isSoftIndex === 0);
 
             describe(`isSoft = ${isSoft}`, () => {
-              for (let caseIndex = 0; caseIndex < 2; caseIndex += 1) {
+              for (let caseIndex = 0; caseIndex < 3; caseIndex += 1) {
                 const caseDescr = caseIndex === 0
                   ? 'all Graph objects provide valid data for max/min'
-                  : 'some Graph objects provide valid data for max/min, some - NaN';
+                  : caseIndex === 1
+                    ? 'some Graph objects provide valid data for max/min, some - NaN'
+                    : 'no Graph objects';
 
                 it(caseDescr, () => {
                   const series = caseIndex === 0
                     ? structuredClone(GRAPH_OBJECTS_VALID)
-                    : structuredClone(GRAPH_OBJECTS);
-                  const fallback = 999; // not used here
+                    : caseIndex === 1
+                      ? structuredClone(GRAPH_OBJECTS)
+                      : [];
+                  const fallback = 999;
                   const result = card.getBoundary(
                     minMaxType,
                     series,
@@ -57,11 +61,15 @@ describe("MiniGraphCard::getBoundary()", () => {
                     min: -300,
                     max: 150,
                   };
-                  const expectedResult = configVal
+                  const expectedResult = configVal !== undefined
                     ? isSoft
-                      ? Math[minMaxType](configVal, graphBound[minMaxType])
+                      ? caseIndex !== 2
+                        ? Math[minMaxType](configVal, graphBound[minMaxType])
+                        : configVal
                       : configVal
-                    : graphBound[minMaxType];
+                    : caseIndex !== 2
+                      ? graphBound[minMaxType]
+                      : fallback;
                   expect(result).toEqual(expectedResult);
                 });
               }
@@ -76,7 +84,7 @@ describe("MiniGraphCard::getBoundary()", () => {
                   isSoft,
                   fallback,
                 );
-                const expectedResult = configVal
+                const expectedResult = configVal !== undefined
                   ? configVal
                   : fallback;
                 expect(result).toEqual(expectedResult);
