@@ -1,0 +1,681 @@
+/**
+ * Tests for Graph::_calcPoints() method.
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it, beforeEach } from 'vitest';
+import Graph from '../../src/graph';
+import { aggregateFuncMap } from '../../src/aggregate';
+import { X, Y, V } from '../../src/const';
+import { GRAPH_SETTINGS } from '../common/graph';
+import type { AggregateKey } from '../types/aggregate';
+import type { HistoryItemType } from '../types/historyItemType';
+import type { CoordsType } from '../types/coordsType';
+
+const CHECK_X_Y = (
+  graph: Graph,
+  buckets: HistoryItemType[][],
+  result: CoordsType[],
+): void => {
+  let xRatio = graph._width / buckets.length;
+  xRatio = Number.isFinite(xRatio) ? xRatio : graph._width;
+  for (let i = 0; i < result.length; i += 1) {
+    const x = xRatio * i + graph._margin[X];
+    expect(result[i][X]).toBeCloseTo(x, 6);
+    expect(result[i][Y]).toEqual(0);
+  }
+};
+
+describe("Graph::_calcPoints()", () => {
+  let graph: any;
+  const setAggregateFunc = (func: AggregateKey) => {
+    graph._aggregateFuncName = func;
+    graph._calcPoint = aggregateFuncMap[func];
+  };
+
+  beforeEach(() => {
+    graph = new Graph({
+      width: GRAPH_SETTINGS.width,
+      height: GRAPH_SETTINGS.height,
+      margin: GRAPH_SETTINGS.margin,
+    });
+  });
+
+  describe("history contains only numbers", () => {
+    const buckets: HistoryItemType[][] = [
+      [{ state: 10 }, { state: 20 }],
+      [{ state: 30 }, { state: 40 }],
+    ];
+
+    it("avg", () => {
+      const result = graph._calcPoints(buckets);
+      expect(result.length).toEqual(3);
+      expect(result[0][V]).toEqual(10);
+      expect(result[1][V]).toEqual(15);
+      expect(result[2][V]).toEqual(35);
+      CHECK_X_Y(graph, buckets, result);
+    });
+
+    it("first", () => {
+      setAggregateFunc('first');
+      const result = graph._calcPoints(buckets);
+      expect(result.length).toEqual(3);
+      expect(result[0][V]).toEqual(10);
+      expect(result[1][V]).toEqual(10);
+      expect(result[2][V]).toEqual(30);
+      CHECK_X_Y(graph, buckets, result);
+    });
+
+    it("last", () => {
+      setAggregateFunc('last');
+      const result = graph._calcPoints(buckets);
+      expect(result.length).toEqual(3);
+      expect(result[0][V]).toEqual(10);
+      expect(result[1][V]).toEqual(20);
+      expect(result[2][V]).toEqual(40);
+      CHECK_X_Y(graph, buckets, result);
+    });
+
+    it("sum", () => {
+      setAggregateFunc('sum');
+      const result = graph._calcPoints(buckets);
+      expect(result.length).toEqual(3);
+      expect(result[0][V]).toEqual(0);
+      expect(result[1][V]).toEqual(30);
+      expect(result[2][V]).toEqual(70);
+      CHECK_X_Y(graph, buckets, result);
+    });
+  });
+
+  describe("1st bucket with unavailable", () => {
+    describe("only unavailable", () => {
+      const buckets: HistoryItemType[][] = [
+        [{ state: NaN }, { state: NaN }],
+        [{ state: 30 }, { state: 40 }],
+      ];
+
+      it("avg", () => {
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(Number.isNaN(result[0][V])).toBe(true);
+        expect(Number.isNaN(result[1][V])).toBe(true);
+        expect(result[2][V]).toEqual(35);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("first", () => {
+        setAggregateFunc('first');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(Number.isNaN(result[0][V])).toBe(true);
+        expect(Number.isNaN(result[1][V])).toBe(true);
+        expect(result[2][V]).toEqual(30);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("last", () => {
+        setAggregateFunc('last');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(Number.isNaN(result[0][V])).toBe(true);
+        expect(Number.isNaN(result[1][V])).toBe(true);
+        expect(result[2][V]).toEqual(40);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("sum", () => {
+        setAggregateFunc('sum');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(Number.isNaN(result[0][V])).toBe(true);
+        expect(Number.isNaN(result[1][V])).toBe(true);
+        expect(result[2][V]).toEqual(70);
+        CHECK_X_Y(graph, buckets, result);
+      });
+    });
+
+    describe("number & unavailable", () => {
+      const buckets: HistoryItemType[][] = [
+        [{ state: 50 }, { state: 60 }, { state: NaN }],
+        [{ state: 30 }, { state: 40 }],
+      ];
+
+      it("avg", () => {
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(result[0][V]).toEqual(50);
+        expect(result[1][V]).toEqual(55);
+        expect(result[2][V]).toEqual(35);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("first", () => {
+        setAggregateFunc('first');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(result[0][V]).toEqual(50);
+        expect(result[1][V]).toEqual(50);
+        expect(result[2][V]).toEqual(30);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("last", () => {
+        setAggregateFunc('last');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(result[0][V]).toEqual(50);
+        expect(Number.isNaN(result[1][V])).toBe(true);
+        expect(result[2][V]).toEqual(40);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("sum", () => {
+        setAggregateFunc('sum');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(result[0][V]).toEqual(0);
+        expect(result[1][V]).toEqual(110);
+        expect(result[2][V]).toEqual(70);
+        CHECK_X_Y(graph, buckets, result);
+      });
+    });
+
+    describe("unavailable & number", () => {
+      const buckets: HistoryItemType[][] = [
+        [{ state: NaN }, { state: 50 }, { state: 60 }],
+        [{ state: 30 }, { state: 40 }],
+      ];
+
+      it("avg", () => {
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(Number.isNaN(result[0][V])).toBe(true);
+        expect(result[1][V]).toEqual(55);
+        expect(result[2][V]).toEqual(35);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("first", () => {
+        setAggregateFunc('first');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(Number.isNaN(result[0][V])).toBe(true);
+        expect(Number.isNaN(result[1][V])).toBe(true);
+        expect(result[2][V]).toEqual(30);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("last", () => {
+        setAggregateFunc('last');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(Number.isNaN(result[0][V])).toBe(true);
+        expect(result[1][V]).toEqual(60);
+        expect(result[2][V]).toEqual(40);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("sum", () => {
+        setAggregateFunc('sum');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(Number.isNaN(result[0][V])).toBe(true);
+        expect(result[1][V]).toEqual(110);
+        expect(result[2][V]).toEqual(70);
+        CHECK_X_Y(graph, buckets, result);
+      });
+    });
+  });
+
+  describe("2nd bucket with unavailable", () => {
+    describe("only unavailable", () => {
+      const buckets: HistoryItemType[][] = [
+        [{ state: 10 }, { state: 20 }],
+        [{ state: NaN }, { state: NaN }],
+      ];
+
+      it("avg", () => {
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(result[0][V]).toEqual(10);
+        expect(result[1][V]).toEqual(15);
+        expect(Number.isNaN(result[2][V])).toBe(true);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("first", () => {
+        setAggregateFunc('first');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(result[0][V]).toEqual(10);
+        expect(result[1][V]).toEqual(10);
+        expect(Number.isNaN(result[2][V])).toBe(true);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("last", () => {
+        setAggregateFunc('last');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(result[0][V]).toEqual(10);
+        expect(result[1][V]).toEqual(20);
+        expect(Number.isNaN(result[2][V])).toBe(true);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("sum", () => {
+        setAggregateFunc('sum');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(result[0][V]).toEqual(0);
+        expect(result[1][V]).toEqual(30);
+        expect(Number.isNaN(result[2][V])).toBe(true);
+        CHECK_X_Y(graph, buckets, result);
+      });
+    });
+
+    describe("number & unavailable", () => {
+      const buckets: HistoryItemType[][] = [
+        [{ state: 10 }, { state: 20 }],
+        [{ state: 50 }, { state: NaN }],
+      ];
+
+      it("avg", () => {
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(result[0][V]).toEqual(10);
+        expect(result[1][V]).toEqual(15);
+        expect(result[2][V]).toEqual(50);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("first", () => {
+        setAggregateFunc('first');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(result[0][V]).toEqual(10);
+        expect(result[1][V]).toEqual(10);
+        expect(result[2][V]).toEqual(50);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("last", () => {
+        setAggregateFunc('last');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(result[0][V]).toEqual(10);
+        expect(result[1][V]).toEqual(20);
+        expect(Number.isNaN(result[2][V])).toBe(true);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("sum", () => {
+        setAggregateFunc('sum');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(result[0][V]).toEqual(0);
+        expect(result[1][V]).toEqual(30);
+        expect(result[2][V]).toEqual(50);
+        CHECK_X_Y(graph, buckets, result);
+      });
+    });
+
+    describe("unavailable & number", () => {
+      const buckets: HistoryItemType[][] = [
+        [{ state: 10 }, { state: 20 }],
+        [{ state: NaN }, { state: 50 }],
+      ];
+
+      it("avg", () => {
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(result[0][V]).toEqual(10);
+        expect(result[1][V]).toEqual(15);
+        expect(result[2][V]).toEqual(50);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("first", () => {
+        setAggregateFunc('first');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(result[0][V]).toEqual(10);
+        expect(result[1][V]).toEqual(10);
+        expect(Number.isNaN(result[2][V])).toBe(true);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("last", () => {
+        setAggregateFunc('last');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(result[0][V]).toEqual(10);
+        expect(result[1][V]).toEqual(20);
+        expect(result[2][V]).toEqual(50);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("sum", () => {
+        setAggregateFunc('sum');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(result[0][V]).toEqual(0);
+        expect(result[1][V]).toEqual(30);
+        expect(result[2][V]).toEqual(50);
+        CHECK_X_Y(graph, buckets, result);
+      });
+    });
+  });
+
+  describe("1st bucket is empty", () => {
+    describe("2nd bucket contains numbers", () => {
+      const buckets: HistoryItemType[][] = [
+        [],
+        [{ state: 30 }, { state: 40 }],
+      ];
+
+      it("avg", () => {
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(Number.isNaN(result[0][V])).toBe(true);
+        expect(Number.isNaN(result[1][V])).toBe(true);
+        expect(result[2][V]).toEqual(35);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("first", () => {
+        setAggregateFunc('first');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(Number.isNaN(result[0][V])).toBe(true);
+        expect(Number.isNaN(result[1][V])).toBe(true);
+        expect(result[2][V]).toEqual(30);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("last", () => {
+        setAggregateFunc('last');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(Number.isNaN(result[0][V])).toBe(true);
+        expect(Number.isNaN(result[1][V])).toBe(true);
+        expect(result[2][V]).toEqual(40);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("sum", () => {
+        setAggregateFunc('sum');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(Number.isNaN(result[0][V])).toBe(true);
+        expect(Number.isNaN(result[1][V])).toBe(true);
+        expect(result[2][V]).toEqual(70);
+        CHECK_X_Y(graph, buckets, result);
+      });
+    });
+
+    describe("2nd bucket contains unavailable", () => {
+      const buckets: HistoryItemType[][] = [
+        [],
+        [{ state: NaN },],
+      ];
+
+      it("avg", () => {
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(Number.isNaN(result[0][V])).toBe(true);
+        expect(Number.isNaN(result[1][V])).toBe(true);
+        expect(Number.isNaN(result[2][V])).toBe(true);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("first", () => {
+        setAggregateFunc('first');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(Number.isNaN(result[0][V])).toBe(true);
+        expect(Number.isNaN(result[1][V])).toBe(true);
+        expect(Number.isNaN(result[2][V])).toBe(true);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("last", () => {
+        setAggregateFunc('last');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(Number.isNaN(result[0][V])).toBe(true);
+        expect(Number.isNaN(result[1][V])).toBe(true);
+        expect(Number.isNaN(result[2][V])).toBe(true);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("sum", () => {
+        setAggregateFunc('sum');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(Number.isNaN(result[0][V])).toBe(true);
+        expect(Number.isNaN(result[1][V])).toBe(true);
+        expect(Number.isNaN(result[2][V])).toBe(true);
+        CHECK_X_Y(graph, buckets, result);
+      });
+    });
+  });
+
+  describe("2nd bucket is empty", () => {
+    describe("1st bucket contains numbers", () => {
+      const buckets: HistoryItemType[][] = [
+        [{ state: 10 }, { state: 20 }],
+        [],
+      ];
+
+      it("avg", () => {
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(result[0][V]).toEqual(10);
+        expect(result[1][V]).toEqual(15);
+        expect(result[2][V]).toEqual(15);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("first", () => {
+        setAggregateFunc('first');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(result[0][V]).toEqual(10);
+        expect(result[1][V]).toEqual(10);
+        expect(result[2][V]).toEqual(10);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("last", () => {
+        setAggregateFunc('last');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(result[0][V]).toEqual(10);
+        expect(result[1][V]).toEqual(20);
+        expect(result[2][V]).toEqual(20);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("sum", () => {
+        setAggregateFunc('sum');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(result[0][V]).toEqual(0);
+        expect(result[1][V]).toEqual(30);
+        expect(result[2][V]).toEqual(30);
+        CHECK_X_Y(graph, buckets, result);
+      });
+    });
+
+    describe("1st bucket contains unavailable", () => {
+      const buckets: HistoryItemType[][] = [
+        [{ state: NaN },],
+        [],
+      ];
+
+      it("avg", () => {
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(Number.isNaN(result[0][V])).toBe(true);
+        expect(Number.isNaN(result[1][V])).toBe(true);
+        expect(Number.isNaN(result[2][V])).toBe(true);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("first", () => {
+        setAggregateFunc('first');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(Number.isNaN(result[0][V])).toBe(true);
+        expect(Number.isNaN(result[1][V])).toBe(true);
+        expect(Number.isNaN(result[2][V])).toBe(true);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("last", () => {
+        setAggregateFunc('last');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(Number.isNaN(result[0][V])).toBe(true);
+        expect(Number.isNaN(result[1][V])).toBe(true);
+        expect(Number.isNaN(result[2][V])).toBe(true);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("sum", () => {
+        setAggregateFunc('sum');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(Number.isNaN(result[0][V])).toBe(true);
+        expect(Number.isNaN(result[1][V])).toBe(true);
+        expect(Number.isNaN(result[2][V])).toBe(true);
+        CHECK_X_Y(graph, buckets, result);
+      });
+    });
+
+    describe("1st bucket is empty", () => {
+      const buckets: HistoryItemType[][] = [
+        [],
+        [],
+      ];
+
+      it("avg", () => {
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(Number.isNaN(result[0][V])).toBe(true);
+        expect(Number.isNaN(result[1][V])).toBe(true);
+        expect(Number.isNaN(result[2][V])).toBe(true);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("first", () => {
+        setAggregateFunc('first');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(Number.isNaN(result[0][V])).toBe(true);
+        expect(Number.isNaN(result[1][V])).toBe(true);
+        expect(Number.isNaN(result[2][V])).toBe(true);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("last", () => {
+        setAggregateFunc('last');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(Number.isNaN(result[0][V])).toBe(true);
+        expect(Number.isNaN(result[1][V])).toBe(true);
+        expect(Number.isNaN(result[2][V])).toBe(true);
+        CHECK_X_Y(graph, buckets, result);
+      });
+
+      it("sum", () => {
+        setAggregateFunc('sum');
+        const result = graph._calcPoints(buckets);
+        expect(result.length).toEqual(3);
+        expect(Number.isNaN(result[0][V])).toBe(true);
+        expect(Number.isNaN(result[1][V])).toBe(true);
+        expect(Number.isNaN(result[2][V])).toBe(true);
+        CHECK_X_Y(graph, buckets, result);
+      });
+    });
+  });
+
+  describe("buckets array contains 1 empty bucket", () => {
+    // impossible case - _reducer() does not create such an array
+    // testing this case just in case
+    const buckets: HistoryItemType[][] = [[]];
+
+    it("avg", () => {
+      const result = graph._calcPoints(buckets);
+      expect(result.length).toEqual(2);
+      expect(Number.isNaN(result[0][V])).toBe(true);
+      expect(Number.isNaN(result[1][V])).toBe(true);
+      CHECK_X_Y(graph, buckets, result);
+    });
+
+    it("first", () => {
+      setAggregateFunc('first');
+      const result = graph._calcPoints(buckets);
+      expect(result.length).toEqual(2);
+      expect(Number.isNaN(result[0][V])).toBe(true);
+      expect(Number.isNaN(result[1][V])).toBe(true);
+      CHECK_X_Y(graph, buckets, result);
+    });
+
+    it("last", () => {
+      setAggregateFunc('last');
+      const result = graph._calcPoints(buckets);
+      expect(result.length).toEqual(2);
+      expect(Number.isNaN(result[0][V])).toBe(true);
+      expect(Number.isNaN(result[1][V])).toBe(true);
+      CHECK_X_Y(graph, buckets, result);
+    });
+
+    it("sum", () => {
+      setAggregateFunc('sum');
+      const result = graph._calcPoints(buckets);
+      expect(result.length).toEqual(2);
+      expect(Number.isNaN(result[0][V])).toBe(true);
+      expect(Number.isNaN(result[1][V])).toBe(true);
+      CHECK_X_Y(graph, buckets, result);
+    });
+  });
+
+  describe("whole buckets array is empty", () => {
+    const buckets: HistoryItemType[][] = [];
+
+    it("avg", () => {
+      const result = graph._calcPoints(buckets);
+      expect(result.length).toEqual(1);
+      expect(Number.isNaN(result[0][V])).toBe(true);
+      CHECK_X_Y(graph, buckets, result);
+    });
+
+    it("first", () => {
+      setAggregateFunc('first');
+      const result = graph._calcPoints(buckets);
+      expect(result.length).toEqual(1);
+      expect(Number.isNaN(result[0][V])).toBe(true);
+      CHECK_X_Y(graph, buckets, result);
+    });
+
+    it("last", () => {
+      setAggregateFunc('last');
+      const result = graph._calcPoints(buckets);
+      expect(result.length).toEqual(1);
+      expect(Number.isNaN(result[0][V])).toBe(true);
+      CHECK_X_Y(graph, buckets, result);
+    });
+
+    it("sum", () => {
+      setAggregateFunc('sum');
+      const result = graph._calcPoints(buckets);
+      expect(result.length).toEqual(1);
+      expect(Number.isNaN(result[0][V])).toBe(true);
+      CHECK_X_Y(graph, buckets, result);
+    });
+  });
+});

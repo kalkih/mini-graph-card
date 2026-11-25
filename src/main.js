@@ -22,7 +22,7 @@ import {
   DEFAULT_GRAPH_HEIGHT,
   DEFAULT_GRAPH_WIDTH,
   DEFAULT_LINE_WIDTH,
-  NBSP,
+  NBSP, LONG_DASH,
 } from './const';
 import {
   fallbackUndefinedNull,
@@ -36,10 +36,12 @@ import {
   isOverallState,
   getObjectAttr,
   isObjectAttr,
-  convertStateByMap,
 } from './others';
 import {
-  getMin, getAvg, getMax,
+  getExtrema,
+  getAvg,
+} from './aggregate';
+import {
   getMilli,
   compress, decompress,
   getFirstDefinedItem,
@@ -51,6 +53,11 @@ import {
   computeEntityName,
   entityNamesChanged,
 } from './entityName';
+import {
+  prepareCachedHistory,
+  alignFetchedWithCurrent,
+  transformFetchedPoints,
+} from './history';
 
 const isUnavailableState = value => ['unavailable'].includes(value);
 
@@ -1314,7 +1321,8 @@ export default class MiniGraphCard extends LitElement {
   /**
   * Renders bars for a particular entity/static value
   * @returns {SVGTemplateResult} SVG element
-  * @param {Array} bars Array of bars for a particular entity/static value
+  * @param {{ width: number, items: Array<object> }} bars Bars for a particular
+  * entity/static value
   * @param {number} index Index of an entry in config.entities
   */
   renderSvgBars(bars, index) {
@@ -1338,6 +1346,9 @@ export default class MiniGraphCard extends LitElement {
     barStyle += 'stroke-opacity: var(--mcg-bar-seam-opacity, 0.3);';
 
     const renderedItems = items.map((bar, i) => {
+      if (Number.isNaN(bar.value)) {
+        return svg``;
+      }
       const color = this.computeColor(bar.value, index);
       return svg`
         <rect class='bar' x=${bar.x} y=${bar.y}
@@ -1663,18 +1674,22 @@ export default class MiniGraphCard extends LitElement {
           <div class="info__item">
             <span class="info__item__type">${entry.type}</span>
             <span class="info__item__value">
-              ${this.computeStateWithUom(entry.state, { index: 0, origin: 'info' }, hideUnit)}
+              ${entry.state === null
+                ? LONG_DASH
+                : this.computeStateWithUom(entry.state, { index: 0, origin: 'info' }, hideUnit)}
             </span>
             <span class="info__item__time">
               ${entry.type !== 'avg'
-                ? formatDateTime(
-                    new Date(entry.last_changed),
-                    this.config,
-                    this.datetimeFormatFromCfgParsed,
-                    this._datetimeFormatDateOptions,
-                    this._datetimeFormatTimeOptions,
-                    this._hass,
-                  )
+                ? entry.last_changed === null
+                  ? LONG_DASH
+                  : formatDateTime(
+                      new Date(entry.last_changed),
+                      this.config,
+                      this.datetimeFormatFromCfgParsed,
+                      this._datetimeFormatDateOptions,
+                      this._datetimeFormatTimeOptions,
+                      this._hass,
+                    )
                 : ''}
             </span>
           </div>
@@ -1933,7 +1948,7 @@ export default class MiniGraphCard extends LitElement {
         // note: no usual need to map the "unavailable" word
         if (!stateMap && !isUnavailableState(inState)) {
           log(`value [${inState}] not found in state_map: `
-            + `[${getStringifiedValue(stateMapArray)}]`); // ?? { isError: false }
+            + `[${getStringifiedValue(stateMapArray)}]`);
         }
       } else {
         // relaxed mode - state_map presumably contains particular values to be "re-labeled"
@@ -2310,6 +2325,10 @@ export default class MiniGraphCard extends LitElement {
 
     // get a state/attribute value or a static_value
     const state = this.computeState(inState, context);
+    if (Number.isNaN(inState)) {
+      // do not add a unit for "NaN"
+      return state;
+    }
 
     // get a unit
     // account a possible state_map.map.hide_unit option
@@ -2383,7 +2402,7 @@ export default class MiniGraphCard extends LitElement {
           // - reduce history arrays;
           // - calc coords[] data;
           // - calc max/min values
-          this.Graph[i].update(end);
+          this.Graph[i].update(end.getTime());
         }
       });
     }
@@ -2419,13 +2438,11 @@ export default class MiniGraphCard extends LitElement {
           graphPos += 1;
         } else {
           // line graph
-          const line = this.Graph[i].getPath();
-          if (entityConfig.show_line !== false) {
-            this.line[i] = line;
-          }
-          if (config.show.fill && entityConfig.show_fill !== false) {
-            this.fill[i] = this.Graph[i].getFill(line);
-          }
+          const buildLine = entityConfig.show_line !== false;
+          const buildFill = !!(config.show.fill && entityConfig.show_fill !== false);
+          const { line, fill } = this.Graph[i].getLineAndFill({ buildLine, buildFill });
+          this.line[i] = line;
+          this.fill[i] = fill;
           if (config.show.points && entityConfig.show_points !== false) {
             this.points[i] = this.Graph[i].getPoints();
           }
@@ -2448,7 +2465,7 @@ export default class MiniGraphCard extends LitElement {
   /**
    * Calculate a boundary
    * @param {'min'|'max'} type Type of boundary
-   * @param {Array<Object>} series Array of Graph objects
+   * @param {Array<object>} series Array of Graph objects
    * @param {number|undefined} configVal User-defined boundary (clean number)
    * @param {boolean} isSoft True if the boundary is soft, false otherwise
    * @param {number} fallback Default boundary if series is empty
@@ -2461,25 +2478,41 @@ export default class MiniGraphCard extends LitElement {
       throw new Error(error);
     }
 
+    // Max/min values from a Graph object can be NaN - filter them out
+    const validGraphValues = series
+      .map(ele => ele[type])
+      .filter(val => !Number.isNaN(val));
+
     if (configVal === undefined) {
       // dynamic boundary depending on values
+      if (validGraphValues.length === 0) {
+        // no valid coords in Graph - use a fallback
+        return fallback;
+      }
       // take a max/min value out of ["max/min value of each Graph object"]
-      const computed = Math[type](...series.map(ele => ele[type]));
-      return isNumeric(computed) ? computed : fallback;
+      const computed = Math[type](...validGraphValues);
+      return isNumeric(computed) // just in case
+        ? computed
+        : fallback;
     }
+
     if (!isSoft) {
-      // fixed boundary
-      // take a user defined boundary
+      // fixed boundary - take a user defined boundary
       return configVal;
     }
+
     // soft boundary (respecting out of range values)
+    if (validGraphValues.length === 0) {
+      // no valid coords in Graph - take a user defined boundary
+      return configVal;
+    }
     // take a max/min value out of ["user-defined boundary", "max/min value of each Graph object"]
-    return Math[type](configVal, ...series.map(ele => ele[type]));
+    return Math[type](configVal, ...validGraphValues);
   }
 
   /**
    * Calculate boundaries for a particular Y-axis
-   * @param {Array<Object>} series Array of Graph objects
+   * @param {Array<object>} series Array of Graph objects
    * associated with a particular Y-axis
    * @param {number|undefined} lowerBound User-defined min boundary (clean number)
    * @param {number|undefined} upperBound User-defined max boundary (clean number)
@@ -2522,10 +2555,10 @@ export default class MiniGraphCard extends LitElement {
   /**
    * Update boundaries for all Y-axes: analyze max/min values from Graph objects,
    * account user-defined lower/upper_bound values
-   * @param {object} config Config object
    * @returns {void}
    */
-  updateBounds({ config } = this) {
+  updateBounds() {
+    const { config } = this;
     // function to extract user-defined bounds
     const extract = boundObj => ([
       boundObj ? boundObj.value : undefined,
@@ -2602,6 +2635,9 @@ export default class MiniGraphCard extends LitElement {
    */
   async updateEntity(stateObj, index, start, end) {
     const entityConfig = this.config.entities[index];
+    const entityId = entityConfig.entity;
+    const stateMapConfig = this._entityStateMap[index];
+    const isStateMapStrictMode = stateMapConfig && stateMapConfig.keep_values !== true;
     // "overall" value is shown for this entity
     const isStateOverall = (index === 0 || entityConfig.show_state)
       && isOverallState(this.config.show.state);
@@ -2610,7 +2646,7 @@ export default class MiniGraphCard extends LitElement {
       // skip static values which are not queued
       || (!stateObj && this._isStaticValue[index] && !this.updateQueue.includes(`static_value-${index}`))
       // skip entities which are not queued
-      || (stateObj && !this.updateQueue.includes(`${stateObj.entity_id}-${index}`))
+      || (stateObj && !this.updateQueue.includes(`${entityId}-${index}`))
       // do not process a history if no graph is displayed
       // unless "overall" value is displayed
       || (entityConfig.show_graph === false && !isStateOverall)
@@ -2628,53 +2664,35 @@ export default class MiniGraphCard extends LitElement {
 
     // process an entity
     // remove a corresponding entry from a queue for a processed entity
-    this.updateQueue = this.updateQueue.filter(entry => entry !== `${stateObj.entity_id}-${index}`);
+    this.updateQueue = this.updateQueue.filter(entry => entry !== `${entityId}-${index}`);
 
     let stateHistory = [];
     let fetchStart = start;
     let skipInitialState = false;
-
-    // cache is converted with state_map
-    let isCacheConverted = false;
+    let isCacheConverted = false; // is cache converted with state_map
 
     const history = this.config.cache
-      ? await this.getCache(`${stateObj.entity_id}_${index}`, this.config.compress)
+      ? await this.getCache(`${entityId}_${index}`, this.config.compress)
       : undefined;
     if (history && history.hours_to_show === this.config.hours_to_show) {
-      // process a cached history
-      stateHistory = history.data.map(item => ({ ...item }));
-      isCacheConverted = history.state_map_converted === true;
-
-      let currDataIndex = stateHistory.findIndex(item => new Date(item.last_changed) > start);
-      if (currDataIndex !== -1) {
-        if (currDataIndex > 0) {
-          // include previous item
-          currDataIndex -= 1;
-          // but change it's last changed time
-          stateHistory[currDataIndex].last_changed = start;
-        }
-
-        // delete everything before the found point
-        stateHistory = stateHistory.slice(currDataIndex);
-        // skip initial state when fetching recent/not-cached data
-        skipInitialState = true;
-
-        const lastFetched = new Date(history.last_fetched);
-        fetchStart = new Date(lastFetched - 1);
-      } else {
-        // there were no states which could be used in current graph so clearing
-        stateHistory = [];
-      }
+      // process a сached history
+      ({
+        history: stateHistory,
+        isCacheConverted, // is cache converted with state_map
+        skipInitialState,
+        fetchStart, // reviewed "fetch start" time
+      } = prepareCachedHistory(history, start));
     }
 
     // fetch recent history
     let fetchedHistory = await this.fetchRecent(
-      stateObj.entity_id,
+      entityId,
       fetchStart,
       end,
       entityConfig.attribute ? false : skipInitialState,
       !!entityConfig.attribute,
     );
+    // console.log("hist: fetchedHistory", fetchedHistory);
 
     // just in case
     if (!fetchedHistory || fetchedHistory.length === 0 || fetchedHistory[0].length === 0) {
@@ -2682,99 +2700,34 @@ export default class MiniGraphCard extends LitElement {
     }
 
     // check if the latest point corresponds to the current state
-    // for that, take the last history item
-    let isLastItemTakenFromCache = false;
-    let lastHistoryItem;
-    if (fetchedHistory[0].length > 0) {
-      // taken from fetched history
-      lastHistoryItem = fetchedHistory[0][fetchedHistory[0].length - 1];
-    } else {
-      // taken from cache
-      isLastItemTakenFromCache = stateHistory.length > 0;
-      lastHistoryItem = isLastItemTakenFromCache
-        ? stateHistory[stateHistory.length - 1]
-        : null;
-    }
-
-    // current value of state/attribute
-    let currentValue = entityConfig.attribute
-      ? getObjectAttr(stateObj.attributes, entityConfig.attribute)
-      : stateObj.state;
-
-    // cached history may contain mapped values (indexes),
-    // to compare a current value with an index, we need to process state_map.
-    // note: stateMapConfig is null if state_map is undefined or has an empty map array
-    const stateMapConfig = this._entityStateMap[index];
-    const isStateMapStrictMode = stateMapConfig && stateMapConfig.keep_values !== true;
-    if (isLastItemTakenFromCache && isCacheConverted && isStateMapStrictMode) {
-      // need to convert before comparing
-      const mock = { state: currentValue };
-      convertStateByMap(mock, stateMapConfig);
-      currentValue = mock.state; // currentValue is an index now
-    }
-
-    // last value of state/attribute from history
-    const lastHistoryValue = lastHistoryItem
-      ? entityConfig.attribute && lastHistoryItem.attributes
-        ? getObjectAttr(lastHistoryItem.attributes, entityConfig.attribute)
-        : lastHistoryItem.state
-      : null;
-
-    // if the latest record from the history does not correspond to the current state/attribute
-    // - add the current state/attribute to the history
-    // (may happen since data in recorder may be not ready yet)
-    if (lastHistoryValue !== currentValue) {
-      fetchedHistory[0].push({
-        entity_id: stateObj.entity_id,
-        state: stateObj.state,
-        last_changed: stateObj.last_changed,
-        last_updated: stateObj.last_updated,
-        attributes: stateObj.attributes,
-      });
-    }
+    // manually add the current state if latest point & current state are different
+    alignFetchedWithCurrent(
+      fetchedHistory[0],
+      stateHistory,
+      stateObj,
+      entityConfig.attribute,
+      stateMapConfig,
+      isStateMapStrictMode,
+      isCacheConverted,
+    );
 
     if (fetchedHistory[0] && fetchedHistory[0].length > 0) {
-      /**
-       * Seems that some old HA versions could not handle properly
-       * a combination of "retrieve a history for attributes" & "skipInitialState=true".
-       * As a workaround, it was implemented a hack: pass "skipInitialState=false" when
-       * requesting a history for attributes, and then delete the 1st point ("initial state")
-       * if skipInitialState=true.
-       * In newer versions of HA (at least in 2026.8), the workaround is not required,
-       * the mentioned combination is handled properly.
-       * Yet the workaround stays for a compatibility with old HA versions.
-       */
-      if (entityConfig.attribute && skipInitialState) {
-        fetchedHistory[0].shift();
-      }
-
-      // check if we should convert states to numeric values
-      if (stateMapConfig || entityConfig.attribute) {
-        fetchedHistory[0].forEach((item) => {
-          if (entityConfig.attribute) {
-            // eslint-disable-next-line no-param-reassign
-            item.state = getObjectAttr(item.attributes, entityConfig.attribute);
-            // eslint-disable-next-line no-param-reassign
-            delete item.attributes;
-          }
-          if (stateMapConfig && isStateMapStrictMode) {
-            convertStateByMap(item, stateMapConfig);
-          }
-        });
-      }
-
-      const processedPoints = fetchedHistory[0]
-        .filter(item => !Number.isNaN(parseFloat(item.state)));
-      const formattedPoints = processedPoints.map(item => ({
-        last_changed: entityConfig.attribute ? item.last_updated : item.last_changed,
-        state: item.state,
-      }));
+      // transform a fetched history to an array of valid values
+      const formattedPoints = transformFetchedPoints(
+        fetchedHistory[0],
+        entityConfig.attribute,
+        stateMapConfig,
+        isStateMapStrictMode,
+        skipInitialState,
+      );
+      // join with a cached history
       stateHistory = [...stateHistory, ...formattedPoints];
 
       if (this.config.cache) {
+        // save a total history in a cache
         const data = {
           hours_to_show: this.config.hours_to_show,
-          last_fetched: new Date(),
+          last_fetched: new Date(), // current date
           data: stateHistory,
           version,
         };
@@ -2783,7 +2736,7 @@ export default class MiniGraphCard extends LitElement {
         }
         this
           .setCache(
-            `${stateObj.entity_id}_${index}`,
+            `${entityId}_${index}`,
             data,
             this.config.compress,
           )
@@ -2796,7 +2749,7 @@ export default class MiniGraphCard extends LitElement {
 
     if (stateHistory.length === 0) return; // no history - nothing to pass to Graph
 
-    if (this.entity[0] && stateObj.entity_id === this.entity[0].entity_id) {
+    if (index === 0) {
       this.updateExtrema(stateHistory);
     }
 
@@ -2819,20 +2772,45 @@ export default class MiniGraphCard extends LitElement {
     return this._hass.callApi('GET', url);
   }
 
+  /**
+   * Update extrema (min, max) and average values based on state history
+   * @param {Array<object>} history Array of historical data objects
+   * @returns {void}
+   */
   updateExtrema(history) {
     const { extrema, average } = this.config.show;
+    const avg = average ? getAvg(history) : NaN;
+    const minObj = extrema
+      ? getExtrema(history, 'min')
+      : {};
+    const maxObj = extrema
+      ? getExtrema(history, 'max')
+      : {};
+
     this.abs = [
       ...(extrema ? [{
         type: 'min',
-        ...getMin(history, 'state'),
+        state: minObj.state !== undefined
+          ? minObj.state
+          : null,
+        last_changed: minObj.last_changed !== undefined
+          ? minObj.last_changed
+          : null,
       }] : []),
       ...(average ? [{
         type: 'avg',
-        state: getAvg(history, 'state'),
+        state: Number.isNaN(avg)
+          ? null
+          : avg,
       }] : []),
       ...(extrema ? [{
         type: 'max',
-        ...getMax(history, 'state'),
+        state: maxObj.state !== undefined
+          ? maxObj.state
+          : null,
+        last_changed: maxObj.last_changed !== undefined
+          ? maxObj.last_changed
+          : null,
       }] : []),
     ];
   }

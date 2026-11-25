@@ -6,4 +6,4 @@ export interface EntityConfigType {
   show_graph?: boolean;
   state_map?: StateMapType | StateMapEntryType[];
   y_axis?: string;
-};
+}

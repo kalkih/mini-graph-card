@@ -1,0 +1,134 @@
+/**
+ * Tests for Graph::getPoints() method.
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it, beforeEach } from 'vitest';
+import Graph from '../../src/graph';
+import { V } from '../../src/const';
+import { GRAPH_SETTINGS } from '../common/graph';
+import type { CoordsType, PointType } from '../types/coordsType';
+
+describe('Graph::getPoints()', () => {
+  let graph: any;
+
+  beforeEach(() => {
+    graph = new Graph({
+      width: GRAPH_SETTINGS.width,
+      height: GRAPH_SETTINGS.height,
+      margin: GRAPH_SETTINGS.margin,
+    });
+  });
+
+  it('empty _coords', () => {
+    graph._coords = [];
+    expect(graph.getPoints()).toEqual([]);
+  });
+
+  describe('all points are NaN', () => {
+    beforeEach(() => {
+      graph._coords = [
+        [0, NaN, NaN],
+        [10, NaN, NaN],
+        [20, NaN, NaN],
+        [30, NaN, NaN],
+      ];
+    });
+    for (let smoothingIndex = 0; smoothingIndex < 2; smoothingIndex += 1) {
+      // smoothing: 0 - false, 1 - true
+      const smoothing = !(smoothingIndex === 0);
+      it(`smoothing = ${smoothing}`, () => {
+        graph._smoothing = smoothing;
+        expect(graph.getPoints()).toEqual([]);
+      });
+    }
+  });
+
+  describe('all points are valid', () => {
+    beforeEach(() => {
+      graph._coords = [
+        [0,  40, 100 ],
+        [10, 50, 200 ],
+        [20, 30, 0   ],
+        [30, 0,  -300],
+      ];
+    });
+    for (let smoothingIndex = 0; smoothingIndex < 2; smoothingIndex += 1) {
+      // smoothing: 0 - false, 1 - true
+      const smoothing = !(smoothingIndex === 0);
+      it(`smoothing = ${smoothing}`, () => {
+        graph._smoothing = smoothing;
+        const expectedPoints: PointType[] = smoothingIndex === 0
+          ? graph._coords
+            .map((point: CoordsType, index: number) => [...point, index])
+          : [
+              [5,  45, 150,  1 ],
+              [15, 40, 100,  2 ],
+              [25, 15, -150, 3 ],
+            ];
+        expect(graph.getPoints()).toEqual(expectedPoints);
+      });
+    }
+  });
+
+  describe('points are valid + NaNs', () => {
+    for (let variantIndex = 0; variantIndex < 2; variantIndex += 1) {
+      const variantDescr = variantIndex === 0
+        ? 'single point at the beginning'
+        : 'single point at the end';
+      const coords: CoordsType[] = variantIndex === 0
+        ? [
+            [0,  40,  100 ],
+            [10, NaN, NaN ],
+            [20, NaN, NaN ],
+            [30, NaN, NaN ],
+            [40, 50,  200 ],
+            [50, 30,  0   ],
+            [60, 0,   -300],
+            [70, NaN, NaN ],
+          ]
+        : [
+            [0,  NaN, NaN ],
+            [10, 40,  100 ],
+            [20, NaN, NaN ],
+            [30, NaN, NaN ],
+            [40, 50,  200 ],
+            [50, 30,  0   ],
+            [60, NaN, NaN ],
+            [70, 0,   -300],
+          ];
+
+      describe(variantDescr, () => {
+        beforeEach(() => {
+          graph._coords = structuredClone(coords);
+        });
+
+        for (let smoothingIndex = 0; smoothingIndex < 2; smoothingIndex += 1) {
+          // smoothing: 0 - false, 1 - true
+          const smoothing = !(smoothingIndex === 0);
+          it(`smoothing = ${smoothing}`, () => {
+            graph._smoothing = smoothing;
+            const expectedPoints: PointType[] = smoothingIndex === 0
+              ? graph._coords
+                .map((point: CoordsType, index: number) => [...point, index])
+                .filter((point: PointType) => !Number.isNaN(point[V]))
+              : variantIndex === 0
+                ? [
+                    [0, 40, 100,  0 ],
+                    [45, 40, 100,  5 ],
+                    [55, 15, -150, 6 ],
+                  ]
+                : [
+                    [10, 40, 100,  1 ],
+                    [45, 40, 100,  5 ],
+                    [70, 0,  -300, 7 ],
+                  ];
+            expect(graph.getPoints()).toEqual(expectedPoints);
+          });
+        }
+      });
+    }
+  });
+});

@@ -1,0 +1,220 @@
+/**
+ * Tests for Graph::calcY() method.
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it, beforeEach } from 'vitest';
+import Graph from '../../src/graph';
+import { GRAPH_SETTINGS } from '../common/graph';
+import { X, Y, V } from '../../src/const';
+import type { CoordsType } from '../types/coordsType';
+
+const X_COORD = 123;
+
+const GRAPH_COORDS_NUMERIC: CoordsType[] = [
+  [ X_COORD, 0, -50 ],
+  [ X_COORD, 0, 50  ],
+  [ X_COORD, 0, 150 ],
+];
+
+const GRAPH_COORDS_NUMERIC_LOG: CoordsType[] = [
+  [ X_COORD, 0, 10   ],
+  [ X_COORD, 0, 100  ],
+  [ X_COORD, 0, 1000 ],
+];
+
+const GRAPH_COORDS_NAN: CoordsType[] = [
+  [ X_COORD, 0, NaN  ],
+];
+
+const GRAPH_COORDS_Y: number[] = [
+  110,
+  60,
+  10,
+];
+
+const MIN = -50;
+const MAX = 150;
+
+const MIN_LOG = 10;
+const MAX_LOG = 1000;
+
+const CHECK_COORDS_LENGTHS = (
+  originalCoords: CoordsType[],
+  resultCoords: CoordsType[],
+) => {
+  expect(resultCoords.length).toEqual(originalCoords.length);
+};
+
+const CHECK_X_COORD = (resultCoords: CoordsType[]) => {
+  for (let i = 0; i < resultCoords.length; i += 1) {
+    expect(resultCoords[i][X]).toEqual(X_COORD);
+  }
+};
+
+const CHECK_V_COORD = (
+  originalCoords: CoordsType[],
+  resultCoords: CoordsType[],
+) => {
+  for (let i = 0; i < resultCoords.length; i += 1) {
+    expect(resultCoords[i][V]).toEqual(originalCoords[i][V]);
+  }
+};
+
+describe("Graph::calcY()", () => {
+  let graph: any;
+  let coords: CoordsType[];
+
+  beforeEach(() => {
+    graph = new Graph({
+      width: GRAPH_SETTINGS.width,
+      height: GRAPH_SETTINGS.height,
+      margin: GRAPH_SETTINGS.margin,
+    });
+  });
+
+  for (let logarithmicIndex = 0; logarithmicIndex < 2; logarithmicIndex += 1) {
+    const logarithmic = !(logarithmicIndex === 0);
+
+    describe(`logarithmic = ${logarithmic}`, () => {
+      beforeEach(() => {
+        graph._logarithmic = logarithmic;
+      });
+
+      for (let invertIndex = 0; invertIndex < 2; invertIndex += 1) {
+        const invert = !(invertIndex === 0);
+
+        describe(`invert = ${invert}`, () => {
+          beforeEach(() => {
+            graph._invert = invert;
+          });
+
+          for (let dataTypeIndex = 0; dataTypeIndex < 3; dataTypeIndex += 1) {
+            // 0 - valid values, 1 - NaN, 2 - empty coords
+            const dataTypeDescr = dataTypeIndex === 0
+              ? 'valid values'
+              : dataTypeIndex === 1
+                ? 'values = NaNs'
+                : 'empty coords';
+
+            describe(dataTypeDescr, () => {
+              beforeEach(() => {
+                if (dataTypeIndex === 0) {
+                  if (!logarithmic) {
+                    coords = GRAPH_COORDS_NUMERIC;
+                  } else {
+                    coords = GRAPH_COORDS_NUMERIC_LOG;
+                  }
+                } else if (dataTypeIndex === 1) {
+                  coords = GRAPH_COORDS_NAN;
+                } else {
+                  coords = [];
+                }
+              });
+
+              it('min & max - numbers', () => {
+                graph._min = !logarithmic ? MIN : MIN_LOG;
+                graph._max = !logarithmic ? MAX : MAX_LOG;
+                ////////
+                const result: CoordsType[] = graph.calcY(coords);
+                ////////
+                CHECK_COORDS_LENGTHS(coords, result);
+                if (dataTypeIndex !== 2) {
+                  CHECK_X_COORD(result);
+                  CHECK_V_COORD(coords, result);
+                  ///
+                  if (dataTypeIndex === 0) {
+                    for (let i = 0; i < result.length; i += 1) {
+                      if (!invert) {
+                        expect(result[i][Y]).toEqual(GRAPH_COORDS_Y[i]);
+                      } else {
+                        expect(result[i][Y]).toEqual(GRAPH_COORDS_Y[result.length - i - 1]);
+                      }
+                    }
+                  } else {
+                    expect(Number.isNaN(result[0][Y])).toBe(true);
+                  }
+                } else {
+                  expect(result.length).toEqual(0);
+                }
+              });
+
+              it('min = max', () => {
+                graph._min = !logarithmic ? MIN : MIN_LOG;
+                graph._max = graph._min;
+                ////////
+                const result: CoordsType[] = graph.calcY(coords);
+                ////////
+                CHECK_COORDS_LENGTHS(coords, result);
+                if (dataTypeIndex !== 2) {
+                  CHECK_X_COORD(result);
+                  CHECK_V_COORD(coords, result);
+                  ///
+                  if (dataTypeIndex === 0) {
+                    if (!invert) {
+                      if (!logarithmic) {
+                        expect(result[0][Y]).toEqual(110);
+                        expect(result[1][Y]).toEqual(10);
+                        expect(result[2][Y]).toEqual(-90);
+                      } else {
+                        expect(result[0][Y]).toEqual(110);
+                        expect(result[1][Y]).toEqual(109);
+                        expect(result[2][Y]).toEqual(108);
+                      }
+                    } else {
+                      if (!logarithmic) {
+                        expect(result[0][Y]).toEqual(10);
+                        expect(result[1][Y]).toEqual(110);
+                        expect(result[2][Y]).toEqual(210);
+                      } else {
+                        expect(result[0][Y]).toEqual(10);
+                        expect(result[1][Y]).toEqual(11);
+                        expect(result[2][Y]).toEqual(12);
+                      }
+                    }
+                  } else {
+                    expect(Number.isNaN(result[0][Y])).toBe(true);
+                  }
+                } else {
+                  expect(result.length).toEqual(0);
+                }
+              });
+
+              for (let boundNaNIndex = 0; boundNaNIndex < 2; boundNaNIndex += 1) {
+                // 0 - min=NaN, 1 - max=NaN
+                const boundNaNDescr = boundNaNIndex === 0
+                  ? 'min = NaN'
+                  : 'max = NaN';
+
+                it(boundNaNDescr, () => {
+                  graph._min = boundNaNIndex === 0
+                    ? NaN
+                    : !logarithmic ? MIN : MIN_LOG;
+                  graph._max = boundNaNIndex === 1
+                    ? NaN
+                    : !logarithmic ? MAX : MAX_LOG;
+                  ////////
+                  const result: CoordsType[] = graph.calcY(coords);
+                  ////////
+                  CHECK_COORDS_LENGTHS(coords, result);
+                  if (dataTypeIndex !== 2) {
+                    CHECK_X_COORD(result);
+                    CHECK_V_COORD(coords, result);
+                    ///
+                    for (let i = 0; i < result.length; i += 1) {
+                      expect(Number.isNaN(result[i][Y])).toBe(true);
+                    }
+                  } else {
+                    expect(result.length).toEqual(0);
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+  }
+});

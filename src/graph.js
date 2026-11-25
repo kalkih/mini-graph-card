@@ -32,7 +32,7 @@ export default class Graph {
    * bar_spacing_group?: number,
    * total_bars_in_group?: number,
    * baseline?: number,
-   * invert?: boolean }} options Graph configuration options
+   * invert?: boolean }} [options={}] Graph configuration options
    */
   constructor({
     graphType = 'line',
@@ -65,14 +65,14 @@ export default class Graph {
 
     this._aggregateFuncName = aggregateFuncName;
     this._calcPoint = aggregateFuncMap[aggregateFuncName]
-     || aggregateFuncMap.avg; // fallback in case a wrong func is passed
+      || aggregateFuncMap.avg; // fallback in case a wrong func is passed
 
     // calculating "overall" aggregated values:
     this._calculateOverall = calculateOverall;
     this._overall = undefined;
     this._overallAggregateFuncName = overallAggregateFuncName;
     this._overallAggregateFunc = aggregateFuncMap[overallAggregateFuncName]
-     || this._calcPoint; // fallback in case a wrong func is passed
+      || this._calcPoint; // fallback in case a wrong func is passed
 
     this._smoothing = smoothing;
     this._logarithmic = logarithmic;
@@ -108,20 +108,23 @@ export default class Graph {
     if (this._baseline !== undefined) {
       // calculate Y coord
       const [baselineCoord] = this.calcY([[0, 0, this._baseline]]);
-      [, baselineY] = baselineCoord;
+      const [, calculatedBaselineY] = baselineCoord;
+      if (!Number.isNaN(calculatedBaselineY)) {
+        baselineY = calculatedBaselineY;
 
-      // if the baseline is inside a top "margins area"
-      // - then shift the baseline to the top edge (0)
-      const gridTop = this._margin[Y] * 2;
-      if (baselineY <= gridTop) {
-        baselineY = absoluteTop;
-      }
+        // if the baseline is inside a top "margins area"
+        // - then shift the baseline to the top edge (0)
+        const gridTop = this._margin[Y] * 2;
+        if (baselineY <= gridTop) {
+          baselineY = absoluteTop;
+        }
 
-      // if the baseline is inside a bottom "margins area"
-      // - then shift the baseline to the bottom edge
-      const gridBottom = this._height + this._margin[Y] * 2;
-      if (baselineY >= gridBottom) {
-        baselineY = absoluteBottom;
+        // if the baseline is inside a bottom "margins area"
+        // - then shift the baseline to the bottom edge
+        const gridBottom = this._height + this._margin[Y] * 2;
+        if (baselineY >= gridBottom) {
+          baselineY = absoluteBottom;
+        }
       }
     }
 
@@ -147,8 +150,8 @@ export default class Graph {
   /**
    * Update the graph data: group history into time buckets,
    * calculate coordinates, define new value boundaries
-   * @param {Date} endTime Current interval's end time
-   * @param {Array<object>} [history=undefined] Array of historical data
+   * @param {number} endTime Current interval's end time (timestamp in ms)
+   * @param {Array<object>} [history=undefined] Array of historical data objects
    * @returns {void}
    */
   update(endTime, history = undefined) {
@@ -181,14 +184,13 @@ export default class Graph {
     }
 
     // define new value boundaries
-    this.min = Math.min(...this._coords.map(item => Number(item[V])));
-    this.max = Math.max(...this._coords.map(item => Number(item[V])));
+    ({ min: this.min, max: this.max } = this._calcBounds());
   }
 
   /**
    * Group historical data into time buckets based on their age
    * @param {Array} res Array of time buckets being populated
-   * @param {Object} item Current history item
+   * @param {object} item Current history item
    * @returns {Array} Updated array of grouped time buckets
    */
   _reducer(res, item) {
@@ -216,7 +218,7 @@ export default class Graph {
 
   /**
    * Calculate coordinates (X, Y = 0, aggregated Value)
-   * @param {Array<Array<Object>|undefined>} buckets Array of grouped time buckets
+   * @param {Array<Array<object>|undefined>} buckets Array of grouped time buckets
    * @returns {Array<Array<number>>} Array of [X, Y, Value] coordinates
    */
   _calcPoints(buckets) {
@@ -224,32 +226,43 @@ export default class Graph {
     xRatio = Number.isFinite(xRatio) ? xRatio : this._width; // prevent "divide by 0"
 
     const coords = [];
-    let lastValue = 0;
+    let lastValue = NaN;
     let x;
 
     for (let i = 0; i <= buckets.length; i += 1) {
       x = xRatio * i + this._margin[X];
+      let currentPointValue;
 
       if (i === 0) {
         // left border
         const firstBucket = buckets[0];
         if (firstBucket && firstBucket[0]) {
-          const zeroStartFuncs = ['sum', 'delta', 'diff'];
-          if (zeroStartFuncs.includes(this._aggregateFuncName)) {
-            lastValue = 0;
+          // state - either a number or NaN
+          const firstValue = firstBucket[0].state;
+          if (!Number.isNaN(firstValue)) {
+            const zeroStartFuncs = ['sum', 'delta', 'diff'];
+            if (zeroStartFuncs.includes(this._aggregateFuncName)) {
+              lastValue = 0;
+            } else {
+              lastValue = firstValue;
+            }
           } else {
-            lastValue = parseFloat(firstBucket[0].state);
+            lastValue = NaN;
           }
         }
-        coords.push([x, 0, lastValue]);
+        currentPointValue = lastValue;
       } else {
         const bucket = buckets[i - 1];
         if (bucket && bucket.length > 0) {
-          const numberBucket = bucket.map(item => parseFloat(item.state));
-          lastValue = this._calcPoint(numberBucket);
+          // calc aggregated value
+          lastValue = this._calcPoint(bucket);
+          currentPointValue = lastValue;
+        } else {
+          // no points in this bucket, use prev. point
+          currentPointValue = lastValue;
         }
-        coords.push([x, 0, lastValue]);
       }
+      coords.push([x, 0, currentPointValue]);
     }
     return coords;
   }
@@ -266,18 +279,26 @@ export default class Graph {
 
   /**
    * Recalculate a point's coords based on min & max thresholds
-   * @param {Array<Array<number>>} coords Array of X, Y, Value
-   * @returns {Array<Array<number>>} Array of X, Y, Value,
+   * @param {Array<Array<number>>} coords Array of [X, Y, Value]
+   * @returns {Array<Array<number>>} Array of [X, Y, Value],
    * where Y - recalculated based on min/max thresholds
    */
   calcY(coords) {
     // account for logarithmic graph
-    const max = this._logarithmic
-      ? getLog10(this.max)
-      : this.max;
-    const min = this._logarithmic
-      ? getLog10(this.min)
-      : this.min;
+    const max = !Number.isNaN(this.max)
+      ? this._logarithmic
+        ? getLog10(this.max)
+        : this.max
+      : NaN;
+    const min = !Number.isNaN(this.min)
+      ? this._logarithmic
+        ? getLog10(this.min)
+        : this.min
+      : NaN;
+
+    if (Number.isNaN(max) || Number.isNaN(min)) {
+      return coords.map(coord => [coord[X], NaN, coord[V]]);
+    }
 
     const delta = Math.abs(max - min);
     let yRatio;
@@ -286,7 +307,12 @@ export default class Graph {
     } else {
       yRatio = delta / this._height;
     }
-    const coords2 = coords.map((coord) => {
+
+    return coords.map((coord) => {
+      if (Number.isNaN(coord[V])) {
+        return [coord[X], NaN, NaN];
+      }
+
       const val = this._logarithmic ? getLog10(coord[V]) : coord[V];
       let coordY;
       if (this._invert) {
@@ -296,8 +322,6 @@ export default class Graph {
       }
       return [coord[X], coordY, coord[V]];
     });
-
-    return coords2;
   }
 
   /**
@@ -305,49 +329,119 @@ export default class Graph {
    * @returns {Array<Array<number>>} Array of points [X, Y, Value, index]
    */
   getPoints() {
-    if (this._smoothing) {
-      const [first, ...rest] = this._coords;
-      let last = first;
-      return rest.map((point, i) => {
-        const Z = this._midPoint(last[X], last[Y], point[X], point[Y]);
-        const sum = (last[V] + point[V]) / 2; // 2-points smoothing
-        last = point;
-        return [Z[X], Z[Y], sum, i + 1];
-      });
-    } else {
-      return this._coords.map((point, i) => [point[X], point[Y], point[V], i]);
+    if (!this.hasCoords) return []; // safety guard
+
+    const points = [];
+    const is2pointsSmoothing = this._smoothing;
+    const len = this._coords.length;
+
+    for (let i = 0; i < len; i += 1) {
+      const point = this._coords[i];
+      if (!Number.isNaN(point[Y])) {
+        if (is2pointsSmoothing) {
+          const prev = i > 0
+            ? this._coords[i - 1]
+            : null;
+          const next = i < len - 1
+            ? this._coords[i + 1]
+            : null;
+          const hasValidPrev = prev && !Number.isNaN(prev[Y]);
+          const hasValidNext = next && !Number.isNaN(next[Y]);
+
+          if (hasValidPrev) {
+            const Z = this._midPoint(prev[X], prev[Y], point[X], point[Y]);
+            const sum = (prev[V] + point[V]) / 2;
+            points.push([Z[X], Z[Y], sum, i]);
+          } else if (!hasValidNext) {
+            // single point between two gaps
+            points.push([point[X], point[Y], point[V], i]);
+          }
+        } else {
+          points.push([point[X], point[Y], point[V], i]);
+        }
+      }
     }
+
+    return points;
   }
 
   /**
-   * Get SVG path for line chart with optional smoothing
-   * @returns {string} SVG path
+   * Generate paths for line and/or fill
+   * @param {object} options Path generation options
+   * @param {boolean} options.buildLine True to build a path for line, false otherwise
+   * @param {boolean} options.buildFill True to build a path for fill, false otherwise
+   * @returns {{line: string, fill: string}} Generated paths
    */
-  getPath() {
-    let next;
-    let Z;
-    let path = '';
-    let last = this._coords[0];
-    path += `M${last[X]},${last[Y]}`; // move to 1st point
+  getLineAndFill({ buildLine, buildFill }) {
+    if (!this.hasCoords || (!buildLine && !buildFill)) {
+      return { line: '', fill: '' };
+    }
 
-    this._coords.forEach((point) => {
-      next = point;
-      Z = this._smoothing
-        ? this._midPoint(last[X], last[Y], next[X], next[Y])
-        : next;
-      path += ` ${Z[X]},${Z[Y]}`; // either a midPoint (smoothing = true) or "next"
-      // does not affect if "next" was added before, otherwise makes a quadratic curve
-      path += ` Q ${next[X]},${next[Y]}`;
-      last = next;
-    });
-    path += ` ${next[X]},${next[Y]}`; // add last point
-    return path;
+    const height = buildFill
+      ? this.baselineY
+      : 0;
+    const len = this._coords.length;
+
+    let line = '';
+    let fill = '';
+    let firstX = 0;
+    let lastPoint = null;
+    let segmentLength = 0;
+
+    // one loop for calculating both lines & fill
+    for (let i = 0; i <= len; i += 1) {
+      const currPoint = i < len
+        ? this._coords[i]
+        : null;
+      const isGap = !currPoint || Number.isNaN(currPoint[Y]); // either a NaN gap or beyond coords
+
+      if (!isGap) {
+        let step = '';
+        if (segmentLength === 0) {
+          if (buildFill) {
+            firstX = currPoint[X];
+          }
+          const cmd = (line || fill) // not equal to ''
+            ? ' M ' // add a command
+            : 'M '; // start with a command
+          step = `${cmd}${currPoint[X]},${currPoint[Y]}`;
+        } else {
+          // continue processing a current segment
+          const Z = this._smoothing
+            ? this._midPoint(lastPoint[X], lastPoint[Y], currPoint[X], currPoint[Y])
+            : currPoint;
+          step = ` ${Z[X]},${Z[Y]} Q ${currPoint[X]},${currPoint[Y]}`;
+        }
+
+        if (buildLine) line += step;
+        if (buildFill) fill += step;
+
+        lastPoint = currPoint;
+        segmentLength += 1;
+      } else if (segmentLength > 0) {
+        // either a NaN gap or beyond coords; finishing the last segment
+        const endStep = segmentLength === 1
+          ? ` L ${lastPoint[X]},${lastPoint[Y]}` // single point
+          : ` ${lastPoint[X]},${lastPoint[Y]}`; // line to last point
+
+        if (buildLine) line += endStep;
+        if (buildFill) {
+          // adding a closed line for a fill (go down, go left)
+          fill += `${endStep} L ${lastPoint[X]},${height} L ${firstX},${height} z`;
+        }
+
+        lastPoint = null;
+        segmentLength = 0;
+      }
+    }
+
+    return { line, fill };
   }
 
   /**
    * Return a gradient used to set a gradiented color for a line & fill
-   * @param {Array<Object>} thresholds color_thresholds array
-   * @returns {Array<Object>} Gradient
+   * @param {Array<object>} thresholds color_thresholds array
+   * @returns {Array<object>} Gradient
    */
   computeGradient(thresholds) {
     const scale = this._logarithmic
@@ -364,7 +458,7 @@ export default class Graph {
         color = interpolateRGB(arr[index - 1].color, stop.color, factor);
       }
       let offset;
-      if (scale <= 0) {
+      if (Number.isNaN(scale) || scale <= 0) {
         offset = 0;
       } else {
         // limit stopValue within max/min
@@ -391,39 +485,26 @@ export default class Graph {
   }
 
   /**
-   * Get an SVG path for a fill
-   * @param {string} path SVG path for a line
-   * @returns {string} SVG path for a fill
-   */
-  getFill(path) {
-    const height = this.baselineY;
-    let fill = path;
-    // note that currently this._margin[X] = 0 when fill is defined
-    fill += ` L ${this._width + this._margin[X]}, ${height}`;
-    fill += ` L ${this._coords[0][X]}, ${height} z`;
-    return fill;
-  }
-
-  /**
    * Get bars for an entity
    * @param {number} position Index of a bar (0,1,..)
    * (i.e. index of an entity with a shown bar graph)
-   * @returns {{width: number, items: Array<Object>}} Bars for an entity
+   * @returns {{width: number, items: Array<object>}} Bars for an entity
    * to be shown at a `position` index
    */
   getBars(position) {
+    if (!this.hasCoords) { // safety guard
+      return {
+        width: 0,
+        items: [],
+      };
+    }
+
     const spacing = this._bar_spacing;
     const spacing_group = this._bar_spacing_group;
     const total = this._total_bars_in_group;
 
     // number of measures
     const total_groups = this._coords.length;
-    if (total_groups === 0) { // safety guard
-      return {
-        width: 0,
-        items: [],
-      };
-    }
 
     // width of a group of bars
     const group_width = (this._width - spacing_group * (total_groups - 1))
@@ -445,13 +526,19 @@ export default class Graph {
 
     const items = this._coords.map((coord, i) => {
       let y;
+      let height;
       const realY = coord[Y];
-      if (realY <= baselineY) {
-        y = realY;
+      if (!Number.isNaN(realY)) {
+        if (realY <= baselineY) {
+          y = realY;
+        } else {
+          y = baselineY;
+        }
+        height = Math.abs(baselineY - realY);
       } else {
         y = baselineY;
+        height = 0;
       }
-      const height = Math.abs(baselineY - realY);
 
       const x = this._margin[X]
         + (group_width + spacing_group) * i
@@ -483,9 +570,26 @@ export default class Graph {
    * @returns {number|undefined} "Overall" value
    */
   _calcOverall() {
-    const numberHistStates = this._history.map(item => parseFloat(item.state));
-    return numberHistStates.length > 0
-      ? this._overallAggregateFunc(numberHistStates)
+    return this._history.length > 0
+      ? this._overallAggregateFunc(this._history)
       : undefined;
+  }
+
+  /**
+   * Calculate min/max bounds based on "coords" array
+   * @returns {{min: number, max: number}} Min/max bounds (can be NaN for empty or NaN coords)
+   */
+  _calcBounds() {
+    let max = NaN;
+    let min = NaN;
+    for (let i = 0; i < this._coords.length; i += 1) {
+      const val = this._coords[i][V];
+      if (!Number.isNaN(val)) {
+        // process only numeric values
+        if (Number.isNaN(max) || val > max) max = val;
+        if (Number.isNaN(min) || val < min) min = val;
+      }
+    }
+    return { max, min };
   }
 }
