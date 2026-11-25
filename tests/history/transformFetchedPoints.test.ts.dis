@@ -40,10 +40,10 @@ describe('transformFetchedPoints()', () => {
 
     describe(typeOfDataDescr, () => {
       for (let attributeIndex = 0; attributeIndex < 2; attributeIndex += 1) {
-        // 0 - state, 1- atttribute
+        // 0 - state, 1- attribute
         const attribute = attributeIndex === 0
           ? undefined
-          : 'xyz'
+          : 'xyz';
         const attributeDescr = attributeIndex === 0
           ? 'state'
           : 'attribute';
@@ -61,15 +61,12 @@ describe('transformFetchedPoints()', () => {
                   ? { ...STATE_MAP_NUMERIC_RELAXED }
                   : { ...STATE_MAP_NUMERIC_STRICT }
                 : { ...STATE_MAP_STRINGS_STRICT };
-            const isStateMapStrictMode = stateMapIndex === 2
-              ? true
-              : false;
+            const isStateMapStrictMode = stateMapIndex === 2;
             const stateMapDescr = stateMapIndex === 0
               ? 'no state_map'
               : stateMapIndex === 1
                 ? 'state_map relaxed'
                 : 'state_map strict';
-            const isStrictStateMap = stateMapIndex === 2;
 
             describe(stateMapDescr, () => {
               for (let skipInitialStateIndex = 0; skipInitialStateIndex < 2; skipInitialStateIndex += 1) {
@@ -120,13 +117,13 @@ describe('transformFetchedPoints()', () => {
                     expect(formattedPoints.length).toBe(historyArrayLength);
                     const expectedNumbersCount = !attribute
                       ? 0
-                      : !isStrictStateMap
+                      : !isStateMapStrictMode
                         ? historyArrayLength - 1 // 7 - 1 undefined
                         : 3; // 3 (passed through state_map)
                     expect(getNumbersCountInHistory(formattedPoints)).toEqual(expectedNumbersCount);
                     const expectedNansCount = !attribute
                       ? historyArrayLength // 8
-                      : !isStrictStateMap
+                      : !isStateMapStrictMode
                         ? 1 // 1 undefined
                         : historyArrayLength - 3; // total - 3 (passed through state_map)
                     expect(getNansCountInHistory(formattedPoints)).toEqual(expectedNansCount);
@@ -161,7 +158,7 @@ describe('transformFetchedPoints()', () => {
                       isStateMapStrictMode,
                       skipInitialState,
                     );
-                    const numbersCountInHistory = !isStrictStateMap
+                    const numbersCountInHistory = !isStateMapStrictMode
                       ? !attribute
                         ? typeOfDataIndex === 0
                           ? 11 // all records are numbers
@@ -172,7 +169,7 @@ describe('transformFetchedPoints()', () => {
                           ? 1 // 1 state passed through state_map
                           : 10 // 11 - 1 (xxx) = 10
                         : 6; // 6 attributes past through state_map
-                    const nansCountInHistory = !isStrictStateMap
+                    const nansCountInHistory = !isStateMapStrictMode
                       ? !attribute
                         ? typeOfDataIndex === 0
                           ? 8 // all "state" NaNs
