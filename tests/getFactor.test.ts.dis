@@ -12,12 +12,12 @@ import { migrateYaxisConfig } from '../src/migrate';
 interface ValueFactorType {
   type?: string | any,
   factor?: number | any,
-};
+}
 
 interface EntityConfig {
   // value_factor?: number | ValueFactorType | any;  // ?
   y_axis?: "primary" | "secondary";
-};
+}
 
 interface ConfigType {
   value_factor?: number | ValueFactorType | any;
@@ -31,7 +31,7 @@ interface ConfigType {
       value_factor?: number | ValueFactorType | any;
     },
   },
-};
+}
 
 const DELTA = 0.0001;
 
