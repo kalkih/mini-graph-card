@@ -37,10 +37,10 @@ describe('Graph::getPoints()', () => {
       ];
     });
     for (let smoothingIndex = 0; smoothingIndex < 3; smoothingIndex += 1) {
-      // smoothing: 0 - false, 1 - true, 2 - bezierc
+      // smoothing: 0 - false, 1 - true, 2 - cubic
       const smoothing = smoothingIndex !== 2
         ? !(smoothingIndex === 0)
-        : 'bezierc';
+        : 'cubic';
       it(`smoothing = ${smoothing}`, () => {
         graph._smoothing = smoothing;
         expect(graph.getPoints()).toEqual([]);
@@ -58,10 +58,10 @@ describe('Graph::getPoints()', () => {
       ];
     });
     for (let smoothingIndex = 0; smoothingIndex < 3; smoothingIndex += 1) {
-      // smoothing: 0 - false, 1 - true, 2 - bezierc
+      // smoothing: 0 - false, 1 - true, 2 - cubic
       const smoothing = smoothingIndex !== 2
         ? !(smoothingIndex === 0)
-        : 'bezierc';
+        : 'cubic';
       it(`smoothing = ${smoothing}`, () => {
         graph._smoothing = smoothing;
         const expectedPoints: PointType[] = [0, 2].includes(smoothingIndex)
@@ -110,10 +110,10 @@ describe('Graph::getPoints()', () => {
         });
 
         for (let smoothingIndex = 0; smoothingIndex < 3; smoothingIndex += 1) {
-          // smoothing: 0 - false, 1 - true, 2 - bezierc
+          // smoothing: 0 - false, 1 - true, 2 - cubic
           const smoothing = smoothingIndex !== 2
             ? !(smoothingIndex === 0)
-            : 'bezierc';
+            : 'cubic';
           it(`smoothing = ${smoothing}`, () => {
             graph._smoothing = smoothing;
             const expectedPoints: PointType[] = [0, 2].includes(smoothingIndex)
