@@ -274,7 +274,7 @@ export default (config) => {
     conf,
     'tension',
     DEFAULT_BEZIERC_TENSION,
-    { minBound: 0, maxBound: 1.2, allowString: true },
+    { minBound: 0.1, maxBound: 1.2, allowString: true },
   );
 
   // process per-entity configs
