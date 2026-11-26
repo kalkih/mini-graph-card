@@ -1,0 +1,140 @@
+/**
+ * Tests for getMonotoneTangent() function.
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it } from 'vitest';
+import { getMonotoneTangent } from '../src/others';
+import type { CoordsType } from './types/coordsType';
+
+describe("getMonotoneTangent()", () => {
+  let p1: CoordsType;
+  let p2: CoordsType;
+  let p3: CoordsType;
+
+  describe("All 3 points are on same flatline", () => {
+    it('zero', () => {
+      p1 = [0, 0, 0];
+      p2 = [0, 0, 0];
+      p3 = [0, 0, 0];
+      const result = getMonotoneTangent(p1, p2, p3);
+      expect(result).toBeCloseTo(0, 6);
+    });
+
+    it('zero Y, diff X', () => {
+      p1 = [0, 0, 0];
+      p2 = [10, 0, 0];
+      p3 = [20, 0, 0];
+      const result = getMonotoneTangent(p1, p2, p3);
+      expect(result).toEqual(0);
+    });
+
+    it('same positive Y, diff X', () => {
+      p1 = [0, 100, 0];
+      p2 = [10, 100, 0];
+      p3 = [20, 100, 0];
+      const result = getMonotoneTangent(p1, p2, p3);
+      expect(result).toEqual(0);
+    });
+
+    it('same negative Y, diff X', () => {
+      p1 = [0, -100, 0];
+      p2 = [10, -100, 0];
+      p3 = [20, -100, 0];
+      const result = getMonotoneTangent(p1, p2, p3);
+      expect(result).toEqual(0);
+    });
+  });
+
+  describe('opposite inclinations', () => {
+    it('up, down', () => {
+      p1 = [0, 0, 0];
+      p2 = [10, 200, 0];
+      p3 = [20, 199.9, 0];
+      const result = getMonotoneTangent(p1, p2, p3);
+      expect(result).toEqual(0);
+    });
+
+    it('down, up', () => {
+      p1 = [0, 200, 0];
+      p2 = [10, 199.9, 0];
+      p3 = [20, 199.91, 0];
+      const result = getMonotoneTangent(p1, p2, p3);
+      expect(result).toEqual(0);
+    });
+  });
+
+  describe('flatline from/to one side', () => {
+    it('from the left', () => {
+      p1 = [0, 100, 0];
+      p2 = [10, 100, 0];
+      p3 = [20, 100.1, 0];
+      const result = getMonotoneTangent(p1, p2, p3);
+      expect(result).toEqual(0);
+    });
+
+    it('to the right', () => {
+      p1 = [0, 200, 0];
+      p2 = [10, 199.9, 0];
+      p3 = [20, 199.9, 0];
+      const result = getMonotoneTangent(p1, p2, p3);
+      expect(result).toEqual(0);
+    });
+  });
+
+  describe('same points on one side', () => {
+    it('on the left', () => {
+      p1 = [0, 100, 0];
+      p2 = [0, 100, 0];
+      p3 = [20, 200, 0];
+      const result = getMonotoneTangent(p1, p2, p3);
+      expect(result).toEqual(0);
+    });
+
+    it('on the right', () => {
+      p1 = [0, 200, 0];
+      p2 = [10, 100, 0];
+      p3 = [10, 100, 0];
+      const result = getMonotoneTangent(p1, p2, p3);
+      expect(result).toEqual(0);
+    });
+  });
+
+  describe('invalid X', () => {
+    it('on the left', () => {
+      p1 = [10, 100, 0];
+      p2 = [0, 110, 0];
+      p3 = [20, 120, 0];
+      const result = getMonotoneTangent(p1, p2, p3);
+      expect(result).toEqual(0);
+    });
+
+    it('on the right', () => {
+      p1 = [0, 100, 0];
+      p2 = [20, 110, 0];
+      p3 = [10, 120, 0];
+      const result = getMonotoneTangent(p1, p2, p3);
+      expect(result).toEqual(0);
+    });
+  });
+
+  describe('normal cases', () => {
+    it('Y increasing', () => {
+      p1 = [0, 20, 0];
+      p2 = [10, 40, 0];
+      p3 = [20, 100, 0];
+      const result = getMonotoneTangent(p1, p2, p3);
+      expect(result).toBeCloseTo(3, 6);
+    });
+
+    it('Y decreasing', () => {
+      p1 = [0, 100, 0];
+      p2 = [10, 40, 0];
+      p3 = [20, 20, 0];
+      const result = getMonotoneTangent(p1, p2, p3);
+      expect(result).toBeCloseTo(-3, 6);
+    });
+  });
+});

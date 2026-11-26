@@ -10,7 +10,8 @@ import Graph from '../../src/graph';
 import {
   DEFAULT_GRAPH_WIDTH, DEFAULT_GRAPH_HEIGHT,
   DEFAULT_LINE_WIDTH,
-  DEFAULT_BAR_SPACING
+  DEFAULT_BAR_SPACING,
+  DEFAULT_BEZIERC_TENSION,
 } from '../../src/const';
 import { aggregateFuncMap } from '../../src/aggregate';
 
@@ -44,6 +45,7 @@ const CHECK_DEFAULT = (graph: Graph) => {
   expect(graph._bar_spacing_group).toEqual(DEFAULT_BAR_SPACING);
   expect(graph._total_bars_in_group).toEqual(1);
   expect(graph._baseline).toBeUndefined();
+  expect(graph._tension).toEqual(DEFAULT_BEZIERC_TENSION);
   expect(graph._invert).toBe(false);
 
   expect(graph._history).toBeUndefined();
@@ -81,6 +83,7 @@ describe("Graph()", () => {
       bar_spacing_group: 8,
       total_bars_in_group: 3,
       baseline: 21,
+      tension: 0.5,
       invert: true,
     });
     expect(graph._graphType).toEqual('bar');
@@ -113,6 +116,7 @@ describe("Graph()", () => {
     expect(graph._bar_spacing_group).toEqual(8);
     expect(graph._total_bars_in_group).toEqual(3);
     expect(graph._baseline).toEqual(21);
+    expect(graph._tension).toEqual(0.5);
     expect(graph._invert).toBe(true);
 
     expect(graph._history).toBeUndefined();

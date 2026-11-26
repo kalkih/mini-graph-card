@@ -517,4 +517,27 @@ describe('Graph::getLineAndFill()', () => {
       }
     });
   }
+
+  it('BezierC curves', () => {
+    graph._smoothing = 'cubic';
+    graph._tension = 1.0;
+    graph._coords = [
+      [0, 100, 0],
+      [30, 70, 30],
+      [60, 10, 90],
+      [90, NaN, NaN],
+      [120, 50, 50],
+    ];
+
+    const expStep1 = ` C 10,100 20,${70 + 40 / 3} 30,70`;
+    const expStep2 = ` C 40,${70 - 40 / 3} 50,10 60,10`;
+    const expectedLine = `M 0,100${expStep1}${expStep2} M 120,50 L 120,50`;
+    const expectedFill = `M 0,100${expStep1}${expStep2} L 60,120 L 0,120 z M 120,50 L 120,50 L 120,120 L 120,120 z`;
+
+    const result = graph.getLineAndFill({ buildLine: true, buildFill: true });
+    expect(result).toEqual({
+      line: expectedLine,
+      fill: expectedFill,
+    });
+  });
 });

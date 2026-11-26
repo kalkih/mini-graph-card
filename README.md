@@ -167,7 +167,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | tap_action | [action object](#action-object-options) |  | v0.7.0 | Action on click/tap.
 | group | boolean | `false` | v0.2.0 | Disable paddings and box-shadow, useful when nesting the card.
 | hours_to_show | integer | `24` | v0.0.2 | Specify how many hours of history the graph should present.
-| points_per_hour | number | `0.5` | v0.2.0 | Specify amount of data points the graph should display for each hour, *(basically the detail/accuracy/smoothing of the graph)*.
+| points_per_hour | number | `0.5` | v0.2.0 | Specify amount of data points the graph should display for each hour *(basically the detail/accuracy/smoothing of the graph)*.
 | aggregate_func | string | `avg` | v0.8.0 | Specify [aggregate function](#aggregate-functions) used to calculate point/bar in the graph.
 | group_by | string | `interval` | v0.8.0 | Specify type of grouping of data, dynamic `interval`, `week`, `date`, `12h`, `hour`, `30min` or `15min`.
 | update_interval | number |  | v0.4.0 | Specify a custom update interval of the history data (in seconds), instead of on every state change.
@@ -191,7 +191,8 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | align_header | string |  | v0.2.0 | Set the alignment of the name in the header, `left`, `right` or `center`. See more details [here](#alignment-for-name--icon-elements).
 | align_icon | string | `right` | v0.2.0 | Set the alignment of the icon, `left`, `right` or `state`. See more details [here](#alignment-for-name--icon-elements).
 | align_state | string | `left` | v0.2.0 | Set the alignment of the current state, `left`, `right` or `center`.
-| smoothing | boolean | `true` | v0.8.0 | Whether to make graph line smooth.
+| smoothing | boolean/string | `true`<br>(see note) | v0.8.0 | Set the graph line shape: `false` (straight lines), `true` (quadratic Bezier curve, legacy method), or `cubic` (monotone cubic Bezier curve, gives a more accurate representation).<br>Note: for non-numeric entity domains, the default value is `false`. |
+| tension | number (0.1 .. 1.2) | `0.9` | v0.14.0-dev.4 | Controls the curve smoothness (tangent tension) when `smoothing: cubic` is used (bigger value = more smoothness).
 | state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert.
 | logarithmic | boolean | `false` | v0.10.0 | Use a logarithmic scale for the graph (see [Logarithmic options](#logarithmic-options)).
 | baseline | number |  | v0.14.0 | Set a custom baseline for the graph (see [Baseline](#baseline)).
@@ -250,7 +251,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | state_adaptive_color | boolean |         | Make the color of the state & the [static value line label](#static-values) adapt to the entity/static value color.
 | y_axis | string |         | If 'secondary', displays using the secondary Y-axis on the right.
 | fixed_value | boolean |         | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
-| smoothing | boolean |         | Override for a flag indicating whether to make graph line smooth.
+| smoothing | boolean/string |         | Set a custom graph line shape or override a global `smoothing` option.
 | state_map | [state map object](#state-map-object) |         | List of entity states to convert.
 | logarithmic | boolean |         | Override logarithmic scaling for this entity only (see [Logarithmic options](#logarithmic-options)).
 | baseline | number |   | Set a custom baseline for the graph or override a global `baseline` option (see [Baseline](#baseline)).

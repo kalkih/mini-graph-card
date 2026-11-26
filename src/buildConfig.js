@@ -7,6 +7,7 @@ import {
   DEFAULT_HOURS_TO_SHOW,
   DEFAULT_POINTS_PER_HOUR,
   DEFAULT_STATIC_VALUE_LABEL_OFFSET,
+  DEFAULT_BEZIERC_TENSION,
   DEFAULT_COLORS,
   DEFAULT_SHOW,
 } from './const';
@@ -268,6 +269,13 @@ export default (config) => {
   }
 
   conf.baseline = checkNumericOption(conf, 'baseline', undefined, { allowString: true });
+
+  conf.tension = checkNumericOption(
+    conf,
+    'tension',
+    DEFAULT_BEZIERC_TENSION,
+    { minBound: 0.1, maxBound: 1.2, allowString: true },
+  );
 
   // process per-entity configs
   /* eslint-disable no-param-reassign */

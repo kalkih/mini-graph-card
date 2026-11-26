@@ -6,6 +6,7 @@
  */
 
 import { log } from './utils';
+import { X, Y } from './const';
 
 /**
  * Check if a value is 'undefined' or 'null'; fallback to a provided fallback value if true
@@ -428,6 +429,51 @@ const convertStateByMap = (res, stateMapConfig) => {
   }
 };
 
+/**
+ * Calculate tangent at some point
+ * (Monotone Piecewise Cubic Interpolation of Fritsch–Butland)
+ * @param {Array<number>} pA Previous point [X, Y, Value]
+ * @param {Array<number>} pB Target point [X, Y, Value]
+ * @param {Array<number>} pC Next point [X, Y, Value]
+ * @returns {number} Tangent dy/dx at point B
+ */
+const getMonotoneTangent = (pA, pB, pC) => {
+  // note: only X & Y components are used from pA, pB, pC
+  const dx1 = pB[X] - pA[X];
+  const dx2 = pC[X] - pB[X];
+  const d1 = dx1 > 0 // prevent division by 0
+    ? (pB[Y] - pA[Y]) / dx1 // tangent
+    : 0;
+  const d2 = dx2 > 0 // prevent division by 0
+    ? (pC[Y] - pB[Y]) / dx2 // tangent
+    : 0;
+
+  // if local peak (different signs), flatline (some tangent = 0)
+  // or boundary (prev or next point is same as target point)
+  if (d1 * d2 <= 0) {
+    return 0; // zero tangent
+  }
+
+  // harmonic tangent
+  const w1 = 2 * dx2 + dx1;
+  const w2 = dx2 + 2 * dx1;
+  return (w1 + w2) / (w1 / d1 + w2 / d2);
+};
+
+/**
+ * Calculate a medium point
+ * @param {number} Ax X coord for point 1
+ * @param {number} Ay Y coord for point 1
+ * @param {number} Bx X coord for point 2
+ * @param {number} By Y coord for point 2
+ * @returns {[number,number]} Coords of midpoint
+ */
+const getMidPoint = (Ax, Ay, Bx, By) => {
+  const Zx = (Ax + Bx) / 2;
+  const Zy = (Ay + By) / 2;
+  return [Zx, Zy];
+};
+
 export {
   fallbackUndefinedNull,
   isString,
@@ -446,4 +492,5 @@ export {
   getObjectAttr,
   isObjectAttr,
   convertStateByMap,
+  getMonotoneTangent, getMidPoint,
 };
