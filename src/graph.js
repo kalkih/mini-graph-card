@@ -6,6 +6,7 @@ import {
   DEFAULT_GRAPH_WIDTH,
   DEFAULT_BAR_SPACING,
   DEFAULT_LINE_WIDTH,
+  DEFAULT_BEZIERC_TENSION,
 } from './const';
 import {
   getLog10,
@@ -26,12 +27,13 @@ export default class Graph {
    * aggregateFuncName?: string,
    * calculateOverall?: boolean,
    * overallAggregateFuncName?: string,
-   * smoothing?: boolean,
+   * smoothing?: boolean|string,
    * logarithmic?: boolean,
    * bar_spacing?: number,
    * bar_spacing_group?: number,
    * total_bars_in_group?: number,
    * baseline?: number,
+   * tension?: number,
    * invert?: boolean }} [options={}] Graph configuration options
    */
   constructor({
@@ -50,6 +52,7 @@ export default class Graph {
     bar_spacing_group = DEFAULT_BAR_SPACING, // spacing between groups of bars
     total_bars_in_group = 1, // number of bars (i.e. number of entities with a shown bar graph)
     baseline = undefined,
+    tension = DEFAULT_BEZIERC_TENSION, // tension for Bezier C curve
     invert = false,
   } = {}) {
     this._graphType = graphType;
@@ -81,6 +84,7 @@ export default class Graph {
     this._total_bars_in_group = total_bars_in_group;
     this._endTime = 0;
     this._baseline = baseline;
+    this._tension = tension;
     this._invert = invert;
   }
 
