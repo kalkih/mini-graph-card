@@ -191,8 +191,8 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | align_header | string |  | v0.2.0 | Set the alignment of the name in the header, `left`, `right` or `center`. See more details [here](#alignment-for-name--icon-elements).
 | align_icon | string | `right` | v0.2.0 | Set the alignment of the icon, `left`, `right` or `state`. See more details [here](#alignment-for-name--icon-elements).
 | align_state | string | `left` | v0.2.0 | Set the alignment of the current state, `left`, `right` or `center`.
-| smoothing | boolean/string | `true`<br>(see a note) | v0.8.0 | Whether to make graph line smooth; `true` enables a "two points" interpolation, `bezierc` - "cubic" interpolation.<br>Note: for non-numeric entities domains, a default value is `false`.
-| tension | number (0.1 .. 1.2) | `0.9` | v0.14.0-dev.4 | Controls the curve smoothness (tangent tension) when `smoothing: bezierc` is used (bigger value = more smoothness).
+| smoothing | boolean/string | `true`<br>(see note) | v0.8.0 | Set the graph line shape: `false` (straight lines), `true` (quadratic Bezier curve, legacy method), or `cubic` (monotone cubic Bezier curve, gives a more accurate representation).<br>Note: for non-numeric entity domains, the default value is `false`. |
+| tension | number (0.1 .. 1.2) | `0.9` | v0.14.0-dev.4 | Controls the curve smoothness (tangent tension) when `smoothing: cubic` is used (bigger value = more smoothness).
 | state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert.
 | logarithmic | boolean | `false` | v0.10.0 | Use a logarithmic scale for the graph (see [Logarithmic options](#logarithmic-options)).
 | baseline | number |  | v0.14.0 | Set a custom baseline for the graph (see [Baseline](#baseline)).
@@ -251,7 +251,7 @@ properties of the Entity object detailed in the following table (as per `sensor.
 | state_adaptive_color | boolean |         | Make the color of the state & the [static value line label](#static-values) adapt to the entity/static value color.
 | y_axis | string |         | If 'secondary', displays using the secondary Y-axis on the right.
 | fixed_value | boolean |         | Set to true to graph the entity's current state as a fixed value instead of graphing its state history.
-| smoothing | boolean/string |         | Override for a flag indicating whether to make graph line smooth.
+| smoothing | boolean/string |         | Set a custom graph line shape or override a global `smoothing` option.
 | state_map | [state map object](#state-map-object) |         | List of entity states to convert.
 | logarithmic | boolean |         | Override logarithmic scaling for this entity only (see [Logarithmic options](#logarithmic-options)).
 | baseline | number |   | Set a custom baseline for the graph or override a global `baseline` option (see [Baseline](#baseline)).
