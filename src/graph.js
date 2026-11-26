@@ -477,7 +477,7 @@ export default class Graph {
           step = this._getBezierCStep(i, lastPoint, currPoint);
         } else {
           // continue processing a current segment
-          const Z = this._smoothing
+          const Z = this._smoothing === true
             ? getMidPoint(lastPoint[X], lastPoint[Y], currPoint[X], currPoint[Y])
             : currPoint;
           step = ` ${Z[X]},${Z[Y]} Q ${currPoint[X]},${currPoint[Y]}`;
