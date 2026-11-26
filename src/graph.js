@@ -12,6 +12,9 @@ import {
   getLog10,
   log,
 } from './utils';
+import {
+  getMidPoint,
+} from './others';
 import { aggregateFuncMap } from './aggregate';
 
 export default class Graph {
@@ -353,7 +356,7 @@ export default class Graph {
           const hasValidNext = next && !Number.isNaN(next[Y]);
 
           if (hasValidPrev) {
-            const Z = this._midPoint(prev[X], prev[Y], point[X], point[Y]);
+            const Z = getMidPoint(prev[X], prev[Y], point[X], point[Y]);
             const sum = (prev[V] + point[V]) / 2;
             points.push([Z[X], Z[Y], sum, i]);
           } else if (!hasValidNext) {
@@ -412,7 +415,7 @@ export default class Graph {
         } else {
           // continue processing a current segment
           const Z = this._smoothing
-            ? this._midPoint(lastPoint[X], lastPoint[Y], currPoint[X], currPoint[Y])
+            ? getMidPoint(lastPoint[X], lastPoint[Y], currPoint[X], currPoint[Y])
             : currPoint;
           step = ` ${Z[X]},${Z[Y]} Q ${currPoint[X]},${currPoint[Y]}`;
         }
@@ -560,12 +563,6 @@ export default class Graph {
       width: bar_width,
       items,
     };
-  }
-
-  _midPoint(Ax, Ay, Bx, By) {
-    const Zx = (Ax - Bx) / 2 + Bx;
-    const Zy = (Ay - By) / 2 + By;
-    return [Zx, Zy];
   }
 
   /**
