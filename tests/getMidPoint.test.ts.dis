@@ -1,0 +1,49 @@
+/**
+ * Tests for getMidPoint() function.
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it } from 'vitest';
+import { getMidPoint } from '../src/others';
+import { X, Y } from '../src/const';
+import type { xyType } from './types/coordsType';
+
+interface VariantType {
+  pointA: xyType;
+  pointB: xyType;
+  expected: xyType;
+}
+
+const VARIANTS: VariantType[] = [
+  {
+    pointA: [-10, 3],
+    pointB: [30, 7],
+    expected: [10, 5],
+  },
+  {
+    pointA: [0.5, -100],
+    pointB: [0.3, 102],
+    expected: [0.4, 1],
+  },
+  {
+    pointA: [2, 0],
+    pointB: [0, 9],
+    expected: [1, 4.5],
+  },
+];
+
+describe("getMidPoint", () => {
+  VARIANTS.forEach((variant, i) => {
+    it(`case ${i + 1}`, () => {
+      const result = getMidPoint(
+        variant.pointA[X],
+        variant.pointA[Y],
+        variant.pointB[X],
+        variant.pointB[Y],
+      );
+      expect(result).toEqual(variant.expected);
+    });
+  });
+});
