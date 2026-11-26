@@ -191,7 +191,7 @@ We recommend looking at the [Example usage section](#example-usage) to understan
 | align_header | string |  | v0.2.0 | Set the alignment of the name in the header, `left`, `right` or `center`. See more details [here](#alignment-for-name--icon-elements).
 | align_icon | string | `right` | v0.2.0 | Set the alignment of the icon, `left`, `right` or `state`. See more details [here](#alignment-for-name--icon-elements).
 | align_state | string | `left` | v0.2.0 | Set the alignment of the current state, `left`, `right` or `center`.
-| smoothing | boolean/string | `true`<br>(see a note) | v0.8.0 | Whether to make graph line smooth; `true` enables a "2 points" interpolation, `bezierc` - "cubic" interpolation.<br>Note: for non-numeric entities domains, a default value is `false`.
+| smoothing | boolean/string | `true`<br>(see a note) | v0.8.0 | Whether to make graph line smooth; `true` enables a "two points" interpolation, `bezierc` - "cubic" interpolation.<br>Note: for non-numeric entities domains, a default value is `false`.
 | tension | number (0.1 .. 1.2) | `0.9` | v0.14.0-dev.4 | Controls the curve smoothness (tangent tension) when `smoothing: bezierc` is used (bigger value = more smoothness).
 | state_map | [state map object](#state-map-object) |  | v0.8.0 | List of entity states to convert.
 | logarithmic | boolean | `false` | v0.10.0 | Use a logarithmic scale for the graph (see [Logarithmic options](#logarithmic-options)).
