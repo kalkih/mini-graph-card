@@ -444,7 +444,7 @@ export default class Graph {
       return { line: '', fill: '' };
     }
 
-    const isBezierC = this._smoothing === 'bezierc';
+    const isBezierC = this._smoothing === 'cubic';
     const height = buildFill
       ? this.baselineY
       : 0;
