@@ -231,7 +231,9 @@ export default class Graph {
    */
   _calcPoints(buckets) {
     let xRatio = this._width / buckets.length;
-    xRatio = Number.isFinite(xRatio) ? xRatio : this._width; // prevent "divide by 0"
+    xRatio = Number.isFinite(xRatio) // prevent division by 0
+      ? xRatio
+      : this._width;
 
     const coords = [];
     let lastValue = NaN;
