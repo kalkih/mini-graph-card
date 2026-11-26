@@ -465,6 +465,7 @@ export default class MiniGraphCard extends LitElement {
           entityConfig.baseline,
           this.config.baseline,
         ),
+        tension: this.config.tension,
         invert: this._isInverted[index],
       }),
     );
