@@ -357,8 +357,8 @@ export default class Graph {
 
           if (hasValidPrev) {
             const Z = getMidPoint(prev[X], prev[Y], point[X], point[Y]);
-            const sum = (prev[V] + point[V]) / 2;
-            points.push([Z[X], Z[Y], sum, i]);
+            const avgValue = (prev[V] + point[V]) / 2;
+            points.push([Z[X], Z[Y], avgValue, i]);
           } else if (!hasValidNext) {
             // single point between two gaps
             points.push([point[X], point[Y], point[V], i]);
