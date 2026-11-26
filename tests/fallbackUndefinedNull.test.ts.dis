@@ -15,7 +15,7 @@ interface VariantType {
   value: any;
   fallback: any;
   expected: any;
-};
+}
 
 const VARIANTS: VariantType[] = [
   {
