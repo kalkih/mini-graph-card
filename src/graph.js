@@ -14,6 +14,7 @@ import {
 } from './utils';
 import {
   getMidPoint,
+  getMonotoneTangent,
 } from './others';
 import { aggregateFuncMap } from './aggregate';
 
@@ -339,7 +340,7 @@ export default class Graph {
     if (!this.hasCoords) return []; // safety guard
 
     const points = [];
-    const is2pointsSmoothing = this._smoothing;
+    const is2pointsSmoothing = this._smoothing === true;
     const len = this._coords.length;
 
     for (let i = 0; i < len; i += 1) {
@@ -373,6 +374,63 @@ export default class Graph {
   }
 
   /**
+   * Generate a single Cubic Bezier curve command for step from (i - 1) to i
+   * @param {number} i Current point index in this._coords
+   * @param {Array<number>} lastPoint Previous valid point [X, Y, Value]
+   * @param {Array<number>} currPoint Current valid point [X, Y, Value]
+   * @returns {string} SVG command fragment
+   */
+  _getBezierCStep(i, lastPoint, currPoint) {
+    const arr = this._coords;
+    const len = arr.length;
+    const tension = this._tension;
+
+    const p0 = (i - 2 >= 0 && !Number.isNaN(arr[i - 2][Y]))
+      ? arr[i - 2]
+      : lastPoint;
+    const p1 = lastPoint;
+    const p2 = currPoint;
+    const p3 = (i + 1 < len && !Number.isNaN(arr[i + 1][Y]))
+      ? arr[i + 1]
+      : currPoint;
+
+    // We need to prevent 'overshoot' glitches.
+    // It is done by calculating tangents & applying a "Fritsch-Carlson guard".
+    // More info here:
+    // https://en.wikipedia.org/wiki/Monotone_cubic_interpolation
+    // https://en.wikipedia.org/wiki/Overshoot_(signal)
+
+    // slope between p1 and p2
+    const dx = p2[X] - p1[X];
+    const d = dx > 0 // prevent division by 0
+      ? (p2[Y] - p1[Y]) / dx
+      : 0;
+
+    // tangents on the beginning & at the end
+    let m1 = getMonotoneTangent(p0, p1, p2) * tension;
+    let m2 = getMonotoneTangent(p1, p2, p3) * tension;
+
+    // Fritsch-Carlson guard to prevent 'overshoot'
+    if (d !== 0) {
+      const alpha = m1 / d;
+      const beta = m2 / d;
+      const sq = alpha * alpha + beta * beta;
+      if (sq > 9) {
+        const tau = 3 / Math.sqrt(sq);
+        m1 *= tau;
+        m2 *= tau;
+      }
+    }
+
+    const cp1x = p1[X] + dx / 3;
+    const cp1y = p1[Y] + (m1 * dx) / 3;
+    const cp2x = p2[X] - dx / 3;
+    const cp2y = p2[Y] - (m2 * dx) / 3;
+
+    return ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2[X]},${p2[Y]}`;
+  }
+
+  /**
    * Generate paths for line and/or fill
    * @param {object} options Path generation options
    * @param {boolean} options.buildLine True to build a path for line, false otherwise
@@ -384,6 +442,7 @@ export default class Graph {
       return { line: '', fill: '' };
     }
 
+    const isBezierC = this._smoothing === 'bezierc';
     const height = buildFill
       ? this.baselineY
       : 0;
@@ -412,6 +471,8 @@ export default class Graph {
             ? ' M ' // add a command
             : 'M '; // start with a command
           step = `${cmd}${currPoint[X]},${currPoint[Y]}`;
+        } else if (isBezierC) {
+          step = this._getBezierCStep(i, lastPoint, currPoint);
         } else {
           // continue processing a current segment
           const Z = this._smoothing
@@ -429,7 +490,9 @@ export default class Graph {
         // either a NaN gap or beyond coords; finishing the last segment
         const endStep = segmentLength === 1
           ? ` L ${lastPoint[X]},${lastPoint[Y]}` // single point
-          : ` ${lastPoint[X]},${lastPoint[Y]}`; // line to last point
+          : !isBezierC
+            ? ` ${lastPoint[X]},${lastPoint[Y]}` // line to last point
+            : ''; // already processed in _getBezierCStep()
 
         if (buildLine) line += endStep;
         if (buildFill) {
