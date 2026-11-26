@@ -16,7 +16,7 @@ import { DEFAULT_LINE_WIDTH } from '../../src/const';
 interface MarginsType {
   min: number;
   max: number;
-};
+}
 
 interface VariantType {
   descr: string;
@@ -24,7 +24,7 @@ interface VariantType {
   expected: MarginsType;
   expected_false_1?: MarginsType;
   expected_false_2?: MarginsType;
-};
+}
 
 const ENTITIES_EMPTY: EntityConfigType[] = [];
 const ENTITIES: EntityConfigType[] = [

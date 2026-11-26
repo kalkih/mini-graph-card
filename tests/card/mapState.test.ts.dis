@@ -15,7 +15,7 @@ import { getStringifiedValue } from '../../src/utils';
 interface ContextType {
   index?: number;
   origin?: string;
-};
+}
 
 const MAP_STRINGS: StateMapEntryType[] = [
   {value: 'abc', label: 'ABC'},

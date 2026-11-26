@@ -104,7 +104,7 @@ interface ConfigType {
   hour24?: boolean;
   time_format?: Intl.DateTimeFormatOptions;
   date_format?: Intl.DateTimeFormatOptions;
-};
+}
 
 const getConfig = (
   hass: any,

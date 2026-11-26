@@ -18,7 +18,7 @@ const BOUNDS_UPPER_SHIFTED = (diff: number): BoundsArrayType => [BOUNDARY[0], BO
 
 interface VariantType {
   minRange?: number;
-};
+}
 
 const VARIANTS: VariantType[] = [
   { }, // undefined

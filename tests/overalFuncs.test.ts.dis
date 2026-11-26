@@ -13,7 +13,7 @@ interface VariantType {
   optionValue: string | any;
   isOverall: boolean;
   parsed: string|undefined;
-};
+}
 
 const VARIANTS: VariantType[] = [
   {

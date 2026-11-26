@@ -11,7 +11,7 @@ import { getLog10 } from '../src/utils';
 interface VariantType {
   value: number;
   expected: number;
-};
+}
 
 describe("getLog10()", () => {
   const values: number[] = [-1000, -100, -10, -1, -0.1, 0, 0.1, 1, 10, 100, 1000];
