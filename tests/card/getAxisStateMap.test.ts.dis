@@ -188,7 +188,7 @@ interface VariantType {
   config?: ConfigType;
   expected_global_primary?: boolean; // expected value when a global state_map is applied
   expected_global_secondary?: boolean; // expected value when a global state_map is applied
-};
+}
 
 const VARIANTS: VariantType[] = [
   {
