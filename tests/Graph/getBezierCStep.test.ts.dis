@@ -1,0 +1,123 @@
+/**
+ * Tests for Graph::_getBezierCStep() method.
+ *
+ * The file is disabled (renamed to *.dis) & thus is not used during a build process;
+ * remove the "dis" extension to use it locally in your VSCode devcontainer.
+ */
+
+import { expect, describe, it, beforeEach } from 'vitest';
+import Graph from '../../src/graph';
+import { GRAPH_SETTINGS } from '../common/graph';
+
+describe('Graph::_getBezierCStep()', () => {
+  let graph: any;
+
+  beforeEach(() => {
+    graph = new Graph({
+      width: GRAPH_SETTINGS.width,
+      height: GRAPH_SETTINGS.height,
+      margin: GRAPH_SETTINGS.margin,
+    });
+  });
+
+  it('tension = 0 (no smoothing)', () => {
+    graph._tension = 0;
+    graph._coords = [
+      [0, 100, 1],
+      [30, 70, 2], // 1
+      [60, 10, 3], // 2
+      [90, 0, 4],
+    ];
+    const result = graph._getBezierCStep(2, graph._coords[1], graph._coords[2]);
+    expect(result).toEqual(' C 40,70 50,10 60,10');
+  });
+
+  describe('tension != 0', () => {
+    beforeEach(() => {
+      graph._tension = 1.0;
+    });
+
+    it('all 4 points exist, calculating a curve for 1-2', () => {
+      graph._coords = [
+        [0, 100, 1],
+        [30, 70, 2], // 1
+        [60, 10, 3], // 2
+        [90, 0, 4],
+      ];
+      const result = graph._getBezierCStep(2, graph._coords[1], graph._coords[2]);
+      expect(result).toEqual(
+        ` C 40,${70 - 40 / 3} 50,${10 + 40 / 7} 60,10`,
+      );
+    });
+
+    it('left boundary, calculating a curve for 0-1', () => {
+      graph._coords = [
+        [0, 100, 1], // 0
+        [30, 70, 2], // 1
+        [60, 10, 3],
+      ];
+      const result = graph._getBezierCStep(1, graph._coords[0], graph._coords[1]);
+      expect(result).toEqual(
+        ` C 10,100 20,${70 + 40 / 3} 30,70`,
+      );
+    });
+
+    it('right boundary, calculating a curve for 1-2', () => {
+      graph._coords = [
+        [0, 100, 1],
+        [30, 70, 2], // 1
+        [60, 10, 3], // 2
+      ];
+      const result = graph._getBezierCStep(2, graph._coords[1], graph._coords[2]);
+      expect(result).toEqual(
+        ` C 40,${70 - 40 / 3} 50,10 60,10`,
+      );
+    });
+
+    it('2 points surrounded by gaps, calculating a curve for 1-2', () => {
+      graph._coords = [
+        [0, NaN, NaN],
+        [30, 70, 1], // 1
+        [60, 10, 2], // 2
+        [90, NaN, NaN],
+      ];
+      const result = graph._getBezierCStep(2, graph._coords[1], graph._coords[2]);
+      expect(result).toEqual(' C 40,70 50,10 60,10');
+    });
+
+    it('trapezia, calculating a curve for 1-2', () => {
+      graph._coords = [
+        [0, 100, 1],
+        [30, 10, 2], // 1
+        [60, 10, 3], // 2
+        [90, 100, 4],
+      ];
+      const result = graph._getBezierCStep(2, graph._coords[1], graph._coords[2]);
+      expect(result).toEqual(' C 40,10 50,10 60,10');
+    });
+  });
+
+  it('Fritsch-Carlson guard', () => {
+    graph._tension = 1.2;
+    graph._coords = [
+      [0, 100, 1],
+      [30, 97, 2], // 1
+      [60, 96.7, 3], // 2
+      [90, 0, 4],
+    ];
+    const result = graph._getBezierCStep(2, graph._coords[1], graph._coords[2]);
+    const [cmd, cp1x, cp1y, cp2x, cp2y, p2x, p2y] = result.trim().split(/[\s,]+/);
+    expect(cmd).toEqual('C');
+    //
+    expect(Number(cp1x)).toEqual(40);
+    expect(Number(cp1y)).toBeLessThanOrEqual(96.798);
+    expect(Number(cp1y)).toBeGreaterThanOrEqual(96.797);
+    //
+    expect(Number(cp2x)).toEqual(50);
+    expect(Number(cp2y)).toBeLessThanOrEqual(96.922);
+    expect(Number(cp2y)).toBeGreaterThanOrEqual(96.921);
+    //
+    expect(Number(p2x)).toEqual(60);
+    expect(Number(p2y)).toEqual(96.7);
+  });
+});
